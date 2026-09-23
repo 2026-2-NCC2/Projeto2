@@ -11,17 +11,17 @@
 ## Integrantes
 
 <a href="https://github.com/IC4DUI">Carlos Eduardo da Silva</a>
-<a href="LINK_LINKEDIN">Lucas Pelliciotti Cintra Da Silva</a>
-<a href="LINK_LINKEDIN">Guilherme Harada Morato</a>
-<a href="LINK_LINKEDIN">Guilherme Fernandes Alexandre de Carvalho</a>
+<a href="https://github.com/lucaspelliciotti">Lucas Pelliciotti Cintra Da Silva</a>
+<a href="https://github.com/guilhermehmorato-glitch">Guilherme Harada Morato</a>
+<a href="https://github.com/GuilhermeF420">Guilherme Fernandes Alexandre de Carvalho</a>
 
 ## Professores Orientadores
 
 <a href="LINK_LINKEDIN">Francisco de Souza Escobar</a>
-<a href="LINK_LINKEDIN">Renata Muniz Do Nascimento</a>
-<a href="LINK_LINKEDIN">Joao Francisco Trencher Martins</a>
-<a href="LINK_LINKEDIN">Victor Bruno Alexander Rosetti de Quiroz</a>
-<a href="LINK_LINKEDIN">Gilles Pedroza Leite</a>
+<a href="LINK_LINKEDIN">Paula Sanchez Astorino</a>
+<a href="LINK_LINKEDIN">David De Oliveira Lemes</a>
+<a href="LINK_LINKEDIN">Jésus De Lisboa Gomes</a>
+<a href="LINK_LINKEDIN">Katia Milani Lara Bossi</a>
 
 ## 📌 Descrição
 
