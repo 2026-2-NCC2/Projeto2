@@ -13,7 +13,6 @@
 <a href="LINK_LINKEDIN">Carlos Eduardo da Silva</a>
 <a href="LINK_LINKEDIN">Lucas Pelliciotti Cintra Da Silva</a>
 <a href="LINK_LINKEDIN">Guilherme Harada Morato</a>
-<a href="LINK_LINKEDIN">Gabryel Vasconcelos Lista</a>
 <a href="LINK_LINKEDIN">Guilherme Fernandes Alexandre de Carvalho</a>
 
 ## Professores Orientadores
