@@ -1,27 +1,13 @@
 # FECAP - Fundação de Comércio Álvares Penteado
 
 <p align="center">
-<a href="https://www.fecap.br/">
-<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhZPrRa89Kma0ZZogxm0pi-tCn_TLKeHGVxywp-LXAFGR3B1DPouAJYHgKZGV0XTEf4AE&usqp=CAU" alt="FECAP - Fundação de Comércio Álvares Penteado" border="0">
-</a>
+<a href= "https://www.fecap.br/"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhZPrRa89Kma0ZZogxm0pi-tCn_TLKeHGVxywp-LXAFGR3B1DPouAJYHgKZGV0XTEf4AE&usqp=CAU" alt="FECAP - Fundação de Comércio Álvares Penteado" border="0"></a>
 </p>
 
 # TrocaTicket
+## Integrantes: <a href="https://github.com/IC4DUI">Carlos Eduardo da Silva</a>, <a href="https://github.com/lucaspelliciotti">Lucas Pelliciotti Cintra Da Silva</a>, <a href="https://github.com/guilhermehmorato-glitch">Guilherme Harada Morato</a>, <a href="https://github.com/GuilhermeF420">Guilherme Fernandes Alexandre de Carvalho</a>
 
-## Integrantes
-
-<a href="https://github.com/IC4DUI">Carlos Eduardo da Silva</a>
-<a href="https://github.com/lucaspelliciotti">Lucas Pelliciotti Cintra Da Silva</a>
-<a href="https://github.com/guilhermehmorato-glitch">Guilherme Harada Morato</a>
-<a href="https://github.com/GuilhermeF420">Guilherme Fernandes Alexandre de Carvalho</a>
-
-## Professores Orientadores
-
-<a href="LINK_LINKEDIN">Francisco de Souza Escobar</a>
-<a href="LINK_LINKEDIN">Paula Sanchez Astorino</a>
-<a href="LINK_LINKEDIN">David De Oliveira Lemes</a>
-<a href="LINK_LINKEDIN">Jésus De Lisboa Gomes</a>
-<a href="LINK_LINKEDIN">Katia Milani Lara Bossi</a>
+## Professores Orientadores: <a href="LINK_LINKEDIN">Francisco de Souza Escobar</a>, <a href="LINK_LINKEDIN">Paula Sanchez Astorino</a>, <a href="LINK_LINKEDIN">David De Oliveira Lemes</a>, <a href="LINK_LINKEDIN">Jésus De Lisboa Gomes</a>, <a href="LINK_LINKEDIN">Katia Milani Lara Bossi</a>
 
 ## 📌 Descrição
 
