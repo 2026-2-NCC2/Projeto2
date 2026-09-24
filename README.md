@@ -55,9 +55,8 @@ Raiz
 |
 |-- documentos
 | |-- Entrega 1
-| |-- ...
+| |-- Entrega 2
 |
-|-- imagens
 |
 |-- src
 | |-- Frontend
