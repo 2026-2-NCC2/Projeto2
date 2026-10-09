@@ -264,7 +264,10 @@ function Menu({ pagina, setPagina, aoCriarNovoEvento }) {
 
       <div className="menuRodape">
 
-        <button onClick={() => alert('Módulo de perfil em desenvolvimento')}>
+        <button
+          className={pagina === 'perfil' ? 'ativo' : ''}
+          onClick={() => setPagina('perfil')}
+        >
 
           ◉ Perfil
 
@@ -327,7 +330,13 @@ function Login({ setPagina }) {
 
     eventoDisparado.preventDefault()
 
-    setPagina(perfil === 'fornecedor' ? 'fornecedor-mural' : 'eventos')
+    setPagina(
+      perfil === 'fornecedor'
+        ? 'fornecedor-mural'
+        : perfil === 'admin'
+          ? 'admin'
+          : 'eventos'
+    )
 
   }
 
@@ -354,6 +363,14 @@ function Login({ setPagina }) {
       <main className="caixaLogin">
 
         <div className="escolhaPerfil"><button type="button" className={perfil === 'organizador' ? 'selecionado' : ''} onClick={() => setPerfil('organizador')}>▦ Organizador</button><button type="button" className={perfil === 'fornecedor' ? 'selecionado' : ''} onClick={() => setPerfil('fornecedor')}>▣ Fornecedor</button></div>
+
+        <button
+          type="button"
+          className={`acessoAdmin ${perfil === 'admin' ? 'selecionado' : ''}`}
+          onClick={() => setPerfil('admin')}
+        >
+          Acesso administrativo
+        </button>
 
         <h1>Boas-vindas de volta!</h1>
 
@@ -1521,6 +1538,31 @@ const OPORTUNIDADES = [
  {id:7633,nome:'Festival Sons do Brasil',organizador:'ArteViva Entretenimento',categoria:'Iluminação & Vídeo',local:'Campinas, SP',publico:2000,prazo:'2026-11-15',descricao:'Iluminação cênica, vídeo e operação técnica.'},
  {id:6102,nome:'Congresso Nacional Médico',organizador:'Sociedade Paulista de Medicina',categoria:'Áudio & Som',local:'São Paulo, SP',publico:900,prazo:'2026-11-22',descricao:'Microfonia sem fio, sonorização e operação.'},
 ]
+function PerfilFornecedor({ perfil, setPerfil, propostas }) {
+  const [editando, setEditando] = useState(false)
+  const [salvo, setSalvo] = useState(false)
+  const [preferencias, setPreferencias] = useState({ oportunidades: true, propostas: true, contratos: true, marketing: false })
+  const alterar = (campo, valor) => { setPerfil((atual) => ({ ...atual, [campo]: valor })); setSalvo(false) }
+  const salvar = (evento) => { evento.preventDefault(); setEditando(false); setSalvo(true) }
+  const homologadas = propostas.filter((item) => item.status === 'Homologada').length
+  const volume = propostas.reduce((soma, item) => soma + item.valor, 0)
+
+  return <div className="perfilPagina perfilFornecedorPagina">
+    <div className="perfilCabecalho"><div><p className="fornTrilha">TrocaTicket Fornecedor › Minha conta › Perfil</p><h1>Perfil do fornecedor</h1><p>Gerencie os dados comerciais, catálogo de serviços e segurança da empresa.</p></div><span className="perfilContaAtiva">● Empresa homologada</span></div>
+    {salvo && <div className="perfilSucesso" role="status">✓ Perfil da empresa atualizado com sucesso.</div>}
+    <section className="perfilResumo perfilResumoFornecedor"><div className="perfilAvatar">SS</div><div className="perfilIdentidade"><h2>{perfil.empresa}</h2><p>Fornecedor homologado · São Paulo, SP</p><div><span>Áudio & Sonorização</span><span>Compliance aprovado</span></div></div><div className="perfilResumoNumeros"><div><strong>{propostas.length}</strong><small>Propostas enviadas</small></div><div><strong>{homologadas}</strong><small>Homologadas</small></div><div><strong>{formatarMoeda(volume)}</strong><small>Volume proposto</small></div></div></section>
+    <div className="perfilGrade">
+      <form className="perfilCartao perfilDados" onSubmit={salvar}><div className="perfilTituloCartao"><div><h2>Dados da empresa</h2><p>Informações exibidas aos organizadores nas suas propostas.</p></div><button type="button" className="perfilEditar" onClick={() => { setEditando((valor) => !valor); setSalvo(false) }}>{editando ? 'Cancelar' : '✎ Editar dados'}</button></div>
+        <div className="perfilCampos"><label>Nome da empresa<input disabled={!editando} value={perfil.empresa} onChange={(e) => alterar('empresa', e.target.value)} /></label><label>E-mail comercial<input type="email" disabled={!editando} value={perfil.email} onChange={(e) => alterar('email', e.target.value)} /></label><label>Telefone<input disabled={!editando} value={perfil.telefone} onChange={(e) => alterar('telefone', e.target.value)} /></label><label>Cidade<input disabled={!editando} value={perfil.cidade} onChange={(e) => alterar('cidade', e.target.value)} /></label><label className="perfilCampoInteiro">Serviços oferecidos<textarea rows="3" disabled={!editando} value={perfil.servicos} onChange={(e) => alterar('servicos', e.target.value)} /></label></div>
+        {editando && <div className="perfilAcoes"><button type="button" className="secundario" onClick={() => setEditando(false)}>Cancelar</button><button className="principal" type="submit">Salvar alterações</button></div>}
+      </form>
+      <aside className="perfilColuna"><section className="perfilCartao"><div className="perfilTituloCartao"><div><h2>Segurança</h2><p>Proteção e acesso ao portal.</p></div></div><div className="perfilSegurancaItem"><span>◈</span><div><strong>Senha</strong><small>Atualizada há 21 dias</small></div><button onClick={() => alert('Link de redefinição enviado ao e-mail comercial.')}>Alterar</button></div><div className="perfilSegurancaItem"><span>✓</span><div><strong>Autenticação em duas etapas</strong><small>Ativada por aplicativo</small></div><b>Ativa</b></div><div className="perfilSegurancaItem"><span>⌁</span><div><strong>Sessões ativas</strong><small>1 dispositivo conectado</small></div><button onClick={() => alert('Todas as outras sessões foram encerradas.')}>Gerenciar</button></div></section>
+        <section className="perfilCartao"><div className="perfilTituloCartao"><div><h2>Preferências</h2><p>Escolha quais avisos deseja receber.</p></div></div>{[['oportunidades','Novas oportunidades','Cotações compatíveis com seu catálogo'],['propostas','Atualizações de propostas','Mudanças de status e solicitações'],['contratos','Contratos e pagamentos','Prazos, assinaturas e repasses'],['marketing','Novidades da plataforma','Recursos, eventos e conteúdos']].map(([id,titulo,texto]) => <label className="perfilPreferencia" key={id}><span><strong>{titulo}</strong><small>{texto}</small></span><input type="checkbox" checked={preferencias[id]} onChange={(e) => setPreferencias((atual) => ({...atual,[id]:e.target.checked}))} /></label>)}</section></aside>
+      <section className="perfilCartao perfilEmpresa"><div className="perfilTituloCartao"><div><h2>Homologação e documentação</h2><p>Situação cadastral para participação nas cotações.</p></div><span className="perfilHomologada">✓ Documentação válida</span></div><div className="perfilEmpresaDados"><div><small>STATUS</small><strong>Fornecedor homologado</strong></div><div><small>CNPJ</small><strong>88.214.558/0001-31</strong></div><div><small>VALIDADE CADASTRAL</small><strong>12/2026</strong></div><div><small>CATEGORIA PRINCIPAL</small><strong>Áudio & Sonorização</strong></div></div></section>
+    </div>
+  </div>
+}
+
 function PortalFornecedor({pagina,setPagina}) {
  const [busca,setBusca]=useState('')
  const [selecionada,setSelecionada]=useState(OPORTUNIDADES[0])
@@ -1545,8 +1587,137 @@ function PortalFornecedor({pagina,setPagina}) {
   {pagina==='fornecedor-contratos' && <div className="fornCartao"><h2>Contratos ativos</h2><p>Os contratos homologados aparecerão aqui. Ainda não há contratos confirmados nos dados de demonstração.</p></div>}
   {pagina==='fornecedor-catalogo' && <div className="fornCartao"><h2>Catálogo e rider técnico</h2><p>Serviços oferecidos: {perfil.servicos}</p><p>Cadastre ou atualize os serviços em Perfil fornecedor.</p><button className="principal" onClick={()=>navegar('perfil')}>Editar perfil e serviços →</button></div>}
   {pagina==='fornecedor-desempenho' && <div className="fornIndicadores"><div><small>PROPOSTAS ENVIADAS</small><strong>{propostas.length}</strong></div><div><small>HOMOLOGADAS</small><strong>{propostas.filter(p=>p.status==='Homologada').length}</strong></div><div><small>VOLUME PROPOSTO</small><strong>{formatarMoeda(propostas.reduce((s,p)=>s+p.valor,0))}</strong></div></div>}
-  {pagina==='fornecedor-perfil' && <form className="fornCartao fornForm" onSubmit={e=>{e.preventDefault();alert('Perfil atualizado nesta sessão de demonstração')}}><h2>Dados da empresa</h2>{[['empresa','Nome da empresa'],['email','E-mail'],['telefone','Telefone'],['cidade','Cidade'],['servicos','Serviços oferecidos']].map(([campo,label])=><div key={campo}><label>{label}</label><input value={perfil[campo]} onChange={e=>setPerfil(atual=>({...atual,[campo]:e.target.value}))} required/></div>)}<button className="principal" type="submit">Salvar alterações</button></form>}
+  {pagina==='fornecedor-perfil' && <PerfilFornecedor perfil={perfil} setPerfil={setPerfil} propostas={propostas} />}
   </main></div></div>
+}
+
+const SOLICITACOES_ADMIN = [
+  { id: 9402, hora: '16/10 · 14:20', nome: 'Vanguard Eventos Corp. S.A.', tipo: 'Org', documento: 'CNPJ 14.892.401/0001-92', atuacao: 'Eventos Corporativos', detalhe: 'Porte: Grande Empresa', responsavel: 'Henrique Dias Moreira', cargo: 'Diretor de Operações', score: 98, risco: 'CND Válida', docs: 3, urgente: false },
+  { id: 9398, hora: '16/10 · 11:05', nome: 'Sonora Stage & Audio Ltda', tipo: 'Forn', documento: 'CNPJ 88.214.558/0001-31', atuacao: 'Áudio & Sonorização', detalhe: 'Equipamentos Técnicos', responsavel: 'Carla Vasconcelos Ramos', cargo: 'Sócia Administradora', score: 95, risco: 'Bombeiros OK', docs: 3, urgente: false },
+  { id: 9391, hora: '15/10 · 17:40', nome: 'Estruturas Alpha Box ME', tipo: 'Forn', documento: 'CNPJ 22.901.733/0001-14', atuacao: 'Estrutura Metálica', detalhe: 'Engenharia Mecânica', responsavel: 'Gilberto Nogueira Neto', cargo: 'CREA-SP: 182.540-X', score: 91, risco: 'CREA Regular', docs: 3, urgente: false },
+  { id: 9388, hora: '14/10 · 09:15', nome: 'Lúmen Cenografia & Design', tipo: 'Forn', documento: 'CNPJ 31.554.889/0001-88', atuacao: 'Iluminação & Efeitos', detalhe: 'Projeções / Laser', responsavel: 'Marcelo Pires Silveira', cargo: 'Procurador Legal', score: 74, risco: 'Divergência Cadastral', docs: 2, urgente: true },
+  { id: 9385, hora: '14/10 · 08:30', nome: 'Summit Tech Congressos', tipo: 'Org', documento: 'CNPJ 19.344.118/0001-56', atuacao: 'Feiras & Convenções', detalhe: 'Bilhetagem Enterprise', responsavel: 'Tatiana Fontes Albuquerque', cargo: 'Diretora Executiva', score: 90, risco: 'Regularidade 100%', docs: 3, urgente: false },
+]
+
+function AdminTopo({ aoSair }) {
+  return (
+    <header className="adminTopo">
+      <div className="adminMarca"><span>TT</span><strong>TrocaTicket</strong><small>Gestão Corporativa</small></div>
+      <div className="adminSeguro">Ambiente Seguro SSL 256-bit</div>
+      <label className="adminBusca"><span>⌕</span><input aria-label="Busca geral" placeholder="Buscar por CNPJ, Razão Social ou Protocolo" /></label>
+      <button className="adminIcone" aria-label="Notificações">●</button>
+      <button className="adminUsuario" onClick={aoSair}><span>RA</span><strong>Roberto Albuquerque<small>Administrador & Compliance Sênior</small></strong></button>
+    </header>
+  )
+}
+
+function AdminMenu({ secao, setSecao, aoSair }) {
+  const itens = [
+    ['painel', '▦', 'Painel de evento'], ['eventos', '□', 'Eventos'], ['cotacoes', '▣', 'Cotações'],
+    ['propostas', '◇', 'Propostas'], ['contas', '▥', 'Fornecedores & Contas'], ['relatorios', '▤', 'Relatórios'],
+  ]
+  return (
+    <aside className="adminMenu">
+      <button className="adminNovo">⊕ &nbsp; + Novo evento</button>
+      <nav>{itens.map(([id, icone, texto]) => <button key={id} className={secao === id ? 'ativo' : ''} onClick={() => setSecao(id)}><span>{icone}</span>{texto}</button>)}</nav>
+      <div className="adminAuditoria"><strong>♙ AUDITORIA ATIVA</strong><p>Sessão sob custódia de compliance. Todos os registros auditados geram hash SHA-256 irrevogável.</p></div>
+      <div className="adminMenuRodape"><button>◎ Perfil</button><button className="sair" onClick={aoSair}>↪ Sair</button></div>
+    </aside>
+  )
+}
+
+function CartaoMetrica({ titulo, valor, texto, tom = 'roxo' }) {
+  return <article className={`adminMetrica ${tom}`}><div><small>{titulo}</small><span>▣</span></div><strong>{valor}</strong><p>{texto}</p></article>
+}
+
+function AdminPortal({ setPagina }) {
+  const [secao, setSecao] = useState('contas')
+  const [aba, setAba] = useState('todos')
+  const [ordem, setOrdem] = useState('Risco')
+  const [selecionados, setSelecionados] = useState([9402, 9398, 9391])
+  const [solicitacoes, setSolicitacoes] = useState(SOLICITACOES_ADMIN)
+  const [mensagem, setMensagem] = useState('')
+
+  const filtradas = solicitacoes.filter((item) => aba === 'todos' || (aba === 'organizadores' ? item.tipo === 'Org' : item.tipo === 'Forn'))
+  const alternar = (id) => setSelecionados((atuais) => atuais.includes(id) ? atuais.filter((item) => item !== id) : [...atuais, id])
+  const atualizar = (id, acao) => {
+    setSolicitacoes((atuais) => atuais.filter((item) => item.id !== id))
+    setSelecionados((atuais) => atuais.filter((item) => item !== id))
+    setMensagem(`Cadastro #HOM-${id} ${acao}.`)
+  }
+  const agirEmLote = (acao) => {
+    if (!selecionados.length) return
+    setSolicitacoes((atuais) => atuais.filter((item) => !selecionados.includes(item.id)))
+    setMensagem(`${selecionados.length} cadastros ${acao} em lote.`)
+    setSelecionados([])
+  }
+
+  return (
+    <div className="adminApp">
+      <AdminTopo aoSair={() => setPagina('login')} />
+      <div className="adminEstrutura">
+        <AdminMenu secao={secao} setSecao={setSecao} aoSair={() => setPagina('login')} />
+        <main className="adminConteudo">
+          <div className="adminTrilha">TrocaTicket Admin &nbsp;›&nbsp; Governança &nbsp;›&nbsp; Gestão de Contas &nbsp;›&nbsp; <b>Fila de Homologação</b><span>#AUD-2026-0812 &nbsp; 16 Out 2026, 14:45 BRT</span></div>
+
+          <section className="adminEtapas">
+            <div className="concluida"><b>✓</b><span><small>ETAPA 1 · CONCLUÍDO</small><strong>Recebimento de Documentos</strong></span></div>
+            <div className="atual"><b>2</b><span><small>ETAPA 2 · EM FOCO (AUDITORIA)</small><strong>Validação Fiscal & CNPJ</strong></span></div>
+            <div><b>3</b><span><small>ETAPA 3 · PRÓXIMO</small><strong>Liberação de Permissões</strong></span></div>
+          </section>
+
+          <section className="adminHero">
+            <div><div className="adminRotulo">FILA OPERACIONAL ATIVA <span>◷ Tempo Médio de Análise: 4.2h</span></div><h1>48 SOLICITAÇÕES PENDENTES</h1><p>Auditoria de idoneidade jurídica, cruzamento automatizado com a Receita Federal e verificação de alvarás para emissão de ingressos e fornecimento de infraestrutura técnica.</p><strong className="adminCriterio">▣ Critério de Homologação: Regularidade RFB + CNAE Compatível + Histórico de Litígio Zerado</strong></div>
+            <div className="adminStatusFila"><div><span><small>STATUS DA FILA</small><b>● Atenção Operacional (8+)</b></span><span><small>CONFIABILIDADE DOC.</small><b className="verde">92% &nbsp; Ótimo</b></span></div><button onClick={() => agirEmLote('enviados para auditoria')}>⚡ Auditar Documentos em Lote</button><a href="#diretrizes">Diretrizes de Compliance ↗</a></div>
+          </section>
+
+          <section className="adminMetricas">
+            <CartaoMetrica titulo="TOTAL ORGANIZADORES PENDENTES" valor="28" texto="↗ +12% vs. semana anterior · 15 grande porte" />
+            <CartaoMetrica titulo="FORNECEDORES EM HOMOLOGAÇÃO" valor="20" texto="8 sonorização/áudio · 6 iluminação · 6 palco" tom="laranja" />
+            <CartaoMetrica titulo="TAXA DE APROVAÇÃO GLOBAL" valor="87.4%" texto="↑ histórico 90d · 2.6% reprovados" tom="verde" />
+          </section>
+
+          <section className="adminFila">
+            <div className="adminFilaCabecalho"><div><h2>Fila de Homologação Cadastral</h2><p>Auditoria rigorosa de contratos sociais, CNDs e certidões tributárias vigentes.</p></div><div className="adminAbas"><button className={aba === 'todos' ? 'ativo' : ''} onClick={() => setAba('todos')}>Todos (48)</button><button className={aba === 'organizadores' ? 'ativo' : ''} onClick={() => setAba('organizadores')}>Organizadores (28)</button><button className={aba === 'fornecedores' ? 'ativo' : ''} onClick={() => setAba('fornecedores')}>Fornecedores (20)</button><button className="urgente">Urgentes &gt; 48h (6)</button></div></div>
+            <div className="adminProgresso"><b>58% Organizadores (28 solicitações)</b><span><i /></span><b>42% Fornecedores (20 empresas)</b></div>
+            <div className="adminOrdenacao">Ordenar por: <select value={ordem} onChange={(e) => setOrdem(e.target.value)}><option>Risco</option><option>Prioridade</option><option>Mais recentes</option></select></div>
+            {mensagem && <div className="adminMensagem" role="status">✓ {mensagem}<button onClick={() => setMensagem('')}>×</button></div>}
+            <div className="adminTabelaWrap"><table className="adminTabela"><thead><tr><th><input type="checkbox" aria-label="Selecionar todos" checked={filtradas.length > 0 && filtradas.every((item) => selecionados.includes(item.id))} onChange={(e) => setSelecionados(e.target.checked ? filtradas.map((item) => item.id) : [])} /></th><th>PROTOCOLO / DATA</th><th>SOLICITANTE</th><th>ATUAÇÃO</th><th>RESPONSÁVEL</th><th>RISCO & RFB</th><th>DOCUMENTOS</th><th>AÇÕES</th></tr></thead>
+              <tbody>{filtradas.map((item) => <tr key={item.id} className={item.urgente ? 'urgente' : ''}><td><input type="checkbox" aria-label={`Selecionar ${item.nome}`} checked={selecionados.includes(item.id)} onChange={() => alternar(item.id)} /></td><td><strong>#HOM-{item.id}</strong><small className={item.urgente ? 'atraso' : ''}>{item.hora}</small></td><td><strong>{item.nome}</strong><small>{item.documento}</small></td><td><strong>{item.atuacao}</strong><small>{item.detalhe}</small></td><td><strong>{item.responsavel}</strong><small>{item.cargo}</small></td><td><span className={`adminScore ${item.score < 80 ? 'alerta' : ''}`}>Score {item.score}</span><small className={item.score < 80 ? 'atraso' : 'ok'}>{item.risco}</small></td><td><div className="adminDocs">{Array.from({ length: item.docs }, (_, i) => <span key={i}>▤</span>)}</div></td><td><div className="adminAcoesLinha"><button className="aprovar" onClick={() => atualizar(item.id, 'homologado')}>Aprovar</button><button className="recusar" onClick={() => atualizar(item.id, 'recusado')}>Recusar</button></div></td></tr>)}</tbody></table></div>
+            <div className="adminPaginacao"><span>Exibindo 1–{filtradas.length} de 48 cadastros</span><div><button disabled>Anterior</button><button className="ativo">1</button><button>2</button><button>3</button><span>…</span><button>10</button><button>Próxima</button></div></div>
+          </section>
+        </main>
+      </div>
+      <footer className="adminBarraLote"><div><b>{selecionados.length}</b><span><strong>{selecionados.length} cadastros selecionados para ação em lote</strong><small>Organizadores e fornecedores de estrutura técnica</small></span></div><div><button className="recusar" onClick={() => agirEmLote('reprovados')}>⊘ Reprovar com Justificativa</button><button className="aprovarLote" onClick={() => agirEmLote('homologados')}>✥ Homologar Cadastros Selecionados →</button></div></footer>
+    </div>
+  )
+}
+
+function PerfilOrganizador() {
+  const [perfil, setPerfil] = useState({ nome: 'Roberto Albuquerque', cargo: 'Organizador Sênior', email: 'roberto@empresa.com', telefone: '(11) 98765-4321', empresa: 'Albuquerque Eventos Corporativos', cnpj: '12.345.678/0001-90', bio: 'Especialista em eventos corporativos, conferências e experiências de marca.' })
+  const [preferencias, setPreferencias] = useState({ cotacoes: true, propostas: true, relatorios: false, seguranca: true })
+  const [editando, setEditando] = useState(false)
+  const [salvo, setSalvo] = useState(false)
+  const alterar = (campo, valor) => { setPerfil((atual) => ({ ...atual, [campo]: valor })); setSalvo(false) }
+  const salvar = (evento) => { evento.preventDefault(); setEditando(false); setSalvo(true) }
+
+  return <div className="perfilPagina">
+    <div className="perfilCabecalho"><div><p className="trilhaNavegacao">TrocaTicket › Gestão Corporativa › Meu Perfil</p><h1>Meu perfil</h1><p>Gerencie seus dados, sua empresa e as preferências da conta.</p></div><span className="perfilContaAtiva">● Conta verificada</span></div>
+    {salvo && <div className="perfilSucesso" role="status">✓ Alterações salvas com sucesso.</div>}
+    <section className="perfilResumo"><div className="perfilAvatar">RA</div><div className="perfilIdentidade"><h2>{perfil.nome}</h2><p>{perfil.cargo} · {perfil.empresa}</p><div><span>Organizador</span><span>Conta corporativa</span></div></div><div className="perfilResumoNumeros"><div><strong>4</strong><small>Eventos ativos</small></div><div><strong>18</strong><small>Cotações publicadas</small></div><div><strong>98,4%</strong><small>Precisão de auditoria</small></div></div></section>
+    <div className="perfilGrade">
+      <form className="perfilCartao perfilDados" onSubmit={salvar}>
+        <div className="perfilTituloCartao"><div><h2>Informações pessoais</h2><p>Dados utilizados na identificação e comunicação da conta.</p></div><button type="button" className="perfilEditar" onClick={() => { setEditando((valor) => !valor); setSalvo(false) }}>{editando ? 'Cancelar' : '✎ Editar dados'}</button></div>
+        <div className="perfilCampos"><label>Nome completo<input disabled={!editando} value={perfil.nome} onChange={(e) => alterar('nome', e.target.value)} /></label><label>Cargo<input disabled={!editando} value={perfil.cargo} onChange={(e) => alterar('cargo', e.target.value)} /></label><label>E-mail corporativo<input type="email" disabled={!editando} value={perfil.email} onChange={(e) => alterar('email', e.target.value)} /></label><label>Telefone<input disabled={!editando} value={perfil.telefone} onChange={(e) => alterar('telefone', e.target.value)} /></label><label className="perfilCampoInteiro">Sobre você<textarea rows="3" disabled={!editando} value={perfil.bio} onChange={(e) => alterar('bio', e.target.value)} /></label></div>
+        {editando && <div className="perfilAcoes"><button type="button" className="secundario" onClick={() => setEditando(false)}>Cancelar</button><button className="principal" type="submit">Salvar alterações</button></div>}
+      </form>
+      <aside className="perfilColuna">
+        <section className="perfilCartao"><div className="perfilTituloCartao"><div><h2>Segurança</h2><p>Proteção e acesso da conta.</p></div></div><div className="perfilSegurancaItem"><span>◈</span><div><strong>Senha</strong><small>Atualizada há 34 dias</small></div><button onClick={() => alert('Um link de redefinição foi enviado para o e-mail cadastrado.')}>Alterar</button></div><div className="perfilSegurancaItem"><span>✓</span><div><strong>Autenticação em duas etapas</strong><small>Ativada por aplicativo</small></div><b>Ativa</b></div><div className="perfilSegurancaItem"><span>⌁</span><div><strong>Sessões ativas</strong><small>2 dispositivos conectados</small></div><button onClick={() => alert('As outras sessões foram encerradas.')}>Gerenciar</button></div></section>
+        <section className="perfilCartao"><div className="perfilTituloCartao"><div><h2>Preferências</h2><p>Escolha quais avisos deseja receber.</p></div></div>{[['cotacoes','Atualizações de cotações','Prazos, respostas e encerramentos'],['propostas','Novas propostas','Avisos de fornecedores'],['relatorios','Relatórios semanais','Resumo por e-mail'],['seguranca','Alertas de segurança','Novos acessos e alterações']].map(([id,titulo,texto]) => <label className="perfilPreferencia" key={id}><span><strong>{titulo}</strong><small>{texto}</small></span><input type="checkbox" checked={preferencias[id]} onChange={(e) => setPreferencias((atual) => ({...atual,[id]:e.target.checked}))} /></label>)}</section>
+      </aside>
+      <section className="perfilCartao perfilEmpresa"><div className="perfilTituloCartao"><div><h2>Empresa vinculada</h2><p>Informações fiscais e operacionais da organização.</p></div><span className="perfilHomologada">✓ Homologada</span></div><div className="perfilEmpresaDados"><div><small>RAZÃO SOCIAL</small><strong>{perfil.empresa}</strong></div><div><small>CNPJ</small><strong>{perfil.cnpj}</strong></div><div><small>LOCALIZAÇÃO</small><strong>São Paulo — SP</strong></div><div><small>PERFIL DE CONTRATAÇÃO</small><strong>Eventos corporativos</strong></div></div></section>
+    </div>
+  </div>
 }
 
 function App() {
@@ -1665,6 +1836,10 @@ function App() {
 
 
 
+  if (pagina === 'admin') {
+    return <AdminPortal setPagina={setPagina} />
+  }
+
   if (pagina.startsWith('fornecedor-')) {
     return <PortalFornecedor pagina={pagina} setPagina={setPagina} />
   }
@@ -1688,6 +1863,8 @@ function App() {
       aoCriarNovoEvento={aoCriarNovoEvento}
 
     >
+
+      {pagina === 'perfil' && <PerfilOrganizador />}
 
       {pagina === 'eventos' && (
 
