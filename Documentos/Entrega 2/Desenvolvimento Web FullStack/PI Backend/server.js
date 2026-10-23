@@ -4,6 +4,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
+const db = require("./db");
+
 const app = express();
 app.use(express.json());
 
@@ -27,6 +29,7 @@ app.get("/usuarios", (req, res) => {
 });
 
 // Cadastrar usuário
+
 app.post("/usuarios", async (req, res) => {
   try {
     const { nome, email, senha } = req.body || {};
@@ -35,7 +38,7 @@ app.post("/usuarios", async (req, res) => {
       typeof nome !== "string" ||
       !nome.trim() ||
       typeof email !== "string" ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) ||
       typeof senha !== "string" ||
       senha.length < 8 ||
       Buffer.byteLength(senha, "utf8") > 72
@@ -47,33 +50,45 @@ app.post("/usuarios", async (req, res) => {
 
     const emailNormalizado = email.trim().toLowerCase();
 
-    if (usuarios.some(u => u.email === emailNormalizado)) {
+    // Verificar se o email já existe no banco
+    const [usuariosExistentes] = await db.execute(
+      "SELECT id FROM usuarios WHERE email = ?",
+      [emailNormalizado]
+    );
+
+    if (usuariosExistentes.length > 0) {
       return res.status(409).json({
         erro: "Email já cadastrado!"
       });
     }
 
+    // Criptografar a senha
     const senhaHash = await bcrypt.hash(senha, 12);
 
-    const usuario = {
-      id: usuarios.length + 1,
-      nome: nome.trim(),
-      email: emailNormalizado,
-      senhaHash
-    };
-
-    usuarios.push(usuario);
+    // Salvar usuário no MySQL
+    const [resultado] = await db.execute(
+      "INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)",
+      [nome.trim(), emailNormalizado, senhaHash]
+    );
 
     return res.status(201).json({
       mensagem: "Usuário cadastrado com sucesso!",
       usuario: {
-        id: usuario.id,
-        nome: usuario.nome,
-        email: usuario.email
+        id: resultado.insertId,
+        nome: nome.trim(),
+        email: emailNormalizado
       }
     });
+
   } catch (erro) {
     console.error(erro);
+
+    if (erro.code === "ER_DUP_ENTRY") {
+      return res.status(409).json({
+        erro: "Email já cadastrado!"
+      });
+    }
+
     return res.status(500).json({
       erro: "Erro interno no cadastro."
     });
@@ -81,23 +96,34 @@ app.post("/usuarios", async (req, res) => {
 });
 
 // Login
+
 app.post("/login", async (req, res) => {
   try {
     const { email, senha } = req.body || {};
 
-    if (typeof email !== "string" ||
-        typeof senha !== "string") {
+    if (
+      typeof email !== "string" ||
+      !email.trim() ||
+      typeof senha !== "string"
+    ) {
       return res.status(400).json({
         erro: "Email e senha são obrigatórios."
       });
     }
 
-    const usuario = usuarios.find(
-      u => u.email === email.trim().toLowerCase()
+    const emailNormalizado = email.trim().toLowerCase();
+
+    // Buscar usuário no MySQL
+    const [usuariosEncontrados] = await db.execute(
+      "SELECT id, nome, email, senha FROM usuarios WHERE email = ?",
+      [emailNormalizado]
     );
 
+    const usuario = usuariosEncontrados[0];
+
+    // Verificar senha com bcrypt
     const senhaCorreta = usuario
-      ? await bcrypt.compare(senha, usuario.senhaHash)
+      ? await bcrypt.compare(senha, usuario.senha)
       : false;
 
     if (!senhaCorreta) {
@@ -106,18 +132,21 @@ app.post("/login", async (req, res) => {
       });
     }
 
+    // Gerar token JWT
     const token = jwt.sign(
       { id: usuario.id },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
-    return res.json({
+    return res.status(200).json({
       mensagem: "Login realizado com sucesso!",
       token
     });
+
   } catch (erro) {
     console.error(erro);
+
     return res.status(500).json({
       erro: "Erro interno no login."
     });
@@ -164,6 +193,121 @@ app.get("/perfil", autenticar, (req, res) => {
     nome: usuario.nome,
     email: usuario.email
   });
+});
+
+
+
+
+const eventos = [];
+
+// Cadastrar novo evento
+
+app.post("/eventos", autenticar, async (req, res) => {
+  try {
+    const {
+      nome,
+      data,
+      horario,
+      local,
+      categoria,
+      publico,
+      descricao
+    } = req.body || {};
+
+    // Validar campos obrigatórios
+    if (
+      typeof nome !== "string" || !nome.trim() ||
+      typeof data !== "string" ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(data) ||
+      !Number.isFinite(Date.parse(data)) ||
+      typeof horario !== "string" ||
+      !/^([01]\d|2[0-3]):[0-5]\d$/.test(horario) ||
+      typeof local !== "string" || !local.trim() ||
+      !Number.isInteger(publico) || publico <= 0 ||
+      (categoria !== undefined && typeof categoria !== "string") ||
+      (descricao !== undefined && typeof descricao !== "string")
+    ) {
+      return res.status(400).json({
+        erro: "Informe nome, data, horário, local e público válidos."
+      });
+    }
+
+    const nomeFinal = nome.trim();
+    const localFinal = local.trim();
+    const categoriaFinal = categoria || "Corporativo";
+    const descricaoFinal = descricao || "";
+    const status = "Em planejamento";
+    const usuarioId = req.usuario.id;
+
+    // Salvar evento no MySQL
+    const [resultado] = await db.execute(
+      `INSERT INTO eventos
+       (nome, data, horario, local, categoria,
+        publico, descricao, status, usuario_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        nomeFinal,
+        data,
+        horario,
+        localFinal,
+        categoriaFinal,
+        publico,
+        descricaoFinal,
+        status,
+        usuarioId
+      ]
+    );
+
+    const novoEvento = {
+      id: resultado.insertId,
+      nome: nomeFinal,
+      data,
+      horario,
+      local: localFinal,
+      categoria: categoriaFinal,
+      publico,
+      descricao: descricaoFinal,
+      status,
+      usuario_id: usuarioId
+    };
+
+    return res.status(201).json({
+      mensagem: "Evento cadastrado com sucesso!",
+      evento: novoEvento
+    });
+
+  } catch (erro) {
+    console.error(erro);
+
+    return res.status(500).json({
+      erro: "Erro interno ao cadastrar evento."
+    });
+  }
+});
+
+// Listar eventos do usuário
+
+app.get("/eventos", autenticar, async (req, res) => {
+  try {
+    const [eventos] = await db.execute(
+      `SELECT id, nome, data, horario, local,
+              categoria, publico, descricao,
+              status, usuario_id
+       FROM eventos
+       WHERE usuario_id = ?
+       ORDER BY id DESC`,
+      [req.usuario.id]
+    );
+
+    return res.status(200).json(eventos);
+
+  } catch (erro) {
+    console.error(erro);
+
+    return res.status(500).json({
+      erro: "Erro interno ao listar eventos."
+    });
+  }
 });
 
 const PORT = process.env.PORT || 3001;
