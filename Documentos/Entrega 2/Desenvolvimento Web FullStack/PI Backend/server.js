@@ -9,8 +9,6 @@ const db = require("./db");
 const app = express();
 app.use(express.json());
 
-const usuarios = [];
-
 app.get("/", (req, res) => {
   res.json({
     mensagem: "Backend do TrocaTicket funcionando!"
@@ -18,18 +16,47 @@ app.get("/", (req, res) => {
 });
 
 // Listar usuários sem expor senhas
-app.get("/usuarios", (req, res) => {
-  const lista = usuarios.map(({ id, nome, email }) => ({
-    id,
-    nome,
-    email
-  }));
+app.get("/eventos", autenticar, async (req, res) => {
+  try {
+    const [eventos] = await db.execute(
+      `SELECT id, nome, data, horario, local,
+              categoria, publico, descricao, status, usuario_id
+       FROM eventos
+       WHERE usuario_id = ?
+       ORDER BY id DESC`,
+      [req.usuario.id]
+    );
 
-  res.json(lista);
+    return res.status(200).json(eventos);
+
+  } catch (erro) {
+    console.error(erro);
+
+    return res.status(500).json({
+      erro: "Erro interno ao listar eventos."
+    });
+  }
+});
+
+
+app.get("/usuarios", autenticar, async (req, res) => {
+  try {
+    const [usuarios] = await db.execute(
+      "SELECT id, nome, email FROM usuarios ORDER BY id DESC"
+    );
+
+    return res.status(200).json(usuarios);
+
+  } catch (erro) {
+    console.error(erro);
+
+    return res.status(500).json({
+      erro: "Erro interno ao listar usuários."
+    });
+  }
 });
 
 // Cadastrar usuário
-
 app.post("/usuarios", async (req, res) => {
   try {
     const { nome, email, senha } = req.body || {};
@@ -96,7 +123,6 @@ app.post("/usuarios", async (req, res) => {
 });
 
 // Login
-
 app.post("/login", async (req, res) => {
   try {
     const { email, senha } = req.body || {};
@@ -177,31 +203,33 @@ function autenticar(req, res, next) {
 }
 
 // Rota protegida
-app.get("/perfil", autenticar, (req, res) => {
-  const usuario = usuarios.find(
-    u => u.id === req.usuario.id
-  );
+app.get("/perfil", autenticar, async (req, res) => {
+  try {
+    const [usuarios] = await db.execute(
+      "SELECT id, nome, email FROM usuarios WHERE id = ?",
+      [req.usuario.id]
+    );
 
-  if (!usuario) {
-    return res.status(404).json({
-      erro: "Usuário não encontrado."
+    if (usuarios.length === 0) {
+      return res.status(404).json({
+        erro: "Usuário não encontrado."
+      });
+    }
+
+    return res.status(200).json(usuarios[0]);
+
+  } catch (erro) {
+    console.error(erro);
+
+    return res.status(500).json({
+      erro: "Erro interno ao buscar perfil."
     });
   }
-
-  res.json({
-    id: usuario.id,
-    nome: usuario.nome,
-    email: usuario.email
-  });
 });
-
-
-
 
 const eventos = [];
 
 // Cadastrar novo evento
-
 app.post("/eventos", autenticar, async (req, res) => {
   try {
     const {
@@ -286,29 +314,148 @@ app.post("/eventos", autenticar, async (req, res) => {
 });
 
 // Listar eventos do usuário
-
-app.get("/eventos", autenticar, async (req, res) => {
+app.get("/eventos/:id", autenticar, async (req, res) => {
   try {
+    const id = Number(req.params.id);
+
+    if (!Number.isSafeInteger(id) || id <= 0) {
+      return res.status(400).json({
+        erro: "ID do evento inválido."
+      });
+    }
+
     const [eventos] = await db.execute(
-      `SELECT id, nome, data, horario, local,
-              categoria, publico, descricao,
-              status, usuario_id
-       FROM eventos
-       WHERE usuario_id = ?
-       ORDER BY id DESC`,
-      [req.usuario.id]
+      `SELECT * FROM eventos
+       WHERE id = ? AND usuario_id = ?`,
+      [id, req.usuario.id]
     );
 
-    return res.status(200).json(eventos);
+    if (eventos.length === 0) {
+      return res.status(404).json({
+        erro: "Evento não encontrado."
+      });
+    }
+
+    return res.status(200).json(eventos[0]);
 
   } catch (erro) {
     console.error(erro);
 
     return res.status(500).json({
-      erro: "Erro interno ao listar eventos."
+      erro: "Erro interno ao buscar evento."
     });
   }
 });
+
+
+app.put("/eventos/:id", autenticar, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    if (!Number.isSafeInteger(id) || id <= 0) {
+      return res.status(400).json({
+        erro: "ID do evento inválido."
+      });
+    }
+
+    const {
+      nome, data, horario, local,
+      categoria, publico, descricao
+    } = req.body || {};
+
+    if (
+      typeof nome !== "string" || !nome.trim() ||
+      typeof data !== "string" ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(data) ||
+      !Number.isFinite(Date.parse(data)) ||
+      typeof horario !== "string" ||
+      !/^([01]\d|2[0-3]):[0-5]\d$/.test(horario) ||
+      typeof local !== "string" || !local.trim() ||
+      !Number.isInteger(publico) || publico <= 0 ||
+      (categoria !== undefined && typeof categoria !== "string") ||
+      (descricao !== undefined && typeof descricao !== "string")
+    ) {
+      return res.status(400).json({
+        erro: "Informe dados válidos para atualizar o evento."
+      });
+    }
+
+    const [resultado] = await db.execute(
+      `UPDATE eventos
+       SET nome = ?, data = ?, horario = ?, local = ?,
+           categoria = ?, publico = ?, descricao = ?
+       WHERE id = ? AND usuario_id = ?`,
+      [
+        nome.trim(),
+        data,
+        horario,
+        local.trim(),
+        categoria || "Corporativo",
+        publico,
+        descricao || "",
+        id,
+        req.usuario.id
+      ]
+    );
+
+    if (resultado.affectedRows === 0) {
+      return res.status(404).json({
+        erro: "Evento não encontrado."
+      });
+    }
+
+    return res.status(200).json({
+      mensagem: "Evento atualizado com sucesso!"
+    });
+
+  } catch (erro) {
+    console.error(erro);
+
+    return res.status(500).json({
+      erro: "Erro interno ao atualizar evento."
+    });
+  }
+});
+
+
+app.delete("/eventos/:id", autenticar, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    // Validar o ID
+    if (!Number.isSafeInteger(id) || id <= 0) {
+      return res.status(400).json({
+        erro: "ID do evento inválido."
+      });
+    }
+
+    // Excluir apenas eventos do usuário logado
+    const [resultado] = await db.execute(
+      `DELETE FROM eventos
+       WHERE id = ? AND usuario_id = ?`,
+      [id, req.usuario.id]
+    );
+
+    // Verificar se o evento existia
+    if (resultado.affectedRows === 0) {
+      return res.status(404).json({
+        erro: "Evento não encontrado."
+      });
+    }
+
+    return res.status(200).json({
+      mensagem: "Evento excluído com sucesso!"
+    });
+
+  } catch (erro) {
+    console.error(erro);
+
+    return res.status(500).json({
+      erro: "Erro interno ao excluir evento."
+    });
+  }
+});
+
 
 const PORT = process.env.PORT || 3001;
 
