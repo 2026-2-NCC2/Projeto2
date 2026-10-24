@@ -403,10 +403,9 @@ function CriarEvento({
   const aoAlterarCampo = (campo, valor) => {
     setEvento((estadoAnterior) => ({ ...estadoAnterior, [campo]: valor }))
   }
-  const aoEnviarFormulario = (eventoDisparado) => {
-    eventoDisparado.preventDefault()
-    aoAvancarParaCustos()
-    setPagina('custos')
+  const aoEnviarFormulario = async (eventoDisparado) => {
+  eventoDisparado.preventDefault()
+  await aoAvancarParaCustos()
   }
   return (
     <div>
@@ -580,13 +579,94 @@ function Cotacao({
   custos,
   setPagina,
 }) {
-  const [prazo, setPrazo] = useState('2026-10-18')
+  const [prazo, setPrazo] = useState('')
+  const [publicando, setPublicando] = useState(false)
   const [observacoes, setObservacoes] = useState(
     'Apresentar proposta comercial completa, incluindo impostos e condições de pagamento.'
   )
   const totalEstimado = useMemo(() => {
     return custos.reduce((acumulador, itemCusto) => acumulador + itemCusto.valor, 0)
   }, [custos])
+  
+const aoPublicarCotacao = async () => {
+  if (publicando) return
+
+  if (!prazo) {
+    alert('Selecione um prazo para o envio das propostas.')
+    return
+  }
+
+  const hoje = new Date()
+  hoje.setHours(0, 0, 0, 0)
+
+  const [ano, mes, dia] = prazo.split('-').map(Number)
+  const dataPrazo = new Date(ano, mes - 1, dia)
+
+  if (
+    dataPrazo.getFullYear() !== ano ||
+    dataPrazo.getMonth() !== mes - 1 ||
+    dataPrazo.getDate() !== dia ||
+    dataPrazo < hoje
+  ) {
+    alert('Selecione um prazo válido que não esteja no passado.')
+    return
+  }
+
+  if (!evento.id) {
+    alert('O evento precisa estar salvo antes de publicar a cotação.')
+    return
+  }
+
+  if (!custos.length) {
+    alert('Adicione pelo menos um item de custo.')
+    return
+  }
+
+  const token = sessionStorage.getItem('token')
+
+  if (!token) {
+    alert('Sua sessão expirou. Faça login novamente.')
+    setPagina('login')
+    return
+  }
+
+  setPublicando(true)
+
+  try {
+    const resposta = await fetch('http://localhost:3001/cotacoes', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        evento_id: evento.id,
+        prazo,
+        observacoes,
+        itens: custos.map((item) => ({
+          categoria: item.categoria,
+          descricao: item.descricao,
+          valor_estimado: Number(item.valor)
+        }))
+      })
+    })
+
+    const dados = await resposta.json()
+
+    if (!resposta.ok) {
+      alert(dados.erro || 'Erro ao publicar cotação.')
+      return
+    }
+
+    alert('Cotação publicada com sucesso!')
+    setPagina('ticket')
+  } catch (erro) {
+    console.error('Erro ao publicar cotação:', erro)
+    alert('Não foi possível conectar ao servidor.')
+  } finally {
+    setPublicando(false)
+  }
+}
   return (
     <div>
       <button className="voltar" onClick={() => setPagina('custos')}>
@@ -633,13 +713,17 @@ function Cotacao({
             value={observacoes}
             onChange={(eventoDisparado) => setObservacoes(eventoDisparado.target.value)}
           />
-          <button
-            type="button"
-            className="principal"
-            style={{ width: '100%', marginTop: '20px' }}
-            onClick={() => setPagina('ticket')}
-          >
-            Publicar Cotação & Simular Ticket →
+          
+<button
+  type="button"
+  className="principal"
+  style={{ width: '100%', marginTop: '20px' }}
+  onClick={aoPublicarCotacao}
+  disabled={publicando}
+>
+  {publicando
+    ? 'Publicando cotação...'
+    : 'Publicar Cotação & Simular Ticket →'}
           </button>
         </div>
       </div>
@@ -1156,7 +1240,61 @@ alert(
           evento={eventoEmEdicao}
           setEvento={setEventoEmEdicao}
           setPagina={setPagina}
-          aoAvancarParaCustos={() => {}}
+          
+aoAvancarParaCustos={async () => {
+  try {
+    const token = sessionStorage.getItem('token')
+
+    if (!token) {
+      alert('Sua sessão expirou. Faça login novamente.')
+      setPagina('login')
+      return
+    }
+
+    const eventoExistente = Boolean(eventoEmEdicao.id)
+
+    const resposta = await fetch(
+      eventoExistente
+        ? `http://localhost:3001/eventos/${eventoEmEdicao.id}`
+        : 'http://localhost:3001/eventos',
+      {
+        method: eventoExistente ? 'PUT' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(eventoEmEdicao)
+      }
+    )
+
+    const dados = await resposta.json()
+
+    if (!resposta.ok) {
+      alert(dados.erro || 'Erro ao salvar evento.')
+      return
+    }
+
+    if (!eventoExistente) {
+      const idCriado = dados.evento?.id ?? dados.id
+
+      if (!idCriado) {
+        alert('Evento salvo, mas a API não retornou o ID.')
+        return
+      }
+
+      setEventoEmEdicao((anterior) => ({
+        ...anterior,
+        id: idCriado
+      }))
+    }
+
+    setPagina('custos')
+  } catch (erro) {
+    console.error('Erro ao salvar evento:', erro)
+    alert('Não foi possível conectar ao servidor.')
+  }
+}}
+
         />
       )}
       {pagina === 'custos' && (

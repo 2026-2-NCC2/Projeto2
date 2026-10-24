@@ -166,21 +166,190 @@ app.post("/login", async (req, res) => {
 
     // Gerar token JWT
     const token = jwt.sign(
-      { id: usuario.id },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+  {
+    id: usuario.id,
+    perfil: usuario.perfil
+  },
+  process.env.JWT_SECRET,
+  { expiresIn: "1h" }
+);
 
     return res.status(200).json({
-      mensagem: "Login realizado com sucesso!",
-      token
-    });
+  mensagem: "Login realizado com sucesso!",
+  token,
+  usuario: {
+    id: usuario.id,
+    nome: usuario.nome,
+    email: usuario.email,
+    perfil: usuario.perfil
+  }
+});
 
   } catch (erro) {
     console.error(erro);
 
     return res.status(500).json({
       erro: "Erro interno no login."
+    });
+  }
+});
+
+ // Publicar cotação de um evento
+app.post("/cotacoes", autenticar, async (req, res) => {
+  const { evento_id, prazo, observacoes, itens } = req.body || {};
+
+  if (
+    !Number.isInteger(Number(evento_id)) ||
+    Number(evento_id) <= 0 ||
+    typeof prazo !== "string" ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(prazo) ||
+    !Array.isArray(itens) ||
+    itens.length === 0 ||
+    itens.some(item =>
+      typeof item.categoria !== "string" ||
+      !item.categoria.trim() ||
+      typeof item.descricao !== "string" ||
+      !item.descricao.trim() ||
+      !Number.isFinite(Number(item.valor_estimado)) ||
+      Number(item.valor_estimado) < 0
+    )
+  ) {
+    return res.status(400).json({
+      erro: "Informe evento, prazo válido e itens da cotação."
+    });
+  }
+
+  const dataPrazo = new Date(`${prazo}T00:00:00Z`);
+
+  if (
+    Number.isNaN(dataPrazo.getTime()) ||
+    dataPrazo.toISOString().slice(0, 10) !== prazo ||
+    prazo < new Date().toISOString().slice(0, 10)
+  ) {
+    return res.status(400).json({
+      erro: "O prazo da cotação deve ser uma data válida e não pode estar no passado."
+    });
+  }
+
+  let conexao;
+
+  try {
+    conexao = await db.getConnection();
+
+    await conexao.beginTransaction();
+
+    const [eventos] = await conexao.execute(
+      "SELECT id FROM eventos WHERE id = ? AND usuario_id = ?",
+      [Number(evento_id), req.usuario.id]
+    );
+
+    if (eventos.length === 0) {
+      await conexao.rollback();
+
+      return res.status(404).json({
+        erro: "Evento não encontrado ou não pertence ao usuário."
+      });
+    }
+
+    const [resultado] = await conexao.execute(
+      `INSERT INTO cotacoes
+       (evento_id, prazo, modalidade, observacoes, status)
+       VALUES (?, ?, 'Fechada', ?, 'Aberta')`,
+      [Number(evento_id), prazo, observacoes || "",]
+    );
+
+    const cotacaoId = resultado.insertId;
+
+    for (const item of itens) {
+      await conexao.execute(
+        `INSERT INTO itens_cotacao
+         (cotacao_id, categoria, descricao, valor_estimado)
+         VALUES (?, ?, ?, ?)`,
+        [
+          cotacaoId,
+          item.categoria.trim(),
+          item.descricao.trim(),
+          Number(item.valor_estimado)
+        ]
+      );
+    }
+
+    await conexao.commit();
+
+    return res.status(201).json({
+      mensagem: "Cotação publicada com sucesso!",
+      cotacao: {
+        id: cotacaoId,
+        evento_id: Number(evento_id),
+        prazo,
+        modalidade: "Fechada",
+        observacoes: observacoes || "",
+        status: "Aberta",
+        itens
+      }
+    });
+
+  } catch (erro) {
+    if (conexao) {
+      await conexao.rollback();
+    }
+
+    console.error("Erro ao publicar cotação:", erro);
+
+    return res.status(500).json({
+      erro: "Erro interno ao publicar cotação."
+    });
+
+  } finally {
+    if (conexao) {
+      conexao.release();
+    }
+  }
+});
+
+app.get("/cotacoes", autenticar, async (req, res) => {
+  try {
+    const [cotacoes] = await db.execute(
+      `SELECT
+        c.id,
+        c.evento_id,
+        e.nome AS evento_nome,
+        e.data AS evento_data,
+        e.local AS evento_local,
+        c.prazo,
+        c.modalidade,
+        c.observacoes,
+        c.status,
+        c.criada_em
+      FROM cotacoes c
+      INNER JOIN eventos e ON e.id = c.evento_id
+      WHERE e.usuario_id = ?
+      ORDER BY c.id DESC`,
+      [req.usuario.id]
+    );
+
+    for (const cotacao of cotacoes) {
+      const [itens] = await db.execute(
+        `SELECT
+          id,
+          categoria,
+          descricao,
+          valor_estimado
+        FROM itens_cotacao
+        WHERE cotacao_id = ?
+        ORDER BY id`,
+        [cotacao.id]
+      );
+
+      cotacao.itens = itens;
+    }
+
+    return res.status(200).json(cotacoes);
+  } catch (erro) {
+    console.error("Erro ao consultar cotações:", erro);
+
+    return res.status(500).json({
+      erro: "Erro interno ao consultar cotações."
     });
   }
 });
