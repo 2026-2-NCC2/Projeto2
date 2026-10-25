@@ -63,9 +63,14 @@ app.get("/usuarios", autenticar, async (req, res) => {
 });
 
 // Cadastrar usuário
+
 app.post("/usuarios", async (req, res) => {
   try {
-    const { nome, email, senha } = req.body || {};
+    const { nome, email, senha, perfil } = req.body || {};
+
+    const perfisPermitidos = [
+      "participante"
+    ];
 
     if (
       typeof nome !== "string" ||
@@ -74,16 +79,17 @@ app.post("/usuarios", async (req, res) => {
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) ||
       typeof senha !== "string" ||
       senha.length < 8 ||
-      Buffer.byteLength(senha, "utf8") > 72
+      Buffer.byteLength(senha, "utf8") > 72 ||
+      !perfisPermitidos.includes(perfil)
     ) {
       return res.status(400).json({
-        erro: "Informe nome, email válido e senha de 8 a 72 bytes."
+        erro: "Informe nome, email válido, senha de 8 a 72 bytes e um perfil permitido."
       });
     }
 
     const emailNormalizado = email.trim().toLowerCase();
 
-    // Verificar se o email já existe no banco
+    // Verificar se o email já existe
     const [usuariosExistentes] = await db.execute(
       "SELECT id FROM usuarios WHERE email = ?",
       [emailNormalizado]
@@ -98,10 +104,10 @@ app.post("/usuarios", async (req, res) => {
     // Criptografar a senha
     const senhaHash = await bcrypt.hash(senha, 12);
 
-    // Salvar usuário no MySQL
+    // Salvar usuário com o perfil escolhido
     const [resultado] = await db.execute(
-      "INSERT INTO usuarios (nome, email, senha) VALUES (?, ?, ?)",
-      [nome.trim(), emailNormalizado, senhaHash]
+      "INSERT INTO usuarios (nome, email, senha, perfil) VALUES (?, ?, ?, ?)",
+      [nome.trim(), emailNormalizado, senhaHash, perfil]
     );
 
     return res.status(201).json({
@@ -109,7 +115,8 @@ app.post("/usuarios", async (req, res) => {
       usuario: {
         id: resultado.insertId,
         nome: nome.trim(),
-        email: emailNormalizado
+        email: emailNormalizado,
+        perfil
       }
     });
 
@@ -147,12 +154,12 @@ app.post("/login", async (req, res) => {
 
     // Buscar usuário no MySQL
     const [usuariosEncontrados] = await db.execute(
-      "SELECT id, nome, email, senha FROM usuarios WHERE email = ?",
+      "SELECT id, nome, email, senha, perfil FROM usuarios WHERE email = ?",
       [emailNormalizado]
     );
 
     const usuario = usuariosEncontrados[0];
-
+    
     // Verificar senha com bcrypt
     const senhaCorreta = usuario
       ? await bcrypt.compare(senha, usuario.senha)
@@ -355,8 +362,9 @@ app.get("/cotacoes", autenticar, async (req, res) => {
 });
 
 // Middleware de autenticação
-function autenticar(req, res, next) {
+async function autenticar(req, res, next) {
   const authorization = req.headers.authorization;
+
   const token = authorization?.startsWith("Bearer ")
     ? authorization.slice(7)
     : null;
@@ -367,12 +375,36 @@ function autenticar(req, res, next) {
     });
   }
 
+  let dadosToken;
+
   try {
-    req.usuario = jwt.verify(token, process.env.JWT_SECRET);
-    next();
+    dadosToken = jwt.verify(token, process.env.JWT_SECRET);
   } catch {
     return res.status(401).json({
       erro: "Token inválido ou expirado."
+    });
+  }
+
+  try {
+    const [usuarios] = await db.execute(
+      "SELECT id, nome, email, perfil FROM usuarios WHERE id = ?",
+      [dadosToken.id]
+    );
+
+    if (usuarios.length === 0) {
+      return res.status(401).json({
+        erro: "Usuário não encontrado."
+      });
+    }
+
+    req.usuario = usuarios[0];
+
+    next();
+  } catch (erro) {
+    console.error("Erro na autenticação:", erro);
+
+    return res.status(500).json({
+      erro: "Erro interno ao autenticar usuário."
     });
   }
 }
@@ -401,11 +433,29 @@ app.get("/perfil", autenticar, async (req, res) => {
     });
   }
 });
+function permitirPerfis(...perfisPermitidos) {
+  return (req, res, next) => {
+    if (!req.usuario) {
+      return res.status(401).json({
+        erro: "Usuário não autenticado."
+      });
+    }
+
+    if (!perfisPermitidos.includes(req.usuario.perfil)) {
+      return res.status(403).json({
+        erro: "Você não tem permissão para realizar esta ação."
+      });
+    }
+
+    next();
+  };
+}
+
 
 const eventos = [];
 
 // Cadastrar novo evento
-app.post("/eventos", autenticar, async (req, res) => {
+app.post("/eventos", autenticar, permitirPerfis("organizador"),async (req, res) => {
   try {
     const {
       nome,
@@ -638,6 +688,197 @@ if (!process.env.JWT_SECRET ||
     process.env.JWT_SECRET.length < 32) {
   throw new Error("Configure um JWT_SECRET seguro no .env");
 }
+
+
+app.post("/solicitacoes-acesso", autenticar, async (req, res) => {
+  try {
+    const { perfil_solicitado, justificativa } = req.body || {};
+    const usuarioId = req.usuario.id;
+
+    // Validar os dados
+    if (
+      !["organizador", "fornecedor"].includes(perfil_solicitado) ||
+      typeof justificativa !== "string" ||
+      !justificativa.trim()
+    ) {
+      return res.status(400).json({
+        erro: "Informe um perfil válido e uma justificativa."
+      });
+    }
+
+    // Somente participantes podem solicitar outro perfil
+    if (req.usuario.perfil !== "participante") {
+      return res.status(403).json({
+        erro: "Somente participantes podem solicitar acesso."
+      });
+    }
+
+    // Impedir solicitações pendentes duplicadas
+    const [solicitacoesExistentes] = await db.execute(
+      `SELECT id FROM solicitacoes_acesso
+       WHERE usuario_id = ? AND status = 'pendente'`,
+      [usuarioId]
+    );
+
+    if (solicitacoesExistentes.length > 0) {
+      return res.status(409).json({
+        erro: "Você já possui uma solicitação pendente."
+      });
+    }
+
+    // Registrar a solicitação
+    const [resultado] = await db.execute(
+      `INSERT INTO solicitacoes_acesso
+       (usuario_id, perfil_solicitado, justificativa)
+       VALUES (?, ?, ?)`,
+      [usuarioId, perfil_solicitado, justificativa.trim()]
+    );
+
+    return res.status(201).json({
+      mensagem: "Solicitação enviada com sucesso!",
+      solicitacao: {
+        id: resultado.insertId,
+        usuario_id: usuarioId,
+        perfil_solicitado,
+        justificativa: justificativa.trim(),
+        status: "pendente"
+      }
+    });
+
+  } catch (erro) {
+    console.error(erro);
+    return res.status(500).json({
+      erro: "Erro interno ao solicitar acesso."
+    });
+  }
+});
+
+
+app.get(
+  "/solicitacoes-acesso",
+  autenticar,
+  permitirPerfis("admin"),
+  async (req, res) => {
+    try {
+      const [solicitacoes] = await db.execute(`
+        SELECT
+          s.id,
+          s.usuario_id,
+          u.nome,
+          u.email,
+          s.perfil_solicitado,
+          s.justificativa,
+          s.status,
+          s.criada_em
+        FROM solicitacoes_acesso s
+        INNER JOIN usuarios u ON u.id = s.usuario_id
+        ORDER BY s.criada_em DESC, s.id DESC
+      `);
+
+      return res.status(200).json(solicitacoes);
+
+    } catch (erro) {
+      console.error(erro);
+
+      return res.status(500).json({
+        erro: "Erro interno ao buscar solicitações."
+      });
+    }
+  }
+);
+
+
+app.patch(
+  "/solicitacoes-acesso/:id",
+  autenticar,
+  permitirPerfis("admin"),
+  async (req, res) => {
+    let conexao;
+
+    try {
+      const id = Number(req.params.id);
+      const { status } = req.body || {};
+
+      if (
+        !Number.isInteger(id) ||
+        id <= 0 ||
+        !["aprovado", "rejeitado"].includes(status)
+      ) {
+        return res.status(400).json({
+          erro: "Informe uma solicitação e um status válidos."
+        });
+      }
+
+      conexao = await db.getConnection();
+      await conexao.beginTransaction();
+
+      const [solicitacoes] = await conexao.execute(
+        `SELECT usuario_id, perfil_solicitado, status
+         FROM solicitacoes_acesso
+         WHERE id = ?
+         FOR UPDATE`,
+        [id]
+      );
+
+      if (solicitacoes.length === 0) {
+        await conexao.rollback();
+        return res.status(404).json({
+          erro: "Solicitação não encontrada."
+        });
+      }
+
+      const solicitacao = solicitacoes[0];
+
+      if (solicitacao.status !== "pendente") {
+        await conexao.rollback();
+        return res.status(409).json({
+          erro: "Esta solicitação já foi analisada."
+        });
+      }
+
+      if (status === "aprovado") {
+        const [resultadoUsuario] = await conexao.execute(
+          `UPDATE usuarios
+           SET perfil = ?
+           WHERE id = ? AND perfil = 'participante'`,
+          [solicitacao.perfil_solicitado, solicitacao.usuario_id]
+        );
+
+        if (resultadoUsuario.affectedRows !== 1) {
+          await conexao.rollback();
+          return res.status(409).json({
+            erro: "O usuário não possui mais o perfil participante."
+          });
+        }
+      }
+
+      await conexao.execute(
+        `UPDATE solicitacoes_acesso
+         SET status = ?
+         WHERE id = ?`,
+        [status, id]
+      );
+
+      await conexao.commit();
+
+      return res.status(200).json({
+        mensagem: status === "aprovado"
+          ? "Solicitação aprovada com sucesso!"
+          : "Solicitação rejeitada com sucesso!"
+      });
+
+    } catch (erro) {
+      if (conexao) await conexao.rollback();
+      console.error(erro);
+
+      return res.status(500).json({
+        erro: "Erro interno ao analisar solicitação."
+      });
+    } finally {
+      if (conexao) conexao.release();
+    }
+  }
+);
 
 app.listen(PORT, () => {
   console.log("Servidor rodando na porta " + PORT);
