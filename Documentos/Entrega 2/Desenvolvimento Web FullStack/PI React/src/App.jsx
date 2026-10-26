@@ -158,6 +158,130 @@ function Layout({ children: filhos, pagina, setPagina, aoCriarNovoEvento }) {
   )
 }
 
+function Cadastro({ setPagina }) {
+  const [nome, setNome] = useState('')
+  const [email, setEmail] = useState('')
+  const [senha, setSenha] = useState('')
+  const [confirmarSenha, setConfirmarSenha] = useState('')
+  const [cadastrando, setCadastrando] = useState(false)
+
+  const cadastrar = async (evento) => {
+    evento.preventDefault()
+
+    if (senha !== confirmarSenha) {
+      alert('As senhas não coincidem.')
+      return
+    }
+
+    setCadastrando(true)
+
+    try {
+      const resposta = await fetch('http://localhost:3001/usuarios', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          nome,
+          email,
+          senha,
+          perfil: 'participante'
+        })
+      })
+
+      const dados = await resposta.json()
+
+      if (!resposta.ok) {
+        alert(dados.erro || 'Erro ao criar conta.')
+        return
+      }
+
+      alert('Conta criada com sucesso! Faça login para continuar.')
+      setPagina('login')
+    } catch (erro) {
+      console.error('Erro ao cadastrar:', erro)
+      alert('Não foi possível conectar ao servidor.')
+    } finally {
+      setCadastrando(false)
+    }
+  }
+
+  return (
+    <div className="paginaLogin">
+      <div className="cabecalhoLogin">
+        <div className="logo">
+          ▣ <span>TrocaTicket</span>
+        </div>
+        <span>🔒 Ambiente Seguro</span>
+      </div>
+
+      <main className="caixaLogin">
+        <h1>Criar conta</h1>
+        <p>
+          Cadastre-se gratuitamente como participante.
+          Depois, você poderá solicitar acesso como organizador ou fornecedor.
+        </p>
+
+        <form onSubmit={cadastrar}>
+          <label>Nome completo</label>
+          <input
+            type="text"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            placeholder="Seu nome completo"
+            required
+          />
+
+          <label>E-mail</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="seuemail@exemplo.com"
+            required
+          />
+
+          <label>Senha</label>
+          <input
+            type="password"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            placeholder="Crie uma senha"
+            required
+          />
+
+          <label>Confirmar senha</label>
+          <input
+            type="password"
+            value={confirmarSenha}
+            onChange={(e) => setConfirmarSenha(e.target.value)}
+            placeholder="Digite a senha novamente"
+            required
+          />
+
+          <button
+            type="submit"
+            className="principal"
+            disabled={cadastrando}
+          >
+            {cadastrando ? 'Criando conta...' : 'CRIAR CONTA →'}
+          </button>
+        </form>
+
+        <p className="cadastro">
+          Já tem uma conta?{' '}
+          <button
+            type="button"
+            onClick={() => setPagina('login')}
+          >
+            Entrar
+          </button>
+        </p>
+      </main>
+    </div>
+  )
+}
+
 function Login({ setPagina }) {
   const [perfil, setPerfil] = useState('organizador')
   const [email, setEmail] = useState('roberto@empresa.com')
@@ -187,13 +311,21 @@ const aoAutenticar = async (eventoDisparado) => {
 
     sessionStorage.setItem('token', dados.token)
 
-    setPagina(
-      perfil === 'fornecedor'
-        ? 'fornecedor-mural'
-        : perfil === 'admin'
-          ? 'admin'
-          : 'eventos'
-    )
+const perfilUsuario = dados.usuario.perfil
+
+sessionStorage.setItem('perfil', perfilUsuario)
+
+if (perfilUsuario === 'admin') {
+  setPagina('admin')
+} else if (perfilUsuario === 'fornecedor') {
+  setPagina('fornecedor-mural')
+} else if (perfilUsuario === 'organizador') {
+  setPagina('eventos')
+} else if (perfilUsuario === 'participante') {
+  setPagina('participante')
+} else {
+  alert('Perfil de usuário não reconhecido.')
+}
   } catch (erro) {
     console.error(erro)
     alert('Não foi possível conectar ao servidor.')
@@ -256,8 +388,8 @@ const aoAutenticar = async (eventoDisparado) => {
         >
           🌐 Google Workspace / SSO
         </button>
-        <p className="cadastro">
-          Ainda não tem uma conta de {perfil}? <b>Solicitar acesso</b>
+        <p className="cadastro">Ainda não tem uma conta?{' '}
+          <button type="button"onClick={() => setPagina('cadastro')}>Criar conta</button>
         </p>
       </main>
     </div>
@@ -933,16 +1065,133 @@ function AdminPortal({ setPagina }) {
   const [secao, setSecao] = useState('contas')
   const [aba, setAba] = useState('todos')
   const [ordem, setOrdem] = useState('Risco')
-  const [selecionados, setSelecionados] = useState([9402, 9398, 9391])
-  const [solicitacoes, setSolicitacoes] = useState(SOLICITACOES_ADMIN)
+  const [selecionados, setSelecionados] = useState([])
+  const [solicitacoes, setSolicitacoes] = useState([])
+  const [carregando, setCarregando] = useState(true)
+  useEffect(() => {
+  const buscarSolicitacoes = async () => {
+    try {
+      const token = sessionStorage.getItem('token')
+
+      const resposta = await fetch(
+        'http://localhost:3001/solicitacoes-acesso',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+
+      const dados = await resposta.json()
+
+      if (!resposta.ok) {
+        throw new Error(dados.erro || 'Erro ao buscar solicitações.')
+      }
+
+      const lista = Array.isArray(dados)
+        ? dados
+        : dados.solicitacoes || []
+
+      setSolicitacoes(
+        lista
+          .filter((item) => item.status === 'pendente')
+          .map((item) => ({
+            id: item.id,
+            nome: item.nome,
+            tipo: item.perfil_solicitado === 'organizador' ? 'Org' : 'Forn',
+            hora: item.criada_em
+              ? new Date(item.criada_em).toLocaleString('pt-BR')
+              : '',
+            documento: item.email,
+            atuacao: item.perfil_solicitado === 'organizador'
+              ? 'Organizador de eventos'
+              : 'Fornecedor',
+            detalhe: item.justificativa,
+            responsavel: item.nome,
+            cargo: 'Solicitante',
+            score: 100,
+            risco: 'Pendente de análise',
+            docs: 0,
+            urgente: false
+          }))
+      )
+    } catch (erro) {
+      console.error('Erro ao carregar solicitações:', erro)
+      setMensagem(erro.message)
+    } finally {
+      setCarregando(false)
+    }
+  }
+
+  buscarSolicitacoes()
+  }, [])
   const [mensagem, setMensagem] = useState('')
   const filtradas = solicitacoes.filter((item) => aba === 'todos' || (aba === 'organizadores' ? item.tipo === 'Org' : item.tipo === 'Forn'))
+  const totalPendentes = solicitacoes.length
+
+  const totalOrganizadores = solicitacoes.filter(
+  (item) => item.tipo === 'Org'
+  ).length
+
+  const totalFornecedores = solicitacoes.filter(
+  (item) => item.tipo === 'Forn'
+  ).length
+  const percentualOrganizadores = totalPendentes > 0
+  ? Math.round((totalOrganizadores / totalPendentes) * 100)
+  : 0
+
+  const percentualFornecedores = totalPendentes > 0
+  ? 100 - percentualOrganizadores
+  : 0
   const alternar = (id) => setSelecionados((atuais) => atuais.includes(id) ? atuais.filter((item) => item !== id) : [...atuais, id])
-  const atualizar = (id, acao) => {
-    setSolicitacoes((atuais) => atuais.filter((item) => item.id !== id))
-    setSelecionados((atuais) => atuais.filter((item) => item !== id))
-    setMensagem(`Cadastro #HOM-${id} ${acao}.`)
+  const atualizar = async (id, acao) => {
+  const status = acao === 'homologado'
+    ? 'aprovado'
+    : 'rejeitado'
+
+  const confirmado = window.confirm(
+    `Deseja realmente ${status === 'aprovado' ? 'aprovar' : 'rejeitar'} a solicitação #HOM-${id}?`
+  )
+
+  if (!confirmado) return
+
+  try {
+    const token = sessionStorage.getItem('token')
+
+    const resposta = await fetch(
+      `http://localhost:3001/solicitacoes-acesso/${id}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ status })
+      }
+    )
+
+    const dados = await resposta.json()
+
+    if (!resposta.ok) {
+      alert(dados.erro || 'Erro ao atualizar solicitação.')
+      return
+    }
+
+    setSolicitacoes((atuais) =>
+      atuais.filter((item) => item.id !== id)
+    )
+
+    setSelecionados((atuais) =>
+      atuais.filter((item) => item !== id)
+    )
+
+    setMensagem(`Solicitação #HOM-${id} ${status} com sucesso!`)
+
+  } catch (erro) {
+    console.error('Erro ao atualizar solicitação:', erro)
+    alert('Não foi possível conectar ao servidor.')
   }
+}
   const agirEmLote = (acao) => {
     if (!selecionados.length) return
     setSolicitacoes((atuais) => atuais.filter((item) => !selecionados.includes(item.id)))
@@ -962,27 +1211,37 @@ function AdminPortal({ setPagina }) {
             <div><b>3</b><span><small>ETAPA 3 · PRÓXIMO</small><strong>Liberação de Permissões</strong></span></div>
           </section>
           <section className="adminHero">
-            <div><div className="adminRotulo">FILA OPERACIONAL ATIVA <span>◷ Tempo Médio de Análise: 4.2h</span></div><h1>48 SOLICITAÇÕES PENDENTES</h1><p>Auditoria de idoneidade jurídica, cruzamento automatizado com a Receita Federal e verificação de alvarás para emissão de ingressos e fornecimento de infraestrutura técnica.</p><strong className="adminCriterio">▣ Critério de Homologação: Regularidade RFB + CNAE Compatível + Histórico de Litígio Zerado</strong></div>
+            <div><div className="adminRotulo">FILA OPERACIONAL ATIVA <span>◷ Tempo Médio de Análise: 4.2h</span></div><h1>{totalPendentes} SOLICITAÇÕES PENDENTES</h1><p>Auditoria de idoneidade jurídica, cruzamento automatizado com a Receita Federal e verificação de alvarás para emissão de ingressos e fornecimento de infraestrutura técnica.</p><strong className="adminCriterio">▣ Critério de Homologação: Regularidade RFB + CNAE Compatível + Histórico de Litígio Zerado</strong></div>
             <div className="adminStatusFila"><div><span><small>STATUS DA FILA</small><b>● Atenção Operacional (8+)</b></span><span><small>CONFIABILIDADE DOC.</small><b className="verde">92% &nbsp; Ótimo</b></span></div><button onClick={() => agirEmLote('enviados para auditoria')}>⚡ Auditar Documentos em Lote</button><a href="#diretrizes">Diretrizes de Compliance ↗</a></div>
           </section>
           <section className="adminMetricas">
-            <CartaoMetrica titulo="TOTAL ORGANIZADORES PENDENTES" valor="28" texto="↗ +12% vs. semana anterior · 15 grande porte" />
-            <CartaoMetrica titulo="FORNECEDORES EM HOMOLOGAÇÃO" valor="20" texto="8 sonorização/áudio · 6 iluminação · 6 palco" tom="laranja" />
-            <CartaoMetrica titulo="TAXA DE APROVAÇÃO GLOBAL" valor="87.4%" texto="↑ histórico 90d · 2.6% reprovados" tom="verde" />
+            <CartaoMetrica titulo="TOTAL ORGANIZADORES PENDENTES"valor={totalOrganizadores}texto="Solicitações aguardando aprovação"/>
+            <CartaoMetrica titulo="FORNECEDORES EM HOMOLOGAÇÃO"valor={totalFornecedores}texto="Solicitações aguardando aprovação"tom="laranja"/>
+            <CartaoMetrica titulo="SOLICITAÇÕES AGUARDANDO ANÁLISE" valor={totalPendentes} texto="Total de solicitações pendentes" tom="verde" />
           </section>
           <section className="adminFila">
-            <div className="adminFilaCabecalho"><div><h2>Fila de Homologação Cadastral</h2><p>Auditoria rigorosa de contratos sociais, CNDs e certidões tributárias vigentes.</p></div><div className="adminAbas"><button className={aba === 'todos' ? 'ativo' : ''} onClick={() => setAba('todos')}>Todos (48)</button><button className={aba === 'organizadores' ? 'ativo' : ''} onClick={() => setAba('organizadores')}>Organizadores (28)</button><button className={aba === 'fornecedores' ? 'ativo' : ''} onClick={() => setAba('fornecedores')}>Fornecedores (20)</button><button className="urgente">Urgentes &gt; 48h (6)</button></div></div>
-            <div className="adminProgresso"><b>58% Organizadores (28 solicitações)</b><span><i /></span><b>42% Fornecedores (20 empresas)</b></div>
+            <div className="adminFilaCabecalho"><div><h2>Fila de Homologação Cadastral</h2><p>Auditoria rigorosa de contratos sociais, CNDs e certidões tributárias vigentes.</p></div><div className="adminAbas">
+            <button  className={aba === 'todos' ? 'ativo' : ''} onClick={() => setAba('todos')}>
+            Todos ({totalPendentes})</button>
+
+            <button className={aba === 'organizadores' ? 'ativo' : ''} onClick={() => setAba('organizadores')}>
+            Organizadores ({totalOrganizadores})
+            </button>
+
+            <button className={aba === 'fornecedores' ? 'ativo' : ''} onClick={() => setAba('fornecedores')}>
+            Fornecedores ({totalFornecedores})
+            </button><button className="urgente">Urgentes &gt; 48h (6)</button></div></div>
+            <div className="adminProgresso"><b>{percentualOrganizadores}% Organizadores
+            ({totalOrganizadores} solicitações)</b><span><i style={{ width: `${percentualOrganizadores}%` }} /></span><b>{percentualFornecedores}% Fornecedores({totalFornecedores} solicitações)</b></div>
             <div className="adminOrdenacao">Ordenar por: <select value={ordem} onChange={(e) => setOrdem(e.target.value)}><option>Risco</option><option>Prioridade</option><option>Mais recentes</option></select></div>
             {mensagem && <div className="adminMensagem" role="status">✓ {mensagem}<button onClick={() => setMensagem('')}>×</button></div>}
             <div className="adminTabelaWrap"><table className="adminTabela"><thead><tr><th><input type="checkbox" aria-label="Selecionar todos" checked={filtradas.length > 0 && filtradas.every((item) => selecionados.includes(item.id))} onChange={(e) => setSelecionados(e.target.checked ? filtradas.map((item) => item.id) : [])} /></th><th>PROTOCOLO / DATA</th><th>SOLICITANTE</th><th>ATUAÇÃO</th><th>RESPONSÁVEL</th><th>RISCO & RFB</th><th>DOCUMENTOS</th><th>AÇÕES</th></tr></thead>
               <tbody>{filtradas.map((item) => <tr key={item.id} className={item.urgente ? 'urgente' : ''}><td><input type="checkbox" aria-label={`Selecionar ${item.nome}`} checked={selecionados.includes(item.id)} onChange={() => alternar(item.id)} /></td><td><strong>#HOM-{item.id}</strong><small className={item.urgente ? 'atraso' : ''}>{item.hora}</small></td><td><strong>{item.nome}</strong><small>{item.documento}</small></td><td><strong>{item.atuacao}</strong><small>{item.detalhe}</small></td><td><strong>{item.responsavel}</strong><small>{item.cargo}</small></td><td><span className={`adminScore ${item.score < 80 ? 'alerta' : ''}`}>Score {item.score}</span><small className={item.score < 80 ? 'atraso' : 'ok'}>{item.risco}</small></td><td><div className="adminDocs">{Array.from({ length: item.docs }, (_, i) => <span key={i}>▤</span>)}</div></td><td><div className="adminAcoesLinha"><button className="aprovar" onClick={() => atualizar(item.id, 'homologado')}>Aprovar</button><button className="recusar" onClick={() => atualizar(item.id, 'recusado')}>Recusar</button></div></td></tr>)}</tbody></table></div>
-            <div className="adminPaginacao"><span>Exibindo 1–{filtradas.length} de 48 cadastros</span><div><button disabled>Anterior</button><button className="ativo">1</button><button>2</button><button>3</button><span>…</span><button>10</button><button>Próxima</button></div></div>
+            <div className="adminPaginacao"><span>Exibindo {filtradas.length} de {totalPendentes} solicitações pendentes</span><div><button disabled>Anterior</button><button className="ativo">1</button><button>2</button><button>3</button><span>…</span><button>10</button><button>Próxima</button></div></div>
           </section>
         </main>
       </div>
-      <footer className="adminBarraLote"><div><b>{selecionados.length}</b><span><strong>{selecionados.length} cadastros selecionados para ação em lote</strong><small>Organizadores e fornecedores de estrutura técnica</small></span></div><div><button className="recusar" onClick={() => agirEmLote('reprovados')}>⊘ Reprovar com Justificativa</button><button className="aprovarLote" onClick={() => agirEmLote('homologados')}>✥ Homologar Cadastros Selecionados →</button></div></footer>
-    </div>
+      <footer className="adminBarraLote"><div><b>{selecionados.length}</b><span><strong>{selecionados.length} cadastros selecionados para ação em lote</strong><small>Organizadores e fornecedores de estrutura técnica</small></span></div><div><button type="button"className="recusar" disabled title="Funcionalidade em desenvolvimento">⊘ Reprovar em lote (em breve)</button><button type="button"className="aprovarLote"disabledtitle="Funcionalidade em desenvolvimento">✥ Aprovar em lote (em breve)</button></div></footer></div>
   )
 }
 
@@ -1010,6 +1269,158 @@ function PerfilOrganizador() {
       <section className="perfilCartao perfilEmpresa"><div className="perfilTituloCartao"><div><h2>Empresa vinculada</h2><p>Informações fiscais e operacionais da organização.</p></div><span className="perfilHomologada">✓ Homologada</span></div><div className="perfilEmpresaDados"><div><small>RAZÃO SOCIAL</small><strong>{perfil.empresa}</strong></div><div><small>CNPJ</small><strong>{perfil.cnpj}</strong></div><div><small>LOCALIZAÇÃO</small><strong>São Paulo — SP</strong></div><div><small>PERFIL DE CONTRATAÇÃO</small><strong>Eventos corporativos</strong></div></div></section>
     </div>
   </div>
+}
+
+function SolicitarAcesso({ setPagina }) {
+  const [perfilSolicitado, setPerfilSolicitado] = useState('organizador')
+  const [justificativa, setJustificativa] = useState('')
+  const [enviando, setEnviando] = useState(false)
+
+  const enviarSolicitacao = async (evento) => {
+    evento.preventDefault()
+    setEnviando(true)
+
+    try {
+      const token = sessionStorage.getItem('token')
+
+      if (!token) {
+        alert('Faça login novamente.')
+        setPagina('login')
+        return
+      }
+
+      const resposta = await fetch(
+        'http://localhost:3001/solicitacoes-acesso',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            perfil_solicitado: perfilSolicitado,
+            justificativa
+          })
+        }
+      )
+
+      const dados = await resposta.json()
+
+      if (!resposta.ok) {
+        alert(dados.erro || 'Erro ao enviar solicitação.')
+        return
+      }
+
+      alert('Solicitação enviada! Aguarde a análise do administrador.')
+      setPagina('participante')
+
+    } catch (erro) {
+      console.error(erro)
+      alert('Não foi possível conectar ao servidor.')
+    } finally {
+      setEnviando(false)
+    }
+  }
+
+  return (
+    <div className="paginaLogin">
+      <div className="cabecalhoLogin">
+        <div className="logo">
+          ▣ <span>TrocaTicket</span>
+        </div>
+      </div>
+
+      <main className="caixaLogin">
+        <h1>Solicitar acesso</h1>
+
+        <p>
+          Escolha o perfil desejado e explique por que
+          deseja utilizá-lo.
+        </p>
+
+        <form onSubmit={enviarSolicitacao}>
+          <label>Perfil solicitado</label>
+
+          <select
+            value={perfilSolicitado}
+            onChange={(e) => setPerfilSolicitado(e.target.value)}
+            required
+          >
+            <option value="organizador">Organizador</option>
+            <option value="fornecedor">Fornecedor</option>
+          </select>
+
+          <label>Justificativa</label>
+
+          <textarea
+            value={justificativa}
+            onChange={(e) => setJustificativa(e.target.value)}
+            placeholder="Explique por que deseja esse acesso..."
+            rows={5}
+            required
+          />
+
+          <button
+            type="submit"
+            className="principal"
+            disabled={enviando}
+          >
+            {enviando ? 'Enviando...' : 'Enviar solicitação →'}
+          </button>
+        </form>
+
+        <button
+          type="button"
+          onClick={() => setPagina('participante')}
+        >
+          ← Voltar
+        </button>
+      </main>
+    </div>
+  )
+}
+
+function PortalParticipante({ setPagina }) {
+  const sair = () => {
+    sessionStorage.removeItem('token')
+    sessionStorage.removeItem('perfil')
+    setPagina('login')
+  }
+
+  return (
+    <div className="paginaLogin">
+      <div className="cabecalhoLogin">
+        <div className="logo">
+          ▣ <span>TrocaTicket</span>
+        </div>
+        <button type="button" onClick={sair}>
+          Sair
+        </button>
+      </div>
+
+      <main className="caixaLogin">
+        <h1>Painel do Participante</h1>
+
+        <p>
+          Bem-vindo ao TrocaTicket!
+        </p>
+
+        <p>
+          Sua conta está ativa como participante.
+          Você pode solicitar acesso como organizador
+          ou fornecedor.
+        </p>
+
+        <button
+          type="button"
+          className="principal"
+          onClick={() => setPagina('solicitar-acesso')}
+        >
+          Solicitar acesso →
+        </button>
+      </main>
+    </div>
+  )
 }
 
 function App() {
@@ -1218,6 +1629,15 @@ alert(
   }
   if (pagina === 'login') {
     return <Login setPagina={setPagina} />
+  }
+  if (pagina === 'cadastro') {
+  return <Cadastro setPagina={setPagina} />
+  }
+  if (pagina === 'participante') {
+  return <PortalParticipante setPagina={setPagina} />
+  }
+  if (pagina === 'solicitar-acesso') {
+  return <SolicitarAcesso setPagina={setPagina} />
   }
   return (
     <Layout

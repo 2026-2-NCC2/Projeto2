@@ -202,7 +202,7 @@ app.post("/login", async (req, res) => {
 });
 
  // Publicar cotação de um evento
-app.post("/cotacoes", autenticar, async (req, res) => {
+app.post("/cotacoes", autenticar, permitirPerfis("organizador"), async (req, res) => {
   const { evento_id, prazo, observacoes, itens } = req.body || {};
 
   if (
@@ -314,7 +314,7 @@ app.post("/cotacoes", autenticar, async (req, res) => {
   }
 });
 
-app.get("/cotacoes", autenticar, async (req, res) => {
+app.get("/cotacoes", autenticar, permitirPerfis("organizador"), async (req, res) => {
   try {
     const [cotacoes] = await db.execute(
       `SELECT
@@ -357,6 +357,54 @@ app.get("/cotacoes", autenticar, async (req, res) => {
 
     return res.status(500).json({
       erro: "Erro interno ao consultar cotações."
+    });
+  }
+});
+
+app.get("/fornecedor/cotacoes", autenticar, permitirPerfis("fornecedor"), async (req, res) => {
+  try {
+    const [cotacoes] = await db.execute(
+      `SELECT
+        c.id,
+        c.evento_id,
+        e.nome AS evento_nome,
+        e.data AS evento_data,
+        e.local AS evento_local,
+        c.prazo,
+        c.modalidade,
+        c.observacoes,
+        c.status,
+        c.criada_em
+      FROM cotacoes c
+      INNER JOIN eventos e ON e.id = c.evento_id
+      WHERE c.status = 'Aberta'
+        AND c.prazo >= CURDATE()
+      ORDER BY c.id DESC`
+    );
+
+    for (const cotacao of cotacoes) {
+      const [itens] = await db.execute(
+        `SELECT
+          id,
+          categoria,
+          descricao,
+          valor_estimado
+        FROM itens_cotacao
+        WHERE cotacao_id = ?
+        ORDER BY id`,
+        [cotacao.id]
+      );
+
+      cotacao.itens = itens;
+    }
+
+    return res.status(200).json(cotacoes);
+
+  } catch (erro) {
+    console.error("Erro ao consultar cotações para fornecedores:", erro);
+
+    return res.status(500).json({
+      erro: "Erro interno ao consultar cotações disponíveis."
     });
   }
 });
@@ -573,7 +621,7 @@ app.get("/eventos/:id", autenticar, async (req, res) => {
 });
 
 
-app.put("/eventos/:id", autenticar, async (req, res) => {
+app.put("/eventos/:id", autenticar, permitirPerfis("organizador"), async (req, res) => {
   try {
     const id = Number(req.params.id);
 
@@ -643,7 +691,7 @@ app.put("/eventos/:id", autenticar, async (req, res) => {
 });
 
 
-app.delete("/eventos/:id", autenticar, async (req, res) => {
+app.delete("/eventos/:id", autenticar, permitirPerfis("organizador"), async (req, res) => {
   try {
     const id = Number(req.params.id);
 
@@ -680,7 +728,6 @@ app.delete("/eventos/:id", autenticar, async (req, res) => {
     });
   }
 });
-
 
 const PORT = process.env.PORT || 3001;
 
@@ -753,12 +800,7 @@ app.post("/solicitacoes-acesso", autenticar, async (req, res) => {
   }
 });
 
-
-app.get(
-  "/solicitacoes-acesso",
-  autenticar,
-  permitirPerfis("admin"),
-  async (req, res) => {
+app.get("/solicitacoes-acesso",autenticar,permitirPerfis("admin"),async (req, res) => {
     try {
       const [solicitacoes] = await db.execute(`
         SELECT
