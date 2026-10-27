@@ -8,56 +8,7 @@ const formatarMoeda = (valor) => {
   }).format(valor)
 }
 
-const EVENTOS_INICIAIS = [
-  {
-    id: 1,
-    nome: 'Festa Universitária',
-    status: 'Ativo',
-    data: '23/08/2026',
-    horario: '22:00',
-    local: 'Espaço Universitário - São Paulo - SP',
-    categoria: 'Social',
-    publico: 800,
-    cotacao: '100%',
-    ticket: 'R$ 45,00',
-  },
-  {
-    id: 2,
-    nome: 'Show Rock Night',
-    status: 'Em planejamento',
-    data: '30/09/2026',
-    horario: '20:00',
-    local: 'Arena Music Hall - São Paulo - SP',
-    categoria: 'Show',
-    publico: 1200,
-    cotacao: '4/6',
-    ticket: 'R$ 85,00',
-  },
-  {
-    id: 3,
-    nome: 'Conferência Anual de Inovação & Tecnologia 2026',
-    status: 'Em planejamento',
-    data: '18/11/2026',
-    horario: '09:00',
-    local: 'Centro de Convenções Rebouças - São Paulo - SP',
-    categoria: 'Corporativo',
-    publico: 600,
-    cotacao: '100%',
-    ticket: 'R$ 75,00',
-  },
-  {
-    id: 4,
-    nome: 'Summit Corporativo Nexus',
-    status: 'Rascunho',
-    data: '10/12/2026',
-    horario: '14:00',
-    local: 'Auditório WTC - São Paulo - SP',
-    categoria: 'Corporativo',
-    publico: 350,
-    cotacao: '2/6',
-    ticket: 'A calcular',
-  },
-]
+
 
 const CUSTOS_PADRAO = [
   { id: 1, categoria: 'Áudio & Som', descricao: 'Som / PA Principal', valor: 8000 },
@@ -283,9 +234,9 @@ function Cadastro({ setPagina }) {
 }
 
 function Login({ setPagina }) {
-  const [perfil, setPerfil] = useState('organizador')
-  const [email, setEmail] = useState('roberto@empresa.com')
-  const [senha, setSenha] = useState('123456')
+  const [perfil, setPerfil] = useState('')
+  const [email, setEmail] = useState('')
+  const [senha, setSenha] = useState('')
   
 const aoAutenticar = async (eventoDisparado) => {
   eventoDisparado.preventDefault()
@@ -713,6 +664,109 @@ function Cotacao({
 }) {
   const [prazo, setPrazo] = useState('')
   const [publicando, setPublicando] = useState(false)
+  const [propostasRecebidas, setPropostasRecebidas] = useState([])
+  const [carregandoPropostas, setCarregandoPropostas] = useState(true)
+  const [erroPropostas, setErroPropostas] = useState('')
+  useEffect(() => {
+  const buscarPropostasRecebidas = async () => {
+    try {
+      setCarregandoPropostas(true)
+      setErroPropostas('')
+
+      const token = sessionStorage.getItem('token')
+
+      const resposta = await fetch(
+        'http://localhost:3001/organizador/propostas',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+
+      const dados = await resposta.json()
+
+      if (!resposta.ok) {
+        throw new Error(dados.erro || 'Erro ao buscar propostas.')
+      }
+
+      const propostasDoEvento = dados.filter(
+        (proposta) => Number(proposta.evento_id) === Number(evento.id)
+      )
+
+      setPropostasRecebidas(propostasDoEvento)
+
+    } catch (erro) {
+      console.error('Erro ao buscar propostas recebidas:', erro)
+      setErroPropostas(erro.message)
+
+    } finally {
+      setCarregandoPropostas(false)
+    }
+  }
+
+  if (evento?.id) {
+    buscarPropostasRecebidas()
+  } else {
+    setPropostasRecebidas([])
+    setCarregandoPropostas(false)
+  }
+}, [evento?.id])
+  const [avaliandoPropostaId, setAvaliandoPropostaId] = useState(null)
+  const avaliarProposta = async (propostaId, novoStatus) => {
+  if (avaliandoPropostaId !== null) return
+
+  const acao = novoStatus === 'Aprovada' ? 'aprovar' : 'recusar'
+
+  const confirmou = window.confirm(
+    `Tem certeza que deseja ${acao} esta proposta?`
+  )
+
+  if (!confirmou) return
+
+  try {
+    setAvaliandoPropostaId(propostaId)
+
+    const token = sessionStorage.getItem('token')
+
+    const resposta = await fetch(
+      `http://localhost:3001/organizador/propostas/${propostaId}/status`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          status: novoStatus
+        })
+      }
+    )
+
+    const dados = await resposta.json()
+
+    if (!resposta.ok) {
+      throw new Error(dados.erro || 'Erro ao avaliar proposta.')
+    }
+
+    setPropostasRecebidas((atual) =>
+      atual.map((proposta) =>
+        proposta.id === propostaId
+          ? { ...proposta, status: novoStatus }
+          : proposta
+      )
+    )
+
+    alert(dados.mensagem)
+
+  } catch (erro) {
+    console.error('Erro ao avaliar proposta:', erro)
+    alert(erro.message)
+
+  } finally {
+    setAvaliandoPropostaId(null)
+  }
+}
   const [observacoes, setObservacoes] = useState(
     'Apresentar proposta comercial completa, incluindo impostos e condições de pagamento.'
   )
@@ -859,6 +913,87 @@ const aoPublicarCotacao = async () => {
           </button>
         </div>
       </div>
+            <section className="cartaoFormulario" style={{ marginTop: '24px' }}>
+        <h2>📩 Propostas recebidas</h2>
+        <p>Propostas enviadas pelos fornecedores para este evento.</p>
+
+        {carregandoPropostas && (
+          <p>Carregando propostas...</p>
+        )}
+
+        {erroPropostas && (
+          <p style={{ color: 'red' }}>{erroPropostas}</p>
+        )}
+
+        {!carregandoPropostas &&
+          !erroPropostas &&
+          propostasRecebidas.length === 0 && (
+            <p>Nenhuma proposta recebida para este evento.</p>
+          )}
+
+        {!carregandoPropostas &&
+          !erroPropostas &&
+          propostasRecebidas.map((proposta) => (
+            <div
+              key={proposta.id}
+              className="cartaoFormulario"
+              style={{ marginTop: '16px' }}
+            >
+              <h3>{proposta.fornecedor_nome}</h3>
+
+              <p>
+                <strong>Evento:</strong> {proposta.evento_nome}
+              </p>
+
+              <p>
+                <strong>Valor:</strong> {formatarMoeda(Number(proposta.valor))}
+              </p>
+
+              <p>
+                <strong>Condições de pagamento:</strong>{' '}
+                {proposta.condicoes_pagamento}
+              </p>
+
+              <p>
+                <strong>Detalhes técnicos:</strong>{' '}
+                {proposta.detalhes_tecnicos}
+              </p>
+
+              <p>
+                <strong>Status:</strong> {proposta.status}
+              </p>
+              {proposta.status === 'Em avaliação' && (
+              <div
+                style={{
+                display: 'flex',
+                gap: '12px',
+                marginTop: '16px'
+              }}
+              >
+              <button
+                type="button"
+                className="principal"
+                onClick={() => avaliarProposta(proposta.id, 'Aprovada')}
+                disabled={avaliandoPropostaId !== null}
+                >
+                  {avaliandoPropostaId === proposta.id
+                  ? 'Processando...'
+                  : '✓ Aprovar proposta'}
+              </button>
+              <button
+                type="button"
+                onClick={() => avaliarProposta(proposta.id, 'Recusada')}
+                disabled={avaliandoPropostaId !== null}
+              >
+                {avaliandoPropostaId === proposta.id
+                ? 'Processando...'
+                : '✕ Recusar proposta'}
+              </button>
+              </div>
+              )}
+            </div>
+          ))}
+      </section>
     </div>
   )
 }
@@ -996,8 +1131,109 @@ function PerfilFornecedor({ perfil, setPerfil, propostas }) {
 
 function PortalFornecedor({pagina,setPagina}) {
  const [busca,setBusca]=useState('')
- const [selecionada,setSelecionada]=useState(OPORTUNIDADES[0])
- const [propostas,setPropostas]=useState([{id:1,evento:'Summit Corporativo Tech 2026',valor:8900,status:'Em avaliação',categoria:'Áudio & Som'}])
+ const [oportunidades, setOportunidades] = useState([])
+  const [carregandoOportunidades, setCarregandoOportunidades] = useState(true)
+  const [erroOportunidades, setErroOportunidades] = useState('')
+  useEffect(() => {
+  const buscarOportunidades = async () => {
+    try {
+      setCarregandoOportunidades(true)
+      setErroOportunidades('')
+
+      const token = sessionStorage.getItem('token')
+
+      const resposta = await fetch(
+        'http://localhost:3001/fornecedor/cotacoes',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+
+      const dados = await resposta.json()
+
+      if (!resposta.ok) {
+        throw new Error(dados.erro || 'Erro ao buscar cotações.')
+      }
+
+      const lista = Array.isArray(dados) ? dados : []
+
+     const oportunidadesFormatadas = lista.map((cotacao) => ({
+       id: cotacao.id,
+       nome: cotacao.evento_nome,
+       categoria: cotacao.itens
+          .map((item) => item.categoria)
+         .join(', '),
+        organizador: 'Organizador do evento',
+       local: cotacao.evento_local,
+       publico: 'Não informado',
+        prazo: cotacao.prazo.slice(0, 10),
+       descricao: cotacao.observacoes || 'Sem observações.',
+        itens: cotacao.itens,
+        status: cotacao.status
+    }))
+
+setOportunidades(oportunidadesFormatadas)
+
+    } catch (erro) {
+      console.error('Erro ao buscar oportunidades:', erro)
+      setErroOportunidades(erro.message)
+    } finally {
+      setCarregandoOportunidades(false)
+    }
+  }
+
+  buscarOportunidades()
+}, [])
+ const [selecionada, setSelecionada] = useState(null)
+ const [propostas, setPropostas] = useState([])
+ const [carregandoPropostas, setCarregandoPropostas] = useState(true)
+ const [erroPropostas, setErroPropostas] = useState('')
+ useEffect(() => {
+  const buscarPropostas = async () => {
+    try {
+      setCarregandoPropostas(true)
+      setErroPropostas('')
+
+      const token = sessionStorage.getItem('token')
+
+      const resposta = await fetch(
+        'http://localhost:3001/fornecedor/propostas',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+
+      const dados = await resposta.json()
+
+      if (!resposta.ok) {
+        throw new Error(dados.erro || 'Erro ao buscar propostas.')
+      }
+
+      const propostasFormatadas = dados.map((proposta) => ({
+        id: proposta.id,
+        evento: proposta.evento_nome,
+        valor: Number(proposta.valor),
+        status: proposta.status,
+        categoria: proposta.categoria || 'Não informada'
+      }))
+
+      setPropostas(propostasFormatadas)
+
+    } catch (erro) {
+      console.error('Erro ao buscar propostas:', erro)
+      setErroPropostas(erro.message)
+
+    } finally {
+      setCarregandoPropostas(false)
+    }
+  }
+
+  buscarPropostas()
+}, [])
  const [valor,setValor]=useState('8900')
  const [condicoes,setCondicoes]=useState('50% na assinatura e 50% após desmontagem')
  const [detalhes,setDetalhes]=useState('Sistema de PA, equipe de operação e montagem inclusos.')
@@ -1005,14 +1241,86 @@ function PortalFornecedor({pagina,setPagina}) {
  const [filtro,setFiltro]=useState('Todas')
  const navegar=(destino)=>setPagina('fornecedor-'+destino)
  const titulo={mural:'Mural de oportunidades',cotacoes:'Minhas cotações',proposta:'Elaborar proposta comercial',enviadas:'Propostas enviadas',contratos:'Contratos ativos',catalogo:'Catálogo e rider',desempenho:'Desempenho',perfil:'Perfil do fornecedor'}[pagina.replace('fornecedor-','')] || 'Portal do Fornecedor'
- const enviar=(e)=>{e.preventDefault();setPropostas(atual=>[{id:Date.now(),evento:selecionada.nome,valor:Number(valor),status:'Em avaliação',categoria:selecionada.categoria},...atual]);navegar('enviadas')}
- const abertas=OPORTUNIDADES.filter(o=>(o.nome+' '+o.categoria+' '+o.local).toLowerCase().includes(busca.toLowerCase()))
+ const enviar = async (e) => {
+  e.preventDefault()
+
+  if (!selecionada) {
+    alert('Selecione uma cotação antes de enviar a proposta.')
+    return
+  }
+
+  try {
+    const token = sessionStorage.getItem('token')
+
+    const resposta = await fetch(
+      'http://localhost:3001/fornecedor/propostas',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          cotacao_id: selecionada.id,
+          valor: Number(valor),
+          condicoes_pagamento: condicoes,
+          detalhes_tecnicos: detalhes
+        })
+      }
+    )
+
+    const dados = await resposta.json()
+
+    if (!resposta.ok) {
+      throw new Error(dados.erro || 'Erro ao enviar proposta.')
+    }
+
+    alert('Proposta enviada com sucesso!')
+
+    setPropostas((atual) => [
+      {
+        id: dados.proposta_id,
+        evento: selecionada.nome,
+        valor: Number(valor),
+        status: 'Em avaliação',
+        categoria: selecionada.categoria
+      },
+      ...atual
+    ])
+
+    navegar('enviadas')
+
+  } catch (erro) {
+    console.error('Erro ao enviar proposta:', erro)
+    alert(erro.message)
+  }
+}
+ const abertas = oportunidades.filter((o) =>
+  (o.nome + ' ' + o.categoria + ' ' + o.local)
+    .toLowerCase()
+    .includes(busca.toLowerCase())
+)
  const menu=[['mural','◈ Mural de oportunidades'],['cotacoes','▣ Minhas cotações'],['enviadas','➤ Propostas enviadas'],['contratos','◇ Contratos ativos'],['catalogo','▤ Catálogo e rider'],['desempenho','▥ Desempenho'],['perfil','◉ Perfil fornecedor']]
  return <div className="portalFornecedor">
   <div className="fornTopo"><div className="logo">▣ <span>TrocaTicket</span><small>PORTAL FORNECEDOR</small></div><span className="fornSelo">● Ambiente seguro · Demonstração</span><span className="fornEmpresa">{perfil.empresa}</span></div>
   <div className="fornCorpo"><aside className="fornMenu"><button className="novo" onClick={()=>navegar('mural')}>⌕ Buscar cotações</button><nav>{menu.map(([id,label])=><button key={id} className={pagina==='fornecedor-'+id?'ativo':''} onClick={()=>navegar(id)}>{label}</button>)}</nav><button className="fornSair" onClick={()=>setPagina('login')}>↪ Sair</button></aside>
   <main className="fornConteudo"><div className="fornTrilha">TrocaTicket Fornecedor › {titulo}</div><div className="fornTitulo"><div><h1>{titulo}</h1><p>Gestão comercial e oportunidades para fornecedores de eventos.</p></div><span className="fornSelo">Fornecedor homologado</span></div>
-  {pagina==='fornecedor-mural' && <><div className="fornHero"><div><h2>{OPORTUNIDADES.length} EVENTOS AGUARDANDO SUA PROPOSTA</h2><p>Encontre demandas compatíveis com seus serviços e envie sua oferta comercial.</p></div><span className="fornSelo">● Oportunidades disponíveis</span></div><div className="fornIndicadores"><div><small>OPORTUNIDADES COMPATÍVEIS</small><strong>{OPORTUNIDADES.length}</strong><span>Demandas abertas</span></div><div><small>PROPOSTAS EM ANÁLISE</small><strong>{propostas.filter(p=>p.status==='Em avaliação').length}</strong><span>Enviadas</span></div><div><small>CONTRATOS FECHADOS</small><strong>{propostas.filter(p=>p.status==='Homologada').length}</strong><span>Homologados</span></div></div><input aria-label="Buscar oportunidades" placeholder="⌕ Buscar eventos, serviços ou cidades..." value={busca} onChange={e=>setBusca(e.target.value)}/><div className="fornLista">{abertas.map(o=><article className="fornCartao" key={o.id}><div className="fornLinha"><span className="tag">#{o.id} · {o.categoria}</span><small>Prazo: {o.prazo.split('-').reverse().join('/')}</small></div><h3>{o.nome}</h3><p>Organizador: {o.organizador}</p><p>⌖ {o.local} · {o.publico} participantes</p><p>{o.descricao}</p><button className="principal" onClick={()=>{setSelecionada(o);setValor('');navegar('proposta')}}>Elaborar proposta →</button></article>)}</div></>}
+  {pagina==='fornecedor-mural' && <><div className="fornHero"><div><h2>{oportunidades.length} EVENTOS AGUARDANDO SUA PROPOSTA</h2><p>Encontre demandas compatíveis com seus serviços e envie sua oferta comercial.</p></div><span className="fornSelo">● Oportunidades disponíveis</span></div><div className="fornIndicadores"><div><small>OPORTUNIDADES COMPATÍVEIS</small><strong>{oportunidades.length}</strong><span>Demandas abertas</span></div><div><small>PROPOSTAS EM ANÁLISE</small><strong>{propostas.filter(p=>p.status==='Em avaliação').length}</strong><span>Enviadas</span></div><div><small>CONTRATOS FECHADOS</small><strong>{propostas.filter(p=>p.status==='Homologada').length}</strong><span>Homologados</span></div></div><input aria-label="Buscar oportunidades" placeholder="⌕ Buscar eventos, serviços ou cidades..." value={busca} onChange={e=>setBusca(e.target.value)}/><div className="fornLista">
+    {carregandoOportunidades && (
+  <p>Carregando oportunidades...</p>
+)}
+
+{erroOportunidades && (
+  <p style={{ color: 'red' }}>
+    {erroOportunidades}
+  </p>
+)}
+
+{!carregandoOportunidades &&
+  !erroOportunidades &&
+  abertas.length === 0 && (
+    <p>Nenhuma cotação disponível no momento.</p>
+  )}{abertas.map(o=><article className="fornCartao" key={o.id}><div className="fornLinha"><span className="tag">#{o.id} · {o.categoria}</span><small>Prazo: {o.prazo.split('-').reverse().join('/')}</small></div><h3>{o.nome}</h3><p>Organizador: {o.organizador}</p><p>⌖ {o.local} · {o.publico} participantes</p><p>{o.descricao}</p><button className="principal" onClick={()=>{setSelecionada(o);setValor('');navegar('proposta')}}>Elaborar proposta →</button></article>)}</div></>}
   {pagina==='fornecedor-proposta' && <><button className="voltar" onClick={()=>navegar('mural')}>← Voltar para oportunidades</button><div className="fornHero"><h2>{selecionada.nome}</h2><p>{selecionada.categoria} · {selecionada.organizador} · {selecionada.publico} participantes</p></div><form className="fornCartao fornForm" onSubmit={enviar}><h2>Parâmetros financeiros e condições</h2><label>Valor global da proposta (R$) *</label><input type="number" min="0.01" step="0.01" value={valor} onChange={e=>setValor(e.target.value)} required/><label>Condições de pagamento *</label><input value={condicoes} onChange={e=>setCondicoes(e.target.value)} required/><label>Detalhamento técnico e rider *</label><textarea rows="5" value={detalhes} onChange={e=>setDetalhes(e.target.value)} required/><label className="fornCheck"><input type="checkbox" required/> Confirmo a disponibilidade e aceito os requisitos da cotação.</label><div className="acoes"><button className="secundario" type="button" onClick={()=>navegar('mural')}>Cancelar</button><button className="principal" type="submit">Enviar proposta ao organizador →</button></div></form></>}
   {(pagina==='fornecedor-enviadas'||pagina==='fornecedor-cotacoes') && <><div className="fornIndicadores"><div><small>PROPOSTAS ENVIADAS</small><strong>{propostas.length}</strong></div><div><small>EM AVALIAÇÃO</small><strong>{propostas.filter(p=>p.status==='Em avaliação').length}</strong></div><div><small>VOLUME PROPOSTO</small><strong>{formatarMoeda(propostas.reduce((s,p)=>s+p.valor,0))}</strong></div></div><div className="fornFiltros">{['Todas','Em avaliação','Homologada'].map(f=><button key={f} className={filtro===f?'selecionado':''} onClick={()=>setFiltro(f)}>{f}</button>)}</div><div className="fornCartao"><h2>Histórico de propostas</h2><div className="fornTabela"><div className="fornTabelaCab"><span>Evento</span><span>Categoria</span><span>Valor</span><span>Status</span></div>{propostas.filter(p=>filtro==='Todas'||p.status===filtro).map(p=><div className="fornTabelaLinha" key={p.id}><strong>{p.evento}</strong><span>{p.categoria}</span><strong>{formatarMoeda(p.valor)}</strong><span className="tag">{p.status}</span></div>)}</div></div></>}
   {pagina==='fornecedor-contratos' && <div className="fornCartao"><h2>Contratos ativos</h2><p>Os contratos homologados aparecerão aqui. Ainda não há contratos confirmados nos dados de demonstração.</p></div>}
@@ -1380,52 +1688,336 @@ function SolicitarAcesso({ setPagina }) {
   )
 }
 
+
 function PortalParticipante({ setPagina }) {
+  const [eventosDisponiveis, setEventosDisponiveis] = useState([])
+  const [carregandoEventos, setCarregandoEventos] = useState(true)
+  const [erroEventos, setErroEventos] = useState('')
+  const [abaParticipante, setAbaParticipante] = useState('inicio')
+  const [busca, setBusca] = useState('')
+
+  useEffect(() => {
+    const carregarEventos = async () => {
+      try {
+        setCarregandoEventos(true)
+        setErroEventos('')
+
+        const token = sessionStorage.getItem('token')
+
+        const resposta = await fetch(
+          'http://localhost:3001/participante/eventos',
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        )
+
+        if (!resposta.ok) {
+          throw new Error('Não foi possível carregar os eventos.')
+        }
+
+        const dados = await resposta.json()
+        setEventosDisponiveis(dados)
+      } catch (erro) {
+        setErroEventos(erro.message)
+      } finally {
+        setCarregandoEventos(false)
+      }
+    }
+
+    carregarEventos()
+  }, [])
+
   const sair = () => {
     sessionStorage.removeItem('token')
     sessionStorage.removeItem('perfil')
+    sessionStorage.removeItem('paginaAtual')
     setPagina('login')
   }
 
+  const menuParticipante = [
+    ['inicio', '⌂ Início'],
+    ['eventos', '▦ Explorar eventos'],
+    ['ingressos', '▣ Meus ingressos'],
+    ['perfil', '♙ Meu perfil']
+  ]
+
+  const titulos = {
+    inicio: 'Painel do Participante',
+    eventos: 'Explorar eventos',
+    ingressos: 'Meus ingressos',
+    perfil: 'Meu perfil'
+  }
+
+  const eventosFiltrados = eventosDisponiveis.filter((evento) => {
+    const texto = [
+      evento.nome,
+      evento.local,
+      evento.categoria
+    ].join(' ').toLowerCase()
+
+    return texto.includes(busca.toLowerCase())
+  })
+
+  const listaEventos = (
+    <>
+      {carregandoEventos && <p>Carregando eventos...</p>}
+
+      {erroEventos && (
+        <p style={{ color: 'red' }}>{erroEventos}</p>
+      )}
+
+      {!carregandoEventos &&
+        !erroEventos &&
+        eventosFiltrados.length === 0 && (
+          <p>Nenhum evento encontrado.</p>
+        )}
+
+      {!carregandoEventos &&
+        !erroEventos &&
+        eventosFiltrados.map((evento) => (
+          <article className="fornCartao" key={evento.id}>
+            <span className="tag">
+              {evento.categoria || 'Evento'}
+            </span>
+
+            <h3>{evento.nome}</h3>
+
+            <p>
+              <strong>📅 Data:</strong>{' '}
+              {evento.data
+                ? new Date(evento.data).toLocaleDateString(
+                    'pt-BR',
+                    { timeZone: 'UTC' }
+                  )
+                : 'Não informada'}
+            </p>
+
+            <p>
+              <strong>🕒 Horário:</strong>{' '}
+              {evento.horario || 'Não informado'}
+            </p>
+
+            <p>
+              <strong>📍 Local:</strong>{' '}
+              {evento.local || 'Não informado'}
+            </p>
+
+            <p>
+              <strong>👥 Público:</strong>{' '}
+              {evento.publico || 'Não informado'}
+            </p>
+
+            <p>
+              <strong>Status:</strong> {evento.status}
+            </p>
+
+            {evento.descricao && <p>{evento.descricao}</p>}
+          </article>
+        ))}
+    </>
+  )
+
   return (
-    <div className="paginaLogin">
-      <div className="cabecalhoLogin">
+    <div className="portalFornecedor">
+      <div className="fornTopo">
         <div className="logo">
           ▣ <span>TrocaTicket</span>
+          <small>PORTAL PARTICIPANTE</small>
         </div>
-        <button type="button" onClick={sair}>
-          Sair
-        </button>
+
+        <span className="fornSelo">
+          ● Área do participante
+        </span>
       </div>
 
-      <main className="caixaLogin">
-        <h1>Painel do Participante</h1>
+      <div className="fornCorpo">
+        <aside className="fornMenu">
+          <button
+            type="button"
+            className="novo"
+            onClick={() => setAbaParticipante('eventos')}
+          >
+            ⌕ Buscar eventos
+          </button>
 
-        <p>
-          Bem-vindo ao TrocaTicket!
-        </p>
+          <nav>
+            {menuParticipante.map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                className={
+                  abaParticipante === id ? 'ativo' : ''
+                }
+                onClick={() => setAbaParticipante(id)}
+              >
+                {label}
+              </button>
+            ))}
+          </nav>
 
-        <p>
-          Sua conta está ativa como participante.
-          Você pode solicitar acesso como organizador
-          ou fornecedor.
-        </p>
+          <button
+            type="button"
+            onClick={() => setPagina('solicitar-acesso')}
+          >
+            ♧ Solicitar acesso
+          </button>
 
-        <button
-          type="button"
-          className="principal"
-          onClick={() => setPagina('solicitar-acesso')}
-        >
-          Solicitar acesso →
-        </button>
-      </main>
+          <button
+            type="button"
+            className="fornSair"
+            onClick={sair}
+          >
+            ↪ Sair
+          </button>
+        </aside>
+
+        <main className="fornConteudo">
+          <div className="fornTrilha">
+            TrocaTicket Participante › {titulos[abaParticipante]}
+          </div>
+
+          <div className="fornTitulo">
+            <div>
+              <h1>{titulos[abaParticipante]}</h1>
+              <p>
+                Descubra eventos e acompanhe sua participação
+                no TrocaTicket.
+              </p>
+            </div>
+          </div>
+
+          {abaParticipante === 'inicio' && (
+            <>
+              <div className="fornHero">
+                <div>
+                  <h2>Bem-vindo ao TrocaTicket!</h2>
+                  <p>
+                    Explore eventos e encontre novas experiências.
+                  </p>
+                </div>
+              </div>
+
+              <div className="fornIndicadores">
+                <div>
+                  <small>EVENTOS CADASTRADOS</small>
+                  <strong>
+                    {carregandoEventos
+                      ? '...'
+                      : erroEventos
+                        ? '—'
+                        : eventosDisponiveis.length}
+                  </strong>
+                  <span>Na plataforma</span>
+                </div>
+
+                <div>
+                  <small>SEU PERFIL</small>
+                  <strong>Ativo</strong>
+                  <span>Participante</span>
+                </div>
+              </div>
+
+              <div className="fornCartao">
+                <h2>Encontre seu próximo evento</h2>
+                <p>
+                  Confira os eventos cadastrados na plataforma.
+                </p>
+
+                <button
+                  type="button"
+                  className="principal"
+                  onClick={() => setAbaParticipante('eventos')}
+                >
+                  Explorar eventos →
+                </button>
+              </div>
+            </>
+          )}
+
+          {abaParticipante === 'eventos' && (
+            <>
+              <div className="fornHero">
+                <div>
+                  <h2>🎟️ Eventos disponíveis para consulta</h2>
+                  <p>
+                    Conheça os eventos cadastrados no TrocaTicket.
+                  </p>
+                </div>
+              </div>
+
+              <input
+                aria-label="Buscar eventos"
+                placeholder="⌕ Buscar por nome, categoria ou local..."
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+              />
+
+              <div
+                className="fornLista"
+                style={{ marginTop: '20px' }}
+              >
+                {listaEventos}
+              </div>
+            </>
+          )}
+
+          {abaParticipante === 'ingressos' && (
+            <div className="fornCartao">
+              <h2>🎫 Meus ingressos</h2>
+              <p>
+                Aqui você poderá acompanhar suas inscrições
+                e seus ingressos.
+              </p>
+              <p>
+                A funcionalidade de inscrição será conectada
+                ao banco de dados na próxima etapa.
+              </p>
+            </div>
+          )}
+
+          {abaParticipante === 'perfil' && (
+            <div className="fornCartao">
+              <h2>👤 Meu perfil</h2>
+
+              <p>
+                Sua conta está ativa como participante.
+              </p>
+
+              <p>
+                Você também pode solicitar acesso como
+                organizador ou fornecedor.
+              </p>
+
+              <button
+                type="button"
+                className="principal"
+                onClick={() => setPagina('solicitar-acesso')}
+              >
+                Solicitar acesso →
+              </button>
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   )
 }
 
 function App() {
-  const [pagina, setPagina] = useState('login')
+  const [pagina, setPagina] = useState(() => {
+  const token = sessionStorage.getItem('token')
+  const paginaSalva = sessionStorage.getItem('paginaAtual')
+
+  return token && paginaSalva ? paginaSalva : 'login'
+})
   const [eventos, setEventos] = useState([])
+  useEffect(() => {
+  if (pagina !== 'login') {
+    sessionStorage.setItem('paginaAtual', pagina)
+  }
+  }, [pagina])
   
   useEffect(() => {
   if (pagina !== 'eventos') return

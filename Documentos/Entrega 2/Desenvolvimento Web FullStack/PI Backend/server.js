@@ -44,6 +44,35 @@ app.get("/eventos", autenticar, async (req, res) => {
   }
 });
 
+app.get("/participante/eventos", autenticar, permitirPerfis("participante"), async (req, res) => {
+    try {
+      const [eventos] = await db.execute(
+        `SELECT
+          id,
+          nome,
+          data,
+          horario,
+          local,
+          categoria,
+          publico,
+          descricao,
+          status
+        FROM eventos
+        ORDER BY data ASC, id ASC`
+      );
+
+      return res.status(200).json(eventos);
+
+    } catch (erro) {
+      console.error("Erro ao listar eventos para participantes:", erro);
+
+      return res.status(500).json({
+        erro: "Erro interno ao listar eventos disponíveis."
+      });
+    }
+  }
+);
+
 
 app.get("/usuarios", autenticar, async (req, res) => {
   try {
@@ -409,6 +438,205 @@ app.get("/fornecedor/cotacoes", autenticar, permitirPerfis("fornecedor"), async 
   }
 });
 
+app.post("/fornecedor/propostas", autenticar, permitirPerfis("fornecedor"), async (req, res) => {
+    try {
+      const {
+        cotacao_id,
+        valor,
+        condicoes_pagamento,
+        detalhes_tecnicos
+      } = req.body;
+
+      const valorNumerico = Number(valor);
+
+      if (
+        !Number.isInteger(Number(cotacao_id)) ||
+        Number(cotacao_id) <= 0 ||
+        !Number.isFinite(valorNumerico) ||
+        valorNumerico <= 0 ||
+        typeof condicoes_pagamento !== "string" ||
+        !condicoes_pagamento.trim() ||
+        typeof detalhes_tecnicos !== "string" ||
+        !detalhes_tecnicos.trim()
+      ) {
+        return res.status(400).json({
+          erro: "Preencha todos os campos corretamente."
+        });
+      }
+
+      const [cotacoes] = await db.query(
+        `SELECT id
+         FROM cotacoes
+         WHERE id = ?
+           AND status = 'Aberta'
+           AND prazo >= CURDATE()`,
+        [cotacao_id]
+      );
+
+      if (cotacoes.length === 0) {
+        return res.status(404).json({
+          erro: "Cotação não encontrada, encerrada ou com prazo expirado."
+        });
+      }
+
+      const [resultado] = await db.query(
+        `INSERT INTO propostas
+          (cotacao_id, fornecedor_id, valor,
+           condicoes_pagamento, detalhes_tecnicos)
+         VALUES (?, ?, ?, ?, ?)`,
+        [
+          cotacao_id,
+          req.usuario.id,
+          valorNumerico,
+          condicoes_pagamento.trim(),
+          detalhes_tecnicos.trim()
+        ]
+      );
+
+      return res.status(201).json({
+        mensagem: "Proposta enviada com sucesso!",
+        proposta_id: resultado.insertId
+      });
+
+    } catch (erro) {
+      console.error("Erro ao enviar proposta:", erro);
+
+      return res.status(500).json({
+        erro: "Erro interno ao enviar proposta."
+      });
+    }
+  }
+);
+
+app.get("/fornecedor/propostas", autenticar, permitirPerfis("fornecedor"),  async (req, res) => {
+    try {
+      const [propostas] = await db.query(
+        `SELECT
+          p.id,
+          p.cotacao_id,
+          p.valor,
+          p.condicoes_pagamento,
+          p.detalhes_tecnicos,
+          p.status,
+          p.criada_em,
+          e.nome AS evento_nome,
+          GROUP_CONCAT(DISTINCT i.categoria SEPARATOR ', ') AS categoria
+        FROM propostas p
+        INNER JOIN cotacoes c ON c.id = p.cotacao_id
+        INNER JOIN eventos e ON e.id = c.evento_id
+        LEFT JOIN itens_cotacao i ON i.cotacao_id = c.id
+        WHERE p.fornecedor_id = ?
+        GROUP BY
+          p.id,
+          p.cotacao_id,
+          p.valor,
+          p.condicoes_pagamento,
+          p.detalhes_tecnicos,
+          p.status,
+          p.criada_em,
+          e.nome
+        ORDER BY p.criada_em DESC, p.id DESC`,
+        [req.usuario.id]
+      );
+
+      return res.status(200).json(propostas);
+
+    } catch (erro) {
+      console.error("Erro ao buscar propostas:", erro);
+
+      return res.status(500).json({
+        erro: "Erro interno ao buscar propostas."
+      });
+    }
+  }
+);
+
+app.get("/organizador/propostas", autenticar, permitirPerfis("organizador"), async (req, res) => {
+    try {
+      const [propostas] = await db.query(
+        `SELECT
+          p.id,
+          p.cotacao_id,
+          p.fornecedor_id,
+          p.valor,
+          p.condicoes_pagamento,
+          p.detalhes_tecnicos,
+          p.status,
+          p.criada_em,
+          e.id AS evento_id,
+          e.nome AS evento_nome,
+          u.nome AS fornecedor_nome
+        FROM propostas p
+        INNER JOIN cotacoes c ON c.id = p.cotacao_id
+        INNER JOIN eventos e ON e.id = c.evento_id
+        INNER JOIN usuarios u ON u.id = p.fornecedor_id
+        WHERE e.usuario_id = ?
+        ORDER BY p.criada_em DESC, p.id DESC`,
+        [req.usuario.id]
+      );
+
+      return res.status(200).json(propostas);
+
+    } catch (erro) {
+      console.error("Erro ao buscar propostas recebidas:", erro);
+
+      return res.status(500).json({
+        erro: "Erro interno ao buscar propostas recebidas."
+      });
+    }
+  }
+);
+
+app.patch("/organizador/propostas/:id/status", autenticar, permitirPerfis("organizador"), async (req, res) => {
+    try {
+      const propostaId = Number(req.params.id);
+      const { status } = req.body;
+
+      if (!Number.isInteger(propostaId) || propostaId <= 0) {
+        return res.status(400).json({
+          erro: "ID da proposta inválido."
+        });
+      }
+
+      if (!["Aprovada", "Recusada"].includes(status)) {
+        return res.status(400).json({
+          erro: "O status deve ser Aprovada ou Recusada."
+        });
+      }
+
+      const [resultado] = await db.query(
+        `UPDATE propostas p
+         INNER JOIN cotacoes c ON c.id = p.cotacao_id
+         INNER JOIN eventos e ON e.id = c.evento_id
+         SET p.status = ?
+         WHERE p.id = ?
+           AND e.usuario_id = ?
+           AND p.status = 'Em avaliação'`,
+        [status, propostaId, req.usuario.id]
+      );
+
+      if (resultado.affectedRows === 0) {
+        return res.status(404).json({
+          erro: "Proposta não encontrada, sem permissão ou já avaliada."
+        });
+      }
+
+      return res.status(200).json({
+        mensagem: `Proposta ${status.toLowerCase()} com sucesso!`,
+        proposta_id: propostaId,
+        status
+      });
+
+    } catch (erro) {
+      console.error("Erro ao avaliar proposta:", erro);
+
+      return res.status(500).json({
+        erro: "Erro interno ao avaliar proposta."
+      });
+    }
+  }
+);
+
 // Middleware de autenticação
 async function autenticar(req, res, next) {
   const authorization = req.headers.authorization;
@@ -585,6 +813,50 @@ app.post("/eventos", autenticar, permitirPerfis("organizador"),async (req, res) 
     });
   }
 });
+
+app.patch(
+  "/eventos/:id/publicar",
+  autenticar,
+  permitirPerfis("organizador"),
+  async (req, res) => {
+    try {
+      const eventoId = Number(req.params.id);
+
+      if (!Number.isInteger(eventoId) || eventoId <= 0) {
+        return res.status(400).json({
+          erro: "ID do evento inválido."
+        });
+      }
+
+      const [resultado] = await db.execute(
+        `UPDATE eventos
+         SET status = 'Ativo'
+         WHERE id = ?
+           AND usuario_id = ?
+           AND status = 'Em planejamento'`,
+        [eventoId, req.usuario.id]
+      );
+
+      if (resultado.affectedRows === 0) {
+        return res.status(404).json({
+          erro: "Evento não encontrado, não pertence a você ou não está em planejamento."
+        });
+      }
+
+      return res.status(200).json({
+        mensagem: "Evento publicado com sucesso!",
+        status: "Ativo"
+      });
+
+    } catch (erro) {
+      console.error("Erro ao publicar evento:", erro);
+
+      return res.status(500).json({
+        erro: "Erro interno ao publicar evento."
+      });
+    }
+  }
+);
 
 // Listar eventos do usuário
 app.get("/eventos/:id", autenticar, async (req, res) => {
