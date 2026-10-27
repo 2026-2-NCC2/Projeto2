@@ -616,3 +616,43 @@ textarea:focus {
 @media(max-width:700px){.perfilCabecalho{flex-direction:column;gap:12px}.perfilResumo{align-items:flex-start;flex-wrap:wrap}.perfilResumoNumeros{width:100%;border-top:1px solid rgba(255,255,255,.2);padding-top:12px}.perfilResumoNumeros>div{flex:1;min-width:0;padding:4px 8px}.perfilResumoNumeros>div:first-child{border-left:0}.perfilCampos,.perfilEmpresaDados{grid-template-columns:1fr}.perfilCampoInteiro{grid-column:auto}.perfilTituloCartao{flex-direction:column}.perfilPagina{min-width:0}}
 .perfilFornecedorPagina{max-width:1180px}.perfilResumoFornecedor{background:linear-gradient(135deg,#2431a8,#4335cd)}.perfilFornecedorPagina .perfilResumoNumeros>div:last-child{min-width:150px}.perfilFornecedorPagina .perfilResumoNumeros>div:last-child strong{font-size:16px;margin-top:3px}.perfilFornecedorPagina .perfilEditar{color:#3427b8}.perfilFornecedorPagina .perfilCartao{box-shadow:0 2px 9px rgba(27,32,71,.035)}
 @media(max-width:700px){.perfilFornecedorPagina .perfilResumoNumeros>div:last-child{min-width:0}.perfilFornecedorPagina .perfilResumoNumeros>div:last-child strong{font-size:13px}}
+
+/* Tabela de eventos do administrador */
+
+.adminTabelaEventos {
+  width: 100%;
+  margin-top: 24px;
+  overflow-x: auto;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.adminTabelaEventos table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.adminTabelaEventos th {
+  padding: 16px 20px;
+  background: #f5f6ff;
+  color: #4440a0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.adminTabelaEventos td {
+  padding: 16px 20px;
+  border-top: 1px solid #edf0f5;
+  color: #334155;
+  font-size: 14px;
+}
+
+.adminTabelaEventos tbody tr:hover {
+  background: #f8f9ff;
+}
+
+.adminTabelaEventos tbody tr {
+  transition: background 0.2s ease;
+}

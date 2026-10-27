@@ -44,6 +44,29 @@ app.get("/eventos", autenticar, async (req, res) => {
   }
 });
 
+// Listar todos os eventos - somente administrador
+app.get("/admin/eventos", autenticar, permitirPerfis("admin"), async (req, res) => {
+    try {
+      const [eventos] = await db.execute(
+        `SELECT id, nome, data, horario, local,
+                categoria, publico, descricao,
+                status, usuario_id
+         FROM eventos
+         ORDER BY id DESC`
+      );
+
+      return res.status(200).json(eventos);
+
+    } catch (erro) {
+      console.error(erro);
+
+      return res.status(500).json({
+        erro: "Erro interno ao listar eventos do administrador."
+      });
+    }
+  }
+);
+
 app.get("/participante/eventos", autenticar, permitirPerfis("participante"), async (req, res) => {
     try {
       const [eventos] = await db.execute(
