@@ -47,18 +47,10 @@ app.get("/eventos", autenticar, async (req, res) => {
 app.get("/participante/eventos", autenticar, permitirPerfis("participante"), async (req, res) => {
     try {
       const [eventos] = await db.execute(
-        `SELECT
-          id,
-          nome,
-          data,
-          horario,
-          local,
-          categoria,
-          publico,
-          descricao,
-          status
-        FROM eventos
-        ORDER BY data ASC, id ASC`
+        `SELECT id, nome, data, horario, local, categoria, publico, descricao, status
+         FROM eventos
+         WHERE status = 'Ativo'
+         ORDER BY data ASC, id ASC`
       );
 
       return res.status(200).json(eventos);
@@ -73,8 +65,105 @@ app.get("/participante/eventos", autenticar, permitirPerfis("participante"), asy
   }
 );
 
+app.post("/participante/inscricoes", autenticar, permitirPerfis("participante"), async (req, res) => {
+    try {
+      const eventoId = Number(req.body?.evento_id);
+      const usuarioId = req.usuario.id;
 
-app.get("/usuarios", autenticar, async (req, res) => {
+      if (!Number.isInteger(eventoId) || eventoId <= 0) {
+        return res.status(400).json({
+          erro: "ID do evento inválido."
+        });
+      }
+
+      const [eventos] = await db.execute(
+        "SELECT id FROM eventos WHERE id = ? AND status = 'Ativo'",
+        [eventoId]
+      );
+
+      if (eventos.length === 0) {
+        return res.status(404).json({
+          erro: "Evento não encontrado ou não publicado."
+        });
+      }
+
+      const [inscricoes] = await db.execute(
+        "SELECT id FROM inscricoes WHERE usuario_id = ? AND evento_id = ?",
+        [usuarioId, eventoId]
+      );
+
+      if (inscricoes.length > 0) {
+        return res.status(409).json({
+          erro: "Você já está inscrito neste evento."
+        });
+      }
+
+      const [resultado] = await db.execute(
+        "INSERT INTO inscricoes (usuario_id, evento_id) VALUES (?, ?)",
+        [usuarioId, eventoId]
+      );
+
+      return res.status(201).json({
+        mensagem: "Inscrição realizada com sucesso!",
+        inscricao: {
+          id: resultado.insertId,
+          usuario_id: usuarioId,
+          evento_id: eventoId,
+          status: "Confirmada"
+        }
+      });
+
+    } catch (erro) {
+      if (erro.code === "ER_DUP_ENTRY") {
+        return res.status(409).json({
+          erro: "Você já está inscrito neste evento."
+        });
+      }
+
+      console.error("Erro ao realizar inscrição:", erro);
+
+      return res.status(500).json({
+        erro: "Erro interno ao realizar inscrição."
+      });
+    }
+  }
+);
+
+app.get("/participante/inscricoes", autenticar, permitirPerfis("participante"), async (req, res) => {
+    try {
+      const usuarioId = req.usuario.id;
+
+      const [inscricoes] = await db.execute(
+        `SELECT
+          i.id,
+          i.evento_id,
+          i.status,
+          i.data_inscricao,
+          e.nome AS evento_nome,
+          e.data AS evento_data,
+          e.horario AS evento_horario,
+          e.local AS evento_local,
+          e.categoria AS evento_categoria
+        FROM inscricoes i
+        INNER JOIN eventos e ON i.evento_id = e.id
+        WHERE i.usuario_id = ?
+        ORDER BY i.data_inscricao DESC`,
+        [usuarioId]
+      );
+
+      return res.status(200).json(inscricoes);
+
+    } catch (erro) {
+      console.error("Erro ao buscar inscrições:", erro);
+
+      return res.status(500).json({
+        erro: "Erro interno ao buscar inscrições."
+      });
+    }
+  }
+);
+
+app.get('/usuarios', autenticar, permitirPerfis('admin'), async (req, res) => {
   try {
     const [usuarios] = await db.execute(
       "SELECT id, nome, email FROM usuarios ORDER BY id DESC"
@@ -814,11 +903,7 @@ app.post("/eventos", autenticar, permitirPerfis("organizador"),async (req, res) 
   }
 });
 
-app.patch(
-  "/eventos/:id/publicar",
-  autenticar,
-  permitirPerfis("organizador"),
-  async (req, res) => {
+app.patch("/eventos/:id/publicar", autenticar, permitirPerfis("organizador"), async (req, res) => {
     try {
       const eventoId = Number(req.params.id);
 
@@ -1001,8 +1086,6 @@ app.delete("/eventos/:id", autenticar, permitirPerfis("organizador"), async (req
   }
 });
 
-const PORT = process.env.PORT || 3001;
-
 if (!process.env.JWT_SECRET ||
     process.env.JWT_SECRET.length < 32) {
   throw new Error("Configure um JWT_SECRET seguro no .env");
@@ -1102,11 +1185,7 @@ app.get("/solicitacoes-acesso",autenticar,permitirPerfis("admin"),async (req, re
 );
 
 
-app.patch(
-  "/solicitacoes-acesso/:id",
-  autenticar,
-  permitirPerfis("admin"),
-  async (req, res) => {
+app.patch("/solicitacoes-acesso/:id", autenticar, permitirPerfis("admin"), async (req, res) => {
     let conexao;
 
     try {
@@ -1194,6 +1273,8 @@ app.patch(
   }
 );
 
+const PORT = process.env.PORT || 3001
+
 app.listen(PORT, () => {
-  console.log("Servidor rodando na porta " + PORT);
-});
+  console.log(`Servidor rodando na porta ${PORT}`)
+})

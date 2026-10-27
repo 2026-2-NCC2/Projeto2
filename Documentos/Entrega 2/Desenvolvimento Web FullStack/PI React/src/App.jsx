@@ -347,7 +347,7 @@ if (perfilUsuario === 'admin') {
   )
 }
 
-function Eventos({eventos, setPagina, aoSelecionarEvento, aoCriarNovoEvento, aoExcluirEvento}) {
+function Eventos({eventos, setPagina, aoSelecionarEvento, aoCriarNovoEvento, aoExcluirEvento, aoPublicarEvento}) {
   const [termoBusca, setTermoBusca] = useState('')
   const [filtroStatus, setFiltroStatus] = useState('Todos')
   const eventosFiltrados = useMemo(() => {
@@ -458,6 +458,22 @@ function Eventos({eventos, setPagina, aoSelecionarEvento, aoCriarNovoEvento, aoE
             >
             Excluir
             </button>
+              {evento.status === 'Em planejamento' && (
+              <button
+    type="button"
+    onClick={() => aoPublicarEvento(evento)}
+    style={{
+      backgroundColor: '#198754',
+      color: 'white',
+      border: 'none',
+      borderRadius: '6px',
+      padding: '8px 12px',
+      cursor: 'pointer'
+    }}
+  >
+    Publicar
+  </button>
+              )}
               <button
                 className="seta"
                 title="Acessar cotações e custos deste evento"
@@ -1691,11 +1707,55 @@ function SolicitarAcesso({ setPagina }) {
 
 function PortalParticipante({ setPagina }) {
   const [eventosDisponiveis, setEventosDisponiveis] = useState([])
-  const [carregandoEventos, setCarregandoEventos] = useState(true)
-  const [erroEventos, setErroEventos] = useState('')
+  const [meusIngressos, setMeusIngressos] = useState([])
+  const [carregandoIngressos, setCarregandoIngressos] = useState(false)
+  const [erroIngressos, setErroIngressos] = useState('')
   const [abaParticipante, setAbaParticipante] = useState('inicio')
   const [busca, setBusca] = useState('')
+  const idsEventosInscritos = new Set(
+  meusIngressos.map((ingresso) => Number(ingresso.evento_id))
+  )
+  const [eventoSelecionado, setEventoSelecionado] = useState(null)
+  const [carregandoEventos, setCarregandoEventos] = useState(true)
+  const [erroEventos, setErroEventos] = useState('')
+  
+  useEffect(() => {
+  if (abaParticipante !== 'ingressos' && abaParticipante !== 'eventos') return
 
+  const buscarIngressos = async () => {
+    setCarregandoIngressos(true)
+    setErroIngressos('')
+
+    try {
+      const token = sessionStorage.getItem('token')
+
+      const resposta = await fetch(
+        'http://localhost:3001/participante/inscricoes',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+
+      if (!resposta.ok) {
+        throw new Error('Não foi possível carregar seus ingressos.')
+      }
+
+      const dados = await resposta.json()
+      setMeusIngressos(dados)
+
+    } catch (erro) {
+      console.error('Erro ao buscar ingressos:', erro)
+      setErroIngressos(erro.message)
+    } finally {
+      setCarregandoIngressos(false)
+    }
+  }
+
+  buscarIngressos()
+}, [abaParticipante])
+ 
   useEffect(() => {
     const carregarEventos = async () => {
       try {
@@ -1736,6 +1796,58 @@ function PortalParticipante({ setPagina }) {
     setPagina('login')
   }
 
+const [inscrevendoEventoId, setInscrevendoEventoId] = useState(null)
+
+const aoInscreverEvento = async (evento) => {
+  const confirmado = window.confirm(
+    `Deseja se inscrever no evento "${evento.nome}"?`
+  )
+
+  if (!confirmado) return
+
+  setInscrevendoEventoId(evento.id)
+
+  try {
+    const token = sessionStorage.getItem('token')
+
+    if (!token) {
+      alert('Sua sessão expirou. Faça login novamente.')
+      setPagina('login')
+      return
+    }
+
+    const resposta = await fetch(
+      'http://localhost:3001/participante/inscricoes',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          evento_id: evento.id
+        })
+      }
+    )
+
+    const dados = await resposta.json()
+
+    if (!resposta.ok) {
+      alert(dados.erro || 'Não foi possível realizar a inscrição.')
+      return
+    }
+
+    alert('Inscrição realizada com sucesso!')
+
+    setAbaParticipante('ingressos')
+  } catch (erro) {
+    console.error('Erro ao realizar inscrição:', erro)
+    alert('Não foi possível conectar ao servidor.')
+  } finally {
+    setInscrevendoEventoId(null)
+  }
+}
+  
   const menuParticipante = [
     ['inicio', '⌂ Início'],
     ['eventos', '▦ Explorar eventos'],
@@ -1814,6 +1926,56 @@ function PortalParticipante({ setPagina }) {
             </p>
 
             {evento.descricao && <p>{evento.descricao}</p>}
+            
+            <button
+  type="button"
+  onClick={() => {
+    setEventoSelecionado(evento)
+    setAbaParticipante('detalhes')
+  }}
+  style={{
+    backgroundColor: 'white',
+    color: '#3528b8',
+    border: '1px solid #3528b8',
+    borderRadius: '6px',
+    padding: '10px 18px',
+    cursor: 'pointer',
+    marginTop: '12px',
+    marginRight: '10px'
+  }}
+>
+  🔎 Ver detalhes
+</button>
+
+            <button
+  type="button"
+  disabled={
+    idsEventosInscritos.has(Number(evento.id)) ||
+    inscrevendoEventoId !== null
+  }
+  onClick={() => aoInscreverEvento(evento)}
+  style={{
+    backgroundColor: idsEventosInscritos.has(Number(evento.id))
+      ? '#6c757d'
+      : '#3528b8',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    padding: '10px 18px',
+    cursor: idsEventosInscritos.has(Number(evento.id))
+      ? 'not-allowed'
+      : inscrevendoEventoId !== null
+        ? 'wait'
+        : 'pointer',
+    marginTop: '12px'
+  }}
+>
+  {idsEventosInscritos.has(Number(evento.id))
+    ? '✓ Já inscrito'
+    : inscrevendoEventoId === evento.id
+      ? 'Realizando inscrição...'
+      : '🎟️ Inscrever-se'}
+</button>
           </article>
         ))}
     </>
@@ -1963,18 +2125,130 @@ function PortalParticipante({ setPagina }) {
             </>
           )}
 
+          {abaParticipante === 'detalhes' && eventoSelecionado && (
+  <section className="fornCartao">
+    <button
+      type="button"
+      onClick={() => setAbaParticipante('eventos')}
+      style={{ marginBottom: '20px', cursor: 'pointer' }}
+    >
+      ← Voltar aos eventos
+    </button>
+
+    <span className="tag">
+      {eventoSelecionado.categoria || 'Evento'}
+    </span>
+
+    <h2>{eventoSelecionado.nome}</h2>
+
+    <p>
+      <strong>📅 Data:</strong>{' '}
+      {eventoSelecionado.data
+        ? new Date(eventoSelecionado.data).toLocaleDateString('pt-BR', {
+            timeZone: 'UTC'
+          })
+        : 'Não informada'}
+    </p>
+
+    <p>
+      <strong>🕒 Horário:</strong>{' '}
+      {eventoSelecionado.horario || 'Não informado'}
+    </p>
+
+    <p>
+      <strong>📍 Local:</strong>{' '}
+      {eventoSelecionado.local || 'Não informado'}
+    </p>
+
+    <p>
+      <strong>👥 Público:</strong>{' '}
+      {eventoSelecionado.publico || 'Não informado'}
+    </p>
+
+    <p>
+      <strong>Status:</strong> {eventoSelecionado.status}
+    </p>
+
+    <h3>Sobre o evento</h3>
+
+    <p>
+      {eventoSelecionado.descricao || 'Descrição não informada.'}
+    </p>
+    <button
+  type="button"
+  disabled={
+    idsEventosInscritos.has(Number(eventoSelecionado.id)) ||
+    inscrevendoEventoId !== null
+  }
+  onClick={() => aoInscreverEvento(eventoSelecionado)}
+  style={{
+    backgroundColor: idsEventosInscritos.has(Number(eventoSelecionado.id))
+      ? '#6c757d'
+      : '#3528b8',
+    color: 'white',
+    border: 'none',
+    borderRadius: '6px',
+    padding: '12px 20px',
+    marginTop: '20px',
+    cursor: idsEventosInscritos.has(Number(eventoSelecionado.id))
+      ? 'not-allowed'
+      : 'pointer'
+  }}
+>
+  {idsEventosInscritos.has(Number(eventoSelecionado.id))
+    ? '✓ Já inscrito'
+    : inscrevendoEventoId === eventoSelecionado.id
+      ? 'Realizando inscrição...'
+      : '🎟️ Inscrever-se'}
+</button>
+  </section>
+)}
+          
           {abaParticipante === 'ingressos' && (
-            <div className="fornCartao">
-              <h2>🎫 Meus ingressos</h2>
-              <p>
-                Aqui você poderá acompanhar suas inscrições
-                e seus ingressos.
-              </p>
-              <p>
-                A funcionalidade de inscrição será conectada
-                ao banco de dados na próxima etapa.
-              </p>
-            </div>
+  <div className="fornCartao">
+    <h2>🎫 Meus ingressos</h2>
+    <p>Confira os eventos em que você está inscrito.</p>
+
+    {carregandoIngressos ? (
+      <p>Carregando seus ingressos...</p>
+    ) : erroIngressos ? (
+      <p style={{ color: '#dc3545' }}>
+        {erroIngressos}
+      </p>
+    ) : meusIngressos.length === 0 ? (
+      <p>Você ainda não possui inscrições em eventos.</p>
+    ) : (
+      meusIngressos.map((ingresso) => (
+        <div
+          key={ingresso.id}
+          className="fornCartao"
+          style={{ marginTop: '16px' }}
+        >
+          <h3>{ingresso.evento_nome}</h3>
+
+          <p>
+            📅 Data: {ingresso.evento_data
+              ? new Date(ingresso.evento_data).toLocaleDateString('pt-BR', {
+                  timeZone: 'UTC'
+                })
+              : 'Não informada'}
+          </p>
+
+          <p>
+            🕒 Horário: {ingresso.evento_horario || 'Não informado'}
+          </p>
+
+          <p>📍 Local: {ingresso.evento_local}</p>
+
+          <p>🎟️ Inscrição nº {ingresso.id}</p>
+
+          <p>
+            Status: <strong>{ingresso.status}</strong>
+          </p>
+        </div>
+      ))
+    )}
+  </div>
           )}
 
           {abaParticipante === 'perfil' && (
@@ -2091,6 +2365,53 @@ const aoSelecionarEvento = (eventoClicado) => {
   })
 }
   
+const aoPublicarEvento = async (evento) => {
+  const confirmado = window.confirm(
+    `Deseja publicar o evento "${evento.nome}"?`
+  )
+
+  if (!confirmado) return
+
+  try {
+    const token = sessionStorage.getItem('token')
+
+    if (!token) {
+      alert('Sua sessão expirou. Faça login novamente.')
+      setPagina('login')
+      return
+    }
+
+    const resposta = await fetch(
+      `http://localhost:3001/eventos/${evento.id}/publicar`,
+      {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+
+    const dados = await resposta.json()
+
+    if (!resposta.ok) {
+      alert(dados.erro || 'Erro ao publicar evento.')
+      return
+    }
+
+    setEventos((anteriores) =>
+      anteriores.map((item) =>
+        item.id === evento.id
+          ? { ...item, status: 'Ativo' }
+          : item
+      )
+    )
+
+    alert('Evento publicado com sucesso!')
+  } catch (erro) {
+    console.error('Erro ao publicar evento:', erro)
+    alert('Não foi possível conectar ao servidor.')
+  }
+}
 const aoExcluirEvento = async (evento) => {
   const confirmado = window.confirm(
     `Tem certeza que deseja excluir o evento "${evento.nome}"?`
@@ -2245,6 +2566,7 @@ alert(
           aoSelecionarEvento={aoSelecionarEvento}
           aoCriarNovoEvento={aoCriarNovoEvento}
           aoExcluirEvento={aoExcluirEvento}
+          aoPublicarEvento={aoPublicarEvento}
         />
       )}
       {pagina === 'criar' && (
