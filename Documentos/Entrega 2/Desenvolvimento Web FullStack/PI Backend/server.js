@@ -512,6 +512,33 @@ app.get("/cotacoes", autenticar, permitirPerfis("organizador"), async (req, res)
   }
 });
 
+app.get("/admin/cotacoes", autenticar, permitirPerfis("admin"), async (req, res) => {
+  try {
+    const [cotacoes] = await db.execute(`
+      SELECT
+        c.id,
+        c.evento_id,
+        e.nome AS evento_nome,
+        c.prazo,
+        c.modalidade,
+        c.observacoes,
+        c.status,
+        c.criada_em
+      FROM cotacoes c
+      INNER JOIN eventos e ON e.id = c.evento_id
+      ORDER BY c.id DESC
+    `);
+
+    return res.status(200).json(cotacoes);
+  } catch (erro) {
+    console.error("Erro ao consultar cotações do administrador:", erro);
+
+    return res.status(500).json({
+      erro: "Erro interno ao consultar cotações."
+    });
+  }
+});
+
 app.get("/fornecedor/cotacoes", autenticar, permitirPerfis("fornecedor"), async (req, res) => {
   try {
     const [cotacoes] = await db.execute(
@@ -708,6 +735,39 @@ app.get("/organizador/propostas", autenticar, permitirPerfis("organizador"), asy
     }
   }
 );
+
+app.get("/admin/propostas", autenticar, permitirPerfis("admin"), async (req, res) => {
+  try {
+    const [propostas] = await db.query(`
+      SELECT
+        p.id,
+        p.cotacao_id,
+        p.fornecedor_id,
+        p.valor,
+        p.condicoes_pagamento,
+        p.detalhes_tecnicos,
+        p.status,
+        p.criada_em,
+        e.id AS evento_id,
+        e.nome AS evento_nome,
+        u.nome AS fornecedor_nome
+      FROM propostas p
+      INNER JOIN cotacoes c ON c.id = p.cotacao_id
+      INNER JOIN eventos e ON e.id = c.evento_id
+      INNER JOIN usuarios u ON u.id = p.fornecedor_id
+      ORDER BY p.criada_em DESC, p.id DESC
+    `);
+
+    return res.status(200).json(propostas);
+
+  } catch (erro) {
+    console.error("Erro ao buscar propostas do administrador:", erro);
+
+    return res.status(500).json({
+      erro: "Erro interno ao buscar propostas."
+    });
+  }
+});
 
 app.patch("/organizador/propostas/:id/status", autenticar, permitirPerfis("organizador"), async (req, res) => {
     try {

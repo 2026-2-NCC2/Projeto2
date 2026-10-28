@@ -37,6 +37,44 @@ export function CartaoMetrica({ titulo, valor, texto, tom = 'roxo' }) {
 }
 
 export function AdminPortal({ setPagina }) {  
+  const [propostaSelecionada, setPropostaSelecionada] = useState(null)
+  useEffect(() => {
+  if (!propostaSelecionada) return
+
+  function fecharComEsc(evento) {
+    if (evento.key === 'Escape') {
+      setPropostaSelecionada(null)
+    }
+  }
+
+  window.addEventListener('keydown', fecharComEsc)
+
+  return () => {
+    window.removeEventListener('keydown', fecharComEsc)
+  }
+}, [propostaSelecionada])
+  const [propostasAdmin, setPropostasAdmin] = useState([])
+  const [carregandoPropostas, setCarregandoPropostas] = useState(false)
+  const [erroPropostas, setErroPropostas] = useState('')
+  const [cotacaoSelecionada, setCotacaoSelecionada] = useState(null)
+  useEffect(() => {
+  if (!cotacaoSelecionada) return
+
+  function fecharComEsc(evento) {
+    if (evento.key === 'Escape') {
+      setCotacaoSelecionada(null)
+    }
+  }
+
+  window.addEventListener('keydown', fecharComEsc)
+
+  return () => {
+    window.removeEventListener('keydown', fecharComEsc)
+  }
+}, [cotacaoSelecionada])
+  const [cotacoesAdmin, setCotacoesAdmin] = useState([])
+  const [carregandoCotacoes, setCarregandoCotacoes] = useState(false)
+  const [erroCotacoes, setErroCotacoes] = useState('')
   const [usuarioSelecionado, setUsuarioSelecionado] = useState(null)
   useEffect(() => {
     if (!usuarioSelecionado) return
@@ -282,6 +320,76 @@ export function AdminPortal({ setPagina }) {
     setMensagem(`${selecionados.length} cadastros ${acao} em lote.`)
     setSelecionados([])
   }
+  useEffect(() => {
+  if (secao !== 'cotacoes') return
+
+  async function carregarCotacoes() {
+    setCarregandoCotacoes(true)
+    setErroCotacoes('')
+
+    try {
+      const token = sessionStorage.getItem('token')
+
+      const resposta = await fetch('http://localhost:3001/admin/cotacoes', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      if (!resposta.ok) {
+        if (resposta.status === 401) {
+          throw new Error('Sessão expirada. Saia e entre novamente.')
+        }
+
+        throw new Error('Não foi possível carregar as cotações.')
+      }
+
+      const dados = await resposta.json()
+      setCotacoesAdmin(dados)
+    } catch (erro) {
+      setErroCotacoes(erro.message)
+    } finally {
+      setCarregandoCotacoes(false)
+    }
+  }
+
+  carregarCotacoes()
+  }, [secao])
+  useEffect(() => {
+  if (secao !== 'propostas') return
+
+  async function carregarPropostas() {
+    setCarregandoPropostas(true)
+    setErroPropostas('')
+
+    try {
+      const token = sessionStorage.getItem('token')
+
+      const resposta = await fetch('http://localhost:3001/admin/propostas', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      if (!resposta.ok) {
+        if (resposta.status === 401) {
+          throw new Error('Sessão expirada. Saia e entre novamente.')
+        }
+
+        throw new Error('Não foi possível carregar as propostas.')
+      }
+
+      const dados = await resposta.json()
+      setPropostasAdmin(dados)
+    } catch (erro) {
+      setErroPropostas(erro.message)
+    } finally {
+      setCarregandoPropostas(false)
+    }
+  }
+
+  carregarPropostas()
+}, [secao])
   return (
     <div className="adminApp">
       <AdminTopo aoSair={() => setPagina('login')} />
@@ -564,26 +672,323 @@ export function AdminPortal({ setPagina }) {
 )}
 </>
   
+) : secao === 'cotacoes' ? (
+  <>
+    <section className="adminGestaoCotacoes">
+    <h2>Gestão de Cotações</h2>
+
+    <p>Consulte e acompanhe as cotações cadastradas no TrocaTicket.</p>
+
+    <div className="adminTabelaEventos">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Evento</th>
+            <th>Modalidade</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+
+        <tbody>
+  {carregandoCotacoes ? (
+    <tr>
+      <td colSpan="5">Carregando cotações...</td>
+    </tr>
+  ) : erroCotacoes ? (
+    <tr>
+      <td colSpan="5">{erroCotacoes}</td>
+    </tr>
+  ) : cotacoesAdmin.length === 0 ? (
+    <tr>
+      <td colSpan="5">Nenhuma cotação cadastrada.</td>
+    </tr>
+  ) : (
+    cotacoesAdmin.map((cotacao) => (
+      <tr key={cotacao.id}>
+        <td>#{cotacao.id}</td>
+        <td>{cotacao.evento_nome}</td>
+        <td>{cotacao.modalidade || 'Não informada'}</td>
+        <td>{cotacao.status || 'Não definido'}</td>
+        <td>
+  <button
+    type="button"
+    className="adminBotaoVisualizar"
+    onClick={() => setCotacaoSelecionada(cotacao)}
+  >
+    Visualizar
+  </button>
+</td>
+      </tr>
+    ))
+  )}
+</tbody>
+      </table>
+    </div>
+  </section>
+  {cotacaoSelecionada && (
+  <div
+    className="adminModalOverlay"
+    onClick={() => setCotacaoSelecionada(null)}
+  >
+    <div
+      className="adminModal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Detalhes da cotação"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h2>Detalhes da Cotação</h2>
+
+      <p><strong>ID:</strong> #{cotacaoSelecionada.id}</p>
+
+      <p>
+        <strong>Evento:</strong> {cotacaoSelecionada.evento_nome}
+      </p>
+
+      <p>
+        <strong>Modalidade:</strong> {cotacaoSelecionada.modalidade || 'Não informada'}
+      </p>
+
+      <p>
+        <strong>Status:</strong> {cotacaoSelecionada.status || 'Não definido'}
+      </p>
+
+      <p>
+        <strong>Prazo:</strong>{' '}
+        {cotacaoSelecionada.prazo
+          ? new Date(cotacaoSelecionada.prazo).toLocaleDateString('pt-BR', {
+              timeZone: 'UTC'
+            })
+          : 'Não informado'}
+      </p>
+
+      <p>
+        <strong>Observações:</strong>{' '}
+        {cotacaoSelecionada.observacoes || 'Nenhuma observação'}
+      </p>
+
+      <button
+        type="button"
+        onClick={() => setCotacaoSelecionada(null)}
+      >
+        Fechar
+      </button>
+    </div>
+  </div>
+)}
+</>
+) : secao === 'propostas' ? (
+  <>
+    <section className="adminGestaoPropostas">
+    <h2>Gestão de Propostas</h2>
+
+    <p>
+      Consulte e acompanhe as propostas enviadas pelos fornecedores.
+    </p>
+
+    <div className="adminTabelaEventos">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Evento</th>
+            <th>Fornecedor</th>
+            <th>Valor</th>
+            <th>Status</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+
+        <tbody>
+  {carregandoPropostas ? (
+    <tr>
+      <td colSpan="6">Carregando propostas...</td>
+    </tr>
+  ) : erroPropostas ? (
+    <tr>
+      <td colSpan="6" role="alert">{erroPropostas}</td>
+    </tr>
+  ) : propostasAdmin.length === 0 ? (
+    <tr>
+      <td colSpan="6">Nenhuma proposta cadastrada.</td>
+    </tr>
+  ) : (
+    propostasAdmin.map((proposta) => (
+      <tr key={proposta.id}>
+        <td>#{proposta.id}</td>
+        <td>{proposta.evento_nome}</td>
+        <td>{proposta.fornecedor_nome}</td>
+        <td>
+          {Number(proposta.valor).toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+          })}
+        </td>
+        <td>{proposta.status || 'Não definido'}</td>
+        <td>
+  <button
+    type="button"
+    className="adminBotaoVisualizar"
+    onClick={() => setPropostaSelecionada(proposta)}
+  >
+    Visualizar
+  </button>
+</td>
+      </tr>
+    ))
+  )}
+</tbody>
+      </table>
+    </div>
+  </section>
+  {propostaSelecionada && (
+  <div
+    className="adminModalOverlay"
+    onClick={() => setPropostaSelecionada(null)}
+  >
+    <div
+      className="adminModal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Detalhes da proposta"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h2>Detalhes da Proposta</h2>
+
+      <p><strong>ID:</strong> #{propostaSelecionada.id}</p>
+
+      <p><strong>Evento:</strong> {propostaSelecionada.evento_nome}</p>
+
+      <p><strong>Fornecedor:</strong> {propostaSelecionada.fornecedor_nome}</p>
+
+      <p>
+        <strong>Valor:</strong>{' '}
+        {Number(propostaSelecionada.valor).toLocaleString('pt-BR', {
+          style: 'currency',
+          currency: 'BRL'
+        })}
+      </p>
+
+      <p><strong>Status:</strong> {propostaSelecionada.status || 'Não definido'}</p>
+
+      <p>
+        <strong>Condições de pagamento:</strong>{' '}
+        {propostaSelecionada.condicoes_pagamento || 'Não informadas'}
+      </p>
+
+      <p>
+        <strong>Detalhes técnicos:</strong>{' '}
+        {propostaSelecionada.detalhes_tecnicos || 'Não informados'}
+      </p>
+
+      <button
+        type="button"
+        onClick={() => setPropostaSelecionada(null)}
+      >
+        Fechar
+      </button>
+    </div>
+  </div>
+)}
+</>
+
 ) : (
   <>
           
-          <div className="adminTrilha">TrocaTicket Admin &nbsp;›&nbsp; Governança &nbsp;›&nbsp; Gestão de Contas &nbsp;›&nbsp; <b>Fila de Homologação</b><span>#AUD-2026-0812 &nbsp; 16 Out 2026, 14:45 BRT</span></div>
-          <section className="adminEtapas">
-            <div className="concluida"><b>✓</b><span><small>ETAPA 1 · CONCLUÍDO</small><strong>Recebimento de Documentos</strong></span></div>
-            <div className="atual"><b>2</b><span><small>ETAPA 2 · EM FOCO (AUDITORIA)</small><strong>Validação Fiscal & CNPJ</strong></span></div>
-            <div><b>3</b><span><small>ETAPA 3 · PRÓXIMO</small><strong>Liberação de Permissões</strong></span></div>
-          </section>
+          <div className="adminTrilha">
+  TrocaTicket Admin &nbsp;›&nbsp; Administração &nbsp;›&nbsp;
+  <b>Fornecedores & Contas</b>
+</div>
+          <section >
+  <div className="concluida">
+    <b>1</b>
+    <span>
+      <small>ETAPA 1 · SOLICITAÇÃO</small>
+      <strong>Solicitação de Acesso</strong>
+    </span>
+  </div>
+
+  <div >
+    <b>2</b>
+    <span>
+      <small>ETAPA 2 · ANÁLISE</small>
+      <strong>Análise do Administrador</strong>
+    </span>
+  </div>
+
+  <div>
+    <b>3</b>
+    <span>
+      <small>ETAPA 3 · DECISÃO</small>
+      <strong>Aprovação ou Rejeição</strong>
+    </span>
+  </div>
+</section>
           <section className="adminHero">
-            <div><div className="adminRotulo">FILA OPERACIONAL ATIVA <span>◷ Tempo Médio de Análise: 4.2h</span></div><h1>{totalPendentes} SOLICITAÇÕES PENDENTES</h1><p>Auditoria de idoneidade jurídica, cruzamento automatizado com a Receita Federal e verificação de alvarás para emissão de ingressos e fornecimento de infraestrutura técnica.</p><strong className="adminCriterio">▣ Critério de Homologação: Regularidade RFB + CNAE Compatível + Histórico de Litígio Zerado</strong></div>
-            <div className="adminStatusFila"><div><span><small>STATUS DA FILA</small><b>● Atenção Operacional (8+)</b></span><span><small>CONFIABILIDADE DOC.</small><b className="verde">92% &nbsp; Ótimo</b></span></div><button onClick={() => agirEmLote('enviados para auditoria')}>⚡ Auditar Documentos em Lote</button><a href="#diretrizes">Diretrizes de Compliance ↗</a></div>
-          </section>
+  <div>
+    <div className="adminRotulo">
+      GESTÃO DE SOLICITAÇÕES DE ACESSO
+    </div>
+
+    <h1>{totalPendentes} SOLICITAÇÕES PENDENTES</h1>
+
+    <p>
+      Analise as solicitações de usuários que desejam se tornar
+      organizadores de eventos ou fornecedores no TrocaTicket.
+    </p>
+
+    <strong className="adminCriterio">
+      ✓ Aprovações e rejeições registradas no banco de dados
+    </strong>
+  </div>
+
+  <div className="adminStatusFila">
+    <div>
+      <span>
+        <small>AGUARDANDO ANÁLISE</small>
+        <b>{totalPendentes} solicitações</b>
+      </span>
+
+      <span>
+        <small>TIPOS DE ACESSO</small>
+        <b>Organizador e Fornecedor</b>
+      </span>
+    </div>
+
+    <p>
+      Selecione uma solicitação na tabela abaixo para
+      aprovar ou rejeitar o pedido de acesso.
+    </p>
+  </div>
+</section>
           <section className="adminMetricas">
-            <CartaoMetrica titulo="TOTAL ORGANIZADORES PENDENTES"valor={totalOrganizadores}texto="Solicitações aguardando aprovação"/>
-            <CartaoMetrica titulo="FORNECEDORES EM HOMOLOGAÇÃO"valor={totalFornecedores}texto="Solicitações aguardando aprovação"tom="laranja"/>
-            <CartaoMetrica titulo="SOLICITAÇÕES AGUARDANDO ANÁLISE" valor={totalPendentes} texto="Total de solicitações pendentes" tom="verde" />
-          </section>
+  <CartaoMetrica
+    titulo="ORGANIZADORES PENDENTES"
+    valor={totalOrganizadores}
+    texto="Solicitações aguardando aprovação"
+  />
+
+  <CartaoMetrica
+    titulo="FORNECEDORES PENDENTES"
+    valor={totalFornecedores}
+    texto="Solicitações aguardando aprovação"
+    tom="laranja"
+  />
+
+  <CartaoMetrica
+    titulo="TOTAL DE SOLICITAÇÕES"
+    valor={totalPendentes}
+    texto="Solicitações pendentes de análise"
+    tom="verde"
+  />
+</section>
           <section className="adminFila">
-            <div className="adminFilaCabecalho"><div><h2>Fila de Homologação Cadastral</h2><p>Auditoria rigorosa de contratos sociais, CNDs e certidões tributárias vigentes.</p></div><div className="adminAbas">
+            <div className="adminFilaCabecalho"><div><h2>Solicitações de Acesso Pendentes</h2><p>
+  Consulte os pedidos de acesso e aprove ou rejeite
+  as solicitações de organizadores e fornecedores.
+</p></div><div className="adminAbas">
             <button  className={aba === 'todos' ? 'ativo' : ''} onClick={() => setAba('todos')}>
             Todos ({totalPendentes})</button>
 
@@ -593,14 +998,20 @@ export function AdminPortal({ setPagina }) {
 
             <button className={aba === 'fornecedores' ? 'ativo' : ''} onClick={() => setAba('fornecedores')}>
             Fornecedores ({totalFornecedores})
-            </button><button className="urgente">Urgentes &gt; 48h (6)</button></div></div>
+            </button></div></div>
             <div className="adminProgresso"><b>{percentualOrganizadores}% Organizadores
             ({totalOrganizadores} solicitações)</b><span><i style={{ width: `${percentualOrganizadores}%` }} /></span><b>{percentualFornecedores}% Fornecedores({totalFornecedores} solicitações)</b></div>
             <div className="adminOrdenacao">Ordenar por: <select value={ordem} onChange={(e) => setOrdem(e.target.value)}><option>Risco</option><option>Prioridade</option><option>Mais recentes</option></select></div>
             {mensagem && <div className="adminMensagem" role="status">✓ {mensagem}<button onClick={() => setMensagem('')}>×</button></div>}
-            <div className="adminTabelaWrap"><table className="adminTabela"><thead><tr><th><input type="checkbox" aria-label="Selecionar todos" checked={filtradas.length > 0 && filtradas.every((item) => selecionados.includes(item.id))} onChange={(e) => setSelecionados(e.target.checked ? filtradas.map((item) => item.id) : [])} /></th><th>PROTOCOLO / DATA</th><th>SOLICITANTE</th><th>ATUAÇÃO</th><th>RESPONSÁVEL</th><th>RISCO & RFB</th><th>DOCUMENTOS</th><th>AÇÕES</th></tr></thead>
-              <tbody>{filtradas.map((item) => <tr key={item.id} className={item.urgente ? 'urgente' : ''}><td><input type="checkbox" aria-label={`Selecionar ${item.nome}`} checked={selecionados.includes(item.id)} onChange={() => alternar(item.id)} /></td><td><strong>#HOM-{item.id}</strong><small className={item.urgente ? 'atraso' : ''}>{item.hora}</small></td><td><strong>{item.nome}</strong><small>{item.documento}</small></td><td><strong>{item.atuacao}</strong><small>{item.detalhe}</small></td><td><strong>{item.responsavel}</strong><small>{item.cargo}</small></td><td><span className={`adminScore ${item.score < 80 ? 'alerta' : ''}`}>Score {item.score}</span><small className={item.score < 80 ? 'atraso' : 'ok'}>{item.risco}</small></td><td><div className="adminDocs">{Array.from({ length: item.docs }, (_, i) => <span key={i}>▤</span>)}</div></td><td><div className="adminAcoesLinha"><button className="aprovar" onClick={() => atualizar(item.id, 'homologado')}>Aprovar</button><button className="recusar" onClick={() => atualizar(item.id, 'recusado')}>Recusar</button></div></td></tr>)}</tbody></table></div>
-            <div className="adminPaginacao"><span>Exibindo {filtradas.length} de {totalPendentes} solicitações pendentes</span><div><button disabled>Anterior</button><button className="ativo">1</button><button>2</button><button>3</button><span>…</span><button>10</button><button>Próxima</button></div></div>
+            <div className="adminTabelaWrap"><table className="adminTabela"><thead><tr><th><input type="checkbox" aria-label="Selecionar todos" checked={filtradas.length > 0 && filtradas.every((item) => selecionados.includes(item.id))} onChange={(e) => setSelecionados(e.target.checked ? filtradas.map((item) => item.id) : [])} /></th><th>PROTOCOLO / DATA</th><th>SOLICITANTE</th><th>ATUAÇÃO</th><th>RESPONSÁVEL</th><th>JUSTIFICATIVA</th><th>AÇÕES</th></tr></thead>
+              <tbody>{filtradas.map((item) => <tr key={item.id} className={item.urgente ? 'urgente' : ''}><td><input type="checkbox" aria-label={`Selecionar ${item.nome}`} checked={selecionados.includes(item.id)} onChange={() => alternar(item.id)} /></td><td><strong>#HOM-{item.id}</strong><small className={item.urgente ? 'atraso' : ''}>{item.hora}</small></td><td><strong>{item.nome}</strong><small>{item.documento}</small></td><td><strong>{item.atuacao}</strong><small>{item.detalhe}</small></td><td><strong>{item.responsavel}</strong><small>{item.cargo}</small></td><td>
+  <span>{item.detalhe || 'Não informada'}</span>
+</td><td><div className="adminAcoesLinha"><button className="aprovar" onClick={() => atualizar(item.id, 'homologado')}>Aprovar</button><button className="recusar" onClick={() => atualizar(item.id, 'recusado')}>Recusar</button></div></td></tr>)}</tbody></table></div>
+            <div className="adminPaginacao">
+  <span>
+    Exibindo {filtradas.length} de {totalPendentes} solicitações pendentes
+  </span>
+</div>
           </section>
             </>
           )}
