@@ -48,11 +48,21 @@ app.get("/eventos", autenticar, async (req, res) => {
 app.get("/admin/eventos", autenticar, permitirPerfis("admin"), async (req, res) => {
     try {
       const [eventos] = await db.execute(
-        `SELECT id, nome, data, horario, local,
-                categoria, publico, descricao,
-                status, usuario_id
-         FROM eventos
-         ORDER BY id DESC`
+        `SELECT
+            e.id,
+            e.nome,
+            e.data,
+            e.horario,
+            e.local,
+            e.categoria,
+            e.publico,
+            e.descricao,
+            e.status,
+            e.usuario_id,
+            u.nome AS organizador_nome
+         FROM eventos e
+         INNER JOIN usuarios u ON u.id = e.usuario_id
+         ORDER BY e.id DESC`
       );
 
       return res.status(200).json(eventos);
@@ -189,7 +199,7 @@ app.get("/participante/inscricoes", autenticar, permitirPerfis("participante"), 
 app.get('/usuarios', autenticar, permitirPerfis('admin'), async (req, res) => {
   try {
     const [usuarios] = await db.execute(
-      "SELECT id, nome, email FROM usuarios ORDER BY id DESC"
+      "SELECT id, nome, email, perfil FROM usuarios ORDER BY id DESC"
     );
 
     return res.status(200).json(usuarios);

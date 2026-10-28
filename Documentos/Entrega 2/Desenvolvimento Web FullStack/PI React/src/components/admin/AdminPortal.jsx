@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useEffect, useState } from 'react';
 
 export function AdminTopo({ aoSair }) {
   return (
@@ -14,8 +14,13 @@ export function AdminTopo({ aoSair }) {
 
 export function AdminMenu({ secao, setSecao, aoSair }) {
   const itens = [
-    ['painel', '▦', 'Painel de evento'], ['eventos', '□', 'Eventos'], ['cotacoes', '▣', 'Cotações'],
-    ['propostas', '◇', 'Propostas'], ['contas', '▥', 'Fornecedores & Contas'], ['relatorios', '▤', 'Relatórios'],
+    ['painel', '▦', 'Painel de evento'],
+    ['eventos', '□', 'Eventos'],
+    ['usuarios', '♙', 'Usuários'],
+    ['cotacoes', '▣', 'Cotações'],
+    ['propostas', '◇', 'Propostas'],
+    ['contas', '▥', 'Fornecedores & Contas'],
+    ['relatorios', '▤', 'Relatórios'],
   ]
   return (
     <aside className="adminMenu">
@@ -31,9 +36,77 @@ export function CartaoMetrica({ titulo, valor, texto, tom = 'roxo' }) {
   return <article className={`adminMetrica ${tom}`}><div><small>{titulo}</small><span>▣</span></div><strong>{valor}</strong><p>{texto}</p></article>
 }
 
-export function AdminPortal({ setPagina }) {
+export function AdminPortal({ setPagina }) {  
+  const [usuarioSelecionado, setUsuarioSelecionado] = useState(null)
+  useEffect(() => {
+    if (!usuarioSelecionado) return
+  
+    function fecharComEsc(evento) {
+      if (evento.key === 'Escape') {
+        setUsuarioSelecionado(null)
+      }
+    }
+  
+    window.addEventListener('keydown', fecharComEsc)
+  
+    return () => {
+      window.removeEventListener('keydown', fecharComEsc)
+    }
+  }, [usuarioSelecionado])
+  const [filtroPerfil, setFiltroPerfil] = useState('todos')
+  const [eventoSelecionado, setEventoSelecionado] = useState(null)
+  useEffect(() => {
+    if (!eventoSelecionado) return
+  
+    function fecharComEsc(evento) {
+      if (evento.key === 'Escape') {
+        setEventoSelecionado(null)
+      }
+    }
+  
+    window.addEventListener('keydown', fecharComEsc)
+  
+    return () => {
+      window.removeEventListener('keydown', fecharComEsc)
+    }
+  }, [eventoSelecionado])
   const [secao, setSecao] = useState('contas')
   const [eventosAdmin, setEventosAdmin] = useState([])
+  const [usuariosAdmin, setUsuariosAdmin] = useState([])
+  const [buscaUsuarios, setBuscaUsuarios] = useState('')
+  const [carregandoUsuarios, setCarregandoUsuarios] = useState(false)
+  const [erroUsuarios, setErroUsuarios] = useState('')
+  useEffect(() => {
+    if (secao !== 'usuarios') return
+  
+    async function carregarUsuarios() {
+      setCarregandoUsuarios(true)
+      setErroUsuarios('')
+  
+      try {
+        const token = sessionStorage.getItem('token')
+  
+        const resposta = await fetch('http://localhost:3001/usuarios', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+  
+        if (!resposta.ok) {
+          throw new Error('Não foi possível carregar os usuários.')
+        }
+  
+        const dados = await resposta.json()
+        setUsuariosAdmin(dados)
+      } catch (erro) {
+        setErroUsuarios(erro.message)
+      } finally {
+        setCarregandoUsuarios(false)
+      }
+    }
+  
+    carregarUsuarios()
+  }, [secao])
   const [carregandoEventos, setCarregandoEventos] = useState(false)
   const [erroEventos, setErroEventos] = useState('')
   useEffect(() => {
@@ -219,6 +292,29 @@ export function AdminPortal({ setPagina }) {
   <section className="adminHero">
     <div>
       <h1>Gestão de Eventos</h1>
+      <div className="adminResumoEventos">
+  <p>
+    Total de eventos: <strong>{eventosAdmin.length}</strong>
+  </p>
+
+  <p>
+    Eventos ativos:{' '}
+    <strong>
+      {eventosAdmin.filter(
+        (evento) => evento.status === 'Ativo'
+      ).length}
+    </strong>
+  </p>
+
+  <p>
+    Em planejamento:{' '}
+    <strong>
+      {eventosAdmin.filter(
+        (evento) => evento.status === 'Em planejamento'
+      ).length}
+    </strong>
+  </p>
+</div>
       <p>Gerencie e acompanhe os eventos cadastrados no TrocaTicket.</p>
       <div className="adminBuscaEventos">
   <input
@@ -273,19 +369,201 @@ export function AdminPortal({ setPagina }) {
     return correspondeNome && correspondeStatus
   })
   .map((evento) => (
-        <tr key={evento.id}>
-          <td>{evento.nome}</td>
-          <td>{evento.local}</td>
-          <td>{evento.status}</td>
-          <td>#{evento.usuario_id}</td>
-        </tr>
+    <tr key={evento.id}>
+    <td>{evento.nome}</td>
+    <td>{evento.local}</td>
+    <td>{evento.status}</td>
+    <td>{evento.organizador_nome || `#${evento.usuario_id}`}</td>
+  
+    <td>
+      <button
+        type="button"
+        className="adminBotaoVisualizar"
+        onClick={() => {
+          setEventoSelecionado(evento)
+        }}
+      >
+        Visualizar
+      </button>
+    </td>
+    </tr>
       ))}
     </tbody>
   </table>
 </div>
 )}
+{eventoSelecionado && (
+  <div
+    className="adminModalOverlay"
+    onClick={() => setEventoSelecionado(null)}
+  >
+    <div
+      className="adminDetalhesEvento"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Detalhes do evento"
+      onClick={(e) => e.stopPropagation()}
+    >
+    <h3>Detalhes do Evento</h3>
+
+    <p><strong>Nome:</strong> {eventoSelecionado.nome}</p>
+    <p>
+  <strong>Data:</strong>{' '}
+  {eventoSelecionado.data
+    ? new Date(eventoSelecionado.data).toLocaleDateString('pt-BR', {
+        timeZone: 'UTC'
+      })
+    : 'Não informada'}
+</p>
+
+<p>
+  <strong>Horário:</strong>{' '}
+  {eventoSelecionado.horario?.slice(0, 5) || 'Não informado'}
+</p>
+    <p><strong>Local:</strong> {eventoSelecionado.local}</p>
+    <p><strong>Categoria:</strong> {eventoSelecionado.categoria}</p>
+    <p><strong>Público:</strong> {eventoSelecionado.publico}</p>
+    <p><strong>Descrição:</strong> {eventoSelecionado.descricao || 'Sem descrição'}</p>
+    <p><strong>Status:</strong> {eventoSelecionado.status}</p>
+    <p><strong>Organizador:</strong>{' '}{eventoSelecionado.organizador_nome || `#${eventoSelecionado.usuario_id}`}</p>
+
+    <button
+      type="button"
+      onClick={() => setEventoSelecionado(null)}
+    >
+      Fechar
+    </button>
+  </div>
+</div>
+)}
     </div>
   </section>
+) : secao === 'usuarios' ? (
+  <> 
+  <section className="adminGestaoUsuarios">
+    <h2>Gestão de Usuários</h2>
+    <p>Consulte os usuários cadastrados no TrocaTicket.</p>
+
+    <div className="adminBuscaEventos">
+  <input
+    type="search"
+    placeholder="Pesquisar por nome ou e-mail..."
+    aria-label="Pesquisar usuários"
+    value={buscaUsuarios}
+    onChange={(e) => setBuscaUsuarios(e.target.value)}
+  />
+</div>
+
+<div className="adminFiltroStatus">
+  <label htmlFor="filtroPerfilUsuarios">
+    Filtrar por perfil:
+  </label>
+
+  <select
+    id="filtroPerfilUsuarios"
+    value={filtroPerfil}
+    onChange={(e) => setFiltroPerfil(e.target.value)}
+  >
+    <option value="todos">Todos os perfis</option>
+    <option value="admin">Administrador</option>
+    <option value="organizador">Organizador</option>
+    <option value="fornecedor">Fornecedor</option>
+    <option value="participante">Participante</option>
+  </select>
+</div>
+
+    {carregandoUsuarios ? (
+      <p>Carregando usuários...</p>
+    ) : erroUsuarios ? (
+      <p role="alert">{erroUsuarios}</p>
+    ) : usuariosAdmin.length === 0 ? (
+      <p>Nenhum usuário cadastrado.</p>
+    ) : (
+      <div className="adminTabelaEventos">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nome</th>
+              <th>E-mail</th>
+              <th>Perfil</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+
+          <tbody>
+          {usuariosAdmin
+  .filter((usuario) => {
+    const busca = buscaUsuarios.toLowerCase().trim()
+
+    const correspondeBusca =
+      usuario.nome.toLowerCase().includes(busca) ||
+      usuario.email.toLowerCase().includes(busca)
+
+    const correspondePerfil =
+      filtroPerfil === 'todos' ||
+      usuario.perfil === filtroPerfil
+
+    return correspondeBusca && correspondePerfil
+  })
+  .map((usuario) => (
+              <tr key={usuario.id}>
+                <td>#{usuario.id}</td>
+                <td>{usuario.nome}</td>
+                <td>{usuario.email}</td>
+                <td>{usuario.perfil? usuario.perfil.charAt(0).toUpperCase() + usuario.perfil.slice(1): 'Não definido'}</td>
+                <td><button
+                    type="button"
+                    className="adminBotaoVisualizar"
+                    onClick={() => setUsuarioSelecionado(usuario)}>Visualizar</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </section>
+
+{usuarioSelecionado && (
+  <div
+    className="adminModalOverlay"
+    onClick={() => setUsuarioSelecionado(null)}
+  >
+    <div
+      className="adminModal"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Detalhes do usuário"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h2>Detalhes do Usuário</h2>
+
+      <p><strong>ID:</strong> #{usuarioSelecionado.id}</p>
+
+      <p><strong>Nome:</strong> {usuarioSelecionado.nome}</p>
+
+      <p><strong>E-mail:</strong> {usuarioSelecionado.email}</p>
+
+      <p>
+        <strong>Perfil:</strong>{' '}
+        {usuarioSelecionado.perfil
+          ? usuarioSelecionado.perfil.charAt(0).toUpperCase() +
+            usuarioSelecionado.perfil.slice(1)
+          : 'Não definido'}
+      </p>
+
+      <button
+        type="button"
+        onClick={() => setUsuarioSelecionado(null)}
+      >
+        Fechar
+      </button>
+    </div>
+  </div>
+)}
+</>
+  
 ) : (
   <>
           
