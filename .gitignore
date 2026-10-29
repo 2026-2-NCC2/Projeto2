@@ -143,3 +143,4 @@ vite.config.ts.timestamp-*
 .vite/
 # Added by code-review-graph
 .code-review-graph/
+Documentos/Banco de Dados/trocaticket.sql
