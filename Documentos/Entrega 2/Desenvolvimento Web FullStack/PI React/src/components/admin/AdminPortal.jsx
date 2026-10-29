@@ -1,3 +1,4 @@
+import { apiUrl } from '../../services/api.js'
 import { useEffect, useState } from 'react';
 
 export function AdminTopo({ aoSair }) {
@@ -124,7 +125,7 @@ export function AdminPortal({ aoSair }) {
       try {
         const token = sessionStorage.getItem('token')
   
-        const resposta = await fetch('http://localhost:3001/usuarios', {
+        const resposta = await fetch(apiUrl('/usuarios'), {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -158,7 +159,7 @@ export function AdminPortal({ aoSair }) {
       const token = sessionStorage.getItem('token')
 
       const resposta = await fetch(
-        'http://localhost:3001/admin/eventos',
+        apiUrl('/admin/eventos'),
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -197,7 +198,7 @@ export function AdminPortal({ aoSair }) {
       const token = sessionStorage.getItem('token')
 
       const resposta = await fetch(
-        'http://localhost:3001/solicitacoes-acesso',
+        apiUrl('/solicitacoes-acesso'),
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -281,7 +282,7 @@ export function AdminPortal({ aoSair }) {
     const token = sessionStorage.getItem('token')
 
     const resposta = await fetch(
-      `http://localhost:3001/solicitacoes-acesso/${id}`,
+      apiUrl(`/solicitacoes-acesso/${id}`),
       {
         method: 'PATCH',
         headers: {
@@ -325,7 +326,7 @@ export function AdminPortal({ aoSair }) {
     try {
       const token = sessionStorage.getItem('token')
 
-      const resposta = await fetch('http://localhost:3001/admin/cotacoes', {
+      const resposta = await fetch(apiUrl('/admin/cotacoes'), {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -360,7 +361,7 @@ export function AdminPortal({ aoSair }) {
     try {
       const token = sessionStorage.getItem('token')
 
-      const resposta = await fetch('http://localhost:3001/admin/propostas', {
+      const resposta = await fetch(apiUrl('/admin/propostas'), {
         headers: {
           Authorization: `Bearer ${token}`
         }

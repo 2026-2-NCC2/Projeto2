@@ -1,11 +1,57 @@
+import { apiUrl } from './services/api.js'
+import { Custos } from './pages/organizador/Custos.jsx'
 import { CriarEvento } from './pages/organizador/CriarEvento.jsx'
 import { Eventos } from './pages/organizador/Eventos.jsx'
 import { Layout } from './components/layout/Layout.jsx'
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { formatarMoeda } from './utils/formatarMoeda.js'
-import { CUSTOS_PADRAO } from './constants/custosPadrao.js'
+import { custosSemanticamenteIguais } from './utils/custos.js'
 import './App.css'
 import { AdminPortal } from './components/admin/AdminPortal'
+
+const ESTADOS_GET_CUSTOS = Object.freeze({
+  NAO_CARREGADO: 'naoCarregado',
+  CARREGANDO: 'carregando',
+  CARREGADO: 'carregado',
+  ERRO: 'erro',
+})
+
+const ESTADOS_PUT_CUSTOS = Object.freeze({
+  OCIOSO: 'ocioso',
+  SALVANDO: 'salvando',
+  ERRO: 'erro',
+  RESULTADO_INCERTO: 'resultadoIncerto',
+})
+
+function criarRascunhoCustos(geracaoSessao) {
+  return {
+    itens: [],
+    basePersistida: null, // Desconhecida; somente uma resposta futura poderá confirmá-la.
+    revisaoLocal: 0,
+    geracaoSessao,
+    get: {
+      estado: ESTADOS_GET_CUSTOS.NAO_CARREGADO,
+      idRequisicao: null,
+      revisaoInicial: null,
+      erro: null,
+    },
+    put: {
+      estado: ESTADOS_PUT_CUSTOS.OCIOSO,
+      idRequisicao: null,
+      revisaoInicial: null,
+      erro: null,
+    },
+  }
+}
+
+function rascunhoCustosTemAlteracoes(rascunho) {
+  if (!rascunho) return false
+  if (rascunho.basePersistida === null) {
+    // Sem itens locais não há conteúdo a descartar; a base continua desconhecida.
+    return rascunho.itens.length > 0
+  }
+  return !custosSemanticamenteIguais(rascunho.itens, rascunho.basePersistida)
+}
 
 
 
@@ -37,7 +83,7 @@ function Cadastro({ setPagina }) {
     setCadastrando(true)
 
     try {
-      const resposta = await fetch('http://localhost:3001/usuarios', {
+      const resposta = await fetch(apiUrl('/usuarios'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -152,7 +198,7 @@ const aoAutenticar = async (eventoDisparado) => {
   eventoDisparado.preventDefault()
 
   try {
-    const resposta = await fetch('http://localhost:3001/login', {
+    const resposta = await fetch(apiUrl('/login'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -257,75 +303,6 @@ if (perfilUsuario === 'admin') {
   )
 }
 
-function Custos({
-  evento,
-  custos,
-  setPagina,
-}) {
-  const totalEstimado = useMemo(() => {
-    return custos.reduce((acumulador, itemCusto) => acumulador + itemCusto.valor, 0)
-  }, [custos])
-  return (
-    <div>
-      <button className="voltar" onClick={() => setPagina('criar')}>
-        ← Voltar para Dados Básicos
-      </button>
-      <div className="tituloLinha">
-        <div>
-          <h1>ITENS DE CUSTO</h1>
-          <p>
-            Defina os itens necessários para <strong>{evento.nome}</strong>.
-          </p>
-        </div>
-        <div className="tag">Etapa 2 de 3</div>
-      </div>
-      <div className="resumoCategorias">
-        {custos.map((itemCusto) => (
-          <div key={itemCusto.id}>
-            {itemCusto.categoria}
-            <br />
-            <b>{formatarMoeda(itemCusto.valor)}</b>
-          </div>
-        ))}
-      </div>
-      <div className="tabela">
-        <div className="tabelaCabecalho">
-          <span>Categoria</span>
-          <span>Descrição</span>
-          <span>Custo estimado</span>
-        </div>
-        {custos.map((itemCusto) => (
-          <div className="tabelaLinha" key={itemCusto.id}>
-            <span>{itemCusto.categoria}</span>
-            <span>{itemCusto.descricao}</span>
-            <strong>{formatarMoeda(itemCusto.valor)}</strong>
-          </div>
-        ))}
-      </div>
-      <div className="total">
-        <span>Total estimado</span>
-        <strong>{formatarMoeda(totalEstimado)}</strong>
-      </div>
-      <div className="acoes">
-        <button
-          type="button"
-          className="secundario"
-          onClick={() => setPagina('criar')}
-        >
-          Voltar
-        </button>
-        <button
-          type="button"
-          className="principal"
-          onClick={() => setPagina('cotacao')}
-        >
-          Revisar e avançar para Cotação →
-        </button>
-      </div>
-    </div>
-  )
-}
-
 function Cotacao({
   evento,
   custos,
@@ -347,7 +324,7 @@ function Cotacao({
       const token = sessionStorage.getItem('token')
 
       const resposta = await fetch(
-        'http://localhost:3001/organizador/propostas',
+        apiUrl('/organizador/propostas'),
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -398,7 +375,7 @@ function Cotacao({
     const token = sessionStorage.getItem('token')
 
     const resposta = await fetch(
-      `http://localhost:3001/organizador/propostas/${propostaId}/status`,
+      apiUrl(`/organizador/propostas/${propostaId}/status`),
       {
         method: 'PATCH',
         headers: {
@@ -443,6 +420,14 @@ function Cotacao({
   }, [custos])
   
 const aoPublicarCotacao = async () => {
+  // Liberar somente na etapa de integração com os custos persistidos.
+  const integracaoCustosPersistidosDisponivel = false
+
+  if (!integracaoCustosPersistidosDisponivel) {
+    alert('Novas publicações de cotação estão bloqueadas até a integração com os custos salvos no banco. Os custos atuais são apenas rascunhos locais.')
+    return
+  }
+
   if (publicando) return
 
   if (!prazo) {
@@ -487,7 +472,7 @@ const aoPublicarCotacao = async () => {
   setPublicando(true)
 
   try {
-    const resposta = await fetch('http://localhost:3001/cotacoes', {
+    const resposta = await fetch(apiUrl('/cotacoes'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -806,7 +791,7 @@ function PortalFornecedor({pagina,setPagina,aoSair}) {
       const token = sessionStorage.getItem('token')
 
       const resposta = await fetch(
-        'http://localhost:3001/fornecedor/cotacoes',
+        apiUrl('/fornecedor/cotacoes'),
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -862,7 +847,7 @@ setOportunidades(oportunidadesFormatadas)
       const token = sessionStorage.getItem('token')
 
       const resposta = await fetch(
-        'http://localhost:3001/fornecedor/propostas',
+        apiUrl('/fornecedor/propostas'),
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -916,7 +901,7 @@ setOportunidades(oportunidadesFormatadas)
     const token = sessionStorage.getItem('token')
 
     const resposta = await fetch(
-      'http://localhost:3001/fornecedor/propostas',
+      apiUrl('/fornecedor/propostas'),
       {
         method: 'POST',
         headers: {
@@ -1048,7 +1033,7 @@ function SolicitarAcesso({ setPagina }) {
       }
 
       const resposta = await fetch(
-        'http://localhost:3001/solicitacoes-acesso',
+        apiUrl('/solicitacoes-acesso'),
         {
           method: 'POST',
           headers: {
@@ -1164,7 +1149,7 @@ function PortalParticipante({ setPagina, aoSair }) {
       const token = sessionStorage.getItem('token')
 
       const resposta = await fetch(
-        'http://localhost:3001/participante/inscricoes',
+        apiUrl('/participante/inscricoes'),
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -1199,7 +1184,7 @@ function PortalParticipante({ setPagina, aoSair }) {
         const token = sessionStorage.getItem('token')
 
         const resposta = await fetch(
-          'http://localhost:3001/participante/eventos',
+          apiUrl('/participante/eventos'),
           {
             headers: {
               Authorization: `Bearer ${token}`
@@ -1244,7 +1229,7 @@ const aoInscreverEvento = async (evento) => {
     }
 
     const resposta = await fetch(
-      'http://localhost:3001/participante/inscricoes',
+      apiUrl('/participante/inscricoes'),
       {
         method: 'POST',
         headers: {
@@ -1707,7 +1692,7 @@ const aoInscreverEvento = async (evento) => {
 }
 
 function App() {
-  const [pagina, setPagina] = useState(() => {
+  const [pagina, definirPagina] = useState(() => {
   const token = sessionStorage.getItem('token')
   const paginaSalva = sessionStorage.getItem('paginaAtual')
 
@@ -1731,7 +1716,7 @@ function App() {
 
       if (!token) return
 
-      const resposta = await fetch('http://localhost:3001/eventos', {
+      const resposta = await fetch(apiUrl('/eventos'), {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -1756,7 +1741,33 @@ function App() {
   }
 }, [pagina])
 
-  const [custos, setCustos] = useState(CUSTOS_PADRAO)
+  const [geracaoSessaoCustos, setGeracaoSessaoCustos] = useState(0)
+  const geracaoSessaoCustosRef = useRef(0)
+  const [rascunhosCustos, setRascunhosCustos] = useState(() => ({
+    'novo:0': criarRascunhoCustos(0),
+  }))
+  const [chaveEvento, setChaveEvento] = useState('novo:0')
+  const [formularioCustosPendente, setFormularioCustosPendente] = useState(false)
+  const [contextoFormularioCustos, setContextoFormularioCustos] = useState(0)
+  const selecaoEventoRef = useRef({ chave: 'novo:0', versao: 0 })
+  const contadorNovoEventoRef = useRef(0)
+  const trocaEventoPendenteRef = useRef(null)
+  const paginaAtualRef = useRef(pagina)
+  const custos = rascunhosCustos[chaveEvento]?.itens || []
+  const temRascunhos = Object.values(rascunhosCustos).some(rascunhoCustosTemAlteracoes)
+
+  useEffect(() => {
+    if (!temRascunhos && !formularioCustosPendente) return
+
+    const avisarAoSair = (evento) => {
+      evento.preventDefault()
+      evento.returnValue = ''
+    }
+
+    window.addEventListener('beforeunload', avisarAoSair)
+    return () => window.removeEventListener('beforeunload', avisarAoSair)
+  }, [temRascunhos, formularioCustosPendente])
+
   const [eventoEmEdicao, setEventoEmEdicao] = useState({
     nome: 'Summit Corporativo de Inovação & Tecnologia 2026',
     data: '2026-11-18',
@@ -1766,8 +1777,8 @@ function App() {
     publico: 600,
     descricao: 'Evento corporativo focado em inovação, tecnologia e integração entre equipes.',
   })
-  const aoCriarNovoEvento = () => {
-    setEventoEmEdicao({
+  function dadosNovoEvento() {
+    return {
       nome: '',
       data: '2026-11-20',
       horario: '10:00',
@@ -1775,28 +1786,203 @@ function App() {
       categoria: 'Corporativo',
       publico: 500,
       descricao: '',
-    })
-    setCustos(CUSTOS_PADRAO)
+    }
   }
-  
+
+  function atualizarSelecao(evento, chave) {
+    const geracaoAtual = geracaoSessaoCustosRef.current
+    setRascunhosCustos((atuais) => {
+      if (atuais[chave]?.geracaoSessao === geracaoAtual) return atuais
+      return { ...atuais, [chave]: criarRascunhoCustos(geracaoAtual) }
+    })
+
+    if (selecaoEventoRef.current.chave !== chave) {
+      setContextoFormularioCustos((atual) => atual + 1)
+    }
+
+    selecaoEventoRef.current = {
+      chave,
+      versao: selecaoEventoRef.current.versao + 1,
+    }
+    setChaveEvento(chave)
+    setEventoEmEdicao(evento)
+  }
+
+  function removerRascunho(chave) {
+    setRascunhosCustos((atuais) => {
+      const restantes = { ...atuais }
+      delete restantes[chave]
+      return restantes
+    })
+  }
+
+  function setCustos(proximosCustos) {
+    // Não reutilizar callbacks de outra sessão nem recriar chaves descartadas.
+    if (geracaoSessaoCustos !== geracaoSessaoCustosRef.current) return
+
+    setRascunhosCustos((atuais) => {
+      const rascunho = atuais[chaveEvento]
+      if (!rascunho || rascunho.geracaoSessao !== geracaoSessaoCustos) return atuais
+
+      const itens = typeof proximosCustos === 'function'
+        ? proximosCustos(rascunho.itens)
+        : proximosCustos
+      const mudouConteudo = !custosSemanticamenteIguais(rascunho.itens, itens)
+
+      return {
+        ...atuais,
+        [chaveEvento]: {
+          ...rascunho,
+          itens,
+          revisaoLocal: rascunho.revisaoLocal + (mudouConteudo ? 1 : 0),
+        },
+      }
+    })
+  }
+
+  function limparRascunhosDaSessao() {
+    geracaoSessaoCustosRef.current += 1
+    setGeracaoSessaoCustos(geracaoSessaoCustosRef.current)
+    setRascunhosCustos({})
+    setFormularioCustosPendente(false)
+    setEventos([])
+    trocaEventoPendenteRef.current = null
+    contadorNovoEventoRef.current += 1
+    atualizarSelecao(dadosNovoEvento(), `novo:${contadorNovoEventoRef.current}`)
+  }
+
+  function confirmarDescarteDaSessao() {
+    return (!temRascunhos && !formularioCustosPendente) || window.confirm(
+      'Os custos estão apenas em memória e não foram salvos no banco. Sair descartará todos os rascunhos locais e os campos do formulário ainda não aplicados à lista. Deseja continuar?'
+    )
+  }
+
+  function setPagina(destino) {
+    const proximaPagina = typeof destino === 'function'
+      ? destino(paginaAtualRef.current)
+      : destino
+    const troca = trocaEventoPendenteRef.current
+    trocaEventoPendenteRef.current = null
+    const trocaDeEvento = troca && troca.tipo !== 'invalido' && (
+      troca.tipo === 'novo' || `evento:${troca.evento.id}` !== selecaoEventoRef.current.chave
+    )
+    const abandonarFormulario = formularioCustosPendente && paginaAtualRef.current === 'custos' && (
+      proximaPagina !== 'custos' || trocaDeEvento
+    )
+
+    if (abandonarFormulario && !trocaDeEvento && proximaPagina !== 'login') {
+      if (!window.confirm('Há campos de custo ainda não aplicados à lista. Sair desta página descartará esses campos, mas manterá os itens já adicionados ao rascunho. Deseja continuar?')) {
+        return false
+      }
+    }
+
+    if (troca) {
+      if (troca.tipo === 'invalido') return false
+
+      const origem = selecaoEventoRef.current.chave
+      const chaveDestino = troca.tipo === 'novo'
+        ? `novo:${contadorNovoEventoRef.current + 1}`
+        : `evento:${troca.evento.id}`
+
+      if (origem !== chaveDestino && (rascunhoCustosTemAlteracoes(rascunhosCustos[origem]) || abandonarFormulario)) {
+        const mensagem = origem.startsWith('novo:')
+          ? 'Este evento ainda não tem ID salvo. Trocar ou criar outro evento descartará seu rascunho local de custos, que não está no banco. Deseja continuar?'
+          : 'Este evento possui custos não salvos no banco. O rascunho será mantido apenas nesta sessão e poderá ser retomado ao abrir o mesmo evento. Deseja continuar?'
+
+        const avisoFormulario = abandonarFormulario
+          ? '\nOs campos do formulário ainda não aplicados à lista serão descartados.'
+          : ''
+
+        if (!window.confirm(mensagem + avisoFormulario)) return false
+      }
+
+      if (origem !== chaveDestino && origem.startsWith('novo:')) {
+        removerRascunho(origem)
+      }
+
+      if (troca.tipo === 'novo') contadorNovoEventoRef.current += 1
+      atualizarSelecao(troca.tipo === 'novo' ? dadosNovoEvento() : troca.evento, chaveDestino)
+    }
+
+    if (proximaPagina === 'login') {
+      if (!confirmarDescarteDaSessao()) return false
+      limparRascunhosDaSessao()
+    }
+
+    if (abandonarFormulario) setFormularioCustosPendente(false)
+    paginaAtualRef.current = proximaPagina
+    definirPagina(proximaPagina)
+    return true
+  }
+
+  const aoCriarNovoEvento = () => {
+    // Menu e Eventos chamam este callback antes de setPagina('criar').
+    // A troca só é aplicada junto com a navegação, após a confirmação.
+    trocaEventoPendenteRef.current = { tipo: 'novo' }
+  }
+
+  function vincularRascunhoAoEvento(id, versaoEsperada) {
+    const eventoId = Number(id)
+
+    if (
+      selecaoEventoRef.current.versao !== versaoEsperada ||
+      !Number.isSafeInteger(eventoId) || eventoId <= 0
+    ) return false
+
+    const origem = selecaoEventoRef.current.chave
+    const destino = `evento:${eventoId}`
+    const geracaoAtual = geracaoSessaoCustosRef.current
+
+    if (origem !== destino) {
+      setRascunhosCustos((atuais) => {
+        const rascunho = atuais[origem]
+        if (!rascunho || rascunho.geracaoSessao !== geracaoAtual) return atuais
+
+        // A identidade mudou: futuras respostas da chave antiga ficam inválidas.
+        const inicial = criarRascunhoCustos(geracaoAtual)
+        const proximos = {
+          ...atuais,
+          [destino]: { ...rascunho, get: inicial.get, put: inicial.put },
+        }
+        delete proximos[origem]
+        return proximos
+      })
+    }
+
+    selecaoEventoRef.current = { chave: destino, versao: versaoEsperada + 1 }
+    setChaveEvento(destino)
+    setEventoEmEdicao((anterior) => ({ ...anterior, id: eventoId }))
+    return true
+  }
+
 const aoSair = () => {
+  if (!confirmarDescarteDaSessao()) return
+
   sessionStorage.removeItem('token')
   sessionStorage.removeItem('perfil')
   sessionStorage.removeItem('paginaAtual')
-  setEventos([])
-  aoCriarNovoEvento()
-  setPagina('login')
+  limparRascunhosDaSessao()
+  paginaAtualRef.current = 'login'
+  definirPagina('login')
 }
 
 const aoSelecionarEvento = (eventoClicado) => {
+  const id = Number(eventoClicado.id)
+
+  if (!Number.isSafeInteger(id) || id <= 0) {
+    trocaEventoPendenteRef.current = { tipo: 'invalido' }
+    alert('Selecione um evento com ID válido para abrir seus custos.')
+    return
+  }
+
   const dataOriginal = eventoClicado.data || ''
 
   const dataFormatada = dataOriginal.includes('/')
     ? dataOriginal.split('/').reverse().join('-')
     : dataOriginal.substring(0, 10)
 
-  setEventoEmEdicao({
-    id: eventoClicado.id,
+  trocaEventoPendenteRef.current = { tipo: 'selecionar', evento: {
+    id,
     nome: eventoClicado.nome,
     data: dataFormatada,
     horario: eventoClicado.horario?.substring(0, 5) || '09:00',
@@ -1804,7 +1990,7 @@ const aoSelecionarEvento = (eventoClicado) => {
     categoria: eventoClicado.categoria || 'Corporativo',
     publico: eventoClicado.publico || 500,
     descricao: eventoClicado.descricao || '',
-  })
+  } }
 }
   
 const aoPublicarEvento = async (evento) => {
@@ -1824,7 +2010,7 @@ const aoPublicarEvento = async (evento) => {
     }
 
     const resposta = await fetch(
-      `http://localhost:3001/eventos/${evento.id}/publicar`,
+      apiUrl(`/eventos/${evento.id}/publicar`),
       {
         method: 'PATCH',
         headers: {
@@ -1855,8 +2041,12 @@ const aoPublicarEvento = async (evento) => {
   }
 }
 const aoExcluirEvento = async (evento) => {
+  const chaveExcluida = `evento:${evento.id}`
+  const avisoRascunho = rascunhoCustosTemAlteracoes(rascunhosCustos[chaveExcluida])
+    ? '\nOs custos em memória deste evento também serão descartados.'
+    : ''
   const confirmado = window.confirm(
-    `Tem certeza que deseja excluir o evento "${evento.nome}"?`
+    `Tem certeza que deseja excluir o evento "${evento.nome}"?${avisoRascunho}`
   )
 
   if (!confirmado) return
@@ -1871,7 +2061,7 @@ const aoExcluirEvento = async (evento) => {
     }
 
     const resposta = await fetch(
-      `http://localhost:3001/eventos/${evento.id}`,
+      apiUrl(`/eventos/${evento.id}`),
       {
         method: 'DELETE',
         headers: {
@@ -1890,6 +2080,13 @@ const aoExcluirEvento = async (evento) => {
       anteriores.filter((item) => item.id !== evento.id)
     )
 
+    removerRascunho(chaveExcluida)
+
+    if (selecaoEventoRef.current.chave === chaveExcluida) {
+      contadorNovoEventoRef.current += 1
+      atualizarSelecao(dadosNovoEvento(), `novo:${contadorNovoEventoRef.current}`)
+    }
+
     alert('Evento excluído com sucesso!')
   } catch (erro) {
     console.error('Erro ao excluir evento:', erro)
@@ -1898,6 +2095,14 @@ const aoExcluirEvento = async (evento) => {
 }
 
   const aoFinalizarESalvar = async (ticketSugerido) => {
+  if (!custos.length) {
+    alert('Cadastre os custos do evento antes de finalizar o planejamento financeiro.')
+    return
+  }
+
+  const versaoAoSalvar = selecaoEventoRef.current.versao
+  const paginaAoSalvar = paginaAtualRef.current
+
   try {
     const token = sessionStorage.getItem('token')
 
@@ -1911,8 +2116,8 @@ const aoExcluirEvento = async (evento) => {
 const editando = Boolean(eventoEmEdicao.id)
 
 const url = editando
-  ? `http://localhost:3001/eventos/${eventoEmEdicao.id}`
-  : 'http://localhost:3001/eventos'
+  ? apiUrl(`/eventos/${eventoEmEdicao.id}`)
+  : apiUrl('/eventos')
 
 const resposta = await fetch(url, {
   method: editando ? 'PUT' : 'POST',
@@ -1934,6 +2139,8 @@ const resposta = await fetch(url, {
 
     const dados = await resposta.json()
 
+    if (selecaoEventoRef.current.versao !== versaoAoSalvar) return
+
     if (!resposta.ok) {
       alert(dados.erro || 'Erro ao cadastrar evento.')
       return
@@ -1950,6 +2157,11 @@ const eventoSalvo = {
   ticket: formatarMoeda(ticketSugerido)
 }
 
+if (!editando && !vincularRascunhoAoEvento(eventoSalvo.id, versaoAoSalvar)) {
+  alert('Evento salvo, mas a API não retornou um ID válido para associar o rascunho de custos.')
+  return
+}
+
 if (editando) {
   setEventos((anteriores) =>
     anteriores.map((evento) =>
@@ -1962,7 +2174,7 @@ if (editando) {
   setEventos((anteriores) => [eventoSalvo, ...anteriores])
 }
 
-setPagina('eventos')
+if (paginaAtualRef.current === paginaAoSalvar) setPagina('eventos')
 
 alert(
   editando
@@ -2001,6 +2213,13 @@ alert(
       aoCriarNovoEvento={aoCriarNovoEvento}
       aoSair={aoSair}
     >
+      {['custos', 'cotacao', 'ticket'].includes(pagina) && (
+        <p role="status">
+          Os custos são rascunhos mantidos apenas em memória, separados por evento.
+          Eles não foram salvos no banco e serão perdidos ao recarregar ou sair.
+          Novas publicações de cotação estão bloqueadas até a integração com os custos persistidos.
+        </p>
+      )}
       {pagina === 'perfil' && <PerfilOrganizador />}
       {pagina === 'eventos' && (
         <Eventos
@@ -2019,6 +2238,9 @@ alert(
           setPagina={setPagina}
           
 aoAvancarParaCustos={async () => {
+  const versaoAoSalvar = selecaoEventoRef.current.versao
+  const paginaAoSalvar = paginaAtualRef.current
+
   try {
     const token = sessionStorage.getItem('token')
 
@@ -2032,8 +2254,8 @@ aoAvancarParaCustos={async () => {
 
     const resposta = await fetch(
       eventoExistente
-        ? `http://localhost:3001/eventos/${eventoEmEdicao.id}`
-        : 'http://localhost:3001/eventos',
+        ? apiUrl(`/eventos/${eventoEmEdicao.id}`)
+        : apiUrl('/eventos'),
       {
         method: eventoExistente ? 'PUT' : 'POST',
         headers: {
@@ -2045,6 +2267,8 @@ aoAvancarParaCustos={async () => {
     )
 
     const dados = await resposta.json()
+
+    if (selecaoEventoRef.current.versao !== versaoAoSalvar) return
 
     if (!resposta.ok) {
       alert(dados.erro || 'Erro ao salvar evento.')
@@ -2059,13 +2283,13 @@ aoAvancarParaCustos={async () => {
         return
       }
 
-      setEventoEmEdicao((anterior) => ({
-        ...anterior,
-        id: idCriado
-      }))
+      if (!vincularRascunhoAoEvento(idCriado, versaoAoSalvar)) {
+        alert('Evento salvo, mas a API não retornou um ID válido para associar o rascunho de custos.')
+        return
+      }
     }
 
-    setPagina('custos')
+    if (paginaAtualRef.current === paginaAoSalvar) setPagina('custos')
   } catch (erro) {
     console.error('Erro ao salvar evento:', erro)
     alert('Não foi possível conectar ao servidor.')
@@ -2076,8 +2300,11 @@ aoAvancarParaCustos={async () => {
       )}
       {pagina === 'custos' && (
         <Custos
+          key={contextoFormularioCustos}
           evento={eventoEmEdicao}
           custos={custos}
+          setCustos={setCustos}
+          aoAlterarFormularioPendente={setFormularioCustosPendente}
           setPagina={setPagina}
         />
       )}
@@ -2088,14 +2315,22 @@ aoAvancarParaCustos={async () => {
           setPagina={setPagina}
         />
       )}
-      {pagina === 'ticket' && (
+      {pagina === 'ticket' && (custos.length === 0 ? (
+        <section className="cartaoFormulario">
+          <h1>Planejamento financeiro indisponível</h1>
+          <p>Este evento não possui custos cadastrados. Nenhum resultado financeiro será apresentado enquanto a lista estiver vazia.</p>
+          <button className="principal" onClick={() => setPagina('custos')}>
+            Voltar para Itens de Custo
+          </button>
+        </section>
+      ) : (
         <Ticket
           evento={eventoEmEdicao}
           custos={custos}
           setPagina={setPagina}
           aoFinalizarESalvar={aoFinalizarESalvar}
         />
-      )}
+      ))}
     </Layout>
   )
 }

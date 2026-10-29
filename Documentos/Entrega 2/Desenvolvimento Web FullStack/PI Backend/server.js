@@ -3,7 +3,8 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
-require("dotenv").config();
+const { modoExecucao } = require("./isolamento.cjs");
+if (modoExecucao() === "principal") require("dotenv").config();
 
 const db = require("./db");
 
@@ -1036,6 +1037,160 @@ app.patch("/eventos/:id/publicar", autenticar, permitirPerfis("organizador"), as
   }
 );
 
+// Listar custos de um evento do organizador
+app.get("/eventos/:id/custos", autenticar, permitirPerfis("organizador"), async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    if (!Number.isSafeInteger(id) || id <= 0) {
+      return res.status(400).json({
+        erro: "ID do evento inválido."
+      });
+    }
+
+    const [eventos] = await db.execute(
+      "SELECT id FROM eventos WHERE id = ? AND usuario_id = ?",
+      [id, req.usuario.id]
+    );
+
+    if (eventos.length === 0) {
+      return res.status(404).json({
+        erro: "Evento não encontrado."
+      });
+    }
+
+    const [custos] = await db.execute(
+      `SELECT id, evento_id, categoria, descricao, valor_estimado
+       FROM custos_evento
+       WHERE evento_id = ?
+       ORDER BY id`,
+      [id]
+    );
+
+    return res.status(200).json(custos);
+  } catch (erro) {
+    console.error("Erro ao listar custos do evento:", erro);
+
+    return res.status(500).json({
+      erro: "Erro interno ao listar custos do evento."
+    });
+  }
+});
+
+// Substituir os custos de um evento do organizador
+app.put("/eventos/:id/custos", autenticar, permitirPerfis("organizador"), async (req, res) => {
+  let conexao;
+
+  try {
+    const id = Number(req.params.id);
+    const { custos } = req.body || {};
+
+    if (!Number.isSafeInteger(id) || id <= 0) {
+      return res.status(400).json({
+        erro: "ID do evento inválido."
+      });
+    }
+
+    if (!Array.isArray(custos)) {
+      return res.status(400).json({
+        erro: "Informe a propriedade custos como um array."
+      });
+    }
+
+    const custosValidados = [];
+
+    for (const item of custos) {
+      if (
+        !item || typeof item !== "object" || Array.isArray(item) ||
+        typeof item.categoria !== "string" || !item.categoria.trim() ||
+        Array.from(item.categoria.trim()).length > 100 ||
+        typeof item.descricao !== "string" || !item.descricao.trim() ||
+        Array.from(item.descricao.trim()).length > 255 ||
+        !["number", "string"].includes(typeof item.valor_estimado) ||
+        (typeof item.valor_estimado === "number" && !Number.isFinite(item.valor_estimado))
+      ) {
+        return res.status(400).json({
+          erro: "Informe categoria de até 100 caracteres, descrição de até 255 caracteres e valor estimado válido."
+        });
+      }
+
+      const valor = String(item.valor_estimado).trim();
+
+      if (!/^\d+(?:\.\d{1,2})?$/.test(valor)) {
+        return res.status(400).json({
+          erro: "O valor estimado deve ser não negativo e possuir no máximo duas casas decimais."
+        });
+      }
+
+      const [inteiro, fracao = ""] = valor.split(".");
+      const inteiroNormalizado = inteiro.replace(/^0+(?=\d)/, "");
+
+      if (inteiroNormalizado.length > 10) {
+        return res.status(400).json({
+          erro: "O valor estimado não pode exceder 9999999999.99."
+        });
+      }
+
+      custosValidados.push({
+        categoria: item.categoria.trim(),
+        descricao: item.descricao.trim(),
+        valor_estimado: `${inteiroNormalizado}.${fracao.padEnd(2, "0")}`
+      });
+    }
+
+    conexao = await db.getConnection();
+    await conexao.beginTransaction();
+
+    const [eventos] = await conexao.execute(
+      "SELECT id FROM eventos WHERE id = ? AND usuario_id = ? FOR UPDATE",
+      [id, req.usuario.id]
+    );
+
+    if (eventos.length === 0) {
+      await conexao.rollback();
+      return res.status(404).json({
+        erro: "Evento não encontrado."
+      });
+    }
+
+    await conexao.execute("DELETE FROM custos_evento WHERE evento_id = ?", [id]);
+
+    for (const item of custosValidados) {
+      await conexao.execute(
+        `INSERT INTO custos_evento (evento_id, categoria, descricao, valor_estimado)
+         VALUES (?, ?, ?, ?)`,
+        [id, item.categoria, item.descricao, item.valor_estimado]
+      );
+    }
+
+    const [custosSalvos] = await conexao.execute(
+      `SELECT id, evento_id, categoria, descricao, valor_estimado
+       FROM custos_evento
+       WHERE evento_id = ?
+       ORDER BY id`,
+      [id]
+    );
+
+    await conexao.commit();
+    return res.status(200).json(custosSalvos);
+  } catch (erro) {
+    if (conexao) {
+      try {
+        await conexao.rollback();
+      } catch (erroRollback) {
+        console.error("Erro ao reverter custos do evento:", erroRollback);
+      }
+    }
+
+    console.error("Erro ao salvar custos do evento:", erro);
+    return res.status(500).json({
+      erro: "Erro interno ao salvar custos do evento."
+    });
+  } finally {
+    if (conexao) conexao.release();
+  }
+});
+
 // Listar eventos do usuário
 app.get("/eventos/:id", autenticar, async (req, res) => {
   try {
@@ -1368,6 +1523,10 @@ app.patch("/solicitacoes-acesso/:id", autenticar, permitirPerfis("admin"), async
 
 const PORT = process.env.PORT || 3001
 
+if (require.main === module && modoExecucao() === "principal") {
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`)
 })
+}
+
+module.exports = app;

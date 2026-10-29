@@ -1,3 +1,8 @@
+const { modoExecucao, obterBancoIsolado } = require("./isolamento.cjs");
+
+if (modoExecucao() === "isolado") {
+  module.exports = obterBancoIsolado();
+} else {
 require("dotenv").config();
 
 const mysql = require("mysql2/promise");
@@ -13,3 +18,4 @@ const db = mysql.createPool({
 });
 
 module.exports = db;
+}
