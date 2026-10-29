@@ -92,11 +92,11 @@ for (const modo of ['principal', 'isolado']) {
   })
 }
 
-test('as 25 referencias dos componentes usam apiUrl com destinos preservados', async () => {
+test('as referencias dos componentes usam apiUrl com destinos preservados', async () => {
   const { apiUrl: construirIsolado } = await carregarApi({ MODE: 'isolado', TROCATICKET_API_MODO: 'isolado' })
   let totalFetch = 0
   for (const [arquivo, quantidade] of [
-    ['../src/App.jsx', 19], ['../src/components/admin/AdminPortal.jsx', 6],
+    ['../src/services/eventos.js', 5], ['../src/pages/participante/PortalParticipante.jsx', 3], ['../src/pages/fornecedor/PortalFornecedor.jsx', 3], ['../src/pages/auth/SolicitarAcesso.jsx', 1], ['../src/pages/auth/Login.jsx', 1], ['../src/pages/auth/Cadastro.jsx', 1], ['../src/pages/organizador/Cotacao.jsx', 2], ['../src/components/admin/AdminPortal.jsx', 6],
   ]) {
     const fonte = readFileSync(new URL(arquivo, import.meta.url), 'utf8')
     assert.doesNotMatch(fonte, /(?:localhost|127\.0\.0\.1):3001/u)
@@ -110,7 +110,7 @@ test('as 25 referencias dos componentes usam apiUrl com destinos preservados', a
       assert.equal(construirIsolado(caminho), `/api${caminho}`)
     }
   }
-  assert.equal(totalFetch, 23)
+  assert.equal(totalFetch, 21)
 })
 
 test('respostas simuladas funcionam nos dois modos sem requisicoes reais', async () => {

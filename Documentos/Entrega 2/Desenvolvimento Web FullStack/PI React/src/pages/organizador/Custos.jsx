@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { formatarMoeda } from '../../utils/formatarMoeda.js'
+import { rascunhoCustosTemAlteracoes } from '../../utils/rascunhosCustos.js'
 
 function converterParaCentavos(texto) {
   const valor = texto.trim()
@@ -23,10 +24,17 @@ export function Custos({
   setCustos,
   aoAlterarFormularioPendente,
   setPagina,
+  rascunho,
+  persistencia,
+  aoUsarServidor,
 }) {
   const [formulario, setFormulario] = useState({ categoria: '', descricao: '', valor: '' })
   const [edicao, setEdicao] = useState(null)
   const [erro, setErro] = useState('')
+  const carregando = rascunho.get.estado === 'carregando'
+  const salvando = rascunho.put.estado === 'salvando'
+  const incerto = rascunho.put.estado === 'resultadoIncerto'
+  const semId = !Number.isSafeInteger(evento.id) || evento.id <= 0
   const totalCentavos = useMemo(() => {
     return custos.reduce((total, item) => total + BigInt(Math.round(item.valor * 100)), 0n)
   }, [custos])
@@ -147,7 +155,7 @@ export function Custos({
       </div>
       <form className="cartaoFormulario" onSubmit={aplicarFormulario} noValidate>
         <h2>{edicao ? 'Editar item do rascunho' : 'Adicionar item de custo'}</h2>
-        <p>Os itens ficam apenas na memória desta sessão. Nenhum custo foi salvo no banco.</p>
+        <p>Adicionar, editar ou remover altera o rascunho. Use “Salvar custos no banco” para persistir a lista.</p>
         <label htmlFor="custo-categoria">Categoria *</label>
         <input
           id="custo-categoria"
@@ -231,6 +239,37 @@ export function Custos({
       <div className="total">
         <span>Total estimado</span>
         <strong>{formatarTotalCentavos(totalCentavos)}</strong>
+      </div>
+      {!persistencia.disponivel && <p role="status">Persistência disponível somente no ambiente isolado. Neste ambiente, os custos continuam locais.</p>}
+      {semId && <p role="status">Salve os dados básicos do evento antes de persistir custos.</p>}
+      {carregando && <p role="status">Consultando os custos do evento...</p>}
+      {salvando && <p role="status">Salvando a lista enviada. Edições posteriores continuam locais.</p>}
+      {rascunho.get.erro && <p role="alert">{rascunho.get.erro}</p>}
+      {rascunho.put.erro && <p role="alert">{rascunho.put.erro}</p>}
+      {rascunho.put.mensagem && <p role="status">{rascunho.put.mensagem}</p>}
+      {rascunho.conflitoRemoto && <p role="alert">O servidor possui custos diferentes. O rascunho foi preservado. Revise antes de substituir a lista.</p>}
+      {rascunho.conflitoRemoto && (
+        <details>
+          <summary>Conferir última lista do servidor</summary>
+          <ul>{rascunho.basePersistida.map(item => (
+            <li key={item.id}>{item.categoria}: {item.descricao} — {formatarMoeda(item.valor)}</li>
+          ))}</ul>
+        </details>
+      )}
+      {temAlteracoes() && <p role="status">Aplique ou cancele os campos do formulário antes de salvar no banco.</p>}
+      <div className="acoes">
+        <button type="button" className="secundario" onClick={persistencia.carregar}
+          disabled={!persistencia.disponivel || semId || carregando || salvando}>
+          {incerto ? 'Verificar resultado no servidor' : 'Consultar custos no servidor'}
+        </button>
+        <button type="button" className="secundario" onClick={aoUsarServidor}
+          disabled={!persistencia.disponivel || rascunho.basePersistida === null || carregando || salvando || incerto || rascunho.get.estado !== 'carregado'}>
+          Usar última lista do servidor
+        </button>
+        <button type="button" className="principal" onClick={persistencia.salvar}
+          disabled={!persistencia.disponivel || semId || rascunho.basePersistida === null || carregando || salvando || incerto || temAlteracoes() || rascunho.get.estado !== 'carregado' || !rascunhoCustosTemAlteracoes(rascunho)}>
+          {salvando ? 'Salvando custos...' : 'Salvar custos no banco'}
+        </button>
       </div>
       <div className="acoes">
         <button

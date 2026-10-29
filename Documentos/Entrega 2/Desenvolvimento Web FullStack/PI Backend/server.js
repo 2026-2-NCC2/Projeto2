@@ -354,24 +354,36 @@ app.post("/login", async (req, res) => {
 });
 
  // Publicar cotação de um evento
+// Canonicaliza DECIMAL(12,2) sem arredondamento.
+function normalizarItemCotacao(item) {
+  if (!item || typeof item !== "object" || Array.isArray(item) ||
+      typeof item.categoria !== "string" || !item.categoria.trim() ||
+      Array.from(item.categoria.trim()).length > 100 ||
+      typeof item.descricao !== "string" || !item.descricao.trim() ||
+      Array.from(item.descricao.trim()).length > 255 ||
+      !["number", "string"].includes(typeof item.valor_estimado) ||
+      (typeof item.valor_estimado === "number" && !Number.isFinite(item.valor_estimado))) return null;
+  const valor = String(item.valor_estimado).trim();
+  if (!/^\d+(?:\.\d{1,2})?$/.test(valor)) return null;
+  const [inteiro, fracao = ""] = valor.split(".");
+  const normalizado = inteiro.replace(/^0+(?=\d)/, "");
+  if (normalizado.length > 10) return null;
+  return { categoria: item.categoria.trim(), descricao: item.descricao.trim(),
+    valor_estimado: normalizado + "." + fracao.padEnd(2, "0") };
+}
+
 app.post("/cotacoes", autenticar, permitirPerfis("organizador"), async (req, res) => {
   const { evento_id, prazo, observacoes, itens } = req.body || {};
+  const revisados = Array.isArray(itens) ? Array.from(itens, normalizarItemCotacao) : null;
 
   if (
-    !Number.isInteger(Number(evento_id)) ||
+    !["number", "string"].includes(typeof evento_id) ||
+    !Number.isSafeInteger(Number(evento_id)) ||
     Number(evento_id) <= 0 ||
     typeof prazo !== "string" ||
     !/^\d{4}-\d{2}-\d{2}$/.test(prazo) ||
-    !Array.isArray(itens) ||
-    itens.length === 0 ||
-    itens.some(item =>
-      typeof item.categoria !== "string" ||
-      !item.categoria.trim() ||
-      typeof item.descricao !== "string" ||
-      !item.descricao.trim() ||
-      !Number.isFinite(Number(item.valor_estimado)) ||
-      Number(item.valor_estimado) < 0
-    )
+    !revisados || revisados.some(item => !item) ||
+    (observacoes !== undefined && typeof observacoes !== "string")
   ) {
     return res.status(400).json({
       erro: "Informe evento, prazo válido e itens da cotação."
@@ -391,23 +403,26 @@ app.post("/cotacoes", autenticar, permitirPerfis("organizador"), async (req, res
   }
 
   let conexao;
+  let descartarConexao = false;
 
   try {
     conexao = await db.getConnection();
-
     await conexao.beginTransaction();
-
+    // Mesmo bloqueio e mesma ordem utilizados pelo PUT de custos.
     const [eventos] = await conexao.execute(
-      "SELECT id FROM eventos WHERE id = ? AND usuario_id = ?",
+      "SELECT id FROM eventos WHERE id = ? AND usuario_id = ? FOR UPDATE",
       [Number(evento_id), req.usuario.id]
     );
-
-    if (eventos.length === 0) {
-      await conexao.rollback();
-
-      return res.status(404).json({
-        erro: "Evento não encontrado ou não pertence ao usuário."
-      });
+    if (eventos.length === 0) throw Object.assign(new Error(), { respostaStatus: 404 });
+    const [custos] = await conexao.execute(
+      `SELECT id, categoria, descricao, valor_estimado FROM custos_evento
+       WHERE evento_id = ? ORDER BY id FOR UPDATE`, [Number(evento_id)]
+    );
+    if (custos.length === 0) throw Object.assign(new Error(), { respostaStatus: 400 });
+    const persistidos = custos.map(normalizarItemCotacao);
+    if (persistidos.some(item => !item)) throw new Error("Custos persistidos inválidos");
+    if (JSON.stringify(revisados) !== JSON.stringify(persistidos)) {
+      throw Object.assign(new Error(), { respostaStatus: 409 });
     }
 
     const [resultado] = await conexao.execute(
@@ -419,7 +434,7 @@ app.post("/cotacoes", autenticar, permitirPerfis("organizador"), async (req, res
 
     const cotacaoId = resultado.insertId;
 
-    for (const item of itens) {
+    for (const item of persistidos) {
       await conexao.execute(
         `INSERT INTO itens_cotacao
          (cotacao_id, categoria, descricao, valor_estimado)
@@ -428,7 +443,7 @@ app.post("/cotacoes", autenticar, permitirPerfis("organizador"), async (req, res
           cotacaoId,
           item.categoria.trim(),
           item.descricao.trim(),
-          Number(item.valor_estimado)
+          item.valor_estimado
         ]
       );
     }
@@ -444,24 +459,35 @@ app.post("/cotacoes", autenticar, permitirPerfis("organizador"), async (req, res
         modalidade: "Fechada",
         observacoes: observacoes || "",
         status: "Aberta",
-        itens
+        itens: persistidos
       }
     });
 
   } catch (erro) {
+    let status = erro.respostaStatus || 500;
     if (conexao) {
-      await conexao.rollback();
+      try { await conexao.rollback(); }
+      catch {
+        status = 500;
+        // O adaptador isolado destroi a conexao ao liberar.
+        if (typeof conexao.destroy === "function") {
+          descartarConexao = true;
+          try { conexao.destroy(); } catch { /* Preserva a resposta de erro. */ }
+        }
+      }
     }
-
-    console.error("Erro ao publicar cotação:", erro);
-
-    return res.status(500).json({
-      erro: "Erro interno ao publicar cotação."
-    });
+    if (![400, 404, 409].includes(status)) status = 500;
+    const mensagens = {
+      400: "Cadastre custos no evento antes de publicar a cotação.",
+      404: "Evento não encontrado ou não pertence ao usuário.",
+      409: "Os custos foram alterados. Consulte e revise a lista antes de publicar.",
+      500: "Não foi possível confirmar a publicação. Consulte as cotações antes de tentar novamente.",
+    };
+    return res.status(status).json({ erro: mensagens[status] });
 
   } finally {
-    if (conexao) {
-      conexao.release();
+    if (conexao && !descartarConexao) {
+      try { conexao.release(); } catch { console.error("Falha ao liberar conexão da publicação."); }
     }
   }
 });
