@@ -1,114 +1,23 @@
+import { CriarEvento } from './pages/organizador/CriarEvento.jsx'
+import { Eventos } from './pages/organizador/Eventos.jsx'
+import { Layout } from './components/layout/Layout.jsx'
 import { useState, useMemo, useEffect } from 'react'
+import { formatarMoeda } from './utils/formatarMoeda.js'
+import { CUSTOS_PADRAO } from './constants/custosPadrao.js'
 import './App.css'
 import { AdminPortal } from './components/admin/AdminPortal'
 
 
 
-const formatarMoeda = (valor) => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(valor)
-}
 
-const CUSTOS_PADRAO = [
-  { id: 1, categoria: 'Áudio & Som', descricao: 'Som / PA Principal', valor: 8000 },
-  { id: 2, categoria: 'Iluminação & Vídeo', descricao: 'Painel de LED e Iluminação Cênica', valor: 12000 },
-  { id: 3, categoria: 'Estrutura & Palco', descricao: 'Montagem de Palco & Cenografia', valor: 4500 },
-  { id: 4, categoria: 'Segurança & Brigada', descricao: 'Equipe de Segurança e Credenciamento', valor: 3500 },
-  { id: 5, categoria: 'Limpeza & Facilities', descricao: 'Equipe de Limpeza & Conservação', valor: 2000 },
-]
 
-function Cabecalho() {
-  return (
-    <header>
-      <div className="logo">
-        ▣ <span>TrocaTicket</span>
-      </div>
-      <div className="empresa">Gestão Corporativa</div>
-      <div className="usuario">
-        <strong>Roberto Albuquerque</strong>
-        <small>Organizador</small>
-      </div>
-    </header>
-  )
-}
 
-function Menu({ pagina, setPagina, aoCriarNovoEvento }) {
-  return (
-    <aside className="menu">
-      <div className="logo">
-        ▣ <span>TrocaTicket</span>
-      </div>
-      <button
-        className="novo"
-        onClick={() => {
-          aoCriarNovoEvento()
-          setPagina('criar')
-        }}
-      >
-        + Novo evento
-      </button>
-      <nav>
-        <button
-          className={pagina === 'eventos' ? 'ativo' : ''}
-          onClick={() => setPagina('eventos')}
-        >
-          ▦ Meus Eventos
-        </button>
-        <button
-          className={pagina === 'criar' ? 'ativo' : ''}
-          onClick={() => setPagina('criar')}
-        >
-          ➕ Criar Evento
-        </button>
-        <button
-          className={pagina === 'custos' ? 'ativo' : ''}
-          onClick={() => setPagina('custos')}
-        >
-          📊 Custos
-        </button>
-        <button
-          className={pagina === 'cotacao' ? 'ativo' : ''}
-          onClick={() => setPagina('cotacao')}
-        >
-          ▣ Cotações & Concorrência
-        </button>
-        <button
-          className={pagina === 'ticket' ? 'ativo' : ''}
-          onClick={() => setPagina('ticket')}
-        >
-          ◇ Propostas & Ticket
-        </button>
-      </nav>
-      <div className="menuRodape">
-        <button
-          className={pagina === 'perfil' ? 'ativo' : ''}
-          onClick={() => setPagina('perfil')}
-        >
-          ◉ Perfil
-        </button>
-        <button onClick={() => setPagina('login')}>↪ Sair</button>
-      </div>
-    </aside>
-  )
-}
 
-function Layout({ children: filhos, pagina, setPagina, aoCriarNovoEvento }) {
-  return (
-    <>
-      <Cabecalho />
-      <div className="layout">
-        <Menu
-          pagina={pagina}
-          setPagina={setPagina}
-          aoCriarNovoEvento={aoCriarNovoEvento}
-        />
-        <main className="conteudo">{filhos}</main>
-      </div>
-    </>
-  )
-}
+
+
+
+
+
 
 function Cadastro({ setPagina }) {
   const [nome, setNome] = useState('')
@@ -348,263 +257,6 @@ if (perfilUsuario === 'admin') {
   )
 }
 
-function Eventos({eventos, setPagina, aoSelecionarEvento, aoCriarNovoEvento, aoExcluirEvento, aoPublicarEvento}) {
-  const [termoBusca, setTermoBusca] = useState('')
-  const [filtroStatus, setFiltroStatus] = useState('Todos')
-  const eventosFiltrados = useMemo(() => {
-    return eventos.filter((evento) => {
-      const correspondeTexto = evento.nome
-        .toLowerCase()
-        .includes(termoBusca.toLowerCase())
-      const correspondeStatus =
-        filtroStatus === 'Todos' || evento.status === filtroStatus
-      return correspondeTexto && correspondeStatus
-    })
-  }, [eventos, termoBusca, filtroStatus])
-  const totalAtivos = eventos.filter((itemEvento) => itemEvento.status === 'Ativo').length
-  const totalPlanejamento = eventos.filter(
-    (itemEvento) => itemEvento.status === 'Em planejamento'
-  ).length
-  return (
-    <div>
-      <div className="tituloLinha">
-        <div>
-          <p className="trilhaNavegacao">
-            TrocaTicket › Gestão Corporativa › Meus Eventos
-          </p>
-          <h1>
-            Meus eventos:{' '}
-            <small>
-              {eventos.length} eventos cadastrados ({totalAtivos} ativos)
-            </small>
-          </h1>
-          <p>
-            Acompanhamento centralizado de cotações, orçamentos e preço sugerido.
-          </p>
-        </div>
-        <button
-          className="principal pequeno"
-          onClick={() => {
-            aoCriarNovoEvento()
-            setPagina('criar')
-          }}
-        >
-          + Novo Evento
-        </button>
-      </div>
-      <div className="filtros">
-        <input
-          placeholder="🔍 Filtrar por nome do evento..."
-          value={termoBusca}
-          onChange={(eventoDisparado) => setTermoBusca(eventoDisparado.target.value)}
-        />
-        <button
-          className={filtroStatus === 'Todos' ? 'ativo' : ''}
-          onClick={() => setFiltroStatus('Todos')}
-        >
-          Todos ({eventos.length})
-        </button>
-        <button
-          className={filtroStatus === 'Ativo' ? 'ativo' : ''}
-          onClick={() => setFiltroStatus('Ativo')}
-        >
-          Ativos ({totalAtivos})
-        </button>
-        <button
-          className={filtroStatus === 'Em planejamento' ? 'ativo' : ''}
-          onClick={() => setFiltroStatus('Em planejamento')}
-        >
-          Em planejamento ({totalPlanejamento})
-        </button>
-      </div>
-      <div className="listaEventos">
-        {eventosFiltrados.length === 0 ? (
-          <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
-            Nenhum evento encontrado para o filtro aplicado.
-          </div>
-        ) : (
-          eventosFiltrados.map((evento) => (
-            <div className="evento" key={evento.id}>
-              <div className="barra"></div>
-              <div className="eventoInfo">
-                <h2>{evento.nome}</h2>
-                <span className="status">{evento.status}</span>
-                <p>
-                  ▣ {evento.data} &nbsp; ◉ {evento.local || 'São Paulo - SP'}
-                </p>
-              </div>
-              <div className="numero">
-                <small>PREVISTOS</small>
-                <strong>{evento.publico}</strong>
-              </div>
-              <div className="numero">
-                <small>COTAÇÃO</small>
-                <strong>{evento.cotacao}</strong>
-              </div>
-              <div className="numero">
-                <small>TICKET SUGERIDO</small>
-                <strong>{evento.ticket}</strong>
-              </div>
-              <button
-              type="button"
-              onClick={() => aoExcluirEvento(evento)}
-              style={{
-              backgroundColor: '#dc3545',
-              color: 'white',
-             border: 'none',
-             borderRadius: '6px',
-              padding: '8px 12px',
-              cursor: 'pointer'
-              }}
-            >
-            Excluir
-            </button>
-              {evento.status === 'Em planejamento' && (
-              <button
-    type="button"
-    onClick={() => aoPublicarEvento(evento)}
-    style={{
-      backgroundColor: '#198754',
-      color: 'white',
-      border: 'none',
-      borderRadius: '6px',
-      padding: '8px 12px',
-      cursor: 'pointer'
-    }}
-  >
-    Publicar
-  </button>
-              )}
-              <button
-                className="seta"
-                title="Acessar cotações e custos deste evento"
-                onClick={() => {
-                  aoSelecionarEvento(evento)
-                  setPagina('custos')
-                }}
-              >
-                ›
-              </button>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  )
-}
-
-function CriarEvento({
-  evento,
-  setEvento,
-  setPagina,
-  aoAvancarParaCustos,
-}) {
-  const categorias = ['Corporativo', 'Confraternização', 'Workshop', 'Social']
-  const aoAlterarCampo = (campo, valor) => {
-    setEvento((estadoAnterior) => ({ ...estadoAnterior, [campo]: valor }))
-  }
-  const aoEnviarFormulario = async (eventoDisparado) => {
-  eventoDisparado.preventDefault()
-  await aoAvancarParaCustos()
-  }
-  return (
-    <div>
-      <button className="voltar" onClick={() => setPagina('eventos')}>
-        ← Voltar para Meus Eventos
-      </button>
-      <h1>CRIAR EVENTO</h1>
-      <p>Comece pelos dados básicos para planejar o evento e as cotações.</p>
-      <div className="etapas">
-        <b>1 &nbsp; Dados Básicos</b>
-        <span>2 &nbsp; Custos e Cotações</span>
-        <span>3 &nbsp; Ticket e Viabilidade</span>
-      </div>
-      <form onSubmit={aoEnviarFormulario} className="cartaoFormulario">
-        <label>Nome do evento *</label>
-        <input
-          value={evento.nome}
-          onChange={(eventoDisparado) => aoAlterarCampo('nome', eventoDisparado.target.value)}
-          placeholder="Ex: Summit Corporativo de Inovação & Tecnologia 2026"
-          required
-        />
-        <div className="duasColunas">
-          <div>
-            <label>Data do evento *</label>
-            <input
-              type="date"
-              value={evento.data}
-              onChange={(eventoDisparado) => aoAlterarCampo('data', eventoDisparado.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label>Horário de início *</label>
-            <input
-              type="time"
-              value={evento.horario}
-              onChange={(eventoDisparado) => aoAlterarCampo('horario', eventoDisparado.target.value)}
-              required
-            />
-          </div>
-        </div>
-        <div className="duasColunas">
-          <div>
-            <label>Local do evento *</label>
-            <input
-              value={evento.local}
-              onChange={(eventoDisparado) => aoAlterarCampo('local', eventoDisparado.target.value)}
-              placeholder="Ex: Centro de Convenções Rebouças - SP"
-              required
-            />
-          </div>
-          <div>
-            <label>Público previsto (participantes) *</label>
-            <input
-              type="number"
-              min="1"
-              value={evento.publico}
-              onChange={(eventoDisparado) => aoAlterarCampo('publico', Number(eventoDisparado.target.value))}
-              required
-            />
-          </div>
-        </div>
-        <label>Categoria do evento</label>
-        <div className="categorias">
-          {categorias.map((itemCategoria) => (
-            <button
-              type="button"
-              key={itemCategoria}
-              className={evento.categoria === itemCategoria ? 'selecionado' : ''}
-              onClick={() => aoAlterarCampo('categoria', itemCategoria)}
-            >
-              {itemCategoria}
-            </button>
-          ))}
-        </div>
-        <label>Descrição do evento e escopo previsto</label>
-        <textarea
-          rows="4"
-          value={evento.descricao}
-          onChange={(eventoDisparado) => aoAlterarCampo('descricao', eventoDisparado.target.value)}
-          placeholder="Descreva os objetivos, perfil do público e necessidades gerais..."
-        />
-        <div className="acoes">
-          <button
-            type="button"
-            className="secundario"
-            onClick={() => setPagina('eventos')}
-          >
-            Cancelar
-          </button>
-          <button type="submit" className="principal">
-            Salvar para Custos & Cotações →
-          </button>
-        </div>
-      </form>
-    </div>
-  )
-}
-
 function Custos({
   evento,
   custos,
@@ -681,8 +333,10 @@ function Cotacao({
 }) {
   const [prazo, setPrazo] = useState('')
   const [publicando, setPublicando] = useState(false)
-  const [propostasRecebidas, setPropostasRecebidas] = useState([])
-  const [carregandoPropostas, setCarregandoPropostas] = useState(true)
+  const [propostasRecebidasSalvas, setPropostasRecebidas] = useState([])
+  const [buscandoPropostas, setCarregandoPropostas] = useState(true)
+  const propostasRecebidas = evento?.id ? propostasRecebidasSalvas : []
+  const carregandoPropostas = Boolean(evento?.id) && buscandoPropostas
   const [erroPropostas, setErroPropostas] = useState('')
   useEffect(() => {
   const buscarPropostasRecebidas = async () => {
@@ -724,9 +378,6 @@ function Cotacao({
 
   if (evento?.id) {
     buscarPropostasRecebidas()
-  } else {
-    setPropostasRecebidas([])
-    setCarregandoPropostas(false)
   }
 }, [evento?.id])
   const [avaliandoPropostaId, setAvaliandoPropostaId] = useState(null)
@@ -1115,12 +766,7 @@ function Ticket({
   )
 }
 
-const OPORTUNIDADES = [
- {id:9041,nome:'Summit Corporativo Tech 2026',organizador:'Vanguard Corp Eventos',categoria:'Áudio & Som',local:'São Paulo, SP',publico:650,prazo:'2026-10-25',descricao:'Sistema de PA, microfones e suporte técnico para conferência.'},
- {id:8820,nome:'InterFacul Fest SP 2026',organizador:'Liga Universitária Paulista',categoria:'Estrutura & Palco',local:'São Paulo, SP',publico:1500,prazo:'2026-11-10',descricao:'Palco e infraestrutura para festival universitário.'},
- {id:7633,nome:'Festival Sons do Brasil',organizador:'ArteViva Entretenimento',categoria:'Iluminação & Vídeo',local:'Campinas, SP',publico:2000,prazo:'2026-11-15',descricao:'Iluminação cênica, vídeo e operação técnica.'},
- {id:6102,nome:'Congresso Nacional Médico',organizador:'Sociedade Paulista de Medicina',categoria:'Áudio & Som',local:'São Paulo, SP',publico:900,prazo:'2026-11-22',descricao:'Microfonia sem fio, sonorização e operação.'},
-]
+
 
 function PerfilFornecedor({ perfil, setPerfil, propostas }) {
   const [editando, setEditando] = useState(false)
@@ -1146,7 +792,7 @@ function PerfilFornecedor({ perfil, setPerfil, propostas }) {
   </div>
 }
 
-function PortalFornecedor({pagina,setPagina}) {
+function PortalFornecedor({pagina,setPagina,aoSair}) {
  const [busca,setBusca]=useState('')
  const [oportunidades, setOportunidades] = useState([])
   const [carregandoOportunidades, setCarregandoOportunidades] = useState(true)
@@ -1205,8 +851,8 @@ setOportunidades(oportunidadesFormatadas)
 }, [])
  const [selecionada, setSelecionada] = useState(null)
  const [propostas, setPropostas] = useState([])
- const [carregandoPropostas, setCarregandoPropostas] = useState(true)
- const [erroPropostas, setErroPropostas] = useState('')
+ const [, setCarregandoPropostas] = useState(true)
+ const [, setErroPropostas] = useState('')
  useEffect(() => {
   const buscarPropostas = async () => {
     try {
@@ -1320,7 +966,7 @@ setOportunidades(oportunidadesFormatadas)
  const menu=[['mural','◈ Mural de oportunidades'],['cotacoes','▣ Minhas cotações'],['enviadas','➤ Propostas enviadas'],['contratos','◇ Contratos ativos'],['catalogo','▤ Catálogo e rider'],['desempenho','▥ Desempenho'],['perfil','◉ Perfil fornecedor']]
  return <div className="portalFornecedor">
   <div className="fornTopo"><div className="logo">▣ <span>TrocaTicket</span><small>PORTAL FORNECEDOR</small></div><span className="fornSelo">● Ambiente seguro · Demonstração</span><span className="fornEmpresa">{perfil.empresa}</span></div>
-  <div className="fornCorpo"><aside className="fornMenu"><button className="novo" onClick={()=>navegar('mural')}>⌕ Buscar cotações</button><nav>{menu.map(([id,label])=><button key={id} className={pagina==='fornecedor-'+id?'ativo':''} onClick={()=>navegar(id)}>{label}</button>)}</nav><button className="fornSair" onClick={()=>setPagina('login')}>↪ Sair</button></aside>
+  <div className="fornCorpo"><aside className="fornMenu"><button className="novo" onClick={()=>navegar('mural')}>⌕ Buscar cotações</button><nav>{menu.map(([id,label])=><button key={id} className={pagina==='fornecedor-'+id?'ativo':''} onClick={()=>navegar(id)}>{label}</button>)}</nav><button className="fornSair" onClick={aoSair}>↪ Sair</button></aside>
   <main className="fornConteudo"><div className="fornTrilha">TrocaTicket Fornecedor › {titulo}</div><div className="fornTitulo"><div><h1>{titulo}</h1><p>Gestão comercial e oportunidades para fornecedores de eventos.</p></div><span className="fornSelo">Fornecedor homologado</span></div>
   {pagina==='fornecedor-mural' && <><div className="fornHero"><div><h2>{oportunidades.length} EVENTOS AGUARDANDO SUA PROPOSTA</h2><p>Encontre demandas compatíveis com seus serviços e envie sua oferta comercial.</p></div><span className="fornSelo">● Oportunidades disponíveis</span></div><div className="fornIndicadores"><div><small>OPORTUNIDADES COMPATÍVEIS</small><strong>{oportunidades.length}</strong><span>Demandas abertas</span></div><div><small>PROPOSTAS EM ANÁLISE</small><strong>{propostas.filter(p=>p.status==='Em avaliação').length}</strong><span>Enviadas</span></div><div><small>CONTRATOS FECHADOS</small><strong>{propostas.filter(p=>p.status==='Homologada').length}</strong><span>Homologados</span></div></div><input aria-label="Buscar oportunidades" placeholder="⌕ Buscar eventos, serviços ou cidades..." value={busca} onChange={e=>setBusca(e.target.value)}/><div className="fornLista">
     {carregandoOportunidades && (
@@ -1347,13 +993,7 @@ setOportunidades(oportunidadesFormatadas)
   </main></div></div>
 }
 
-const SOLICITACOES_ADMIN = [
-  { id: 9402, hora: '16/10 · 14:20', nome: 'Vanguard Eventos Corp. S.A.', tipo: 'Org', documento: 'CNPJ 14.892.401/0001-92', atuacao: 'Eventos Corporativos', detalhe: 'Porte: Grande Empresa', responsavel: 'Henrique Dias Moreira', cargo: 'Diretor de Operações', score: 98, risco: 'CND Válida', docs: 3, urgente: false },
-  { id: 9398, hora: '16/10 · 11:05', nome: 'Sonora Stage & Audio Ltda', tipo: 'Forn', documento: 'CNPJ 88.214.558/0001-31', atuacao: 'Áudio & Sonorização', detalhe: 'Equipamentos Técnicos', responsavel: 'Carla Vasconcelos Ramos', cargo: 'Sócia Administradora', score: 95, risco: 'Bombeiros OK', docs: 3, urgente: false },
-  { id: 9391, hora: '15/10 · 17:40', nome: 'Estruturas Alpha Box ME', tipo: 'Forn', documento: 'CNPJ 22.901.733/0001-14', atuacao: 'Estrutura Metálica', detalhe: 'Engenharia Mecânica', responsavel: 'Gilberto Nogueira Neto', cargo: 'CREA-SP: 182.540-X', score: 91, risco: 'CREA Regular', docs: 3, urgente: false },
-  { id: 9388, hora: '14/10 · 09:15', nome: 'Lúmen Cenografia & Design', tipo: 'Forn', documento: 'CNPJ 31.554.889/0001-88', atuacao: 'Iluminação & Efeitos', detalhe: 'Projeções / Laser', responsavel: 'Marcelo Pires Silveira', cargo: 'Procurador Legal', score: 74, risco: 'Divergência Cadastral', docs: 2, urgente: true },
-  { id: 9385, hora: '14/10 · 08:30', nome: 'Summit Tech Congressos', tipo: 'Org', documento: 'CNPJ 19.344.118/0001-56', atuacao: 'Feiras & Convenções', detalhe: 'Bilhetagem Enterprise', responsavel: 'Tatiana Fontes Albuquerque', cargo: 'Diretora Executiva', score: 90, risco: 'Regularidade 100%', docs: 3, urgente: false },
-]
+
 
 
 
@@ -1499,7 +1139,7 @@ function SolicitarAcesso({ setPagina }) {
 }
 
 
-function PortalParticipante({ setPagina }) {
+function PortalParticipante({ setPagina, aoSair }) {
   const [eventosDisponiveis, setEventosDisponiveis] = useState([])
   const [meusIngressos, setMeusIngressos] = useState([])
   const [carregandoIngressos, setCarregandoIngressos] = useState(false)
@@ -1582,13 +1222,6 @@ function PortalParticipante({ setPagina }) {
 
     carregarEventos()
   }, [])
-
-  const sair = () => {
-    sessionStorage.removeItem('token')
-    sessionStorage.removeItem('perfil')
-    sessionStorage.removeItem('paginaAtual')
-    setPagina('login')
-  }
 
 const [inscrevendoEventoId, setInscrevendoEventoId] = useState(null)
 
@@ -1823,7 +1456,7 @@ const aoInscreverEvento = async (evento) => {
           <button
             type="button"
             className="fornSair"
-            onClick={sair}
+            onClick={aoSair}
           >
             ↪ Sair
           </button>
@@ -2090,6 +1723,8 @@ function App() {
   useEffect(() => {
   if (pagina !== 'eventos') return
 
+  let consultaAtiva = true
+
   const buscarEventos = async () => {
     try {
       const token = sessionStorage.getItem('token')
@@ -2108,13 +1743,17 @@ function App() {
 
       const dados = await resposta.json()
 
-      setEventos(dados)
+      if (consultaAtiva) setEventos(dados)
     } catch (erro) {
       console.error('Erro ao carregar eventos:', erro)
     }
   }
 
   buscarEventos()
+
+  return () => {
+    consultaAtiva = false
+  }
 }, [pagina])
 
   const [custos, setCustos] = useState(CUSTOS_PADRAO)
@@ -2140,6 +1779,15 @@ function App() {
     setCustos(CUSTOS_PADRAO)
   }
   
+const aoSair = () => {
+  sessionStorage.removeItem('token')
+  sessionStorage.removeItem('perfil')
+  sessionStorage.removeItem('paginaAtual')
+  setEventos([])
+  aoCriarNovoEvento()
+  setPagina('login')
+}
+
 const aoSelecionarEvento = (eventoClicado) => {
   const dataOriginal = eventoClicado.data || ''
 
@@ -2329,10 +1977,10 @@ alert(
 }
 
   if (pagina === 'admin') {
-    return <AdminPortal setPagina={setPagina} />
+    return <AdminPortal aoSair={aoSair} />
   }
   if (pagina.startsWith('fornecedor-')) {
-    return <PortalFornecedor pagina={pagina} setPagina={setPagina} />
+    return <PortalFornecedor pagina={pagina} setPagina={setPagina} aoSair={aoSair} />
   }
   if (pagina === 'login') {
     return <Login setPagina={setPagina} />
@@ -2341,7 +1989,7 @@ alert(
   return <Cadastro setPagina={setPagina} />
   }
   if (pagina === 'participante') {
-  return <PortalParticipante setPagina={setPagina} />
+  return <PortalParticipante setPagina={setPagina} aoSair={aoSair} />
   }
   if (pagina === 'solicitar-acesso') {
   return <SolicitarAcesso setPagina={setPagina} />
@@ -2351,6 +1999,7 @@ alert(
       pagina={pagina}
       setPagina={setPagina}
       aoCriarNovoEvento={aoCriarNovoEvento}
+      aoSair={aoSair}
     >
       {pagina === 'perfil' && <PerfilOrganizador />}
       {pagina === 'eventos' && (

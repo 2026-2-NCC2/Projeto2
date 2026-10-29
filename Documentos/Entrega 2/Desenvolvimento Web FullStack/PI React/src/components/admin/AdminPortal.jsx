@@ -36,7 +36,7 @@ export function CartaoMetrica({ titulo, valor, texto, tom = 'roxo' }) {
   return <article className={`adminMetrica ${tom}`}><div><small>{titulo}</small><span>▣</span></div><strong>{valor}</strong><p>{texto}</p></article>
 }
 
-export function AdminPortal({ setPagina }) {  
+export function AdminPortal({ aoSair }) {
   const [propostaSelecionada, setPropostaSelecionada] = useState(null)
   useEffect(() => {
   if (!propostaSelecionada) return
@@ -189,7 +189,8 @@ export function AdminPortal({ setPagina }) {
   const [ordem, setOrdem] = useState('Risco')
   const [selecionados, setSelecionados] = useState([])
   const [solicitacoes, setSolicitacoes] = useState([])
-  const [carregando, setCarregando] = useState(true)
+  const [mensagem, setMensagem] = useState('')
+  const [, setCarregando] = useState(true)
   useEffect(() => {
   const buscarSolicitacoes = async () => {
     try {
@@ -247,7 +248,6 @@ export function AdminPortal({ setPagina }) {
 
   buscarSolicitacoes()
   }, [])
-  const [mensagem, setMensagem] = useState('')
   const filtradas = solicitacoes.filter((item) => aba === 'todos' || (aba === 'organizadores' ? item.tipo === 'Org' : item.tipo === 'Forn'))
   const totalPendentes = solicitacoes.length
 
@@ -314,12 +314,7 @@ export function AdminPortal({ setPagina }) {
     alert('Não foi possível conectar ao servidor.')
   }
 }
-  const agirEmLote = (acao) => {
-    if (!selecionados.length) return
-    setSolicitacoes((atuais) => atuais.filter((item) => !selecionados.includes(item.id)))
-    setMensagem(`${selecionados.length} cadastros ${acao} em lote.`)
-    setSelecionados([])
-  }
+
   useEffect(() => {
   if (secao !== 'cotacoes') return
 
@@ -392,9 +387,9 @@ export function AdminPortal({ setPagina }) {
 }, [secao])
   return (
     <div className="adminApp">
-      <AdminTopo aoSair={() => setPagina('login')} />
+      <AdminTopo aoSair={aoSair} />
       <div className="adminEstrutura">
-        <AdminMenu secao={secao} setSecao={setSecao} aoSair={() => setPagina('login')} />
+        <AdminMenu secao={secao} setSecao={setSecao} aoSair={aoSair} />
         <main className="adminConteudo">
           {secao === 'eventos' ? (
   <section className="adminHero">
