@@ -20,13 +20,14 @@ function ambiente(opcoes = {}) {
     async getConnection() {
       estado.conexoes++;
       if (opcoes.falhaConexao) throw Error("segredo-SQL");
-      let liberar, snapshot, novas = [], novosItens = [];
+      let liberar, snapshot, novas = [], novosItens = [], numeroItens = 0;
       const c = {
-        async beginTransaction() { estado.chamadas.push("begin"); },
+        async beginTransaction() { estado.chamadas.push("begin"); if (opcoes.falhaInicio) throw Error("segredo-SQL"); },
         async execute(sql, params) {
           const texto = sql.replace(/\s+/g, " ").trim();
           estado.chamadas.push({ sql: texto, params });
           if (/^SELECT id FROM eventos/.test(texto)) {
+            if (opcoes.falhaLock) throw Error("segredo-SQL");
             assert.match(texto, /FOR UPDATE$/);
             assert.deepEqual(Array.from(params), [13, 10]);
             const anterior = fila;
@@ -39,6 +40,7 @@ function ambiente(opcoes = {}) {
             return [opcoes.semEvento ? [] : [{ id: 13 }]];
           }
           if (/^SELECT .*FROM custos_evento/.test(texto)) {
+            if (opcoes.falhaLeituraCustos) throw Error("segredo-SQL");
             assert.ok(snapshot);
             if (/FOR UPDATE/.test(texto)) assert.match(texto, /ORDER BY id FOR UPDATE$/);
             return [snapshot];
@@ -50,11 +52,13 @@ function ambiente(opcoes = {}) {
             return [{}];
           }
           if (/^INSERT INTO cotacoes/.test(texto)) {
+            if (opcoes.falhaCriarCotacao) throw Error("segredo-SQL");
             if (opcoes.pausarPost) { opcoes.pausarPost.entrou.resolve(); await opcoes.pausarPost.continuar.promise; }
             novas.push({ id: 2 }); return [{ insertId: 2 }];
           }
           if (/^INSERT INTO itens_cotacao/.test(texto)) {
-            if (opcoes.falhaItem) throw Error("segredo-SQL");
+            numeroItens++;
+            if (opcoes.falhaItem || (opcoes.falhaSegundoItem && numeroItens === 2)) throw Error("segredo-SQL");
             novosItens.push(Array.from(params)); return [{}];
           }
           throw Error("SQL inesperado");
@@ -71,7 +75,7 @@ function ambiente(opcoes = {}) {
           if (opcoes.falhaRollback) throw Error("segredo-SQL");
           liberar?.(); liberar = null;
         },
-        release() { estado.releases++; liberar?.(); },
+        release() { estado.releases++; liberar?.(); if (opcoes.falhaRelease) throw Error("segredo-SQL"); },
         destroy() { estado.destroys++; liberar?.(); },
       };
       if (opcoes.semDestroy) delete c.destroy;
@@ -90,6 +94,12 @@ function ambiente(opcoes = {}) {
       if (nome === "dotenv") return { config() {} };
       if (nome === "./db") return db;
       if (nome === "./repositories/mysql/usuarios.cjs") return require("../repositories/mysql/usuarios.cjs");
+      if (nome === "./repositories/mysql/eventos.cjs") return require("../repositories/mysql/eventos.cjs");
+      if (nome === "./repositories/mysql/cotacoes.cjs") return require("../repositories/mysql/cotacoes.cjs");
+      if (nome === "./repositories/mysql/propostas.cjs") return require("../repositories/mysql/propostas.cjs");
+      if (nome === "./repositories/mysql/inscricoes.cjs") return require("../repositories/mysql/inscricoes.cjs");
+      if (nome === "./repositories/mysql/solicitacoes-acesso.cjs") return require("../repositories/mysql/solicitacoes-acesso.cjs");
+      if (nome === "./repositories/mysql/custos.cjs") return require("../repositories/mysql/custos.cjs");
       if (nome === "./isolamento.cjs") return { modoExecucao: () => "principal" };
       if (nome === "bcryptjs") return {};
       if (nome === "jsonwebtoken") return { verify() { if (opcoes.jwtInvalido) throw Error(); return { id: 10 }; } };
@@ -202,4 +212,26 @@ test("POST concorrente primeiro: snapshot publicado permanece apos PUT", async (
   const put = a.requisitar("put", { custos: [item("0.20")] }); await segundo.promise;
   pausa.continuar.resolve(); assert.equal((await post).statusCode, 201); assert.equal((await put).statusCode, 200);
   assert.equal(a.estado.itens[0][3], "0.10"); assert.equal(a.estado.custos[0].valor_estimado, "0.20");
+});
+
+for (const etapa of ["falhaInicio", "falhaLock", "falhaLeituraCustos", "falhaCriarCotacao", "falhaSegundoItem"]) {
+  test(`publicacao: ${etapa} reverte sem persistir cotacao ou itens e libera uma unica conexao`, async () => {
+    const custos = [item("0.10"), { ...item("0.20"), descricao: "Luz" }];
+    const a = ambiente({ [etapa]: true, custos });
+    const r = await a.requisitar("post", { itens: custos });
+    assert.equal(r.statusCode, 500);
+    assert.equal(a.estado.cotacoes.length, 1); assert.equal(a.estado.itens.length, 0);
+    assert.deepEqual(a.estado.custos, custos);
+    assert.equal(a.estado.conexoes, 1); assert.equal(a.estado.commits, 0);
+    assert.equal(a.estado.rollbacks, 1); assert.equal(a.estado.releases, 1);
+    assert.ok(!JSON.stringify(r.body).includes("segredo"));
+  });
+}
+
+test("falha de release apos commit nao altera resposta confirmada nem repete publicacao", async () => {
+  const a = ambiente({ falhaRelease: true });
+  assert.equal((await a.requisitar()).statusCode, 201);
+  assert.equal(a.estado.cotacoes.length, 2); assert.equal(a.estado.itens.length, 1);
+  assert.equal(a.estado.commits, 1); assert.equal(a.estado.rollbacks, 0);
+  assert.equal(a.estado.releases, 1); assert.equal(a.estado.conexoes, 1);
 });

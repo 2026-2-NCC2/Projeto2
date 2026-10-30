@@ -1,9 +1,13 @@
 const { modoExecucao, obterBancoIsolado } = require("./isolamento.cjs");
+const { validarInicializacaoBanco } = require("./config/banco.cjs");
+const modo = modoExecucao();
 
-if (modoExecucao() === "isolado") {
+if (modo === "isolado") {
+  validarInicializacaoBanco(process.env, modo);
   module.exports = obterBancoIsolado();
 } else {
 require("dotenv").config();
+validarInicializacaoBanco(process.env, modo);
 
 const mysql = require("mysql2/promise");
 

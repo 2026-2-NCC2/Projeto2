@@ -61,6 +61,12 @@ function ambiente(perfil = "organizador", passos = []) {
     },
     "./db": db,
     "./repositories/mysql/usuarios.cjs": require("../repositories/mysql/usuarios.cjs"),
+    "./repositories/mysql/eventos.cjs": require("../repositories/mysql/eventos.cjs"),
+    "./repositories/mysql/cotacoes.cjs": require("../repositories/mysql/cotacoes.cjs"),
+    "./repositories/mysql/propostas.cjs": require("../repositories/mysql/propostas.cjs"),
+    "./repositories/mysql/inscricoes.cjs": require("../repositories/mysql/inscricoes.cjs"),
+    "./repositories/mysql/solicitacoes-acesso.cjs": require("../repositories/mysql/solicitacoes-acesso.cjs"),
+    "./repositories/mysql/custos.cjs": require("../repositories/mysql/custos.cjs"),
     "./isolamento.cjs": { modoExecucao: () => "principal" },
     dotenv: { config() {} },
   };
@@ -270,6 +276,60 @@ test("inscricao: ignora usuario do corpo e devolve contrato Confirmada", async (
   assert.deepEqual(r.body, { mensagem: "Inscrição realizada com sucesso!", inscricao: { id: 21, usuario_id: 7, evento_id: 13, status: "Confirmada" } }); a.verificar();
 });
 
+for (const [nome, passos, rota, mensagem] of [
+  ["busca de evento ativo", [{ ...buscaEventoAtivo, erro: Error("falha simulada") }],
+    "post /participante/inscricoes", "Erro interno ao realizar inscrição."],
+  ["busca de duplicidade", [buscaEventoAtivo, { ...buscaInscricao, erro: Error("falha simulada") }],
+    "post /participante/inscricoes", "Erro interno ao realizar inscrição."],
+  ["insercao", [buscaEventoAtivo, buscaInscricao,
+    { sql: "INSERT INTO inscricoes (usuario_id, evento_id) VALUES (?, ?)", params: [7, 13], erro: Error("falha simulada") }],
+    "post /participante/inscricoes", "Erro interno ao realizar inscrição."],
+  ["listagem", [{ sql: /WHERE i.usuario_id = \? ORDER BY i.data_inscricao DESC$/, params: [7], erro: Error("falha simulada") }],
+    "get /participante/inscricoes", "Erro interno ao buscar inscrições."],
+]) test(`inscricoes: falha na ${nome} preserva 500 sem repetir consultas`, async () => {
+  const a = ambiente("participante", passos);
+  const r = await a.requisitar(rota, { evento_id: "13" });
+  assert.equal(r.statusCode, 500);
+  assert.deepEqual(r.body, { erro: mensagem });
+  assert.deepEqual(a.transacao, []);
+  a.verificar();
+});
+
+test("inscricoes: evento indisponivel impede demais consultas e preserva mensagem 404", async () => {
+  const a = ambiente("participante", [{ ...buscaEventoAtivo, retorno: [] }]);
+  const r = await a.requisitar("post /participante/inscricoes", { evento_id: 13 });
+  assert.equal(r.statusCode, 404);
+  assert.deepEqual(r.body, { erro: "Evento não encontrado ou não publicado." });
+  a.verificar();
+});
+
+test("inscricoes: duplicidade previa e concorrente preservam mensagem 409", async () => {
+  for (const passos of [
+    [buscaEventoAtivo, { ...buscaInscricao, retorno: [{ id: 21 }] }],
+    [buscaEventoAtivo, buscaInscricao, { sql: /^INSERT INTO inscricoes/, params: [7, 13], erro: { code: "ER_DUP_ENTRY" } }],
+  ]) {
+    const a = ambiente("participante", passos);
+    const r = await a.requisitar("post /participante/inscricoes", { evento_id: 13 });
+    assert.equal(r.statusCode, 409);
+    assert.deepEqual(r.body, { erro: "Você já está inscrito neste evento." });
+    assert.deepEqual(a.transacao, []);
+    a.verificar();
+  }
+});
+
+test("inscricoes: listagem preserva todos os campos JSON, datas, nulos e usuario autenticado", async () => {
+  const linhas = [{ id: 21, evento_id: 13, status: "Confirmada",
+    data_inscricao: new Date("2030-01-01T12:00:00Z"), evento_nome: "Evento",
+    evento_data: new Date("2030-01-02T00:00:00Z"), evento_horario: "19:00:00",
+    evento_local: "Local", evento_categoria: null }];
+  const a = ambiente("participante", [{ sql: /WHERE i.usuario_id = \? ORDER BY i.data_inscricao DESC$/,
+    params: [7], retorno: linhas }]);
+  const r = await a.requisitar("get /participante/inscricoes", { usuario_id: 999 });
+  assert.equal(r.statusCode, 200);
+  assert.deepEqual(r.body, json(linhas));
+  a.verificar();
+});
+
 const proposta = { cotacao_id: "13", valor: "12.345", condicoes_pagamento: " Pix ", detalhes_tecnicos: " Som " };
 test("proposta: valida dados antes de consultar e exige cotacao aberta dentro do prazo", async () => {
   for (const alteracao of [{ cotacao_id: 0 }, { valor: 0 }, { valor: "abc" }, { condicoes_pagamento: " " }, { detalhes_tecnicos: null }]) {
@@ -301,6 +361,61 @@ test("avaliacao: somente dono do evento e proposta Em avaliacao podem mudar stat
   }
 });
 
+const falhasPropostas = [
+  { nome: "consulta de disponibilidade", perfil: "fornecedor", rota: "post /fornecedor/propostas", body: proposta,
+    passos: [{ tipo: "query", sql: /^SELECT id FROM cotacoes/, params: ["13"] }], mensagem: "Erro interno ao enviar proposta." },
+  { nome: "insercao, inclusive duplicidade", perfil: "fornecedor", rota: "post /fornecedor/propostas", body: proposta,
+    passos: [
+      { tipo: "query", sql: /^SELECT id FROM cotacoes/, params: ["13"], retorno: [{ id: 13 }] },
+      { tipo: "query", sql: /^INSERT INTO propostas/, params: ["13", 7, 12.345, "Pix", "Som"] },
+    ], mensagem: "Erro interno ao enviar proposta." },
+  { nome: "listagem do fornecedor", perfil: "fornecedor", rota: "get /fornecedor/propostas",
+    passos: [{ tipo: "query", sql: /WHERE p.fornecedor_id = \?/, params: [7] }], mensagem: "Erro interno ao buscar propostas." },
+  { nome: "listagem do organizador", perfil: "organizador", rota: "get /organizador/propostas",
+    passos: [{ tipo: "query", sql: /WHERE e.usuario_id = \?/, params: [7] }], mensagem: "Erro interno ao buscar propostas recebidas." },
+  { nome: "listagem administrativa", perfil: "admin", rota: "get /admin/propostas",
+    passos: [{ tipo: "query", sql: /^SELECT p.id, p.cotacao_id/ }], mensagem: "Erro interno ao buscar propostas." },
+  { nome: "avaliacao condicional", perfil: "organizador", rota: "patch /organizador/propostas/:id/status", body: { status: "Recusada" },
+    passos: [{ tipo: "query", sql: /^UPDATE propostas p/, params: ["Recusada", 13, 7] }], mensagem: "Erro interno ao avaliar proposta." },
+];
+for (const caso of falhasPropostas) test(`propostas: falha de ${caso.nome} mantem 500 sem retry`, async () => {
+  const passos = caso.passos.map(p => ({ ...p }));
+  passos.at(-1).erro = Object.assign(new Error("falha simulada"), { code: "ER_DUP_ENTRY" });
+  const a = ambiente(caso.perfil, passos);
+  const r = await a.requisitar(caso.rota, caso.body);
+  assert.equal(r.statusCode, 500);
+  assert.deepEqual(r.body, { erro: caso.mensagem });
+  assert.deepEqual(a.transacao, []);
+  a.verificar();
+});
+
+for (const [rota, perfil, mensagem] of [
+  ["post /fornecedor/propostas", "fornecedor", "Erro interno ao enviar proposta."],
+  ["patch /organizador/propostas/:id/status", "organizador", "Erro interno ao avaliar proposta."],
+]) test(`propostas: corpo null em ${rota} preserva 500 sem SQL de negocio`, async () => {
+  const a = ambiente(perfil);
+  const r = await a.requisitar(rota, null);
+  assert.equal(r.statusCode, 500);
+  assert.deepEqual(r.body, { erro: mensagem });
+  a.verificar();
+});
+
+for (const [rota, perfil, sql, params] of [
+  ["get /fornecedor/propostas", "fornecedor", /WHERE p.fornecedor_id = \?/, [7]],
+  ["get /organizador/propostas", "organizador", /WHERE e.usuario_id = \?/, [7]],
+  ["get /admin/propostas", "admin", /^SELECT p.id, p.cotacao_id/, []],
+]) test(`propostas: ${rota} preserva campos JSON, decimais, datas e nulos`, async () => {
+  const linhas = [{ id: 21, cotacao_id: 13, valor: "12.30", condicoes_pagamento: "Pix",
+    detalhes_tecnicos: "Som", status: "Em avaliação", criada_em: new Date("2030-01-01T00:00:00Z"),
+    evento_nome: "Evento", ...(perfil === "fornecedor" ? { categoria: null }
+      : { fornecedor_id: 8, evento_id: 9, fornecedor_nome: "Fornecedor" }) }];
+  const a = ambiente(perfil, [{ tipo: "query", sql, params, retorno: linhas }]);
+  const r = await a.requisitar(rota);
+  assert.equal(r.statusCode, 200);
+  assert.deepEqual(r.body, json(linhas));
+  a.verificar();
+});
+
 test("acesso: valida corpo antes do perfil, impede pendencia e grava justificativa aparada", async () => {
   const body = { perfil_solicitado: "fornecedor", justificativa: " Preciso fornecer " };
   const invalido = ambiente("admin");
@@ -315,6 +430,40 @@ test("acesso: valida corpo antes do perfil, impede pendencia e grava justificati
     }); a.verificar();
   }
 });
+for (const [nome, rota, perfil, passos, mensagem] of [
+  ["consulta de pendencias", "post /solicitacoes-acesso", "participante", [
+    { sql: "SELECT id FROM solicitacoes_acesso WHERE usuario_id = ? AND status = 'pendente'", params: [7], erro: Error("falha simulada") },
+  ], "Erro interno ao solicitar acesso."],
+  ["insercao com ER_DUP_ENTRY", "post /solicitacoes-acesso", "participante", [
+    { sql: "SELECT id FROM solicitacoes_acesso WHERE usuario_id = ? AND status = 'pendente'", params: [7] },
+    { sql: /^INSERT INTO solicitacoes_acesso/, params: [7, "organizador", "Motivo"], erro: { code: "ER_DUP_ENTRY" } },
+  ], "Erro interno ao solicitar acesso."],
+  ["listagem administrativa", "get /solicitacoes-acesso", "admin", [
+    { sql: /ORDER BY s.criada_em DESC, s.id DESC$/, erro: Error("falha simulada") },
+  ], "Erro interno ao buscar solicitações."],
+]) test(`acesso: falha na ${nome} preserva 500 sem transacao ou retry`, async () => {
+  const a = ambiente(perfil, passos);
+  const r = await a.requisitar(rota, { perfil_solicitado: "organizador", justificativa: " Motivo " });
+  assert.equal(r.statusCode, 500);
+  assert.deepEqual(r.body, { erro: mensagem });
+  assert.deepEqual(a.transacao, []);
+  a.verificar();
+});
+
+test("acesso: listagem preserva campos JSON, ordem recebida, datas e nulos", async () => {
+  const linhas = [{ id: 21, usuario_id: 9, nome: "Pessoa", email: "pessoa@example.invalid",
+    perfil_solicitado: "organizador", justificativa: "Motivo", status: "pendente",
+    criada_em: new Date("2030-01-01T12:00:00Z") },
+    { id: 20, usuario_id: 8, nome: "Outra pessoa", email: "outra@example.invalid",
+      perfil_solicitado: "fornecedor", justificativa: "Outro motivo", status: "rejeitado", criada_em: null }];
+  const a = ambiente("admin", [{ sql: /INNER JOIN usuarios u ON u.id = s.usuario_id ORDER BY s.criada_em DESC, s.id DESC$/,
+    retorno: linhas }]);
+  const r = await a.requisitar("get /solicitacoes-acesso");
+  assert.equal(r.statusCode, 200);
+  assert.deepEqual(r.body, json(linhas));
+  a.verificar();
+});
+
 const buscaSolicitacao = { tipo: "tx", sql: "SELECT usuario_id, perfil_solicitado, status FROM solicitacoes_acesso WHERE id = ? FOR UPDATE", params: [13], retorno: [{ usuario_id: 9, perfil_solicitado: "fornecedor", status: "pendente" }] };
 for (const status of ["aprovado", "rejeitado"]) test(`acesso ${status}: lock, atualizacoes atomicas, commit e release`, async () => {
   const passos = [buscaSolicitacao];

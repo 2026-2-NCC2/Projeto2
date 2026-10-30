@@ -72,7 +72,8 @@ function moduloSimulado(nome, { env = {}, stubs = {}, principal = false, mainFil
   processo.env = env;
   processo.argv = ["node", arquivo];
   const logs = [];
-  const carregar = id => Object.hasOwn(stubs, id) ? stubs[id] : require(id);
+  const carregar = id => Object.hasOwn(stubs, id) ? stubs[id]
+    : id === "./config/banco.cjs" ? require("../config/banco.cjs") : require(id);
   carregar.main = principal ? modulo : { filename: mainFile ?? path.join(raiz, "scripts", "iniciar-backend-isolado.cjs") };
   const contexto = vm.createContext({
     require: carregar, module: modulo, exports: modulo.exports, __dirname: path.dirname(arquivo),
@@ -510,6 +511,12 @@ function carregarServidor(principal, modo) {
       express, bcryptjs: {}, jsonwebtoken: {}, cors: () => () => {},
       dotenv: { config: () => { estado.dotenv++; } }, "./db": {},
       "./repositories/mysql/usuarios.cjs": require("../repositories/mysql/usuarios.cjs"),
+      "./repositories/mysql/eventos.cjs": require("../repositories/mysql/eventos.cjs"),
+      "./repositories/mysql/cotacoes.cjs": require("../repositories/mysql/cotacoes.cjs"),
+      "./repositories/mysql/propostas.cjs": require("../repositories/mysql/propostas.cjs"),
+      "./repositories/mysql/inscricoes.cjs": require("../repositories/mysql/inscricoes.cjs"),
+      "./repositories/mysql/solicitacoes-acesso.cjs": require("../repositories/mysql/solicitacoes-acesso.cjs"),
+      "./repositories/mysql/custos.cjs": require("../repositories/mysql/custos.cjs"),
       "./isolamento.cjs": { modoExecucao: () => modo },
     },
   });
@@ -549,6 +556,12 @@ test("startup com server.js e db.js reais usa apenas o adaptador simulado e nunc
       express, bcryptjs: {}, jsonwebtoken: {}, cors: () => () => {},
       "./isolamento.cjs": fake.iso, "./db": db, dotenv: { config: proibido },
       "./repositories/mysql/usuarios.cjs": require("../repositories/mysql/usuarios.cjs"),
+      "./repositories/mysql/eventos.cjs": require("../repositories/mysql/eventos.cjs"),
+      "./repositories/mysql/cotacoes.cjs": require("../repositories/mysql/cotacoes.cjs"),
+      "./repositories/mysql/propostas.cjs": require("../repositories/mysql/propostas.cjs"),
+      "./repositories/mysql/inscricoes.cjs": require("../repositories/mysql/inscricoes.cjs"),
+      "./repositories/mysql/solicitacoes-acesso.cjs": require("../repositories/mysql/solicitacoes-acesso.cjs"),
+      "./repositories/mysql/custos.cjs": require("../repositories/mysql/custos.cjs"),
     } }).modulo;
   };
   const controle = await fake.iso.iniciarBackendIsolado(config(), fake.deps);

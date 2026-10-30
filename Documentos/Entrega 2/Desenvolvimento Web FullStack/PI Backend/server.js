@@ -9,6 +9,18 @@ if (modoExecucao() === "principal") require("dotenv").config();
 const db = require("./db");
 const { criarRepositorioUsuarios } = require("./repositories/mysql/usuarios.cjs");
 const usuariosRepository = criarRepositorioUsuarios(db);
+const { criarRepositorioEventos } = require("./repositories/mysql/eventos.cjs");
+const eventosRepository = criarRepositorioEventos(db);
+const { criarRepositorioCustos } = require("./repositories/mysql/custos.cjs");
+const custosRepository = criarRepositorioCustos(db);
+const { criarRepositorioCotacoes } = require("./repositories/mysql/cotacoes.cjs");
+const cotacoesRepository = criarRepositorioCotacoes(db);
+const { criarRepositorioPropostas } = require("./repositories/mysql/propostas.cjs");
+const propostasRepository = criarRepositorioPropostas(db);
+const { criarRepositorioInscricoes } = require("./repositories/mysql/inscricoes.cjs");
+const inscricoesRepository = criarRepositorioInscricoes(db);
+const { criarRepositorioSolicitacoesAcesso } = require("./repositories/mysql/solicitacoes-acesso.cjs");
+const solicitacoesAcessoRepository = criarRepositorioSolicitacoesAcesso(db);
 
 const app = express();
 
@@ -62,14 +74,7 @@ app.get("/", (req, res) => {
 // Listar usuários sem expor senhas
 app.get("/eventos", autenticar, async (req, res) => {
   try {
-    const [eventos] = await db.execute(
-      `SELECT id, nome, data, horario, local,
-              categoria, publico, descricao, status, usuario_id
-       FROM eventos
-       WHERE usuario_id = ?
-       ORDER BY id DESC`,
-      [req.usuario.id]
-    );
+    const eventos = await eventosRepository.listarPorUsuario(req.usuario.id);
 
     return res.status(200).json(eventos);
 
@@ -85,23 +90,7 @@ app.get("/eventos", autenticar, async (req, res) => {
 // Listar todos os eventos - somente administrador
 app.get("/admin/eventos", autenticar, permitirPerfis("admin"), async (req, res) => {
     try {
-      const [eventos] = await db.execute(
-        `SELECT
-            e.id,
-            e.nome,
-            e.data,
-            e.horario,
-            e.local,
-            e.categoria,
-            e.publico,
-            e.descricao,
-            e.status,
-            e.usuario_id,
-            u.nome AS organizador_nome
-         FROM eventos e
-         INNER JOIN usuarios u ON u.id = e.usuario_id
-         ORDER BY e.id DESC`
-      );
+      const eventos = await eventosRepository.listarAdministrativo();
 
       return res.status(200).json(eventos);
 
@@ -117,12 +106,7 @@ app.get("/admin/eventos", autenticar, permitirPerfis("admin"), async (req, res) 
 
 app.get("/participante/eventos", autenticar, permitirPerfis("participante"), async (req, res) => {
     try {
-      const [eventos] = await db.execute(
-        `SELECT id, nome, data, horario, local, categoria, publico, descricao, status
-         FROM eventos
-         WHERE status = 'Ativo'
-         ORDER BY data ASC, id ASC`
-      );
+      const eventos = await eventosRepository.listarAtivosParaParticipante();
 
       return res.status(200).json(eventos);
 
@@ -147,10 +131,7 @@ app.post("/participante/inscricoes", autenticar, permitirPerfis("participante"),
         });
       }
 
-      const [eventos] = await db.execute(
-        "SELECT id FROM eventos WHERE id = ? AND status = 'Ativo'",
-        [eventoId]
-      );
+      const eventos = await inscricoesRepository.buscarEventoAtivo(eventoId);
 
       if (eventos.length === 0) {
         return res.status(404).json({
@@ -158,10 +139,7 @@ app.post("/participante/inscricoes", autenticar, permitirPerfis("participante"),
         });
       }
 
-      const [inscricoes] = await db.execute(
-        "SELECT id FROM inscricoes WHERE usuario_id = ? AND evento_id = ?",
-        [usuarioId, eventoId]
-      );
+      const inscricoes = await inscricoesRepository.buscarPorUsuarioEEvento(usuarioId, eventoId);
 
       if (inscricoes.length > 0) {
         return res.status(409).json({
@@ -169,15 +147,12 @@ app.post("/participante/inscricoes", autenticar, permitirPerfis("participante"),
         });
       }
 
-      const [resultado] = await db.execute(
-        "INSERT INTO inscricoes (usuario_id, evento_id) VALUES (?, ?)",
-        [usuarioId, eventoId]
-      );
+      const inscricaoId = await inscricoesRepository.criar(usuarioId, eventoId);
 
       return res.status(201).json({
         mensagem: "Inscrição realizada com sucesso!",
         inscricao: {
-          id: resultado.insertId,
+          id: inscricaoId,
           usuario_id: usuarioId,
           evento_id: eventoId,
           status: "Confirmada"
@@ -204,23 +179,7 @@ app.get("/participante/inscricoes", autenticar, permitirPerfis("participante"), 
     try {
       const usuarioId = req.usuario.id;
 
-      const [inscricoes] = await db.execute(
-        `SELECT
-          i.id,
-          i.evento_id,
-          i.status,
-          i.data_inscricao,
-          e.nome AS evento_nome,
-          e.data AS evento_data,
-          e.horario AS evento_horario,
-          e.local AS evento_local,
-          e.categoria AS evento_categoria
-        FROM inscricoes i
-        INNER JOIN eventos e ON i.evento_id = e.id
-        WHERE i.usuario_id = ?
-        ORDER BY i.data_inscricao DESC`,
-        [usuarioId]
-      );
+      const inscricoes = await inscricoesRepository.listarPorUsuario(usuarioId);
 
       return res.status(200).json(inscricoes);
 
@@ -434,15 +393,9 @@ app.post("/cotacoes", autenticar, permitirPerfis("organizador"), async (req, res
     conexao = await db.getConnection();
     await conexao.beginTransaction();
     // Mesmo bloqueio e mesma ordem utilizados pelo PUT de custos.
-    const [eventos] = await conexao.execute(
-      "SELECT id FROM eventos WHERE id = ? AND usuario_id = ? FOR UPDATE",
-      [Number(evento_id), req.usuario.id]
-    );
+    const eventos = await custosRepository.bloquearEventoDoUsuario(conexao, Number(evento_id), req.usuario.id);
     if (eventos.length === 0) throw Object.assign(new Error(), { respostaStatus: 404 });
-    const [custos] = await conexao.execute(
-      `SELECT id, categoria, descricao, valor_estimado FROM custos_evento
-       WHERE evento_id = ? ORDER BY id FOR UPDATE`, [Number(evento_id)]
-    );
+    const custos = await cotacoesRepository.bloquearCustosDoEvento(conexao, Number(evento_id));
     if (custos.length === 0) throw Object.assign(new Error(), { respostaStatus: 400 });
     const persistidos = custos.map(normalizarItemCotacao);
     if (persistidos.some(item => !item)) throw new Error("Custos persistidos inválidos");
@@ -450,27 +403,15 @@ app.post("/cotacoes", autenticar, permitirPerfis("organizador"), async (req, res
       throw Object.assign(new Error(), { respostaStatus: 409 });
     }
 
-    const [resultado] = await conexao.execute(
-      `INSERT INTO cotacoes
-       (evento_id, prazo, modalidade, observacoes, status)
-       VALUES (?, ?, 'Fechada', ?, 'Aberta')`,
-      [Number(evento_id), prazo, observacoes || "",]
-    );
-
-    const cotacaoId = resultado.insertId;
+    const cotacaoId = await cotacoesRepository.criar(conexao, {
+      eventoId: Number(evento_id), prazo, observacoes: observacoes || ""
+    });
 
     for (const item of persistidos) {
-      await conexao.execute(
-        `INSERT INTO itens_cotacao
-         (cotacao_id, categoria, descricao, valor_estimado)
-         VALUES (?, ?, ?, ?)`,
-        [
-          cotacaoId,
-          item.categoria.trim(),
-          item.descricao.trim(),
-          item.valor_estimado
-        ]
-      );
+      await cotacoesRepository.inserirItem(conexao, cotacaoId, {
+        categoria: item.categoria.trim(), descricao: item.descricao.trim(),
+        valor_estimado: item.valor_estimado
+      });
     }
 
     await conexao.commit();
@@ -519,37 +460,10 @@ app.post("/cotacoes", autenticar, permitirPerfis("organizador"), async (req, res
 
 app.get("/cotacoes", autenticar, permitirPerfis("organizador"), async (req, res) => {
   try {
-    const [cotacoes] = await db.execute(
-      `SELECT
-        c.id,
-        c.evento_id,
-        e.nome AS evento_nome,
-        e.data AS evento_data,
-        e.local AS evento_local,
-        c.prazo,
-        c.modalidade,
-        c.observacoes,
-        c.status,
-        c.criada_em
-      FROM cotacoes c
-      INNER JOIN eventos e ON e.id = c.evento_id
-      WHERE e.usuario_id = ?
-      ORDER BY c.id DESC`,
-      [req.usuario.id]
-    );
+    const cotacoes = await cotacoesRepository.listarPorOrganizador(req.usuario.id);
 
     for (const cotacao of cotacoes) {
-      const [itens] = await db.execute(
-        `SELECT
-          id,
-          categoria,
-          descricao,
-          valor_estimado
-        FROM itens_cotacao
-        WHERE cotacao_id = ?
-        ORDER BY id`,
-        [cotacao.id]
-      );
+      const itens = await cotacoesRepository.listarItens(cotacao.id);
 
       cotacao.itens = itens;
     }
@@ -566,20 +480,7 @@ app.get("/cotacoes", autenticar, permitirPerfis("organizador"), async (req, res)
 
 app.get("/admin/cotacoes", autenticar, permitirPerfis("admin"), async (req, res) => {
   try {
-    const [cotacoes] = await db.execute(`
-      SELECT
-        c.id,
-        c.evento_id,
-        e.nome AS evento_nome,
-        c.prazo,
-        c.modalidade,
-        c.observacoes,
-        c.status,
-        c.criada_em
-      FROM cotacoes c
-      INNER JOIN eventos e ON e.id = c.evento_id
-      ORDER BY c.id DESC
-    `);
+    const cotacoes = await cotacoesRepository.listarAdministrativo();
 
     return res.status(200).json(cotacoes);
   } catch (erro) {
@@ -593,37 +494,10 @@ app.get("/admin/cotacoes", autenticar, permitirPerfis("admin"), async (req, res)
 
 app.get("/fornecedor/cotacoes", autenticar, permitirPerfis("fornecedor"), async (req, res) => {
   try {
-    const [cotacoes] = await db.execute(
-      `SELECT
-        c.id,
-        c.evento_id,
-        e.nome AS evento_nome,
-        e.data AS evento_data,
-        e.local AS evento_local,
-        c.prazo,
-        c.modalidade,
-        c.observacoes,
-        c.status,
-        c.criada_em
-      FROM cotacoes c
-      INNER JOIN eventos e ON e.id = c.evento_id
-      WHERE c.status = 'Aberta'
-        AND c.prazo >= CURDATE()
-      ORDER BY c.id DESC`
-    );
+    const cotacoes = await cotacoesRepository.listarDisponiveisParaFornecedor();
 
     for (const cotacao of cotacoes) {
-      const [itens] = await db.execute(
-        `SELECT
-          id,
-          categoria,
-          descricao,
-          valor_estimado
-        FROM itens_cotacao
-        WHERE cotacao_id = ?
-        ORDER BY id`,
-        [cotacao.id]
-      );
+      const itens = await cotacoesRepository.listarItens(cotacao.id);
 
       cotacao.itens = itens;
     }
@@ -665,14 +539,7 @@ app.post("/fornecedor/propostas", autenticar, permitirPerfis("fornecedor"), asyn
         });
       }
 
-      const [cotacoes] = await db.query(
-        `SELECT id
-         FROM cotacoes
-         WHERE id = ?
-           AND status = 'Aberta'
-           AND prazo >= CURDATE()`,
-        [cotacao_id]
-      );
+      const cotacoes = await propostasRepository.buscarCotacaoDisponivel(cotacao_id);
 
       if (cotacoes.length === 0) {
         return res.status(404).json({
@@ -680,23 +547,17 @@ app.post("/fornecedor/propostas", autenticar, permitirPerfis("fornecedor"), asyn
         });
       }
 
-      const [resultado] = await db.query(
-        `INSERT INTO propostas
-          (cotacao_id, fornecedor_id, valor,
-           condicoes_pagamento, detalhes_tecnicos)
-         VALUES (?, ?, ?, ?, ?)`,
-        [
-          cotacao_id,
-          req.usuario.id,
-          valorNumerico,
-          condicoes_pagamento.trim(),
-          detalhes_tecnicos.trim()
-        ]
-      );
+      const propostaId = await propostasRepository.criar({
+        cotacaoId: cotacao_id,
+        fornecedorId: req.usuario.id,
+        valor: valorNumerico,
+        condicoesPagamento: condicoes_pagamento.trim(),
+        detalhesTecnicos: detalhes_tecnicos.trim()
+      });
 
       return res.status(201).json({
         mensagem: "Proposta enviada com sucesso!",
-        proposta_id: resultado.insertId
+        proposta_id: propostaId
       });
 
     } catch (erro) {
@@ -711,34 +572,7 @@ app.post("/fornecedor/propostas", autenticar, permitirPerfis("fornecedor"), asyn
 
 app.get("/fornecedor/propostas", autenticar, permitirPerfis("fornecedor"),  async (req, res) => {
     try {
-      const [propostas] = await db.query(
-        `SELECT
-          p.id,
-          p.cotacao_id,
-          p.valor,
-          p.condicoes_pagamento,
-          p.detalhes_tecnicos,
-          p.status,
-          p.criada_em,
-          e.nome AS evento_nome,
-          GROUP_CONCAT(DISTINCT i.categoria SEPARATOR ', ') AS categoria
-        FROM propostas p
-        INNER JOIN cotacoes c ON c.id = p.cotacao_id
-        INNER JOIN eventos e ON e.id = c.evento_id
-        LEFT JOIN itens_cotacao i ON i.cotacao_id = c.id
-        WHERE p.fornecedor_id = ?
-        GROUP BY
-          p.id,
-          p.cotacao_id,
-          p.valor,
-          p.condicoes_pagamento,
-          p.detalhes_tecnicos,
-          p.status,
-          p.criada_em,
-          e.nome
-        ORDER BY p.criada_em DESC, p.id DESC`,
-        [req.usuario.id]
-      );
+      const propostas = await propostasRepository.listarPorFornecedor(req.usuario.id);
 
       return res.status(200).json(propostas);
 
@@ -754,27 +588,7 @@ app.get("/fornecedor/propostas", autenticar, permitirPerfis("fornecedor"),  asyn
 
 app.get("/organizador/propostas", autenticar, permitirPerfis("organizador"), async (req, res) => {
     try {
-      const [propostas] = await db.query(
-        `SELECT
-          p.id,
-          p.cotacao_id,
-          p.fornecedor_id,
-          p.valor,
-          p.condicoes_pagamento,
-          p.detalhes_tecnicos,
-          p.status,
-          p.criada_em,
-          e.id AS evento_id,
-          e.nome AS evento_nome,
-          u.nome AS fornecedor_nome
-        FROM propostas p
-        INNER JOIN cotacoes c ON c.id = p.cotacao_id
-        INNER JOIN eventos e ON e.id = c.evento_id
-        INNER JOIN usuarios u ON u.id = p.fornecedor_id
-        WHERE e.usuario_id = ?
-        ORDER BY p.criada_em DESC, p.id DESC`,
-        [req.usuario.id]
-      );
+      const propostas = await propostasRepository.listarPorOrganizador(req.usuario.id);
 
       return res.status(200).json(propostas);
 
@@ -790,25 +604,7 @@ app.get("/organizador/propostas", autenticar, permitirPerfis("organizador"), asy
 
 app.get("/admin/propostas", autenticar, permitirPerfis("admin"), async (req, res) => {
   try {
-    const [propostas] = await db.query(`
-      SELECT
-        p.id,
-        p.cotacao_id,
-        p.fornecedor_id,
-        p.valor,
-        p.condicoes_pagamento,
-        p.detalhes_tecnicos,
-        p.status,
-        p.criada_em,
-        e.id AS evento_id,
-        e.nome AS evento_nome,
-        u.nome AS fornecedor_nome
-      FROM propostas p
-      INNER JOIN cotacoes c ON c.id = p.cotacao_id
-      INNER JOIN eventos e ON e.id = c.evento_id
-      INNER JOIN usuarios u ON u.id = p.fornecedor_id
-      ORDER BY p.criada_em DESC, p.id DESC
-    `);
+    const propostas = await propostasRepository.listarAdministrativo();
 
     return res.status(200).json(propostas);
 
@@ -838,18 +634,9 @@ app.patch("/organizador/propostas/:id/status", autenticar, permitirPerfis("organ
         });
       }
 
-      const [resultado] = await db.query(
-        `UPDATE propostas p
-         INNER JOIN cotacoes c ON c.id = p.cotacao_id
-         INNER JOIN eventos e ON e.id = c.evento_id
-         SET p.status = ?
-         WHERE p.id = ?
-           AND e.usuario_id = ?
-           AND p.status = 'Em avaliação'`,
-        [status, propostaId, req.usuario.id]
-      );
+      const affectedRows = await propostasRepository.avaliar(propostaId, req.usuario.id, status);
 
-      if (resultado.affectedRows === 0) {
+      if (affectedRows === 0) {
         return res.status(404).json({
           erro: "Proposta não encontrada, sem permissão ou já avaliada."
         });
@@ -1001,26 +788,13 @@ app.post("/eventos", autenticar, permitirPerfis("organizador"),async (req, res) 
     const usuarioId = req.usuario.id;
 
     // Salvar evento no MySQL
-    const [resultado] = await db.execute(
-      `INSERT INTO eventos
-       (nome, data, horario, local, categoria,
-        publico, descricao, status, usuario_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        nomeFinal,
-        data,
-        horario,
-        localFinal,
-        categoriaFinal,
-        publico,
-        descricaoFinal,
-        status,
-        usuarioId
-      ]
-    );
+    const eventoId = await eventosRepository.criar({
+      nome: nomeFinal, data, horario, local: localFinal, categoria: categoriaFinal,
+      publico, descricao: descricaoFinal, status, usuarioId
+    });
 
     const novoEvento = {
-      id: resultado.insertId,
+      id: eventoId,
       nome: nomeFinal,
       data,
       horario,
@@ -1056,16 +830,9 @@ app.patch("/eventos/:id/publicar", autenticar, permitirPerfis("organizador"), as
         });
       }
 
-      const [resultado] = await db.execute(
-        `UPDATE eventos
-         SET status = 'Ativo'
-         WHERE id = ?
-           AND usuario_id = ?
-           AND status = 'Em planejamento'`,
-        [eventoId, req.usuario.id]
-      );
+      const affectedRows = await eventosRepository.publicar(eventoId, req.usuario.id);
 
-      if (resultado.affectedRows === 0) {
+      if (affectedRows === 0) {
         return res.status(404).json({
           erro: "Evento não encontrado, não pertence a você ou não está em planejamento."
         });
@@ -1097,10 +864,7 @@ app.get("/eventos/:id/custos", autenticar, permitirPerfis("organizador"), async 
       });
     }
 
-    const [eventos] = await db.execute(
-      "SELECT id FROM eventos WHERE id = ? AND usuario_id = ?",
-      [id, req.usuario.id]
-    );
+    const eventos = await custosRepository.buscarEventoDoUsuario(id, req.usuario.id);
 
     if (eventos.length === 0) {
       return res.status(404).json({
@@ -1108,13 +872,7 @@ app.get("/eventos/:id/custos", autenticar, permitirPerfis("organizador"), async 
       });
     }
 
-    const [custos] = await db.execute(
-      `SELECT id, evento_id, categoria, descricao, valor_estimado
-       FROM custos_evento
-       WHERE evento_id = ?
-       ORDER BY id`,
-      [id]
-    );
+    const custos = await custosRepository.listarPorEvento(id);
 
     return res.status(200).json(custos);
   } catch (erro) {
@@ -1190,10 +948,7 @@ app.put("/eventos/:id/custos", autenticar, permitirPerfis("organizador"), async 
     conexao = await db.getConnection();
     await conexao.beginTransaction();
 
-    const [eventos] = await conexao.execute(
-      "SELECT id FROM eventos WHERE id = ? AND usuario_id = ? FOR UPDATE",
-      [id, req.usuario.id]
-    );
+    const eventos = await custosRepository.bloquearEventoDoUsuario(conexao, id, req.usuario.id);
 
     if (eventos.length === 0) {
       await conexao.rollback();
@@ -1202,23 +957,13 @@ app.put("/eventos/:id/custos", autenticar, permitirPerfis("organizador"), async 
       });
     }
 
-    await conexao.execute("DELETE FROM custos_evento WHERE evento_id = ?", [id]);
+    await custosRepository.excluirPorEvento(conexao, id);
 
     for (const item of custosValidados) {
-      await conexao.execute(
-        `INSERT INTO custos_evento (evento_id, categoria, descricao, valor_estimado)
-         VALUES (?, ?, ?, ?)`,
-        [id, item.categoria, item.descricao, item.valor_estimado]
-      );
+      await custosRepository.inserir(conexao, id, item);
     }
 
-    const [custosSalvos] = await conexao.execute(
-      `SELECT id, evento_id, categoria, descricao, valor_estimado
-       FROM custos_evento
-       WHERE evento_id = ?
-       ORDER BY id`,
-      [id]
-    );
+    const custosSalvos = await custosRepository.listarPorEvento(id, conexao);
 
     await conexao.commit();
     return res.status(200).json(custosSalvos);
@@ -1251,20 +996,15 @@ app.get("/eventos/:id", autenticar, async (req, res) => {
       });
     }
 
-    const [eventos] = await db.execute(
-      `SELECT id, nome, data, horario, local, categoria, publico, descricao, status, usuario_id
-       FROM eventos
-       WHERE id = ? AND usuario_id = ?`,
-      [id, req.usuario.id]
-    );
+    const evento = await eventosRepository.buscarPorIdDoUsuario(id, req.usuario.id);
 
-    if (eventos.length === 0) {
+    if (!evento) {
       return res.status(404).json({
         erro: "Evento não encontrado."
       });
     }
 
-    return res.status(200).json(eventos[0]);
+    return res.status(200).json(evento);
 
   } catch (erro) {
     console.error("Falha em GET /eventos/:id.");
@@ -1308,25 +1048,12 @@ app.put("/eventos/:id", autenticar, permitirPerfis("organizador"), async (req, r
       });
     }
 
-    const [resultado] = await db.execute(
-      `UPDATE eventos
-       SET nome = ?, data = ?, horario = ?, local = ?,
-           categoria = ?, publico = ?, descricao = ?
-       WHERE id = ? AND usuario_id = ?`,
-      [
-        nome.trim(),
-        data,
-        horario,
-        local.trim(),
-        categoria || "Corporativo",
-        publico,
-        descricao || "",
-        id,
-        req.usuario.id
-      ]
-    );
+    const affectedRows = await eventosRepository.atualizar(id, req.usuario.id, {
+      nome: nome.trim(), data, horario, local: local.trim(),
+      categoria: categoria || "Corporativo", publico, descricao: descricao || ""
+    });
 
-    if (resultado.affectedRows === 0) {
+    if (affectedRows === 0) {
       return res.status(404).json({
         erro: "Evento não encontrado."
       });
@@ -1358,14 +1085,10 @@ app.delete("/eventos/:id", autenticar, permitirPerfis("organizador"), async (req
     }
 
     // Excluir apenas eventos do usuário logado
-    const [resultado] = await db.execute(
-      `DELETE FROM eventos
-       WHERE id = ? AND usuario_id = ?`,
-      [id, req.usuario.id]
-    );
+    const affectedRows = await eventosRepository.excluir(id, req.usuario.id);
 
     // Verificar se o evento existia
-    if (resultado.affectedRows === 0) {
+    if (affectedRows === 0) {
       return res.status(404).json({
         erro: "Evento não encontrado."
       });
@@ -1414,11 +1137,7 @@ app.post("/solicitacoes-acesso", autenticar, async (req, res) => {
     }
 
     // Impedir solicitações pendentes duplicadas
-    const [solicitacoesExistentes] = await db.execute(
-      `SELECT id FROM solicitacoes_acesso
-       WHERE usuario_id = ? AND status = 'pendente'`,
-      [usuarioId]
-    );
+    const solicitacoesExistentes = await solicitacoesAcessoRepository.buscarPendentesPorUsuario(usuarioId);
 
     if (solicitacoesExistentes.length > 0) {
       return res.status(409).json({
@@ -1427,17 +1146,12 @@ app.post("/solicitacoes-acesso", autenticar, async (req, res) => {
     }
 
     // Registrar a solicitação
-    const [resultado] = await db.execute(
-      `INSERT INTO solicitacoes_acesso
-       (usuario_id, perfil_solicitado, justificativa)
-       VALUES (?, ?, ?)`,
-      [usuarioId, perfil_solicitado, justificativa.trim()]
-    );
+    const solicitacaoId = await solicitacoesAcessoRepository.criar(usuarioId, perfil_solicitado, justificativa.trim());
 
     return res.status(201).json({
       mensagem: "Solicitação enviada com sucesso!",
       solicitacao: {
-        id: resultado.insertId,
+        id: solicitacaoId,
         usuario_id: usuarioId,
         perfil_solicitado,
         justificativa: justificativa.trim(),
@@ -1455,20 +1169,7 @@ app.post("/solicitacoes-acesso", autenticar, async (req, res) => {
 
 app.get("/solicitacoes-acesso",autenticar,permitirPerfis("admin"),async (req, res) => {
     try {
-      const [solicitacoes] = await db.execute(`
-        SELECT
-          s.id,
-          s.usuario_id,
-          u.nome,
-          u.email,
-          s.perfil_solicitado,
-          s.justificativa,
-          s.status,
-          s.criada_em
-        FROM solicitacoes_acesso s
-        INNER JOIN usuarios u ON u.id = s.usuario_id
-        ORDER BY s.criada_em DESC, s.id DESC
-      `);
+      const solicitacoes = await solicitacoesAcessoRepository.listar();
 
       return res.status(200).json(solicitacoes);
 
@@ -1503,13 +1204,7 @@ app.patch("/solicitacoes-acesso/:id", autenticar, permitirPerfis("admin"), async
       conexao = await db.getConnection();
       await conexao.beginTransaction();
 
-      const [solicitacoes] = await conexao.execute(
-        `SELECT usuario_id, perfil_solicitado, status
-         FROM solicitacoes_acesso
-         WHERE id = ?
-         FOR UPDATE`,
-        [id]
-      );
+      const solicitacoes = await solicitacoesAcessoRepository.bloquearPorId(conexao, id);
 
       if (solicitacoes.length === 0) {
         await conexao.rollback();
@@ -1528,14 +1223,9 @@ app.patch("/solicitacoes-acesso/:id", autenticar, permitirPerfis("admin"), async
       }
 
       if (status === "aprovado") {
-        const [resultadoUsuario] = await conexao.execute(
-          `UPDATE usuarios
-           SET perfil = ?
-           WHERE id = ? AND perfil = 'participante'`,
-          [solicitacao.perfil_solicitado, solicitacao.usuario_id]
-        );
+        const usuariosAfetados = await solicitacoesAcessoRepository.atualizarPerfilParticipante(conexao, solicitacao.perfil_solicitado, solicitacao.usuario_id);
 
-        if (resultadoUsuario.affectedRows !== 1) {
+        if (usuariosAfetados !== 1) {
           await conexao.rollback();
           return res.status(409).json({
             erro: "O usuário não possui mais o perfil participante."
@@ -1543,12 +1233,7 @@ app.patch("/solicitacoes-acesso/:id", autenticar, permitirPerfis("admin"), async
         }
       }
 
-      await conexao.execute(
-        `UPDATE solicitacoes_acesso
-         SET status = ?
-         WHERE id = ?`,
-        [status, id]
-      );
+      await solicitacoesAcessoRepository.atualizarStatus(conexao, status, id);
 
       await conexao.commit();
 

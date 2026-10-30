@@ -46,6 +46,12 @@ function ambiente() {
       if (nome === "cors") return () => () => {};
       if (nome === "./db") return db;
       if (nome === "./repositories/mysql/usuarios.cjs") return require("../repositories/mysql/usuarios.cjs");
+      if (nome === "./repositories/mysql/eventos.cjs") return require("../repositories/mysql/eventos.cjs");
+      if (nome === "./repositories/mysql/cotacoes.cjs") return require("../repositories/mysql/cotacoes.cjs");
+      if (nome === "./repositories/mysql/propostas.cjs") return require("../repositories/mysql/propostas.cjs");
+      if (nome === "./repositories/mysql/inscricoes.cjs") return require("../repositories/mysql/inscricoes.cjs");
+      if (nome === "./repositories/mysql/solicitacoes-acesso.cjs") return require("../repositories/mysql/solicitacoes-acesso.cjs");
+      if (nome === "./repositories/mysql/custos.cjs") return require("../repositories/mysql/custos.cjs");
       if (nome === "./isolamento.cjs") return { modoExecucao: () => "principal" };
       if (nome === "dotenv") return { config() {} };
       throw new Error("Dependencia inesperada");
