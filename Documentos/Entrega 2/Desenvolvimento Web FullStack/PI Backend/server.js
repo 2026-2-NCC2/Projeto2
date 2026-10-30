@@ -7,6 +7,8 @@ const { modoExecucao } = require("./isolamento.cjs");
 if (modoExecucao() === "principal") require("dotenv").config();
 
 const db = require("./db");
+const { criarRepositorioUsuarios } = require("./repositories/mysql/usuarios.cjs");
+const usuariosRepository = criarRepositorioUsuarios(db);
 
 const app = express();
 
@@ -15,6 +17,41 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+// Janelas por IP, independentes por rota e locais a este processo.
+// Nao confiar em X-Forwarded-For sem uma topologia de proxy validada.
+function limitarFrequencia(limite, janelaMs) {
+  const clientes = new Map();
+  const capacidade = 10000;
+  let proximaLimpeza = 0;
+  return (req, res, next) => {
+    const agora = Date.now();
+    if (agora >= proximaLimpeza || clientes.size >= capacidade) {
+      for (const [ip, estado] of clientes) {
+        if (estado.expira <= agora) clientes.delete(ip);
+      }
+      proximaLimpeza = agora + 60000;
+    }
+    const ip = req.ip || req.socket?.remoteAddress || "desconhecido";
+    let estado = clientes.get(ip);
+    if (estado && estado.expira <= agora) {
+      clientes.delete(ip);
+      estado = undefined;
+    }
+    if (!estado && clientes.size < capacidade) {
+      estado = { tentativas: 0, expira: agora + janelaMs };
+      clientes.set(ip, estado);
+    }
+    // Ao atingir a capacidade, recusar novas chaves sem descartar bloqueios ativos.
+    if (!estado || estado.tentativas >= limite) {
+      res.setHeader("Retry-After", String(Math.max(1,
+        Math.ceil(((estado?.expira ?? agora + janelaMs) - agora) / 1000))));
+      return res.status(429).json({ erro: "Muitas tentativas. Tente novamente mais tarde." });
+    }
+    estado.tentativas++;
+    return next();
+  };
+}
 
 app.get("/", (req, res) => {
   res.json({
@@ -37,7 +74,7 @@ app.get("/eventos", autenticar, async (req, res) => {
     return res.status(200).json(eventos);
 
   } catch (erro) {
-    console.error(erro);
+    console.error("Falha em GET /eventos.");
 
     return res.status(500).json({
       erro: "Erro interno ao listar eventos."
@@ -69,7 +106,7 @@ app.get("/admin/eventos", autenticar, permitirPerfis("admin"), async (req, res) 
       return res.status(200).json(eventos);
 
     } catch (erro) {
-      console.error(erro);
+      console.error("Falha em GET /admin/eventos.");
 
       return res.status(500).json({
         erro: "Erro interno ao listar eventos do administrador."
@@ -90,7 +127,7 @@ app.get("/participante/eventos", autenticar, permitirPerfis("participante"), asy
       return res.status(200).json(eventos);
 
     } catch (erro) {
-      console.error("Erro ao listar eventos para participantes:", erro);
+      console.error("Erro ao listar eventos para participantes:");
 
       return res.status(500).json({
         erro: "Erro interno ao listar eventos disponíveis."
@@ -154,7 +191,7 @@ app.post("/participante/inscricoes", autenticar, permitirPerfis("participante"),
         });
       }
 
-      console.error("Erro ao realizar inscrição:", erro);
+      console.error("Erro ao realizar inscrição:");
 
       return res.status(500).json({
         erro: "Erro interno ao realizar inscrição."
@@ -188,7 +225,7 @@ app.get("/participante/inscricoes", autenticar, permitirPerfis("participante"), 
       return res.status(200).json(inscricoes);
 
     } catch (erro) {
-      console.error("Erro ao buscar inscrições:", erro);
+      console.error("Erro ao buscar inscrições:");
 
       return res.status(500).json({
         erro: "Erro interno ao buscar inscrições."
@@ -199,14 +236,12 @@ app.get("/participante/inscricoes", autenticar, permitirPerfis("participante"), 
 
 app.get('/usuarios', autenticar, permitirPerfis('admin'), async (req, res) => {
   try {
-    const [usuarios] = await db.execute(
-      "SELECT id, nome, email, perfil FROM usuarios ORDER BY id DESC"
-    );
+    const usuarios = await usuariosRepository.listar();
 
     return res.status(200).json(usuarios);
 
   } catch (erro) {
-    console.error(erro);
+    console.error("Falha em GET /usuarios.");
 
     return res.status(500).json({
       erro: "Erro interno ao listar usuários."
@@ -216,7 +251,7 @@ app.get('/usuarios', autenticar, permitirPerfis('admin'), async (req, res) => {
 
 // Cadastrar usuário
 
-app.post("/usuarios", async (req, res) => {
+app.post("/usuarios", limitarFrequencia(5, 60 * 60 * 1000), async (req, res) => {
   try {
     const { nome, email, senha, perfil } = req.body || {};
 
@@ -242,12 +277,9 @@ app.post("/usuarios", async (req, res) => {
     const emailNormalizado = email.trim().toLowerCase();
 
     // Verificar se o email já existe
-    const [usuariosExistentes] = await db.execute(
-      "SELECT id FROM usuarios WHERE email = ?",
-      [emailNormalizado]
-    );
+    const usuarioExistente = await usuariosRepository.buscarIdPorEmail(emailNormalizado);
 
-    if (usuariosExistentes.length > 0) {
+    if (usuarioExistente) {
       return res.status(409).json({
         erro: "Email já cadastrado!"
       });
@@ -257,15 +289,14 @@ app.post("/usuarios", async (req, res) => {
     const senhaHash = await bcrypt.hash(senha, 12);
 
     // Salvar usuário com o perfil escolhido
-    const [resultado] = await db.execute(
-      "INSERT INTO usuarios (nome, email, senha, perfil) VALUES (?, ?, ?, ?)",
-      [nome.trim(), emailNormalizado, senhaHash, perfil]
-    );
+    const usuarioId = await usuariosRepository.criar({
+      nome: nome.trim(), email: emailNormalizado, senhaHash, perfil
+    });
 
     return res.status(201).json({
       mensagem: "Usuário cadastrado com sucesso!",
       usuario: {
-        id: resultado.insertId,
+        id: usuarioId,
         nome: nome.trim(),
         email: emailNormalizado,
         perfil
@@ -273,7 +304,7 @@ app.post("/usuarios", async (req, res) => {
     });
 
   } catch (erro) {
-    console.error(erro);
+    console.error("Falha em POST /usuarios.");
 
     if (erro.code === "ER_DUP_ENTRY") {
       return res.status(409).json({
@@ -288,7 +319,7 @@ app.post("/usuarios", async (req, res) => {
 });
 
 // Login
-app.post("/login", async (req, res) => {
+app.post("/login", limitarFrequencia(10, 15 * 60 * 1000), async (req, res) => {
   try {
     const { email, senha } = req.body || {};
 
@@ -304,13 +335,7 @@ app.post("/login", async (req, res) => {
 
     const emailNormalizado = email.trim().toLowerCase();
 
-    // Buscar usuário no MySQL
-    const [usuariosEncontrados] = await db.execute(
-      "SELECT id, nome, email, senha, perfil FROM usuarios WHERE email = ?",
-      [emailNormalizado]
-    );
-
-    const usuario = usuariosEncontrados[0];
+    const usuario = await usuariosRepository.buscarParaLogin(emailNormalizado);
     
     // Verificar senha com bcrypt
     const senhaCorreta = usuario
@@ -330,7 +355,7 @@ app.post("/login", async (req, res) => {
     perfil: usuario.perfil
   },
   process.env.JWT_SECRET,
-  { expiresIn: "1h" }
+  { algorithm: "HS256", expiresIn: "1h" }
 );
 
     return res.status(200).json({
@@ -345,7 +370,7 @@ app.post("/login", async (req, res) => {
 });
 
   } catch (erro) {
-    console.error(erro);
+    console.error("Falha em POST /login.");
 
     return res.status(500).json({
       erro: "Erro interno no login."
@@ -531,7 +556,7 @@ app.get("/cotacoes", autenticar, permitirPerfis("organizador"), async (req, res)
 
     return res.status(200).json(cotacoes);
   } catch (erro) {
-    console.error("Erro ao consultar cotações:", erro);
+    console.error("Erro ao consultar cotações:");
 
     return res.status(500).json({
       erro: "Erro interno ao consultar cotações."
@@ -558,7 +583,7 @@ app.get("/admin/cotacoes", autenticar, permitirPerfis("admin"), async (req, res)
 
     return res.status(200).json(cotacoes);
   } catch (erro) {
-    console.error("Erro ao consultar cotações do administrador:", erro);
+    console.error("Erro ao consultar cotações do administrador:");
 
     return res.status(500).json({
       erro: "Erro interno ao consultar cotações."
@@ -606,7 +631,7 @@ app.get("/fornecedor/cotacoes", autenticar, permitirPerfis("fornecedor"), async 
     return res.status(200).json(cotacoes);
 
   } catch (erro) {
-    console.error("Erro ao consultar cotações para fornecedores:", erro);
+    console.error("Erro ao consultar cotações para fornecedores:");
 
     return res.status(500).json({
       erro: "Erro interno ao consultar cotações disponíveis."
@@ -675,7 +700,7 @@ app.post("/fornecedor/propostas", autenticar, permitirPerfis("fornecedor"), asyn
       });
 
     } catch (erro) {
-      console.error("Erro ao enviar proposta:", erro);
+      console.error("Erro ao enviar proposta:");
 
       return res.status(500).json({
         erro: "Erro interno ao enviar proposta."
@@ -718,7 +743,7 @@ app.get("/fornecedor/propostas", autenticar, permitirPerfis("fornecedor"),  asyn
       return res.status(200).json(propostas);
 
     } catch (erro) {
-      console.error("Erro ao buscar propostas:", erro);
+      console.error("Erro ao buscar propostas:");
 
       return res.status(500).json({
         erro: "Erro interno ao buscar propostas."
@@ -754,7 +779,7 @@ app.get("/organizador/propostas", autenticar, permitirPerfis("organizador"), asy
       return res.status(200).json(propostas);
 
     } catch (erro) {
-      console.error("Erro ao buscar propostas recebidas:", erro);
+      console.error("Erro ao buscar propostas recebidas:");
 
       return res.status(500).json({
         erro: "Erro interno ao buscar propostas recebidas."
@@ -788,7 +813,7 @@ app.get("/admin/propostas", autenticar, permitirPerfis("admin"), async (req, res
     return res.status(200).json(propostas);
 
   } catch (erro) {
-    console.error("Erro ao buscar propostas do administrador:", erro);
+    console.error("Erro ao buscar propostas do administrador:");
 
     return res.status(500).json({
       erro: "Erro interno ao buscar propostas."
@@ -837,7 +862,7 @@ app.patch("/organizador/propostas/:id/status", autenticar, permitirPerfis("organ
       });
 
     } catch (erro) {
-      console.error("Erro ao avaliar proposta:", erro);
+      console.error("Erro ao avaliar proposta:");
 
       return res.status(500).json({
         erro: "Erro interno ao avaliar proposta."
@@ -863,7 +888,11 @@ async function autenticar(req, res, next) {
   let dadosToken;
 
   try {
-    dadosToken = jwt.verify(token, process.env.JWT_SECRET);
+    dadosToken = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ["HS256"] });
+    if (!dadosToken || typeof dadosToken !== "object" || Array.isArray(dadosToken) ||
+        !Number.isSafeInteger(dadosToken.id) || dadosToken.id <= 0) {
+      throw new Error("Identificador de usuario invalido.");
+    }
   } catch {
     return res.status(401).json({
       erro: "Token inválido ou expirado."
@@ -871,22 +900,19 @@ async function autenticar(req, res, next) {
   }
 
   try {
-    const [usuarios] = await db.execute(
-      "SELECT id, nome, email, perfil FROM usuarios WHERE id = ?",
-      [dadosToken.id]
-    );
+    const usuario = await usuariosRepository.buscarParaAutenticacao(dadosToken.id);
 
-    if (usuarios.length === 0) {
+    if (!usuario) {
       return res.status(401).json({
         erro: "Usuário não encontrado."
       });
     }
 
-    req.usuario = usuarios[0];
+    req.usuario = usuario;
 
     next();
   } catch (erro) {
-    console.error("Erro na autenticação:", erro);
+    console.error("Erro na autenticação:");
 
     return res.status(500).json({
       erro: "Erro interno ao autenticar usuário."
@@ -897,21 +923,18 @@ async function autenticar(req, res, next) {
 // Rota protegida
 app.get("/perfil", autenticar, async (req, res) => {
   try {
-    const [usuarios] = await db.execute(
-      "SELECT id, nome, email FROM usuarios WHERE id = ?",
-      [req.usuario.id]
-    );
+    const usuario = await usuariosRepository.buscarPerfil(req.usuario.id);
 
-    if (usuarios.length === 0) {
+    if (!usuario) {
       return res.status(404).json({
         erro: "Usuário não encontrado."
       });
     }
 
-    return res.status(200).json(usuarios[0]);
+    return res.status(200).json(usuario);
 
   } catch (erro) {
-    console.error(erro);
+    console.error("Falha em GET /perfil.");
 
     return res.status(500).json({
       erro: "Erro interno ao buscar perfil."
@@ -1015,7 +1038,7 @@ app.post("/eventos", autenticar, permitirPerfis("organizador"),async (req, res) 
     });
 
   } catch (erro) {
-    console.error(erro);
+    console.error("Falha em POST /eventos.");
 
     return res.status(500).json({
       erro: "Erro interno ao cadastrar evento."
@@ -1054,7 +1077,7 @@ app.patch("/eventos/:id/publicar", autenticar, permitirPerfis("organizador"), as
       });
 
     } catch (erro) {
-      console.error("Erro ao publicar evento:", erro);
+      console.error("Erro ao publicar evento:");
 
       return res.status(500).json({
         erro: "Erro interno ao publicar evento."
@@ -1095,7 +1118,7 @@ app.get("/eventos/:id/custos", autenticar, permitirPerfis("organizador"), async 
 
     return res.status(200).json(custos);
   } catch (erro) {
-    console.error("Erro ao listar custos do evento:", erro);
+    console.error("Erro ao listar custos do evento:");
 
     return res.status(500).json({
       erro: "Erro interno ao listar custos do evento."
@@ -1204,11 +1227,11 @@ app.put("/eventos/:id/custos", autenticar, permitirPerfis("organizador"), async 
       try {
         await conexao.rollback();
       } catch (erroRollback) {
-        console.error("Erro ao reverter custos do evento:", erroRollback);
+        console.error("Erro ao reverter custos do evento:");
       }
     }
 
-    console.error("Erro ao salvar custos do evento:", erro);
+    console.error("Erro ao salvar custos do evento:");
     return res.status(500).json({
       erro: "Erro interno ao salvar custos do evento."
     });
@@ -1229,7 +1252,8 @@ app.get("/eventos/:id", autenticar, async (req, res) => {
     }
 
     const [eventos] = await db.execute(
-      `SELECT * FROM eventos
+      `SELECT id, nome, data, horario, local, categoria, publico, descricao, status, usuario_id
+       FROM eventos
        WHERE id = ? AND usuario_id = ?`,
       [id, req.usuario.id]
     );
@@ -1243,7 +1267,7 @@ app.get("/eventos/:id", autenticar, async (req, res) => {
     return res.status(200).json(eventos[0]);
 
   } catch (erro) {
-    console.error(erro);
+    console.error("Falha em GET /eventos/:id.");
 
     return res.status(500).json({
       erro: "Erro interno ao buscar evento."
@@ -1313,7 +1337,7 @@ app.put("/eventos/:id", autenticar, permitirPerfis("organizador"), async (req, r
     });
 
   } catch (erro) {
-    console.error(erro);
+    console.error("Falha em PUT /eventos/:id.");
 
     return res.status(500).json({
       erro: "Erro interno ao atualizar evento."
@@ -1352,7 +1376,7 @@ app.delete("/eventos/:id", autenticar, permitirPerfis("organizador"), async (req
     });
 
   } catch (erro) {
-    console.error(erro);
+    console.error("Falha em DELETE /eventos/:id.");
 
     return res.status(500).json({
       erro: "Erro interno ao excluir evento."
@@ -1422,7 +1446,7 @@ app.post("/solicitacoes-acesso", autenticar, async (req, res) => {
     });
 
   } catch (erro) {
-    console.error(erro);
+    console.error("Falha em POST /solicitacoes-acesso.");
     return res.status(500).json({
       erro: "Erro interno ao solicitar acesso."
     });
@@ -1449,7 +1473,7 @@ app.get("/solicitacoes-acesso",autenticar,permitirPerfis("admin"),async (req, re
       return res.status(200).json(solicitacoes);
 
     } catch (erro) {
-      console.error(erro);
+      console.error("Falha em GET /solicitacoes-acesso.");
 
       return res.status(500).json({
         erro: "Erro interno ao buscar solicitações."
@@ -1536,7 +1560,7 @@ app.patch("/solicitacoes-acesso/:id", autenticar, permitirPerfis("admin"), async
 
     } catch (erro) {
       if (conexao) await conexao.rollback();
-      console.error(erro);
+      console.error("Falha em PATCH /solicitacoes-acesso/:id.");
 
       return res.status(500).json({
         erro: "Erro interno ao analisar solicitação."
@@ -1546,6 +1570,16 @@ app.patch("/solicitacoes-acesso/:id", autenticar, permitirPerfis("admin"), async
     }
   }
 );
+
+// Evita o handler padrao do Express, que pode registrar stack/mensagem do erro.
+app.use((erro, req, res, next) => {
+  console.error("Erro no processamento da requisicao.");
+  if (res.headersSent) return res.destroy();
+  const status = erro?.type === "entity.parse.failed" ? 400
+    : erro?.type === "entity.too.large" ? 413 : 500;
+  return res.status(status).json({ erro: status === 500
+    ? "Erro interno no servidor." : "Corpo da requisicao invalido ou muito grande." });
+});
 
 const PORT = process.env.PORT || 3001
 

@@ -509,6 +509,7 @@ function carregarServidor(principal, modo) {
     stubs: {
       express, bcryptjs: {}, jsonwebtoken: {}, cors: () => () => {},
       dotenv: { config: () => { estado.dotenv++; } }, "./db": {},
+      "./repositories/mysql/usuarios.cjs": require("../repositories/mysql/usuarios.cjs"),
       "./isolamento.cjs": { modoExecucao: () => modo },
     },
   });
@@ -547,10 +548,16 @@ test("startup com server.js e db.js reais usa apenas o adaptador simulado e nunc
     return moduloSimulado("server.js", { env: fake.processo.env, stubs: {
       express, bcryptjs: {}, jsonwebtoken: {}, cors: () => () => {},
       "./isolamento.cjs": fake.iso, "./db": db, dotenv: { config: proibido },
+      "./repositories/mysql/usuarios.cjs": require("../repositories/mysql/usuarios.cjs"),
     } }).modulo;
   };
   const controle = await fake.iso.iniciarBackendIsolado(config(), fake.deps);
   assert.deepEqual(fake.http.estado.chamadas, [[3107, "127.0.0.1"]]);
+  const { criarRepositorioUsuarios } = require("../repositories/mysql/usuarios.cjs");
+  const repo = criarRepositorioUsuarios(fake.iso.obterBancoIsolado());
+  assert.deepEqual(await repo.listar(), [{ resultado: "simulado" }]);
+  assert.equal(fake.banco.estado.sql.at(-1)[0],
+    "SELECT id, nome, email, perfil FROM usuarios ORDER BY id DESC");
   await controle.encerrar();
 })
 

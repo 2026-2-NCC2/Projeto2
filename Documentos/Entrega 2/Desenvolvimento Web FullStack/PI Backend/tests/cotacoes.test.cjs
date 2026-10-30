@@ -89,6 +89,7 @@ function ambiente(opcoes = {}) {
       if (nome === "cors") return () => () => {};
       if (nome === "dotenv") return { config() {} };
       if (nome === "./db") return db;
+      if (nome === "./repositories/mysql/usuarios.cjs") return require("../repositories/mysql/usuarios.cjs");
       if (nome === "./isolamento.cjs") return { modoExecucao: () => "principal" };
       if (nome === "bcryptjs") return {};
       if (nome === "jsonwebtoken") return { verify() { if (opcoes.jwtInvalido) throw Error(); return { id: 10 }; } };
