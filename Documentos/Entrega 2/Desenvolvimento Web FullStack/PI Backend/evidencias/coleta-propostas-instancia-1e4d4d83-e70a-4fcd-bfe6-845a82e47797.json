@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-10-30T19:23:22.181Z",
+  "status": "BLOCKED_MISSING_LEGITIMATE_MYSQL_CREDENTIALS",
+  "process": {
+    "pid": 30896,
+    "executable": "C:/xampp/mysql/bin/mysqld.exe",
+    "listener": {
+      "address": "::",
+      "port": 3306
+    },
+    "defaultsFile": "C:/xampp/mysql/bin/my.ini",
+    "datadirConfigured": "C:/xampp/mysql/data",
+    "pidFile": 30896
+  },
+  "configuration": {
+    "projectMysqlCredentialsFound": false,
+    "projectDotenvContainsSupabaseOnly": true
+  },
+  "databaseExistence": "NOT_VERIFIED_NO_AUTHENTICATED_CONNECTION",
+  "sqlExecuted": [],
+  "comparisonsExecuted": [],
+  "progress": "26/27"
+}

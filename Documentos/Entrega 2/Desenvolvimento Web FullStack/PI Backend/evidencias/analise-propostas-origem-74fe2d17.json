@@ -1,0 +1,13 @@
+{
+  "source": "evidencias/propostas-origem-74fe2d17-2347-4621-8425-dda96672edc8.json",
+  "sha256": "876a7ed3ae6bd6455357474997abe71412f77a7220a20751f23c98b15c80f89b",
+  "sameReservedConnection": true,
+  "allSyntheticHexAndByteLengthsVerified": true,
+  "representativeDependsOnInputOrder": true,
+  "composedAndDecomposedDistinctInObservedSource": true,
+  "sourceMetadataMissing": false,
+  "implemented": false,
+  "progress": "26/27",
+  "remainingBlocker": "Exact PostgreSQL equivalence of general_ci DISTINCT/order/representatives is not established. Original query has no internal ORDER BY; input order changed the chosen representative. No silent canonicalization or deterministic tie-break is authorized.",
+  "scope": "Source observations only; not PostgreSQL comparison, HTTP integration or activation."
+}

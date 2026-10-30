@@ -127,6 +127,29 @@ test("IDs fora de ordem ou repetidos recusados", async () => {
   }
 });
 
+test("custos: validar todos os campos e posicoes sem aceitar resposta parcial", async () => {
+  const transformar = [
+    () => ({}),
+    r => { r[0].evento_id = "9"; return r; },
+    r => { r[0].id = Number.MAX_SAFE_INTEGER + 1; return r; },
+    r => { delete r[0]; return r; },
+    r => { delete r[1]; return r; },
+    r => { delete r[0].categoria; return r; },
+    r => { r[0].descricao = null; return r; },
+    r => { r[0] = []; return r; },
+    r => { r[0].valor_estimado = "0.10\n"; return r; },
+    r => { r[1].valor_estimado = "0.200"; return r; },
+  ];
+  for (const mudar of transformar) {
+    const r = mudar([{ id: 10, evento_id: 9, categoria: "Segurança", descricao: "Equipe", valor_estimado: "0.10" },
+      { id: 12, evento_id: 9, categoria: "Segurança", descricao: "Equipe", valor_estimado: "0.20" }]);
+    const m = mock(() => ({ data: r }));
+    await assert.rejects(criarAdaptadorSubstituicaoCustos(m.cliente).substituir(9, 1, [entrada("0.10"), entrada("0.20")]),
+      e => e.respostaStatus === 500 && e.resultadoIncerto);
+    assert.equal(m.chamadas.length, 1);
+  }
+});
+
 test("retorno independente: IDs gerados com lacunas, ordem e ator atual sem aceitar extras do corpo", async () => {
   const m = mock(p => {
     assert.deepEqual(p, { p_evento_id: 13, p_usuario_id: 10, p_custos: [
@@ -220,6 +243,7 @@ test("fabrica existente e tardia, reutilizada; importacao/validacao nao iniciali
   const contexto = { module: { exports: {} }, AbortController, setTimeout, clearTimeout,
     require(nome) {
       if (nome === "./suporte-leitura.cjs") return require("../repositories/supabase/suporte-leitura.cjs");
+      if (nome === "./validacao-custos.cjs") return require("../repositories/supabase/validacao-custos.cjs");
       assert.equal(nome, "../../db-supabase.cjs");
       return { criarClienteSupabase() { criacoes++; return m.cliente; } };
     } };

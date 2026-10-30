@@ -1,0 +1,33 @@
+{
+  "timestamp": "2026-10-30T19:20:35.833Z",
+  "status": "BLOCKED_BEFORE_CONNECTION",
+  "initialization": {
+    "source": "db.js",
+    "dotenvLoaded": true,
+    "providerWhenUnset": "mysql",
+    "perConnectionHooksFound": false,
+    "sessionSettersFound": false,
+    "customCharsetConfigured": false,
+    "groupConcatLimitConfigured": false
+  },
+  "configuration": {
+    "mysqlHostPresent": false,
+    "mysqlUserPresent": false,
+    "mysqlPasswordPresent": false,
+    "mysqlDatabasePresent": false,
+    "supabaseConfigurationPresent": true
+  },
+  "os": {
+    "port": 3306,
+    "listenerFound": false
+  },
+  "databaseConnectionsOpened": 0,
+  "sqlExecuted": [],
+  "syntheticComparisons": [],
+  "reason": "Current db.js configuration cannot identify/authenticate an explicit MySQL target. Refused driver defaults and fallback credentials.",
+  "limitations": [
+    "Environment inherited by a separately running backend, if any, was not inspected.",
+    "No session metadata or collation-equivalence evidence was collected."
+  ],
+  "progress": "26/27"
+}

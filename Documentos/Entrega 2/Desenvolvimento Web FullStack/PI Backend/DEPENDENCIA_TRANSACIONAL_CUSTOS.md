@@ -1,14 +1,22 @@
 # Dependencia transacional: custos.listarPorEvento
 
-Estado: analisada e adiada. Progresso mantido em 22/27; nenhuma implementacao
-Supabase de listarPorEvento foi adicionada. Este incremento nao retoma propostas.
+Atualizacao de contagem e evidencias: ver [consolidacao](CONSOLIDACAO_ETAPA_5.md).
+GET e releitura atomica estao implementados e contabilizados sob criterio local
+uniforme (26/27 no total). As exigencias HTTP abaixo sao de validacao integrada,
+nao motivo para excluir apenas esta operacao da contagem de codigo.
+
+Estado atual: GET/interface independente preparados localmente; a equivalencia
+integral do metodo original, incluindo o PUT, ainda aguarda validacao transacional.
+Progresso reavaliado em 22/27 pelos criterios abaixo, sem contar um caminho parcial.
 MySQL continua ativo em todas as rotas. Nenhuma consulta real foi executada.
 
 Atualizacao posterior: a substituicao atomica e sua releitura foram preparadas
 em arquivo SQL e adaptador independente, sem instalacao ou ligacao a rotas.
 Contrato, artefatos e pendencias constam exclusivamente na secao
 "Preparacao local autorizada" de [PLANO_TRANSACOES_SUPABASE.md](PLANO_TRANSACOES_SUPABASE.md).
-A analise abaixo permanece valida; listarPorEvento nao e declarado migrado.
+A leitura GET foi adicionada em repositories/supabase/custos.cjs. A analise
+transacional abaixo permanece valida; o metodo original ainda nao e declarado
+integralmente migrado.
 
 ## Dois usos do mesmo metodo
 
@@ -69,15 +77,18 @@ leitura ja nao permitiria reverter a substituicao, e outro PUT poderia modificar
 os custos antes da resposta. Ler dados previamente confirmados ou retornar o
 payload enviado ignora IDs efetivos e o resultado da persistencia.
 
-Assim, nao foi criado um listarPorEvento que so funcione sem conexao, descarte o
-argumento transacional ou use fallback MySQL. Nenhum desses atalhos conta como
-migracao completa do metodo. A dependência nao e do SELECT isolado, mas de sua
+Nesta etapa foi autorizada a separacao explicita: listarPorEvento(id) no
+repositorio Supabase e SOMENTE leitura independente. Qualquer segundo argumento,
+inclusive undefined, e recusado com SUPABASE_CUSTO_CONNECTION_UNSUPPORTED antes
+de construir a consulta. Nao ha descarte de conexao, fallback MySQL ou alegacao
+de que esse metodo pode substituir listarPorEvento(id, conexao) dentro do PUT.
+A dependencia do metodo original nao e do SELECT isolado, mas tambem de sua
 reutilizacao dentro da atualizacao atomica.
 
-## Solucao futura proposta, nao implementada
+## Solucao transacional preparada, ainda nao executada
 
-Definir uma operacao PostgreSQL atomica de substituicao de custos, em etapa
-propria autorizada. Uma RPC de escrita pode executar validacao, verificacao de
+Foi preparada a operacao atomica de substituicao descrita no plano, sem executar
+ou instalar o SQL. Uma RPC de escrita deve executar validacao, verificacao de
 propriedade, bloqueio do evento, exclusao, insercoes e a releitura ordenada na
 mesma transacao da requisicao. Falhas devem abortar a transacao, nao ser capturadas
 e transformadas em retorno de sucesso ou objeto de erro que permita commit.
@@ -98,10 +109,33 @@ real poderia preservar a assinatura com conexao. Isso exigiria decisao separada
 de infraestrutura e nao e equivalente a reutilizar a fabrica Supabase existente.
 Nao introduzir tal adaptador neste incremento.
 
-Ao separar futuramente a interface do GET da atualizacao atomica, registrar a
-mudanca de interface em etapa propria. O GET pode usar uma leitura independente;
-o PUT deve devolver a lista construida internamente, apos o sucesso transacional.
-Nao sinalizar sucesso apos timeout incerto nem repetir a substituicao automaticamente.
+## Interfaces locais separadas
+
+| Caminho | Interface | Contexto da leitura |
+|---|---|---|
+| MySQL atual, GET/PUT | criarRepositorioCustos(db).listarPorEvento(id, conexao = db) | Executor real recebido ou pool; assinatura/chamadores preservados |
+| Supabase, apenas GET | criarRepositorioCustos(cliente).listarPorEvento(id) | Requisicoes independentes de leitura; segundo argumento recusado |
+| Supabase, substituicao atomica | criarAdaptadorSubstituicaoCustos(cliente).substituir(eventoId, usuarioId, custos) | Releitura ocorre no SQL da mesma RPC, antes do commit; nenhum GET posterior |
+
+O GET recebe o ID numerico validado pelo chamador, como o handler atual. Ele
+nao substitui JWT, perfil ou buscarEventoDoUsuario, nem cria resposta 404 por si:
+lista vazia significa sem custos, e propriedade continua no fluxo chamador.
+Retorna id/evento_id/categoria/descricao/valor_estimado; nao faz trim em textos,
+nao calcula total nem reaplica validacoes de escrita. Negativos historicos e
+strings vazias sao preservados. NUMERIC e solicitado como ::text antes de JSON.
+decimalTexto e reutilizado sem alterar o helper compartilhado; whitespace final
+monetario e recusado, nunca corrigido silenciosamente.
+
+listarPaginas coleta a lista por id ASC com count exact, recusa contagens
+inconsistentes, IDs repetidos/fora de ordem e erros em qualquer pagina. Os erros
+originais do SDK/transporte sao propagados; nunca viram [] ou lista parcial.
+retry(false) e explicito, sem alterar a fabrica. Nao ha snapshot entre paginas:
+mudancas concorrentes podem manter a contagem e escapar das verificacoes. Essa
+limitacao ja documentada para leituras REST permanece pendente de validacao/
+decisao de compatibilidade antes da ativacao; nao afeta a releitura interna da RPC.
+
+Nao sinalizar sucesso apos timeout incerto do PUT nem repetir substituicao
+automaticamente. O SQL e o adaptador atomico nao foram alterados neste incremento.
 
 ## Evidencias e validacoes
 
@@ -118,12 +152,34 @@ Esses testes serao aproveitados, sem duplicar testes apenas para aumentar a
 contagem. A suite completa foi solicitada novamente neste incremento. Nenhum
 teste de equivalencia Supabase ou concorrencia real foi considerado aprovado.
 
-Quando a estrategia transacional for autorizada, testar em ambiente descartavel:
+Quando a validacao transacional for autorizada, testar em ambiente descartavel:
 visibilidade das proprias insercoes antes do commit; dados anteriores para outras
 sessoes; falha na releitura revertendo toda a substituicao; array vazio; precisao
 decimal; disputa PUT/publicacao com o mesmo evento; e timeout apos possivel commit.
 Paginas REST nao sao substituto de snapshot nem de uma unica transacao. Fidelidade
 dos dados importados continua dependendo da reconciliacao, nao de mocks.
+
+## Reavaliacao da contagem
+
+Completo LOCALMENTE: leitura independente para o GET, rejeicao de conexao,
+projecao, filtros/ordem/decimais/vazio/erros e testes simulados significativos.
+Essa interface ja nao e uma pendencia de codigo local. Nao alterou rotas.
+
+Para contabilizar custos.listarPorEvento no inventario original de 27 metodos,
+faltam as garantias do seu segundo uso: compilar a RPC em PostgreSQL autorizado,
+comprovar releitura das proprias insercoes antes do commit, IDs/ordem/precisao,
+vazio e rollback integral se a releitura falhar; conferir binding/privilegios e
+equivalencia real da leitura independente, incluindo paginacao. A interface GET
+nao aceita uma conexao, portanto nao alegar compatibilidade de assinatura com
+o metodo MySQL completo. O mapeamento GET separado + resultado da RPC esta
+definido; sua validacao integral continua pendente. Nao e necessario ativar
+producao para comprovar essas garantias num ambiente descartavel autorizado.
+
+Assim, o incremento conclui o caminho GET, mas nao completa uma nova operacao
+integral do inventario: 22/27, por criterio contratual e evidencia faltante,
+nao por ordem de manter um numero fixo. Ver a matriz unica em
+[LEITURAS_PENDENTES.md](repositories/supabase/LEITURAS_PENDENTES.md) para os
+criterios das outras quatro operacoes. Nenhuma validacao PostgreSQL foi iniciada.
 
 Referencias verificadas:
 - repositories/mysql/custos.cjs
