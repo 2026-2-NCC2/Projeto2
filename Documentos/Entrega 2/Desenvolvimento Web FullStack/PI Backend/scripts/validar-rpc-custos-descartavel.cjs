@@ -12,10 +12,11 @@ const run = crypto.randomUUID().replaceAll('-', '');
 const publicationMode = process.argv.includes('--publicacao');
 const accessMode = process.argv.includes('--acesso');
 const comparisonMode = process.argv.includes('--comparar-propostas');
-assert.ok([publicationMode,accessMode,comparisonMode].filter(Boolean).length<=1, 'Choose one scenario');
+const approvedProposalsMode = process.argv.includes('--propostas-aprovadas');
+assert.ok([publicationMode,accessMode,comparisonMode,approvedProposalsMode].filter(Boolean).length<=1, 'Choose one scenario');
 const folder = path.join('C:\\Users\\Lucas\\PostgreSQLTest', 'tt-custos-pg-' + run);
 const db = 'tt_custos_' + run;
-const manifest = { run, folder, database: db, mode: comparisonMode ? 'comparar-propostas' : accessMode ? 'acesso' : publicationMode ? 'publicacao' : 'custos', context: 'desktop-linux', created: new Date().toISOString(), results: [] };
+const manifest = { run, folder, database: db, mode: approvedProposalsMode ? 'propostas-aprovadas' : comparisonMode ? 'comparar-propostas' : accessMode ? 'acesso' : publicationMode ? 'publicacao' : 'custos', context: 'desktop-linux', created: new Date().toISOString(), results: [] };
 let cid, cluster, started, testDeadline;
 const sessions = new Set();
 const hash = b => crypto.createHash('sha256').update(b).digest('hex');
@@ -115,7 +116,7 @@ async function main() {
   fs.writeFileSync(secret,crypto.randomBytes(48).toString('base64'),{flag:'wx'});
   command('icacls.exe',[secret,'/inheritance:r','/grant:r','Lucas:F','SYSTEM:F']);
   let image=d(['image','ls','postgres:17','--format','{{.ID}}']);
-  if(!image) { assert.ok(!comparisonMode,'Image absent: downloads forbidden'); d(['pull','postgres:17'],undefined,180000); }
+  if(!image) { assert.ok(!comparisonMode&&!approvedProposalsMode,'Image absent: downloads forbidden'); d(['pull','postgres:17'],undefined,180000); }
   const im=JSON.parse(d(['image','inspect','postgres:17']))[0]; manifest.image=im.Id; manifest.digests=im.RepoDigests; save();
   cid=d(['create','--name','tt-custos-pg-'+run,'--label','tt.run='+run,'--label','tt.purpose=rpc-custos','--network','none','--memory','768m','--cpus','1','--shm-size','64m','--tmpfs','/var/lib/postgresql/data:rw,nosuid,size=256m','--mount',`type=bind,source=${secret},target=/run/secrets/bootstrap-password,readonly`,'-e','POSTGRES_PASSWORD_FILE=/run/secrets/bootstrap-password','-e','POSTGRES_USER=postgres','-e','POSTGRES_DB='+db,'-e','PGDATA=/var/lib/postgresql/data','-e','POSTGRES_INITDB_ARGS=--auth-local=peer --auth-host=scram-sha-256',im.Id,'postgres','-c','port=5432','-c','listen_addresses=','-c','unix_socket_directories=/var/run/postgresql','-c','timezone=UTC','-c','statement_timeout=15000','-c','lock_timeout=5000','-c','idle_in_transaction_session_timeout=30000']);
   assert.match(cid,/^[0-9a-f]{64}$/); manifest.container=cid; save(); verifyContainer(); started=new Date().toISOString(); d(['start',cid]);
@@ -127,6 +128,11 @@ async function main() {
   manifest.identity=identity(); manifest.cluster=cluster; testDeadline=Date.now()+180000; save();
   assert.equal(sql("SELECT count(*) FROM pg_tables WHERE schemaname='public';"),'0');
   assert.equal(sql("SELECT count(*) FROM pg_roles WHERE rolname='service_role';"),'0'); pass('isolamento e identidade');
+  if (approvedProposalsMode) {
+    fs.copyFileSync(__filename,path.join(folder,'controlador.cjs'));manifest.controllerSha256=hash(fs.readFileSync(__filename));save();
+    await require('./validar-propostas-aprovadas.cjs')({sql,pass,folder,manifest,hash,save});
+    pass('cluster final reconfirmado',identity());return;
+  }
   if (comparisonMode) {
     fs.copyFileSync(__filename,path.join(folder,'controlador.cjs')); manifest.controllerSha256=hash(fs.readFileSync(__filename));save();
     await require('./comparar-propostas-descartavel.cjs')({sql,pass,folder,manifest,hash,save});

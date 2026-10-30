@@ -63,7 +63,7 @@ test("fornecedor MySQL: falha do driver e propagada sem retry/fallback", async (
   assert.equal(consultas, 1);
 });
 
-test("fornecedor Supabase: operacao nao e anunciada como implementada sem equivalencia", () => {
+test("fornecedor Supabase: contrato aprovado exposto sem inicializar fabrica ou transporte", () => {
   // Cliente vazio injetado: nenhuma fabrica/configuracao/conexao e utilizada.
-  assert.equal(criarSupabase({}).listarPorFornecedor, undefined);
+  assert.equal(typeof criarSupabase({}).listarPorFornecedor, 'function');
 });

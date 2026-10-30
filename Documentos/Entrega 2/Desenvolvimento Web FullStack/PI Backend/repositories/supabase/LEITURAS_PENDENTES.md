@@ -1,5 +1,13 @@
 # Leituras Supabase — estado consolidado da Etapa 5
 
+**Encerramento atual: 27/27 implementadas localmente.** Contrato ICU de
+propostas.listarPorFornecedor explicitamente aprovado e implementado, com SQL
+real validado em PostgreSQL descartavel. Suite completa: 731 PASS/0 FAIL/8 SKIP
+historicos. HTTP e ativacao continuam pendentes. Ver
+[estado final](../../CONSOLIDACAO_ETAPA_5.md) e
+[contrato/evidencias](../../CONTRATO_RPC_PROPOSTAS_FORNECEDOR.md).
+Todas as contagens/pendencias de implementacao abaixo sao historicas.
+
 **Estado atual: 26/27 implementacoes locais; HTTP e ativacao separados.**
 Ver [relatorio unico](../../CONSOLIDACAO_ETAPA_5.md): criterio uniforme para as
 27 operacoes, evidencias preservadas e bloqueios. Os 22/27 abaixo sao historicos;

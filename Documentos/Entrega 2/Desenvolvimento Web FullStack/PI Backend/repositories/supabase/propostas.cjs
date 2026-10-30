@@ -1,6 +1,6 @@
 "use strict";
 
-// Leituras comuns apenas. Sem envio, avaliacao, agregacao de categorias ou
+// Leituras apenas. Sem envio, avaliacao ou
 // mudanca de provedor.
 function criarRepositorioPropostas(
   cliente = require("../../db-supabase.cjs").criarClienteSupabase()
@@ -41,6 +41,9 @@ function criarRepositorioPropostas(
   }
 
   return {
+    async listarPorFornecedor(fornecedorId) {
+      return require('./propostas-fornecedor.cjs').criarLeituraPropostasFornecedor(cliente).listarPorFornecedor(fornecedorId);
+    },
     async listarPorOrganizador(organizadorId) { return listar(true, organizadorId); },
     async listarAdministrativo() { return listar(false); },
 

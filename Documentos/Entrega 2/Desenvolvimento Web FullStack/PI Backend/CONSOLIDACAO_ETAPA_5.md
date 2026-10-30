@@ -1,5 +1,39 @@
 # Etapa 5 — consolidacao operacional, 30/10/2026
 
+## Encerramento da implementacao — 27/27
+
+O usuario aprovou explicitamente o novo contrato de propostas.listarPorFornecedor:
+igualdade ICU documentada do PostgreSQL, representante de menor ID, ordem por
+esses IDs, separador/NULL/vazio e limite de 1 MiB em UTF-8 valido preservados.
+RPC/adaptador implementados e SQL validado em cluster novo descartavel. Nao se
+alega equivalencia com MySQL ou entre versoes ICU.
+
+Inventario final: 24 leituras independentes (inclui a RPC agregada) e tres
+mapeamentos atomicos, 27/27 pelo mesmo criterio local das primeiras 22.
+Implementacao da Etapa 5 encerrada; migracao operacional NAO ativada.
+
+- Suite completa: 731 PASS, zero FAIL, oito SKIP historicos (739 testes).
+- PostgreSQL real: oito grupos aprovados neste incremento, sem repetir MySQL.
+- Contrato e evidencias finais: CONTRATO_RPC_PROPOSTAS_FORNECEDOR.md, secao inicial.
+- Manifesto: C:\Users\Lucas\PostgreSQLTest\tt-custos-pg-1aaef7ca51a84ab1ac27103891536377\manifesto.json.
+- Recursos descartaveis removidos; sem downloads, dados ou permissoes externas.
+
+Arquivos novos: rpc_listar_propostas_fornecedor.preparacao.sql (Banco de dados),
+repositories/supabase/propostas-fornecedor.cjs, tests/propostas-fornecedor-supabase.test.cjs,
+scripts/validar-propostas-aprovadas.cjs. Ajustados propostas.cjs, conversor de
+resposta (limite em bytes), controlador descartavel e testes historicos.
+Documentacao consolidada atualizada. Nenhuma rota, autenticacao, .env ou MySQL
+alterados. Sintaxe e git diff --check verificados.
+
+Pendencias de INTEGRACAO: HTTP PostgREST/SDK real, configuracao/binding,
+privilegios/ICU efetivos do destino e erros/timeout. Pendencias de ATIVACAO:
+homologar destino e dados importados, migrar escritas restantes, ligar identidades
+confiaveis do middleware e liberar provider/rotas apenas com autorizacao propria.
+O bloqueio de startup Supabase permanece; nao remover por ter 27 leituras prontas.
+
+O restante deste documento e historico. Seus 26/27 ou bloqueios de decisao
+contratual foram superados pela aprovacao e implementacao acima.
+
 Estado atual de referencia. Corrige a contagem anterior, que misturava codigo e
 integracao. Preserva as evidencias originais. Nesta consolidacao nao houve
 download, instalacao, consulta de banco ou repeticao de testes aprovados.

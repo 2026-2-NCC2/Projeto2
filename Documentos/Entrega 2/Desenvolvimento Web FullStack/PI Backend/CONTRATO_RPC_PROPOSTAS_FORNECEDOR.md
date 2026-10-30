@@ -1,8 +1,66 @@
 # Contrato proposto: RPC de propostas do fornecedor
 
-Estado: preparacao tecnica, sem RPC, chamada real ou ativacao nas rotas.
-Progresso atual: 26/27 implementadas. Esta operacao continua nao implementada.
+Estado atual: RPC e adaptador implementados localmente, SQL validado em
+PostgreSQL descartavel. Mudanca de contrato explicitamente aprovada pelo usuario.
+Progresso atual: 27/27 implementadas; HTTP real e ativacao separados.
 O MySQL continua ativo. Nenhum novo objeto e exposto.
+
+## Contrato aprovado e implementado — estado final
+
+A aprovacao do usuario substitui a exigencia de equivalencia estrita com MySQL
+EXCLUSIVAMENTE em propostas.listarPorFornecedor. Usa igualdade ICU do esquema
+PostgreSQL; escolhe a grafia original do menor ID de item em cada classe e ordena
+as categorias por esses IDs. Preserva separador ', ', NULL/ausencia, string vazia
+e teto de 1048576 bytes, com prefixo UTF-8 valido. Nenhuma normalizacao, trim,
+mudanca de collation de tabelas ou reescrita de registros e feita.
+
+Implementacao:
+- ../Banco de dados/rpc_listar_propostas_fornecedor.preparacao.sql: funcao
+  STABLE/INVOKER, search_path vazio, filtro de fornecedor e joins originais;
+  uma consulta/snapshot seleciona propostas e representantes por row_number;
+  string_agg usa ID dos representantes; corte por bytea tenta no maximo quatro
+  fronteiras e captura somente SQLSTATE 22021. Nenhum SET de sessao externo.
+- repositories/supabase/propostas-fornecedor.cjs: RPC POST unica, timeout/abort,
+  retry(false), fabrica existente/injecao, erros preservados sem virar [].
+- propostas.cjs expoe listarPorFornecedor; conversor existente projeta os nove
+  campos, datas e decimais textuais, rejeitando respostas acima de 1 MiB por
+  agregado ou malformadas. Nenhuma rota importa esse repositorio agora.
+
+Filtros, ordem externa criada_em DESC/id DESC, status sem filtro novo, dinheiro
+inclusive negativo historico e instantes UTC foram preservados. Sem resultados
+retorna []; proposta sem itens retorna categoria NULL; categoria vazia e ''.
+Chave privada/JWT de usuario nao foram usados nos testes nem encaminhados por
+parametro. Guard service_role protege a RPC, mas nao autentica fornecedor:
+integracao futura deve continuar usando req.usuario.id autorizado no backend.
+
+### Resultado real e revisao
+
+PostgreSQL 17.11 descartavel, ICU und-u-ks-level1 versao registrada/efetiva
+153.128. Destino anteriormente auditado: 153.121. Nenhuma alegacao de equivalencia
+universal entre ICU/general_ci ou entre versoes. Esse e um contrato novo aprovado.
+
+Manifesto final:
+`C:\Users\Lucas\PostgreSQLTest\tt-custos-pg-1aaef7ca51a84ab1ac27103891536377\manifesto.json`.
+Oito grupos PASS: isolamento, filtros/joins/ordem/campos/decimais/datas/vazio;
+representantes/ordem/NULL; emojis e ß/ss; EXECUTE/guard; quatro fronteiras reais
+de 1 MiB (abaixo/exato/acima/emoji cortado); integridade do SQL; identidade final.
+Resultados-base e fronteiras preservados junto ao manifesto. removed=true;
+conteiner e senha sintetica removidos; imagem/evidencias mantidas; sem prune.
+Nao houve downloads, consultas MySQL ou acesso a banco existente.
+
+Suíte completa: 739 testes, 731 aprovados, zero falhas, oito SKIP historicos.
+Os SKIP de equivalencia estrita permanecem como historico NAO APROVADO, mas nao
+sao requisitos do contrato ICU aprovado. Teste antigo que exigia ausencia do
+metodo foi atualizado; inicialmente falhou por expectativa obsoleta. Nenhuma
+falha do SQL novo encontrada. Testes SDK usam fetch falso, nao HTTP real.
+
+**Implementacao da Etapa 5 concluida: 27/27 pelo criterio original uniforme.**
+SQL real foi validado somente no descartavel. Instalar/homologar RPC no destino,
+revisar EXECUTE/ACLs, binding/JSON/erros por HTTP e ativar provider/rotas sao
+etapas posteriores, nao realizadas. MySQL/autenticacao/.env permanecem intactos.
+
+As secoes abaixo preservam o historico e a justificativa da mudanca; seus
+26/27 e propostas ainda nao aprovadas nao representam mais o estado atual.
 
 **Atualizacao apos autorizacao de coleta:** metadados e 23 casos sinteticos
 observados em 30/10/2026. Nao solicitar novamente esses metadados. Ver resultado
