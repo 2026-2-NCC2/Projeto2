@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-10-30T23:14:52.380Z",
+  "operation": "single synthetic usuarios.criar HTTPS insert and SELECT verification",
+  "insertAttempts": 1,
+  "selectAttempts": 1,
+  "otherUsersModified": false,
+  "mainProviderChanged": false,
+  "credentialsLogged": false,
+  "projectOriginVerified": true,
+  "projectHeaderVerified": true,
+  "insertHttpStatus": 201,
+  "testUserId": 10,
+  "insertResponseOnlyId": true,
+  "repositoryReturnedOnlyId": true,
+  "selectHttpStatus": 200,
+  "persistenceVerified": true,
+  "storedFieldsMatch": true,
+  "bcryptVerified": true,
+  "bcryptCost": 12,
+  "plaintextNotStored": true,
+  "status": "PASS",
+  "inconsistenciesFound": false
+}

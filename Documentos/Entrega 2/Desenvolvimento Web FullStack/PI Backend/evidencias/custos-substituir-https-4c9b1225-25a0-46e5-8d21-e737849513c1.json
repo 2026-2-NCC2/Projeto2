@@ -1,0 +1,57 @@
+{
+  "timestamp": "2026-10-31T00:10:06.966Z",
+  "operation": "single synthetic substituir_custos_evento HTTPS",
+  "eventId": 12,
+  "rpcAttempts": 1,
+  "mainProviderChanged": false,
+  "credentialsLogged": false,
+  "status": "PASS",
+  "projectOriginVerified": true,
+  "projectHeaderVerified": true,
+  "http": [
+    {
+      "phase": "event",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "phase": "owner",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "phase": "before",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "phase": "replace",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "phase": "after",
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "syntheticEventVerified": true,
+  "ownerId": 1,
+  "organizerVerified": true,
+  "costsBefore": [],
+  "priorCount": 0,
+  "savedIds": [
+    7,
+    8
+  ],
+  "returnVerified": true,
+  "persistenceVerified": true,
+  "exactDecimalsVerified": true,
+  "values": [
+    "0.10",
+    "1234.56"
+  ],
+  "oldIdsCheck": "NOT_APPLICABLE_NO_PREVIOUS_COSTS",
+  "otherEventsModified": false,
+  "inconsistenciesFound": false
+}

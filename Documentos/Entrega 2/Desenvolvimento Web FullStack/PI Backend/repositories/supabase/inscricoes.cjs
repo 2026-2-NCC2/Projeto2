@@ -1,11 +1,40 @@
 "use strict";
 
-// Somente leituras de inscricoes. Nenhuma rota passa a
+// Leituras e criacao de inscricoes. Nenhuma rota passa a
 // usar Supabase nesta etapa; fabrica existente e importada apenas se necessario.
 function criarRepositorioInscricoes(
   cliente = require("../../db-supabase.cjs").criarClienteSupabase()
 ) {
   return {
+    async criar(usuarioId, eventoId) {
+      // Evento ativo e duplicidade previa continuam no handler, sem transacao
+      // nova. O UNIQUE do banco resolve a corrida entre verificacao e INSERT.
+      // Status/data usam os defaults do banco, como no MySQL.
+      try {
+        const { data, error } = await cliente.schema("public")
+          .from("inscricoes")
+          .insert({ usuario_id: usuarioId, evento_id: eventoId })
+          .select("id")
+          .single()
+          .retry(false);
+        if (error) throw error;
+        if (!data || typeof data !== "object" || Array.isArray(data) ||
+            !Object.hasOwn(data, "id") || !Number.isSafeInteger(data.id) || data.id <= 0) {
+          throw Object.assign(new Error("Resposta invalida ao criar inscricao."), {
+            code: "SUPABASE_INSCRICAO_CREATE_RESPONSE", resultadoIncerto: true,
+          });
+        }
+        return data.id;
+      } catch (error) {
+        if (error?.code === "23505") {
+          throw Object.assign(new Error("Conflito de unicidade na inscricao."), {
+            code: "ER_DUP_ENTRY",
+          });
+        }
+        throw error;
+      }
+    },
+
     async buscarPorUsuarioEEvento(usuarioId, eventoId) {
       const { data, error } = await cliente.schema("public")
         .from("inscricoes")

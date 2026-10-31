@@ -1,0 +1,44 @@
+{
+  "timestamp": "2026-10-30T23:50:00.371Z",
+  "operation": "single synthetic solicitacoes_acesso.criar HTTPS",
+  "userId": 10,
+  "requestedProfile": "fornecedor",
+  "insertAttempts": 1,
+  "mainProviderChanged": false,
+  "credentialsLogged": false,
+  "status": "PASS",
+  "projectOriginVerified": true,
+  "projectHeaderVerified": true,
+  "http": [
+    {
+      "phase": "user",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "phase": "before",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "phase": "insert",
+      "method": "POST",
+      "status": 201
+    },
+    {
+      "phase": "after",
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "participantVerified": true,
+  "noPendingRequestVerified": true,
+  "insertResponseOnlyId": true,
+  "requestId": 6,
+  "repositoryReturnedOnlyId": true,
+  "fieldsVerified": true,
+  "persistedStatus": "pendente",
+  "timestampVerified": true,
+  "otherRecordsModified": false,
+  "inconsistenciesFound": false
+}

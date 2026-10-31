@@ -1,6 +1,6 @@
 "use strict";
 
-const { normalizarCustos } = require("./validacao-custos.cjs");
+const { prepararPublicacao } = require("../../services/validacao-publicacao.cjs");
 const { decimalTexto } = require("./suporte-leitura.cjs");
 const mensagens = {
   TP400: [400, "Informe evento, prazo válido e itens da cotação."],
@@ -15,11 +15,6 @@ class ErroPublicacao extends Error {}
 function erro(code, status, message, incerto = false) {
   return Object.assign(new ErroPublicacao(message), { code, respostaStatus: status, resultadoIncerto: incerto });
 }
-function calendario(data) {
-  if (typeof data !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(data)) return false;
-  const instante = new Date(`${data}T00:00:00Z`);
-  return Number.isFinite(instante.getTime()) && instante.toISOString().slice(0, 10) === data;
-}
 
 // Isolado das rotas. usuarioId deve vir EXCLUSIVAMENTE de req.usuario.id.
 // hojeUtc e capturado no backend antes da espera pelos locks, como no handler.
@@ -29,21 +24,7 @@ function criarAdaptadorPublicacaoCotacoes(cliente, { timeoutMs = 15000, agora = 
   }
   let banco = cliente;
   return { async publicar(usuarioId, payload) {
-    if (!Number.isSafeInteger(usuarioId) || usuarioId <= 0) throw erro("TP403", ...mensagens.TP403);
-    const { evento_id, prazo, observacoes, itens } = payload || {};
-    let revisados;
-    try { revisados = normalizarCustos(Number(evento_id), usuarioId, itens); }
-    catch { throw erro("TP400", ...mensagens.TP400); }
-    if (!["number", "string"].includes(typeof evento_id) || !Number.isSafeInteger(Number(evento_id)) || Number(evento_id) <= 0 ||
-        typeof prazo !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(prazo) || !revisados || revisados.some(i => !i) ||
-        (observacoes !== undefined && typeof observacoes !== "string")) throw erro("TP400", ...mensagens.TP400);
-    let hojeUtc;
-    try {
-      hojeUtc = agora().toISOString().slice(0, 10);
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(hojeUtc)) throw Error("relogio");
-    } catch { throw erro("PUBLICACAO_RELOGIO", 500, mensagemIncerta); }
-    if (!calendario(prazo) || prazo < hojeUtc) throw erro("PUBLICACAO_PRAZO", 400,
-      "O prazo da cotação deve ser uma data válida e não pode estar no passado.");
+    const { evento_id, prazo, observacoes, revisados, hojeUtc } = prepararPublicacao(usuarioId, payload, agora);
     const controle = new AbortController();
     let timer;
     try {

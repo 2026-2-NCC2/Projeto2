@@ -233,7 +233,7 @@ test("fabrica e inerte e reutilizada; validacao falha sem inicializar SDK", asyn
   let criacoes = 0;
   const m = mock();
   const contexto = { module: { exports: {} }, Date, AbortController, setTimeout, clearTimeout, require(nome) {
-    if (nome === "./validacao-custos.cjs") return require("../repositories/supabase/validacao-custos.cjs");
+    if (nome === "../../services/validacao-publicacao.cjs") return require("../services/validacao-publicacao.cjs");
     if (nome === "./suporte-leitura.cjs") return require("../repositories/supabase/suporte-leitura.cjs");
     assert.equal(nome, "../../db-supabase.cjs"); return { criarClienteSupabase() { criacoes++; return m.cliente; } };
   } };

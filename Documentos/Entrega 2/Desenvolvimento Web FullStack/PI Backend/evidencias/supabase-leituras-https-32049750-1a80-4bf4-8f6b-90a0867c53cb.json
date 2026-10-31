@@ -1,0 +1,100 @@
+{
+  "timestamp": "2026-10-30T22:48:32.645Z",
+  "scope": [
+    "propostas"
+  ],
+  "checks": [
+    {
+      "name": "propostas.listarAdministrativo: campos joins ordenacao datas e decimais",
+      "status": "PASS"
+    },
+    {
+      "name": "propostas.listarPorOrganizador: propriedade e lista completa",
+      "status": "PASS"
+    },
+    {
+      "name": "propostas.listarPorOrganizador: outro organizador sem propostas retorna []",
+      "status": "PASS"
+    },
+    {
+      "name": "propostas por cotacao: SELECT direto respeita filtro e ordenacao",
+      "status": "PASS"
+    },
+    {
+      "name": "propostas por cotacao: filtro sem resultados retorna []",
+      "status": "PASS"
+    },
+    {
+      "name": "fornecedor: RPC por GET com contrato aprovado e filtro confiavel",
+      "status": "FAIL",
+      "code": "PGRST202"
+    },
+    {
+      "name": "fornecedor: agrupamento e NULL/vazio do agregado",
+      "status": "PENDING",
+      "reason": "RPC read did not succeed. Do not install or change permissions automatically."
+    }
+  ],
+  "http": [
+    {
+      "check": "propostas.listarAdministrativo: campos joins ordenacao datas e decimais",
+      "table": "propostas",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "propostas.listarPorOrganizador: propriedade e lista completa",
+      "table": "propostas",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "propostas.listarPorOrganizador: outro organizador sem propostas retorna []",
+      "table": "propostas",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "propostas por cotacao: SELECT direto respeita filtro e ordenacao",
+      "table": "propostas",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "propostas por cotacao: filtro sem resultados retorna []",
+      "table": "propostas",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "fornecedor: RPC por GET com contrato aprovado e filtro confiavel",
+      "table": "listar_propostas_por_fornecedor",
+      "method": "GET",
+      "status": 404,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    }
+  ],
+  "writes": 0,
+  "mainRoutesChanged": false,
+  "limitations": [
+    "No JWT or route authorization exercised.",
+    "MySQL contracts checked by source/projection and injected executor, not a live MySQL comparison.",
+    "Independent HTTP requests do not share a snapshot."
+  ],
+  "proposalRowsValidated": 2,
+  "byQuoteScope": "Repository has no listarPorCotacao; testing read-only filtered SELECT, not introducing a new method or route.",
+  "supplierAdapterTransportNotExercised": "Production adapter uses POST. This diagnostic probes the read RPC using GET only; no claim of POST transport validation.",
+  "status": "FAIL",
+  "durationMs": 4204
+}

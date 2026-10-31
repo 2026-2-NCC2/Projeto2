@@ -27,7 +27,7 @@ function converterData(valor) {
   return data;
 }
 
-// Leituras de eventos. Nao selecionadas pelas
+// Leituras, cadastro, edicao, exclusao e publicacao. Nao selecionados pelas
 // rotas ainda. Reutiliza a fabrica existente; importar o modulo e inerte.
 // Injetar o cliente permite testes sem SDK, credenciais ou consultas reais.
 function criarRepositorioEventos(
@@ -74,6 +74,94 @@ function criarRepositorioEventos(
   }
 
   return {
+    async publicar(id, usuarioId) {
+      // Mesmo UPDATE atomico do MySQL: propriedade e estado conferidos na escrita.
+      // Nao confundir com publicar_cotacao, que possui outro contrato/transacao.
+      const { data: linhas, error } = await cliente.schema("public")
+        .from("eventos")
+        .update({ status: "Ativo" })
+        .eq("id", id)
+        .eq("usuario_id", usuarioId)
+        .eq("status", "Em planejamento")
+        .select("id")
+        .retry(false);
+      if (error) throw error;
+      if (!Array.isArray(linhas) || linhas.length > 1 ||
+          (linhas.length === 1 && (!linhas[0] || typeof linhas[0] !== "object" ||
+            Array.isArray(linhas[0]) || !Object.hasOwn(linhas[0], "id") ||
+            !Number.isSafeInteger(linhas[0].id) || linhas[0].id <= 0 || linhas[0].id !== id))) {
+        throw Object.assign(new Error("Resposta invalida ao publicar evento."), {
+          code: "SUPABASE_EVENTO_PUBLISH_RESPONSE", resultadoIncerto: true,
+        });
+      }
+      return linhas.length;
+    },
+
+    async excluir(id, usuarioId) {
+      // Uma unica exclusao condicional. FKs/cascatas pertencem ao banco;
+      // nao remover dependencias manualmente nem ocultar falhas de integridade.
+      const { data: linhas, error } = await cliente.schema("public")
+        .from("eventos")
+        .delete()
+        .eq("id", id)
+        .eq("usuario_id", usuarioId)
+        .select("id")
+        .retry(false);
+      if (error) throw error;
+      if (!Array.isArray(linhas) || linhas.length > 1 ||
+          (linhas.length === 1 && (!linhas[0] || typeof linhas[0] !== "object" ||
+            Array.isArray(linhas[0]) || !Object.hasOwn(linhas[0], "id") ||
+            !Number.isSafeInteger(linhas[0].id) || linhas[0].id <= 0 || linhas[0].id !== id))) {
+        throw Object.assign(new Error("Resposta invalida ao excluir evento."), {
+          code: "SUPABASE_EVENTO_DELETE_RESPONSE", resultadoIncerto: true,
+        });
+      }
+      return linhas.length;
+    },
+
+    async criar({ nome, data, horario, local, categoria, publico, descricao, status, usuarioId }) {
+      // Validacoes/defaults e identidade do organizador continuam no handler.
+      // Nao aceitar usuario_id extra do corpo como substituto de usuarioId.
+      const { data: criado, error } = await cliente.schema("public")
+        .from("eventos")
+        .insert({ nome, data, horario, local, categoria, publico, descricao, status, usuario_id: usuarioId })
+        .select("id")
+        .single()
+        .retry(false);
+      // FK, NOT NULL, tipo/data e demais erros mantem o caminho 500 existente.
+      if (error) throw error;
+      if (!criado || typeof criado !== "object" || Array.isArray(criado) ||
+          !Object.hasOwn(criado, "id") || !Number.isSafeInteger(criado.id) || criado.id <= 0) {
+        throw Object.assign(new Error("Resposta invalida ao cadastrar evento."), {
+          code: "SUPABASE_EVENTO_CREATE_RESPONSE", resultadoIncerto: true,
+        });
+      }
+      return criado.id;
+    },
+
+    async atualizar(id, usuarioId, { nome, data, horario, local, categoria, publico, descricao }) {
+      // Mesmo UPDATE condicional por id E proprietario, sem leitura previa.
+      // Status e usuario_id nao sao editaveis; validacoes/perfil ficam no handler.
+      const { data: linhas, error } = await cliente.schema("public")
+        .from("eventos")
+        .update({ nome, data, horario, local, categoria, publico, descricao })
+        .eq("id", id)
+        .eq("usuario_id", usuarioId)
+        .select("id")
+        .retry(false);
+      if (error) throw error;
+      if (!Array.isArray(linhas) || linhas.length > 1 ||
+          (linhas.length === 1 && (!linhas[0] || typeof linhas[0] !== "object" ||
+            Array.isArray(linhas[0]) || !Object.hasOwn(linhas[0], "id") ||
+            !Number.isSafeInteger(linhas[0].id) || linhas[0].id <= 0 || linhas[0].id !== id))) {
+        throw Object.assign(new Error("Resposta invalida ao atualizar evento."), {
+          code: "SUPABASE_EVENTO_UPDATE_RESPONSE", resultadoIncerto: true,
+        });
+      }
+      // Corresponde a affectedRows com FOUND_ROWS do mysql2: 1 mesmo sem mudanca.
+      return linhas.length;
+    },
+
     async listarPorUsuario(usuarioId) {
       return listarTodas(() => cliente.schema("public").from("eventos")
         .select(campos.join(", "), { count: "exact" })

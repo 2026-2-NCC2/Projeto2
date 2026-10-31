@@ -6,21 +6,26 @@ const cors = require("cors");
 const { modoExecucao } = require("./isolamento.cjs");
 if (modoExecucao() === "principal") require("dotenv").config();
 
-const db = require("./db");
-const { criarRepositorioUsuarios } = require("./repositories/mysql/usuarios.cjs");
-const usuariosRepository = criarRepositorioUsuarios(db);
-const { criarRepositorioEventos } = require("./repositories/mysql/eventos.cjs");
-const eventosRepository = criarRepositorioEventos(db);
-const { criarRepositorioCustos } = require("./repositories/mysql/custos.cjs");
-const custosRepository = criarRepositorioCustos(db);
-const { criarRepositorioCotacoes } = require("./repositories/mysql/cotacoes.cjs");
-const cotacoesRepository = criarRepositorioCotacoes(db);
-const { criarRepositorioPropostas } = require("./repositories/mysql/propostas.cjs");
-const propostasRepository = criarRepositorioPropostas(db);
-const { criarRepositorioInscricoes } = require("./repositories/mysql/inscricoes.cjs");
-const inscricoesRepository = criarRepositorioInscricoes(db);
-const { criarRepositorioSolicitacoesAcesso } = require("./repositories/mysql/solicitacoes-acesso.cjs");
-const solicitacoesAcessoRepository = criarRepositorioSolicitacoesAcesso(db);
+// Manter a trava de startup antes de criar qualquer cliente/pool.
+const { validarInicializacaoBanco } = require("./config/banco.cjs");
+validarInicializacaoBanco(process.env, modoExecucao());
+const { criarPersistencia } = require("./repositories/index.cjs");
+const { repositorios, servicos } = criarPersistencia();
+const {
+  usuarios: usuariosRepository, eventos: eventosRepository,
+  custos: custosRepository, cotacoes: cotacoesRepository,
+  propostas: propostasRepository, inscricoes: inscricoesRepository,
+  solicitacoesAcesso: solicitacoesAcessoRepository,
+} = repositorios;
+const { ErroServico } = require("./services/suporte-transacoes.cjs");
+
+// Somente erros sanitizados pelos servicos podem fornecer texto/status publico.
+function responderErroServico(res, erro, mensagem) {
+  const conhecido = erro instanceof ErroServico &&
+    [400, 401, 403, 404, 409, 500].includes(erro.respostaStatus);
+  return res.status(conhecido ? erro.respostaStatus : 500)
+    .json({ erro: conhecido ? erro.message : mensagem });
+}
 
 const app = express();
 
@@ -338,123 +343,12 @@ app.post("/login", limitarFrequencia(10, 15 * 60 * 1000), async (req, res) => {
 });
 
  // Publicar cotação de um evento
-// Canonicaliza DECIMAL(12,2) sem arredondamento.
-function normalizarItemCotacao(item) {
-  if (!item || typeof item !== "object" || Array.isArray(item) ||
-      typeof item.categoria !== "string" || !item.categoria.trim() ||
-      Array.from(item.categoria.trim()).length > 100 ||
-      typeof item.descricao !== "string" || !item.descricao.trim() ||
-      Array.from(item.descricao.trim()).length > 255 ||
-      !["number", "string"].includes(typeof item.valor_estimado) ||
-      (typeof item.valor_estimado === "number" && !Number.isFinite(item.valor_estimado))) return null;
-  const valor = String(item.valor_estimado).trim();
-  if (!/^\d+(?:\.\d{1,2})?$/.test(valor)) return null;
-  const [inteiro, fracao = ""] = valor.split(".");
-  const normalizado = inteiro.replace(/^0+(?=\d)/, "");
-  if (normalizado.length > 10) return null;
-  return { categoria: item.categoria.trim(), descricao: item.descricao.trim(),
-    valor_estimado: normalizado + "." + fracao.padEnd(2, "0") };
-}
-
 app.post("/cotacoes", autenticar, permitirPerfis("organizador"), async (req, res) => {
-  const { evento_id, prazo, observacoes, itens } = req.body || {};
-  const revisados = Array.isArray(itens) ? Array.from(itens, normalizarItemCotacao) : null;
-
-  if (
-    !["number", "string"].includes(typeof evento_id) ||
-    !Number.isSafeInteger(Number(evento_id)) ||
-    Number(evento_id) <= 0 ||
-    typeof prazo !== "string" ||
-    !/^\d{4}-\d{2}-\d{2}$/.test(prazo) ||
-    !revisados || revisados.some(item => !item) ||
-    (observacoes !== undefined && typeof observacoes !== "string")
-  ) {
-    return res.status(400).json({
-      erro: "Informe evento, prazo válido e itens da cotação."
-    });
-  }
-
-  const dataPrazo = new Date(`${prazo}T00:00:00Z`);
-
-  if (
-    Number.isNaN(dataPrazo.getTime()) ||
-    dataPrazo.toISOString().slice(0, 10) !== prazo ||
-    prazo < new Date().toISOString().slice(0, 10)
-  ) {
-    return res.status(400).json({
-      erro: "O prazo da cotação deve ser uma data válida e não pode estar no passado."
-    });
-  }
-
-  let conexao;
-  let descartarConexao = false;
-
   try {
-    conexao = await db.getConnection();
-    await conexao.beginTransaction();
-    // Mesmo bloqueio e mesma ordem utilizados pelo PUT de custos.
-    const eventos = await custosRepository.bloquearEventoDoUsuario(conexao, Number(evento_id), req.usuario.id);
-    if (eventos.length === 0) throw Object.assign(new Error(), { respostaStatus: 404 });
-    const custos = await cotacoesRepository.bloquearCustosDoEvento(conexao, Number(evento_id));
-    if (custos.length === 0) throw Object.assign(new Error(), { respostaStatus: 400 });
-    const persistidos = custos.map(normalizarItemCotacao);
-    if (persistidos.some(item => !item)) throw new Error("Custos persistidos inválidos");
-    if (JSON.stringify(revisados) !== JSON.stringify(persistidos)) {
-      throw Object.assign(new Error(), { respostaStatus: 409 });
-    }
-
-    const cotacaoId = await cotacoesRepository.criar(conexao, {
-      eventoId: Number(evento_id), prazo, observacoes: observacoes || ""
-    });
-
-    for (const item of persistidos) {
-      await cotacoesRepository.inserirItem(conexao, cotacaoId, {
-        categoria: item.categoria.trim(), descricao: item.descricao.trim(),
-        valor_estimado: item.valor_estimado
-      });
-    }
-
-    await conexao.commit();
-
-    return res.status(201).json({
-      mensagem: "Cotação publicada com sucesso!",
-      cotacao: {
-        id: cotacaoId,
-        evento_id: Number(evento_id),
-        prazo,
-        modalidade: "Fechada",
-        observacoes: observacoes || "",
-        status: "Aberta",
-        itens: persistidos
-      }
-    });
-
+    return res.status(201).json(await servicos.cotacoes.publicar(req.usuario, req.body));
   } catch (erro) {
-    let status = erro.respostaStatus || 500;
-    if (conexao) {
-      try { await conexao.rollback(); }
-      catch {
-        status = 500;
-        // O adaptador isolado destroi a conexao ao liberar.
-        if (typeof conexao.destroy === "function") {
-          descartarConexao = true;
-          try { conexao.destroy(); } catch { /* Preserva a resposta de erro. */ }
-        }
-      }
-    }
-    if (![400, 404, 409].includes(status)) status = 500;
-    const mensagens = {
-      400: "Cadastre custos no evento antes de publicar a cotação.",
-      404: "Evento não encontrado ou não pertence ao usuário.",
-      409: "Os custos foram alterados. Consulte e revise a lista antes de publicar.",
-      500: "Não foi possível confirmar a publicação. Consulte as cotações antes de tentar novamente.",
-    };
-    return res.status(status).json({ erro: mensagens[status] });
-
-  } finally {
-    if (conexao && !descartarConexao) {
-      try { conexao.release(); } catch { console.error("Falha ao liberar conexão da publicação."); }
-    }
+    return responderErroServico(res, erro,
+      "Não foi possível confirmar a publicação. Consulte as cotações antes de tentar novamente.");
   }
 });
 
@@ -886,102 +780,12 @@ app.get("/eventos/:id/custos", autenticar, permitirPerfis("organizador"), async 
 
 // Substituir os custos de um evento do organizador
 app.put("/eventos/:id/custos", autenticar, permitirPerfis("organizador"), async (req, res) => {
-  let conexao;
-
   try {
-    const id = Number(req.params.id);
-    const { custos } = req.body || {};
-
-    if (!Number.isSafeInteger(id) || id <= 0) {
-      return res.status(400).json({
-        erro: "ID do evento inválido."
-      });
-    }
-
-    if (!Array.isArray(custos)) {
-      return res.status(400).json({
-        erro: "Informe a propriedade custos como um array."
-      });
-    }
-
-    const custosValidados = [];
-
-    for (const item of custos) {
-      if (
-        !item || typeof item !== "object" || Array.isArray(item) ||
-        typeof item.categoria !== "string" || !item.categoria.trim() ||
-        Array.from(item.categoria.trim()).length > 100 ||
-        typeof item.descricao !== "string" || !item.descricao.trim() ||
-        Array.from(item.descricao.trim()).length > 255 ||
-        !["number", "string"].includes(typeof item.valor_estimado) ||
-        (typeof item.valor_estimado === "number" && !Number.isFinite(item.valor_estimado))
-      ) {
-        return res.status(400).json({
-          erro: "Informe categoria de até 100 caracteres, descrição de até 255 caracteres e valor estimado válido."
-        });
-      }
-
-      const valor = String(item.valor_estimado).trim();
-
-      if (!/^\d+(?:\.\d{1,2})?$/.test(valor)) {
-        return res.status(400).json({
-          erro: "O valor estimado deve ser não negativo e possuir no máximo duas casas decimais."
-        });
-      }
-
-      const [inteiro, fracao = ""] = valor.split(".");
-      const inteiroNormalizado = inteiro.replace(/^0+(?=\d)/, "");
-
-      if (inteiroNormalizado.length > 10) {
-        return res.status(400).json({
-          erro: "O valor estimado não pode exceder 9999999999.99."
-        });
-      }
-
-      custosValidados.push({
-        categoria: item.categoria.trim(),
-        descricao: item.descricao.trim(),
-        valor_estimado: `${inteiroNormalizado}.${fracao.padEnd(2, "0")}`
-      });
-    }
-
-    conexao = await db.getConnection();
-    await conexao.beginTransaction();
-
-    const eventos = await custosRepository.bloquearEventoDoUsuario(conexao, id, req.usuario.id);
-
-    if (eventos.length === 0) {
-      await conexao.rollback();
-      return res.status(404).json({
-        erro: "Evento não encontrado."
-      });
-    }
-
-    await custosRepository.excluirPorEvento(conexao, id);
-
-    for (const item of custosValidados) {
-      await custosRepository.inserir(conexao, id, item);
-    }
-
-    const custosSalvos = await custosRepository.listarPorEvento(id, conexao);
-
-    await conexao.commit();
-    return res.status(200).json(custosSalvos);
+    return res.status(200).json(await servicos.custos.substituir(
+      req.usuario, req.params.id, req.body?.custos
+    ));
   } catch (erro) {
-    if (conexao) {
-      try {
-        await conexao.rollback();
-      } catch (erroRollback) {
-        console.error("Erro ao reverter custos do evento:");
-      }
-    }
-
-    console.error("Erro ao salvar custos do evento:");
-    return res.status(500).json({
-      erro: "Erro interno ao salvar custos do evento."
-    });
-  } finally {
-    if (conexao) conexao.release();
+    return responderErroServico(res, erro, "Erro interno ao salvar custos do evento.");
   }
 });
 
@@ -1185,76 +989,14 @@ app.get("/solicitacoes-acesso",autenticar,permitirPerfis("admin"),async (req, re
 
 
 app.patch("/solicitacoes-acesso/:id", autenticar, permitirPerfis("admin"), async (req, res) => {
-    let conexao;
-
-    try {
-      const id = Number(req.params.id);
-      const { status } = req.body || {};
-
-      if (
-        !Number.isInteger(id) ||
-        id <= 0 ||
-        !["aprovado", "rejeitado"].includes(status)
-      ) {
-        return res.status(400).json({
-          erro: "Informe uma solicitação e um status válidos."
-        });
-      }
-
-      conexao = await db.getConnection();
-      await conexao.beginTransaction();
-
-      const solicitacoes = await solicitacoesAcessoRepository.bloquearPorId(conexao, id);
-
-      if (solicitacoes.length === 0) {
-        await conexao.rollback();
-        return res.status(404).json({
-          erro: "Solicitação não encontrada."
-        });
-      }
-
-      const solicitacao = solicitacoes[0];
-
-      if (solicitacao.status !== "pendente") {
-        await conexao.rollback();
-        return res.status(409).json({
-          erro: "Esta solicitação já foi analisada."
-        });
-      }
-
-      if (status === "aprovado") {
-        const usuariosAfetados = await solicitacoesAcessoRepository.atualizarPerfilParticipante(conexao, solicitacao.perfil_solicitado, solicitacao.usuario_id);
-
-        if (usuariosAfetados !== 1) {
-          await conexao.rollback();
-          return res.status(409).json({
-            erro: "O usuário não possui mais o perfil participante."
-          });
-        }
-      }
-
-      await solicitacoesAcessoRepository.atualizarStatus(conexao, status, id);
-
-      await conexao.commit();
-
-      return res.status(200).json({
-        mensagem: status === "aprovado"
-          ? "Solicitação aprovada com sucesso!"
-          : "Solicitação rejeitada com sucesso!"
-      });
-
-    } catch (erro) {
-      if (conexao) await conexao.rollback();
-      console.error("Falha em PATCH /solicitacoes-acesso/:id.");
-
-      return res.status(500).json({
-        erro: "Erro interno ao analisar solicitação."
-      });
-    } finally {
-      if (conexao) conexao.release();
-    }
+  try {
+    return res.status(200).json(await servicos.solicitacoesAcesso.decidir(
+      req.usuario, req.params.id, req.body?.status
+    ));
+  } catch (erro) {
+    return responderErroServico(res, erro, "Erro interno ao analisar solicitação.");
   }
-);
+});
 
 // Evita o handler padrao do Express, que pode registrar stack/mensagem do erro.
 app.use((erro, req, res, next) => {

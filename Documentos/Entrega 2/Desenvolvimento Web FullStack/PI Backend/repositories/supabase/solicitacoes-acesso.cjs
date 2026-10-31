@@ -1,11 +1,41 @@
 "use strict";
 
-// Apenas leituras comuns. Nao cria solicitacoes, altera perfis ou usa
-// bloqueios. Nenhuma rota muda de provedor; importar este modulo e inerte.
+// Leituras, criacao e decisao atomica via RPC. Nenhuma rota muda de provedor;
+// importar este modulo e inerte.
 function criarRepositorioSolicitacoesAcesso(
   cliente = require("../../db-supabase.cjs").criarClienteSupabase()
 ) {
+  let decisao;
   return {
+    async decidir(adminId, solicitacaoId, status) {
+      // Operacao composta: nao emular conexao MySQL nem dividir perfil/status
+      // entre chamadas HTTP. Admin vem da sessao autenticada no backend.
+      // Reutiliza validacoes, mensagens, timeout incerto e ausencia de retry.
+      decisao ??= require("./solicitacoes-acesso-decisao.cjs")
+        .criarAdaptadorDecisaoAcesso(cliente);
+      return decisao.decidir(adminId, solicitacaoId, status);
+    },
+
+    async criar(usuarioId, perfilSolicitado, justificativa) {
+      // Participante, perfil solicitado, trim e pendencia ficam no handler.
+      // Sem transacao/garantia nova contra corridas; preserva o fluxo MySQL.
+      const { data, error } = await cliente.schema("public")
+        .from("solicitacoes_acesso")
+        .insert({ usuario_id: usuarioId, perfil_solicitado: perfilSolicitado, justificativa })
+        .select("id")
+        .single()
+        .retry(false);
+      // Inclusive unicidade: nao mapear para 409, pois o handler atual usa 500.
+      if (error) throw error;
+      if (!data || typeof data !== "object" || Array.isArray(data) ||
+          !Object.hasOwn(data, "id") || !Number.isSafeInteger(data.id) || data.id <= 0) {
+        throw Object.assign(new Error("Resposta invalida ao criar solicitacao."), {
+          code: "SUPABASE_SOLICITACAO_CREATE_RESPONSE", resultadoIncerto: true,
+        });
+      }
+      return data.id;
+    },
+
     async buscarPendentesPorUsuario(usuarioId) {
       const solicitacoes = [];
       const ids = new Set();

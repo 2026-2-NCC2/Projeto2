@@ -1,0 +1,259 @@
+{
+  "timestamp": "2026-10-30T22:42:02.291Z",
+  "scope": [
+    "cotacoes",
+    "inscricoes",
+    "solicitacoes_acesso"
+  ],
+  "checks": [
+    {
+      "name": "cotacoes.listarAdministrativo: projecao join datas ordem e nulos",
+      "status": "PASS"
+    },
+    {
+      "name": "cotacoes: identificadores de propriedade para testes de filtro",
+      "status": "PASS"
+    },
+    {
+      "name": "cotacoes.listarPorOrganizador: filtro propriedade campos e data do evento",
+      "status": "PASS"
+    },
+    {
+      "name": "cotacoes: organizador sem cotacoes retorna []",
+      "status": "PASS"
+    },
+    {
+      "name": "cotacoes.listarItens: filtro cotacao id ASC e decimal textual",
+      "status": "PASS"
+    },
+    {
+      "name": "cotacoes: itens de cotacao ausente retornam []",
+      "status": "PASS"
+    },
+    {
+      "name": "cotacoes: prazo junto a virada do dia",
+      "status": "PENDING",
+      "reason": "HTTP Date does not attest SQL session timezone; boundary requires controlled fixture"
+    },
+    {
+      "name": "cotacoes.listarDisponiveisParaFornecedor: Aberta prazo e projecao",
+      "status": "PASS"
+    },
+    {
+      "name": "inscricoes: fixture somente ids e filtros",
+      "status": "PASS"
+    },
+    {
+      "name": "inscricoes.buscarPorUsuarioEEvento: par exato e vazio",
+      "status": "PASS"
+    },
+    {
+      "name": "inscricoes.listarPorUsuario: join projecao datas e ordem sem desempate novo",
+      "status": "PASS"
+    },
+    {
+      "name": "inscricoes: usuario sem inscricoes retorna []",
+      "status": "PASS"
+    },
+    {
+      "name": "inscricoes: fixture de status para buscarEventoAtivo",
+      "status": "PASS"
+    },
+    {
+      "name": "inscricoes.buscarEventoAtivo: evento ativo existente",
+      "status": "PASS"
+    },
+    {
+      "name": "inscricoes.buscarEventoAtivo: evento inativo retorna []",
+      "status": "PASS"
+    },
+    {
+      "name": "inscricoes.buscarEventoAtivo: evento ausente retorna []",
+      "status": "PASS"
+    },
+    {
+      "name": "solicitacoes.listar: join usuario campos enum instantes e ordem",
+      "status": "PASS"
+    },
+    {
+      "name": "solicitacoes.buscarPendentesPorUsuario: usuario status e projecao id",
+      "status": "PASS"
+    },
+    {
+      "name": "solicitacoes: usuario sem pendencias retorna []",
+      "status": "PASS"
+    },
+    {
+      "name": "nulos reais em cotacoes.observacoes",
+      "status": "PENDING",
+      "reason": "No NULL observation in current fixture; preservation tested with mocks only"
+    }
+  ],
+  "http": [
+    {
+      "check": "cotacoes.listarAdministrativo: projecao join datas ordem e nulos",
+      "table": "cotacoes",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "cotacoes: identificadores de propriedade para testes de filtro",
+      "table": "cotacoes",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "cotacoes.listarPorOrganizador: filtro propriedade campos e data do evento",
+      "table": "cotacoes",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "cotacoes: organizador sem cotacoes retorna []",
+      "table": "cotacoes",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "cotacoes.listarItens: filtro cotacao id ASC e decimal textual",
+      "table": "itens_cotacao",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "cotacoes: itens de cotacao ausente retornam []",
+      "table": "itens_cotacao",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "cotacoes.listarDisponiveisParaFornecedor: Aberta prazo e projecao",
+      "table": "cotacoes",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "inscricoes: fixture somente ids e filtros",
+      "table": "inscricoes",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "inscricoes.buscarPorUsuarioEEvento: par exato e vazio",
+      "table": "inscricoes",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "inscricoes.buscarPorUsuarioEEvento: par exato e vazio",
+      "table": "inscricoes",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "inscricoes.listarPorUsuario: join projecao datas e ordem sem desempate novo",
+      "table": "inscricoes",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "inscricoes: usuario sem inscricoes retorna []",
+      "table": "inscricoes",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "inscricoes: fixture de status para buscarEventoAtivo",
+      "table": "eventos",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "inscricoes.buscarEventoAtivo: evento ativo existente",
+      "table": "eventos",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "inscricoes.buscarEventoAtivo: evento inativo retorna []",
+      "table": "eventos",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "inscricoes.buscarEventoAtivo: evento ausente retorna []",
+      "table": "eventos",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "solicitacoes.listar: join usuario campos enum instantes e ordem",
+      "table": "solicitacoes_acesso",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "solicitacoes.buscarPendentesPorUsuario: usuario status e projecao id",
+      "table": "solicitacoes_acesso",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "solicitacoes: usuario sem pendencias retorna []",
+      "table": "solicitacoes_acesso",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    }
+  ],
+  "writes": 0,
+  "mainRoutesChanged": false,
+  "limitations": [
+    "No JWT or route authorization exercised.",
+    "MySQL contracts checked by source/projection and injected executor, not a live MySQL comparison.",
+    "Independent HTTP requests do not share a snapshot."
+  ],
+  "nullObservationsValidated": 0,
+  "quoteItemDecimalsValidated": 5,
+  "availableQuoteRowsValidated": 1,
+  "pendingAccessRowsValidated": 1,
+  "status": "PARTIAL",
+  "durationMs": 11211
+}

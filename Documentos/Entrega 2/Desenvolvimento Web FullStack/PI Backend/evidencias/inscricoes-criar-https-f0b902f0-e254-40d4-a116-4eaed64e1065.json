@@ -1,0 +1,50 @@
+{
+  "timestamp": "2026-10-30T23:38:12.146Z",
+  "operation": "single synthetic inscricoes.criar HTTPS",
+  "insertAttempts": 1,
+  "mainProviderChanged": false,
+  "credentialsLogged": false,
+  "status": "PASS",
+  "projectOriginVerified": true,
+  "projectHeaderVerified": true,
+  "http": [
+    {
+      "phase": "event",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "phase": "user",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "phase": "before",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "phase": "insert",
+      "method": "POST",
+      "status": 201
+    },
+    {
+      "phase": "after",
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "eventId": 12,
+  "eventActiveVerified": true,
+  "userId": 10,
+  "participantVerified": true,
+  "noPriorRegistrationVerified": true,
+  "insertResponseOnlyId": true,
+  "registrationId": 3,
+  "repositoryReturnedOnlyId": true,
+  "linksVerified": true,
+  "persistedStatus": "Confirmada",
+  "timestampVerified": true,
+  "otherRecordsModified": false,
+  "inconsistenciesFound": false
+}

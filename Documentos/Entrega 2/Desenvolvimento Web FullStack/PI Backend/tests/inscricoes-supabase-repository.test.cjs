@@ -113,7 +113,7 @@ test("evento ativo: importacao inerte e reutilizacao da fabrica existente", asyn
   assert.deepEqual(JSON.parse(JSON.stringify(await repo.buscarEventoAtivo(9))), [{ id: 9 }]);
   assert.equal(a.criacoes(), 1);
   assert.deepEqual(a.imports, ["../../db-supabase.cjs"]);
-  assert.deepEqual(Object.keys(repo), ["buscarPorUsuarioEEvento", "buscarEventoAtivo", "listarPorUsuario"]);
+  assert.deepEqual(Object.keys(repo), ["criar", "buscarPorUsuarioEEvento", "buscarEventoAtivo", "listarPorUsuario"]);
 });
 
 test("evento ativo: cliente injetado nao inicializa fabrica ou SDK", async () => {

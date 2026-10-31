@@ -1,0 +1,152 @@
+{
+  "timestamp": "2026-10-30T23:02:41.680Z",
+  "scope": [
+    "RPC fornecedor instalada"
+  ],
+  "checks": [
+    {
+      "name": "fornecedor: fixture minima de identificadores",
+      "status": "PASS"
+    },
+    {
+      "name": "RPC instalada: POST real pelo adaptador e guard service_role",
+      "status": "PASS"
+    },
+    {
+      "name": "fornecedor: filtro relacionamentos campos datas e valores iguais ao SELECT base",
+      "status": "PASS"
+    },
+    {
+      "name": "fornecedor: categoria NULL em dados reais",
+      "status": "PENDING",
+      "reason": "No such fixture; remains validated in disposable PostgreSQL and mocks only"
+    },
+    {
+      "name": "fornecedor: categoria vazia em dados reais",
+      "status": "PENDING",
+      "reason": "No such fixture; remains validated in disposable PostgreSQL and mocks only"
+    },
+    {
+      "name": "fornecedor: agrupamento ICU menor ID grafia original e ordem",
+      "status": "PASS"
+    },
+    {
+      "name": "fornecedor: resposta vazia pelo mesmo adaptador POST",
+      "status": "PASS"
+    }
+  ],
+  "http": [
+    {
+      "check": "fornecedor: fixture minima de identificadores",
+      "table": "propostas",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "RPC instalada: POST real pelo adaptador e guard service_role",
+      "table": "listar_propostas_por_fornecedor",
+      "method": "POST",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "fornecedor: filtro relacionamentos campos datas e valores iguais ao SELECT base",
+      "table": "propostas",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "fornecedor: agrupamento ICU menor ID grafia original e ordem",
+      "table": "itens_cotacao",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "fornecedor: agrupamento ICU menor ID grafia original e ordem",
+      "table": "itens_cotacao",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "fornecedor: agrupamento ICU menor ID grafia original e ordem",
+      "table": "itens_cotacao",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "fornecedor: agrupamento ICU menor ID grafia original e ordem",
+      "table": "itens_cotacao",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "fornecedor: agrupamento ICU menor ID grafia original e ordem",
+      "table": "itens_cotacao",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "fornecedor: agrupamento ICU menor ID grafia original e ordem",
+      "table": "itens_cotacao",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "fornecedor: agrupamento ICU menor ID grafia original e ordem",
+      "table": "itens_cotacao",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "fornecedor: agrupamento ICU menor ID grafia original e ordem",
+      "table": "itens_cotacao",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "fornecedor: resposta vazia pelo mesmo adaptador POST",
+      "table": "listar_propostas_por_fornecedor",
+      "method": "POST",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    }
+  ],
+  "writes": 0,
+  "mainRoutesChanged": false,
+  "limitations": [
+    "No JWT or route authorization exercised.",
+    "MySQL contracts checked by source/projection and injected executor, not a live MySQL comparison.",
+    "Independent HTTP requests do not share a snapshot."
+  ],
+  "rpcAvailable": true,
+  "serviceRoleGuardSucceeded": true,
+  "supplierRowsValidated": 2,
+  "nullCategoriesValidated": 0,
+  "emptyCategoriesValidated": 0,
+  "multiCategoryRowsValidated": 2,
+  "previous404Resolved": true,
+  "status": "PARTIAL",
+  "durationMs": 4374
+}

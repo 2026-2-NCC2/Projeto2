@@ -1,7 +1,6 @@
 "use strict";
 
-// Leituras apenas. Sem envio, avaliacao ou
-// mudanca de provedor.
+// Leituras, envio e avaliacao. Sem mudanca de provedor.
 function criarRepositorioPropostas(
   cliente = require("../../db-supabase.cjs").criarClienteSupabase()
 ) {
@@ -41,6 +40,45 @@ function criarRepositorioPropostas(
   }
 
   return {
+    async avaliar(propostaId, organizadorId, status) {
+      // Organizador vem de req.usuario.id; JWT/perfil e status ficam no handler.
+      // Uma RPC, nao SELECT de propriedade seguido de UPDATE independente.
+      // NUMERIC textual preserva IDs inteiros grandes aceitos pelo handler.
+      const { data, error } = await cliente.schema("public")
+        .rpc("avaliar_proposta", {
+          p_proposta_id: String(propostaId), p_organizador_id: organizadorId, p_status: status,
+        }, { get: false, head: false })
+        .retry(false);
+      if (error) throw error;
+      if (data !== 0 && data !== 1) {
+        throw Object.assign(new Error("Resposta invalida ao avaliar proposta."), {
+          code: "SUPABASE_PROPOSTA_EVALUATE_RESPONSE", resultadoIncerto: true,
+        });
+      }
+      return data;
+    },
+
+    async criar({ cotacaoId, fornecedorId, valor, condicoesPagamento, detalhesTecnicos }) {
+      // Perfil, disponibilidade, Number e trim continuam no handler existente.
+      // Sem regra nova de duplicidade, transacao ou arredondamento no adaptador.
+      const { data, error } = await cliente.schema("public")
+        .from("propostas")
+        .insert({ cotacao_id: cotacaoId, fornecedor_id: fornecedorId, valor,
+          condicoes_pagamento: condicoesPagamento, detalhes_tecnicos: detalhesTecnicos })
+        .select("id")
+        .single()
+        .retry(false);
+      // Inclusive 23505: o handler MySQL atual nao converte duplicidade em 409.
+      if (error) throw error;
+      if (!data || typeof data !== "object" || Array.isArray(data) ||
+          !Object.hasOwn(data, "id") || !Number.isSafeInteger(data.id) || data.id <= 0) {
+        throw Object.assign(new Error("Resposta invalida ao enviar proposta."), {
+          code: "SUPABASE_PROPOSTA_CREATE_RESPONSE", resultadoIncerto: true,
+        });
+      }
+      return data.id;
+    },
+
     async listarPorFornecedor(fornecedorId) {
       return require('./propostas-fornecedor.cjs').criarLeituraPropostasFornecedor(cliente).listarPorFornecedor(fornecedorId);
     },

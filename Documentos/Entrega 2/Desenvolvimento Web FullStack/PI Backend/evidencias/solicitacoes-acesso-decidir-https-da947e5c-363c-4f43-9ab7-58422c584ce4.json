@@ -1,0 +1,62 @@
+{
+  "timestamp": "2026-10-30T23:55:27.215Z",
+  "operation": "single solicitacoes_acesso.decidir HTTPS",
+  "requestId": 6,
+  "userId": 10,
+  "approvalAttempts": 1,
+  "mainProviderChanged": false,
+  "credentialsLogged": false,
+  "status": "PASS",
+  "projectOriginVerified": true,
+  "projectHeaderVerified": true,
+  "http": [
+    {
+      "phase": "api",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "phase": "requestBefore",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "phase": "userBefore",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "phase": "admin",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "phase": "approve",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "phase": "requestAfter",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "phase": "userAfter",
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "rpcAvailableByApi": true,
+  "pendingRequestVerified": true,
+  "requestedProfile": "fornecedor",
+  "participantVerified": true,
+  "adminId": 5,
+  "adminVerified": true,
+  "repositoryResponseVerified": true,
+  "finalRequestStatus": "aprovado",
+  "otherRequestFieldsUnchanged": true,
+  "finalUserProfile": "fornecedor",
+  "bothChangesPersisted": true,
+  "otherRecordsModified": false,
+  "inconsistenciesFound": false
+}

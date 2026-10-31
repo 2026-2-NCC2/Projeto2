@@ -1,0 +1,62 @@
+{
+  "timestamp": "2026-10-30T23:41:26.309Z",
+  "operation": "single synthetic propostas.criar HTTPS",
+  "insertAttempts": 1,
+  "mainProviderChanged": false,
+  "credentialsLogged": false,
+  "status": "PASS",
+  "projectOriginVerified": true,
+  "projectHeaderVerified": true,
+  "http": [
+    {
+      "phase": "quote",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "phase": "owner",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "phase": "supplier",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "phase": "available",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "phase": "insert",
+      "method": "POST",
+      "status": 201
+    },
+    {
+      "phase": "after",
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "quoteId": 1,
+  "eventId": 1,
+  "quoteDeadline": "2026-11-15",
+  "quoteStatus": "Aberta",
+  "quoteEventLinkVerified": true,
+  "ownerVerified": true,
+  "supplierId": 3,
+  "supplierVerified": true,
+  "availableByRepositoryVerified": true,
+  "insertResponseOnlyId": true,
+  "proposalId": 3,
+  "repositoryReturnedOnlyId": true,
+  "linksVerified": true,
+  "fieldsVerified": true,
+  "exactDecimalVerified": true,
+  "testValue": "12.34",
+  "persistedStatus": "Em avaliação",
+  "timestampVerified": true,
+  "otherRecordsModified": false,
+  "inconsistenciesFound": false
+}

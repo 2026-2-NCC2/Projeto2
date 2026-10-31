@@ -1,0 +1,57 @@
+{
+  "timestamp": "2026-10-30T23:24:14.091Z",
+  "operation": "single eventos.atualizar HTTPS",
+  "eventId": 11,
+  "organizerId": 1,
+  "updateAttempts": 1,
+  "selectAttempts": 2,
+  "otherRecordsModified": false,
+  "mainProviderChanged": false,
+  "projectOriginVerified": true,
+  "projectHeaderVerified": true,
+  "beforeSelectHttpStatus": 200,
+  "before": {
+    "id": 11,
+    "nome": "Evento ficticio de integracao 8f9e65e7-28b4-4375-abce-0a53633681ba",
+    "data": "2030-06-15",
+    "horario": "14:30:00",
+    "local": "Local ficticio de teste",
+    "categoria": "Corporativo",
+    "publico": 25,
+    "descricao": "Registro sintetico para validar eventos.criar.",
+    "status": "Em planejamento",
+    "usuario_id": 1
+  },
+  "ownershipVerified": true,
+  "updateHttpStatus": 200,
+  "repositoryReturn": 1,
+  "afterSelectHttpStatus": 200,
+  "after": {
+    "id": 11,
+    "nome": "Evento ficticio atualizado 49ff14cb-b829-42d4-abeb-bde2b9578a89",
+    "data": "2030-06-15",
+    "horario": "14:30:00",
+    "local": "Local ficticio de teste",
+    "categoria": "Corporativo",
+    "publico": 25,
+    "descricao": "Descricao ficticia alterada no teste unico de eventos.atualizar.",
+    "status": "Em planejamento",
+    "usuario_id": 1
+  },
+  "changedFields": [
+    "nome",
+    "descricao"
+  ],
+  "unchangedFieldsVerified": [
+    "id",
+    "data",
+    "horario",
+    "local",
+    "categoria",
+    "publico",
+    "status",
+    "usuario_id"
+  ],
+  "status": "PASS",
+  "inconsistenciesFound": false
+}

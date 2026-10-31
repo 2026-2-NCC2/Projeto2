@@ -1,0 +1,49 @@
+{
+  "timestamp": "2026-10-30T23:47:21.005Z",
+  "operation": "single propostas.avaliar HTTPS",
+  "proposalId": 3,
+  "quoteId": 1,
+  "approvalAttempts": 1,
+  "mainProviderChanged": false,
+  "credentialsLogged": false,
+  "status": "PASS",
+  "projectOriginVerified": true,
+  "projectHeaderVerified": true,
+  "http": [
+    {
+      "phase": "api",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "phase": "before",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "phase": "owner",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "phase": "approve",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "phase": "after",
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "rpcAvailableByApi": true,
+  "organizerId": 1,
+  "initialStatus": "Em avaliação",
+  "quoteEventOwnerLinkVerified": true,
+  "organizerVerified": true,
+  "repositoryReturn": 1,
+  "finalStatus": "Aprovada",
+  "otherFieldsUnchanged": true,
+  "otherRecordsModified": false,
+  "inconsistenciesFound": false
+}

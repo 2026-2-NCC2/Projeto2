@@ -2,13 +2,43 @@
 
 const campos = ["id", "nome", "email"];
 
-// Somente leituras de usuarios. A fabrica existente continua responsavel pela
+// Leituras e cadastro de usuarios. A fabrica existente continua responsavel pela
 // configuracao/isolamento; importar este modulo nao inicializa cliente algum.
 // Rotas, autenticacao e selecao do provedor permanecem inalteradas.
 function criarRepositorioUsuarios(
   cliente = require("../../db-supabase.cjs").criarClienteSupabase()
 ) {
   return {
+    async criar({ nome, email, senhaHash, perfil }) {
+      // Normalizacao, validacao e bcrypt continuam no handler existente.
+      // Receber apenas o hash ja calculado, sem selecionar/devolver a senha.
+      try {
+        const { data, error } = await cliente.schema("public")
+          .from("usuarios")
+          .insert({ nome, email, senha: senhaHash, perfil })
+          .select("id")
+          .single()
+          .retry(false);
+        if (error) throw error;
+        if (!data || typeof data !== "object" || Array.isArray(data) ||
+            !Object.hasOwn(data, "id") || !Number.isSafeInteger(data.id) || data.id <= 0) {
+          // INSERT pode ter sido confirmado: nao devolver ID falso nem repetir.
+          throw Object.assign(new Error("Resposta invalida ao cadastrar usuario."), {
+            code: "SUPABASE_USUARIO_CREATE_RESPONSE", resultadoIncerto: true,
+          });
+        }
+        return data.id;
+      } catch (error) {
+        if (error?.code === "23505") {
+          // Mesmo caminho 409 da corrida no INSERT MySQL, sem dados do conflito.
+          throw Object.assign(new Error("Conflito de unicidade no cadastro."), {
+            code: "ER_DUP_ENTRY",
+          });
+        }
+        throw error;
+      }
+    },
+
     async buscarParaLogin(email) {
       const camposLogin = ["id", "nome", "email", "senha", "perfil"];
       const { data, error } = await cliente.schema("public")

@@ -1,0 +1,24 @@
+{
+  "timestamp": "2026-10-30T23:30:00.967Z",
+  "operation": "conditional test eventos.excluir HTTPS",
+  "eventId": 11,
+  "organizerId": 1,
+  "deleteAttempts": 1,
+  "otherRecordsDeleted": false,
+  "mainProviderChanged": false,
+  "projectOriginVerified": true,
+  "projectHeaderVerified": true,
+  "ownershipVerified": true,
+  "dependencies": {
+    "custos_evento": 0,
+    "cotacoes": 0,
+    "inscricoes": 0,
+    "propostas": 0
+  },
+  "dependencyScope": "All event/cotacao foreign-key relationships from existing audited schema; no table/trigger/schema changes performed.",
+  "deleteHttpStatus": 200,
+  "repositoryReturn": 1,
+  "absenceVerified": true,
+  "status": "PASS",
+  "inconsistenciesFound": false
+}

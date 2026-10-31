@@ -1,0 +1,48 @@
+{
+  "timestamp": "2026-10-30T23:34:51.079Z",
+  "operation": "single synthetic eventos.publicar HTTPS",
+  "insertAttempts": 1,
+  "publishAttempts": 1,
+  "mainProviderChanged": false,
+  "credentialsLogged": false,
+  "status": "PASS",
+  "projectOriginVerified": true,
+  "projectHeaderVerified": true,
+  "http": [
+    {
+      "phase": "organizer",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "phase": "create",
+      "method": "POST",
+      "status": 201
+    },
+    {
+      "phase": "before",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "phase": "publish",
+      "method": "PATCH",
+      "status": 200
+    },
+    {
+      "phase": "after",
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "organizerId": 1,
+  "organizerVerified": true,
+  "testEventId": 12,
+  "initialStatus": "Em planejamento",
+  "initialOwnerVerified": true,
+  "repositoryReturn": 1,
+  "finalStatus": "Ativo",
+  "otherFieldsUnchanged": true,
+  "otherRecordsModified": false,
+  "inconsistenciesFound": false
+}

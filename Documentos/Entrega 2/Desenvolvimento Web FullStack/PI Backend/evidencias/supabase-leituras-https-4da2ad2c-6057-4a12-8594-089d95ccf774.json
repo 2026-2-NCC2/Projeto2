@@ -1,0 +1,214 @@
+{
+  "timestamp": "2026-10-30T22:35:14.917Z",
+  "scope": [
+    "usuarios",
+    "eventos",
+    "custos"
+  ],
+  "checks": [
+    {
+      "name": "usuarios.listar: campos sem senha e id DESC",
+      "status": "PASS"
+    },
+    {
+      "name": "usuarios.buscarPerfil: filtro id e projecao",
+      "status": "PASS"
+    },
+    {
+      "name": "usuarios.buscarParaAutenticacao: perfil atual sem JWT",
+      "status": "PASS"
+    },
+    {
+      "name": "usuarios.buscarIdPorEmail: filtro exato e projecao",
+      "status": "PASS"
+    },
+    {
+      "name": "usuarios: ausencia por id retorna undefined",
+      "status": "PASS"
+    },
+    {
+      "name": "eventos.listarAdministrativo: join campos datas e id DESC",
+      "status": "PASS"
+    },
+    {
+      "name": "eventos.listarPorUsuario: propriedade projecao e ordem",
+      "status": "PASS"
+    },
+    {
+      "name": "eventos.buscarPorIdDoUsuario: detalhes pertencentes ao usuario",
+      "status": "PASS"
+    },
+    {
+      "name": "eventos: outro proprietario e evento ausente retornam undefined",
+      "status": "PASS"
+    },
+    {
+      "name": "eventos: listagem vazia por usuario ausente",
+      "status": "PASS"
+    },
+    {
+      "name": "eventos.listarAtivosParaParticipante: status e data ASC id ASC",
+      "status": "PASS"
+    },
+    {
+      "name": "custos.buscarEventoDoUsuario: filtro propriedade e ausencia",
+      "status": "PASS"
+    },
+    {
+      "name": "custos.listarPorEvento: campos filtro id ASC decimais textuais",
+      "status": "PASS"
+    },
+    {
+      "name": "custos: lista vazia para evento ausente",
+      "status": "PASS"
+    }
+  ],
+  "http": [
+    {
+      "check": "usuarios.listar: campos sem senha e id DESC",
+      "table": "usuarios",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "usuarios.buscarPerfil: filtro id e projecao",
+      "table": "usuarios",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "usuarios.buscarParaAutenticacao: perfil atual sem JWT",
+      "table": "usuarios",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "usuarios.buscarIdPorEmail: filtro exato e projecao",
+      "table": "usuarios",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "usuarios: ausencia por id retorna undefined",
+      "table": "usuarios",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "usuarios: ausencia por id retorna undefined",
+      "table": "usuarios",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "eventos.listarAdministrativo: join campos datas e id DESC",
+      "table": "eventos",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "eventos.listarPorUsuario: propriedade projecao e ordem",
+      "table": "eventos",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "eventos.buscarPorIdDoUsuario: detalhes pertencentes ao usuario",
+      "table": "eventos",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "eventos: outro proprietario e evento ausente retornam undefined",
+      "table": "eventos",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "eventos: outro proprietario e evento ausente retornam undefined",
+      "table": "eventos",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "eventos: listagem vazia por usuario ausente",
+      "table": "eventos",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "eventos.listarAtivosParaParticipante: status e data ASC id ASC",
+      "table": "eventos",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "custos.buscarEventoDoUsuario: filtro propriedade e ausencia",
+      "table": "eventos",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "custos.buscarEventoDoUsuario: filtro propriedade e ausencia",
+      "table": "eventos",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "custos.listarPorEvento: campos filtro id ASC decimais textuais",
+      "table": "custos_evento",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    },
+    {
+      "check": "custos: lista vazia para evento ausente",
+      "table": "custos_evento",
+      "method": "GET",
+      "status": 200,
+      "projectOriginMatches": true,
+      "projectHeaderMatches": true
+    }
+  ],
+  "writes": 0,
+  "mainRoutesChanged": false,
+  "limitations": [
+    "No JWT or route authorization exercised.",
+    "MySQL contracts checked by source/projection and injected executor, not a live MySQL comparison.",
+    "Independent HTTP requests do not share a snapshot."
+  ],
+  "decimalRowsValidated": 3,
+  "status": "PASS",
+  "durationMs": 10696
+}

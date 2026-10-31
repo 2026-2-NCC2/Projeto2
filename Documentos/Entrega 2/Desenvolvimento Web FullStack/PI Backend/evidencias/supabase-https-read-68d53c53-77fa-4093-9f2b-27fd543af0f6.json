@@ -1,0 +1,20 @@
+{
+  "timestamp": "2026-10-30T22:32:07.465Z",
+  "operation": "GET eventos select id limit 1",
+  "configurationSource": "existing backend .env explicitly authorized",
+  "credentialsLogged": false,
+  "writes": 0,
+  "mainProviderChanged": false,
+  "requests": 1,
+  "https": true,
+  "tlsVerificationEnabled": true,
+  "requestOriginMatchesConfiguredProject": true,
+  "responseOriginMatchesConfiguredProject": true,
+  "serverProjectHeaderPresent": true,
+  "serverProjectHeaderMatches": true,
+  "httpStatus": 200,
+  "status": "HTTPS_READ_VALIDATED",
+  "rowsReturned": 1,
+  "responseShape": "array containing id only",
+  "identityLimit": "Configured project origin verified; dashboard project display name not independently checked."
+}
