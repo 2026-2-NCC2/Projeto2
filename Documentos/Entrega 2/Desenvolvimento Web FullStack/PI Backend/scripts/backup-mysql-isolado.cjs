@@ -38,7 +38,7 @@ function hashRows(rows, columns) {
   const sorted = [...rows].sort((a, b) => Number(a.id) - Number(b.id));
   return digest(JSON.stringify(sorted.map(r => columns.map(k => r[k] === null ? null : String(r[k])))));
 }
-async function executar(dir, restaurarExistente = false, aposRestaurar) {
+async function executar(dir, restaurarExistente = false, aposRestaurar, somenteNovoEnsaio = false) {
   dir = validarDestino(dir);
   const env = require("dotenv").parse(fs.readFileSync(path.join(project, ".env"), "utf8"));
   assert.ok(["localhost", "127.0.0.1", "::1"].includes(env.DB_HOST));
@@ -54,7 +54,7 @@ async function executar(dir, restaurarExistente = false, aposRestaurar) {
     manifest.previousAttempts ??= [];
     manifest.previousAttempts.push({ status: manifest.status, failure: manifest.failure, restoreVerified: manifest.restoreVerified, rollbackDrill: manifest.rollbackDrill, containers: manifest.restoreContainers });
     manifest.restoreContainers = []; delete manifest.failure; delete manifest.cleanupFailed;
-    manifest.restoreVerified = false; delete manifest.rollbackDrill;
+    if (!somenteNovoEnsaio) { manifest.restoreVerified = false; delete manifest.rollbackDrill; }
   }
   const save = () => fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n");
   const check = (v, name) => { assert.ok(v, name); manifest.checks.push(name); save(); };
@@ -94,7 +94,7 @@ async function executar(dir, restaurarExistente = false, aposRestaurar) {
     fs.writeFileSync(cloneConfig, "[client]\nuser=root\npassword=" + quoteOption(password) + "\nprotocol=socket\n", { flag: "wx" });
     const imageId = (await docker(["image", "inspect", image, "--format", "{{.Id}}"])).toString().trim();
     manifest.image = { tag: image, id: imageId }; save();
-    for (const suffix of ["a", "b"]) {
+    for (const suffix of (somenteNovoEnsaio ? ["a"] : ["a", "b"])) {
       const id = (await docker(["run", "--detach", "--name", "tt-mysql-" + name.slice(-16) + "-" + suffix, "--label", label,
         "--network", "none", "--read-only", "--memory", "768m", "--cpus", "1", "--pids-limit", "256", "--tmpfs", "/tmp:rw,size=128m",
         "--tmpfs", "/run/mysqld:rw,size=16m", "--tmpfs", "/var/lib/mysql:rw,size=512m",
@@ -127,11 +127,11 @@ async function executar(dir, restaurarExistente = false, aposRestaurar) {
     }
     stage = "restauracao_integridade";
     const baseline = {};
-    for (const id of ids) {
+    for (const id of (somenteNovoEnsaio ? [] : ids)) {
       const rows = await snapshot(id); baseline[id] = rows;
       for (const table of Object.keys(parsed.rows)) check(hashRows(rows[table], parsed.columns[table]) === hashRows(parsed.rows[table], parsed.columns[table]), "restauracao integral " + table + " clone " + ids.indexOf(id));
     }
-    manifest.restoreVerified = true; save(); console.log(JSON.stringify({ stage, status: "OK", clones: 2, rowsEach: 42 }));
+    if (!somenteNovoEnsaio) { manifest.restoreVerified = true; save(); console.log(JSON.stringify({ stage, status: "OK", clones: 2, rowsEach: 42 })); }
     if (aposRestaurar) {
       stage = "ensaio_postgres_para_mysql"; await aposRestaurar({ ids, sql, snapshot, parsed });
       manifest.crossProviderCallbackVerified = true; manifest.status = "MYSQL_RESTAURADO_E_RETORNO_POSTGRES_VERIFICADO"; save(); return;

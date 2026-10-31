@@ -1,0 +1,36 @@
+{
+  "run": "408e778c-24af-447f-a65d-b03e5f05fc03",
+  "started": "2026-10-31T15:23:34.364Z",
+  "status": "INTERROMPIDA",
+  "stage": "preflight",
+  "checks": [],
+  "http": [],
+  "createdIds": {
+    "eventos": [],
+    "custos_evento": []
+  },
+  "t1Attempted": false,
+  "rollbackExecuted": false,
+  "existingRecordsDeleted": false,
+  "failure": {
+    "stage": "preflight",
+    "code": "POWERSHELL_EXECUTION_DISABLED",
+    "originalCode": "BACKUP_COMMAND",
+    "cause": "A politica efetiva do Windows PowerShell recusou carregar inventario-janela-real.ps1. Nenhuma politica foi alterada."
+  },
+  "postFailureVerification": {
+    "freezeActivated": false,
+    "sealed": false,
+    "transitionPresent": false,
+    "originalStartupGuardPresent": true,
+    "mysqlRemainsDefault": true,
+    "jwtRotated": false,
+    "startupPatchApplied": false,
+    "t0BackupsGenerated": false,
+    "databaseConnectionsAttempted": false,
+    "dataWritesAttempted": false,
+    "automaticRetryExecuted": false,
+    "securityPolicyChanged": false
+  },
+  "finished": "2026-10-31T15:23:34.653Z"
+}

@@ -31,9 +31,15 @@ function prepararRepositorios() {
   return { provider, conexao, repositorios };
 }
 
-function criarRepositorios() { return prepararRepositorios().repositorios; }
+function criarRepositorios() {
+  const { repositorios } = prepararRepositorios();
+  const supervisor = require("../config/supervisor-cutover.cjs").criarSupervisor();
+  return supervisor.instrumentar({ repositorios, servicos: {} }).repositorios;
+}
 
 function criarPersistencia() {
+  // A leitura do estado privado precede qualquer criacao de cliente/pool.
+  const supervisor = require("../config/supervisor-cutover.cjs").criarSupervisor();
   const { provider, conexao, repositorios } = prepararRepositorios();
   const opcoes = provider === "mysql"
     ? { provider, db: conexao, repositorios }
@@ -43,7 +49,7 @@ function criarPersistencia() {
     cotacoes: require("../services/cotacoes.cjs").criarServicoCotacoes(opcoes),
     solicitacoesAcesso: require("../services/solicitacoes-acesso.cjs").criarServicoSolicitacoesAcesso(opcoes),
   };
-  return { repositorios, servicos };
+  return { ...supervisor.instrumentar({ repositorios, servicos }), supervisor };
 }
 
 module.exports = { criarRepositorios, criarPersistencia };

@@ -1,0 +1,37 @@
+{
+  "at": "2026-10-31T14:38:56.985Z",
+  "dataWritesExecuted": 0,
+  "administrativeSessionsTerminated": 0,
+  "mysql": {
+    "status": "READ_ONLY",
+    "clients": [],
+    "transactions": [],
+    "eventScheduler": "OFF",
+    "jobs": []
+  },
+  "supabase": {
+    "status": "READ_ONLY_TLS_VERIFICADO",
+    "sessions": [
+      {
+        "role": "authenticator",
+        "state": "idle",
+        "sessions": 1,
+        "transactions": 0
+      },
+      {
+        "role": "pgbouncer",
+        "state": "idle",
+        "sessions": 2,
+        "transactions": 0
+      },
+      {
+        "role": "supabase_admin",
+        "state": "idle",
+        "sessions": 2,
+        "transactions": 0
+      }
+    ],
+    "activeCronJobs": 0,
+    "netQueueConfigured": false
+  }
+}

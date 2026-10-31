@@ -1,0 +1,69 @@
+{
+  "at": "2026-10-31T15:08:17.294Z",
+  "status": "PREPARACAO_TECNICA_SIMULADA_APROVADA",
+  "inventoryConfirmed": true,
+  "implementation": {
+    "controlledReplacementIntegrated": true,
+    "knownDrainedProcessExitRequired": true,
+    "oneUseStartupTicket": true,
+    "pidProjectConfigurationBound": true,
+    "readOnlyStageBeforeWriteRelease": true,
+    "explicitWriteReleaseAfterSmokeAndDelta": true,
+    "uncertaintyResealsAndBlocks": true,
+    "normalStartupProposalPrepared": true,
+    "normalStartupProposalVMValidated": true,
+    "startupPatchApplied": false,
+    "t0ProducerPrepared": true,
+    "t0ArtifactsAndSnapshotComparison": true,
+    "t0PrivateCheckpoint": true,
+    "t0AndTransitionIntegrated": true
+  },
+  "validation": {
+    "newTestsPassed": 17,
+    "failed": 0,
+    "previousTestSuitesRepeated": 0,
+    "previousRestorationTestsRepeated": 0,
+    "testBatches": [
+      5,
+      4,
+      3,
+      2,
+      1,
+      1,
+      1
+    ],
+    "privateDirectoryPowerShellSyntaxCheckedOnly": true,
+    "realDatabaseConnectionsOpened": 0,
+    "realProcessesSubstituted": 0,
+    "simulatedOnly": true
+  },
+  "currentState": {
+    "frozen": false,
+    "sealed": false,
+    "transitionCreated": false,
+    "normalSupabaseStartupBlocked": true,
+    "actualT0BackupsGenerated": false,
+    "actualFinalDeltaExecuted": false,
+    "jwtChanged": false,
+    "credentialsChanged": false,
+    "applicationDataWrites": 0,
+    "cutoverExecuted": false,
+    "supabaseActivated": false
+  },
+  "readiness": {
+    "readyToRequestControlledWindowAuthorization": true,
+    "readyToActivateImmediately": false,
+    "implementationBlockersRemaining": [],
+    "remainingWindowGates": [
+      "Autorizacao explicita para a janela, controle dos escritores locais e boot supervisionado real",
+      "Freeze/selagem/drenagem, backups T0 e delta reais",
+      "Aplicacao autorizada da proposta protegida de startup e rotacao JWT",
+      "Smoke real com leitura/login, escritas ainda bloqueadas",
+      "Liberacao explicita somente apos todos os gates; retorno antes/depois de T1 preparado"
+    ]
+  },
+  "documentation": "ETAPA_FINAL_PREPARADA.md",
+  "commitsCreated": 0,
+  "frontendModified": false,
+  "computerUseUsed": false
+}

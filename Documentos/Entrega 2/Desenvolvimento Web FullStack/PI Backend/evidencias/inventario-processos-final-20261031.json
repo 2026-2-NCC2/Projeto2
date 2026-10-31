@@ -1,0 +1,54 @@
+{
+    "at":  "2026-10-31T14:31:44.5437685Z",
+    "processes":  [
+                      {
+                          "pid":  27220,
+                          "name":  "node.exe",
+                          "category":  "CODEX_MCP"
+                      },
+                      {
+                          "pid":  29684,
+                          "name":  "node.exe",
+                          "category":  "CODEX_MCP"
+                      },
+                      {
+                          "pid":  30652,
+                          "name":  "node_repl.exe",
+                          "category":  "CODEX_MCP"
+                      },
+                      {
+                          "pid":  28312,
+                          "name":  "node_repl.exe",
+                          "category":  "CODEX_MCP"
+                      },
+                      {
+                          "pid":  19348,
+                          "name":  "mysqld.exe",
+                          "category":  "MYSQL_LOCAL"
+                      },
+                      {
+                          "pid":  29412,
+                          "name":  "node.exe",
+                          "category":  "CODEX_MCP"
+                      },
+                      {
+                          "pid":  25396,
+                          "name":  "node.exe",
+                          "category":  "CODEX_MCP"
+                      }
+                  ],
+    "listeners":  [
+                      {
+                          "port":  3306,
+                          "pid":  19348,
+                          "bind":  "TODAS_INTERFACES"
+                      }
+                  ],
+    "scheduledProjectReferences":  [
+
+                                   ],
+    "computerUseUsed":  false,
+    "establishedDatabasePortConnections":  [
+
+                                           ]
+}

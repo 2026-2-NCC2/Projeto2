@@ -1,4 +1,10 @@
-# Backups e restauracao isolada — 31/10/2026
+   # Backups e restauracao isolada — 31/10/2026
+
+Estado operacional mais recente: `ETAPA_FINAL_PREPARADA.md`.
+
+Atualizacao posterior: o ensaio dos oito dominios foi concluido em
+`PREPARACAO_FINAL_CUTOVER.md`. Esse documento substitui o bloqueio historico
+de cobertura do rollback descrito abaixo. Freeze e cutover continuam inativos.
 
 Backups logicos gerados fora do repositorio:
 `C:\Users\Lucas\BackupsTrocaTicket\backup-20261031-e51f28697254468aa205e99c9a1fbe15`.

@@ -1,0 +1,50 @@
+{
+  "at": "2026-10-31T14:03:50.324Z",
+  "mainDataWrites": 0,
+  "mysql": {
+    "status": "INDISPONIVEL",
+    "code": "ECONNREFUSED"
+  },
+  "supabase": {
+    "status": "METADADOS_CONSULTADOS",
+    "tlsVerified": true,
+    "sessions": [
+      {
+        "backend_type": "client backend",
+        "state": "idle",
+        "role": "OUTRA_ROLE",
+        "sessions": 2,
+        "transactions": 0
+      },
+      {
+        "backend_type": "client backend",
+        "state": "idle",
+        "role": "authenticator",
+        "sessions": 1,
+        "transactions": 0
+      },
+      {
+        "backend_type": "client backend",
+        "state": "idle",
+        "role": "supabase_admin",
+        "sessions": 2,
+        "transactions": 0
+      },
+      {
+        "backend_type": "pg_cron launcher",
+        "state": "VISIBILIDADE_LIMITADA",
+        "role": "supabase_admin",
+        "sessions": 1,
+        "transactions": 0
+      },
+      {
+        "backend_type": "pg_net 0.20.4 worker",
+        "state": "idle",
+        "role": "postgres",
+        "sessions": 1,
+        "transactions": 0
+      }
+    ],
+    "globalVisibility": "NAO_IDENTIFICA_CLIENTES_OCIOSOS_DO_SESSION_POOLER_OU_CREDENCIAIS_FORA_DA_REDE"
+  }
+}

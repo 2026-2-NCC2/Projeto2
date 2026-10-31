@@ -1,0 +1,204 @@
+{
+  "at": "2026-10-31T14:32:21.933Z",
+  "endpointConfiguration": [
+    {
+      "variable": "SUPABASE_URL",
+      "destination": "SUPABASE_PI_BACKEND"
+    },
+    {
+      "variable": "SUPABASE_JWKS_URL",
+      "destination": "SUPABASE_PI_BACKEND"
+    },
+    {
+      "variable": "HOMOLOG_SUPABASE_URL",
+      "destination": "SUPABASE_PI_BACKEND"
+    },
+    {
+      "variable": "DB_HOST",
+      "destination": "LOCAL"
+    },
+    {
+      "variable": "PGHOST",
+      "destination": "SUPABASE_POOLER"
+    }
+  ],
+  "packageScriptNames": [
+    "test"
+  ],
+  "documentation": [
+    {
+      "file": "CONSOLIDACAO_ETAPA_5.md",
+      "hostingProviderUrl": false,
+      "localBackendEndpoint": false,
+      "deploymentMention": false
+    },
+    {
+      "file": "CONTRATOS.md",
+      "hostingProviderUrl": false,
+      "localBackendEndpoint": false,
+      "deploymentMention": false
+    },
+    {
+      "file": "CONTRATO_RPC_PROPOSTAS_FORNECEDOR.md",
+      "hostingProviderUrl": false,
+      "localBackendEndpoint": false,
+      "deploymentMention": false
+    },
+    {
+      "file": "DEPENDENCIA_TRANSACIONAL_CUSTOS.md",
+      "hostingProviderUrl": false,
+      "localBackendEndpoint": false,
+      "deploymentMention": false
+    },
+    {
+      "file": "HOMOLOGACAO_LEITURA.md",
+      "hostingProviderUrl": false,
+      "localBackendEndpoint": false,
+      "deploymentMention": false
+    },
+    {
+      "file": "INVESTIGACAO_BLOQUEIOS_CUTOVER.md",
+      "hostingProviderUrl": false,
+      "localBackendEndpoint": false,
+      "deploymentMention": true
+    },
+    {
+      "file": "PLANO_CUTOVER_DEFINITIVO.md",
+      "hostingProviderUrl": false,
+      "localBackendEndpoint": false,
+      "deploymentMention": false
+    },
+    {
+      "file": "PLANO_HOMOLOGACAO_ESCRITA.md",
+      "hostingProviderUrl": false,
+      "localBackendEndpoint": false,
+      "deploymentMention": false
+    },
+    {
+      "file": "PLANO_TRANSACOES_SUPABASE.md",
+      "hostingProviderUrl": false,
+      "localBackendEndpoint": false,
+      "deploymentMention": false
+    },
+    {
+      "file": "PLANO_VALIDACAO_RPC_CUSTOS_DESCARTAVEL.md",
+      "hostingProviderUrl": false,
+      "localBackendEndpoint": false,
+      "deploymentMention": false
+    },
+    {
+      "file": "PREPARACAO_FINAL_CUTOVER.md",
+      "hostingProviderUrl": false,
+      "localBackendEndpoint": false,
+      "deploymentMention": false
+    },
+    {
+      "file": "PREPARACAO_OPERACIONAL_CUTOVER.md",
+      "hostingProviderUrl": false,
+      "localBackendEndpoint": false,
+      "deploymentMention": false
+    },
+    {
+      "file": "RELATORIO_RECONCILIACAO_CUTOVER.md",
+      "hostingProviderUrl": false,
+      "localBackendEndpoint": false,
+      "deploymentMention": false
+    },
+    {
+      "file": "RESULTADO_BACKUPS_CUTOVER.md",
+      "hostingProviderUrl": false,
+      "localBackendEndpoint": false,
+      "deploymentMention": false
+    },
+    {
+      "file": "RESULTADO_HOMOLOGACAO_ESCRITA.md",
+      "hostingProviderUrl": false,
+      "localBackendEndpoint": false,
+      "deploymentMention": false
+    },
+    {
+      "file": "RESULTADO_HOMOLOGACAO_LEITURA.md",
+      "hostingProviderUrl": false,
+      "localBackendEndpoint": false,
+      "deploymentMention": false
+    },
+    {
+      "file": "RESULTADO_VALIDACAO_ACESSO_DESCARTAVEL.md",
+      "hostingProviderUrl": false,
+      "localBackendEndpoint": false,
+      "deploymentMention": false
+    },
+    {
+      "file": "RESULTADO_VALIDACAO_PUBLICACAO_DESCARTAVEL.md",
+      "hostingProviderUrl": false,
+      "localBackendEndpoint": false,
+      "deploymentMention": false
+    },
+    {
+      "file": "RESULTADO_VALIDACAO_RPC_CUSTOS_DESCARTAVEL.md",
+      "hostingProviderUrl": false,
+      "localBackendEndpoint": false,
+      "deploymentMention": false
+    },
+    {
+      "file": "SEGURANCA.md",
+      "hostingProviderUrl": false,
+      "localBackendEndpoint": false,
+      "deploymentMention": false
+    },
+    {
+      "file": "SUPABASE.md",
+      "hostingProviderUrl": false,
+      "localBackendEndpoint": false,
+      "deploymentMention": false
+    },
+    {
+      "file": "SUPERVISOR_CUTOVER.md",
+      "hostingProviderUrl": false,
+      "localBackendEndpoint": false,
+      "deploymentMention": false
+    },
+    {
+      "file": "VALIDACAO_HTTP_INCREMENTO_4.md",
+      "hostingProviderUrl": false,
+      "localBackendEndpoint": false,
+      "deploymentMention": false
+    }
+  ],
+  "postman": [
+    {
+      "file": ".postman/resources.yaml",
+      "localEndpointPresent": false,
+      "hostingProviderReference": false
+    },
+    {
+      "file": "postman/globals/workspace.globals.yaml",
+      "localEndpointPresent": false,
+      "hostingProviderReference": false
+    }
+  ],
+  "server": {
+    "corsOriginLocal": true,
+    "listenHostExplicit": false,
+    "defaultPort": 3001
+  },
+  "computerUseUsed": false,
+  "externalAbsenceProven": false,
+  "trackedDeploymentFiles": [],
+  "environmentFiles": [
+    {
+      "file": ".env",
+      "template": false,
+      "provider": "mysql_PADRAO",
+      "configuredBackendPort": 3001,
+      "otherEndpointVariables": []
+    },
+    {
+      "file": ".env.example",
+      "template": true,
+      "provider": "mysql_PADRAO",
+      "configuredBackendPort": 3001,
+      "otherEndpointVariables": []
+    }
+  ]
+}

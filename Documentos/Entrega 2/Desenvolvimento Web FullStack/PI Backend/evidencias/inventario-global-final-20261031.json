@@ -1,0 +1,142 @@
+{
+  "at": "2026-10-31T14:35:05.799Z",
+  "status": "CONCLUIDO_NO_ESCOPO_LOCAL",
+  "globalInventoryComplete": false,
+  "externalConsumersConfirmed": false,
+  "scope": "Arquivos/configuracoes/processos locais; evidencias SQL anteriores reutilizadas",
+  "sourceEvidence": {
+    "localConfiguration": "inventario-fontes-locais-final-20261031.json",
+    "localProcesses": "inventario-processos-final-20261031.json",
+    "mysqlPriorSnapshot": {
+      "file": "inventario-mysql-retomado-20261031.json",
+      "at": "2026-10-31T14:27:14.911Z"
+    },
+    "supabasePriorSnapshot": {
+      "file": "inventario-supabase-atualizado-20261031.json",
+      "at": "2026-10-31T14:28:05.626Z"
+    }
+  },
+  "localFindings": {
+    "endpointConfiguration": [
+      {
+        "variable": "SUPABASE_URL",
+        "destination": "SUPABASE_PI_BACKEND"
+      },
+      {
+        "variable": "SUPABASE_JWKS_URL",
+        "destination": "SUPABASE_PI_BACKEND"
+      },
+      {
+        "variable": "HOMOLOG_SUPABASE_URL",
+        "destination": "SUPABASE_PI_BACKEND"
+      },
+      {
+        "variable": "DB_HOST",
+        "destination": "LOCAL"
+      },
+      {
+        "variable": "PGHOST",
+        "destination": "SUPABASE_POOLER"
+      }
+    ],
+    "environmentFiles": [
+      {
+        "file": ".env",
+        "template": false,
+        "provider": "mysql_PADRAO",
+        "configuredBackendPort": 3001,
+        "otherEndpointVariables": []
+      },
+      {
+        "file": ".env.example",
+        "template": true,
+        "provider": "mysql_PADRAO",
+        "configuredBackendPort": 3001,
+        "otherEndpointVariables": []
+      }
+    ],
+    "documentationFilesChecked": 23,
+    "hostingProviderUrlsFound": 0,
+    "deploymentFiles": [],
+    "processes": [
+      {
+        "pid": 27220,
+        "name": "node.exe",
+        "category": "CODEX_MCP"
+      },
+      {
+        "pid": 29684,
+        "name": "node.exe",
+        "category": "CODEX_MCP"
+      },
+      {
+        "pid": 30652,
+        "name": "node_repl.exe",
+        "category": "CODEX_MCP"
+      },
+      {
+        "pid": 28312,
+        "name": "node_repl.exe",
+        "category": "CODEX_MCP"
+      },
+      {
+        "pid": 19348,
+        "name": "mysqld.exe",
+        "category": "MYSQL_LOCAL"
+      },
+      {
+        "pid": 29412,
+        "name": "node.exe",
+        "category": "CODEX_MCP"
+      },
+      {
+        "pid": 25396,
+        "name": "node.exe",
+        "category": "CODEX_MCP"
+      }
+    ],
+    "listeners": [
+      {
+        "port": 3306,
+        "pid": 19348,
+        "bind": "TODAS_INTERFACES"
+      }
+    ],
+    "scheduledProjectReferences": [],
+    "establishedDatabasePortConnections": []
+  },
+  "mysqlPriorInterpretation": {
+    "readOnlyConfirmed": true,
+    "applicationSessions": [],
+    "internalInnoDbThreads": 5,
+    "legacyOriginLabelDoesNotIdentifyRemoteClients": true,
+    "transactions": [],
+    "eventScheduler": "OFF",
+    "scheduledEvents": []
+  },
+  "supabaseInterpretation": {
+    "infrastructureRolesAccepted": [
+      "supabase_admin",
+      "pgbouncer"
+    ],
+    "endConsumersBehindProxyNotProven": true
+  },
+  "restrictions": {
+    "computerUseUsed": false,
+    "browserSecurityBypassAttempted": false,
+    "databaseConnectionsOpenedThisTurn": 0,
+    "dataWritesExecuted": 0,
+    "credentialsChanged": false,
+    "jwtChanged": false,
+    "testsRepeated": 0,
+    "freezeExecuted": false,
+    "cutoverExecuted": false,
+    "observedFreezeState": false,
+    "observedSealState": false
+  },
+  "blockers": [
+    "Confirmacao dos hosts, deploys, jobs/CI e consumidores externos de API/banco",
+    "Comprovacao do controle operacional de todos os escritores antes do gate global",
+    "Janela autorizada e evidencias renovadas para supervisor, freeze/drain e T0/delta"
+  ]
+}

@@ -1,0 +1,129 @@
+{
+  "at": "2026-10-31T14:20:54.286Z",
+  "mysqlEnv": {
+    "hostLocal": true,
+    "port": 3306,
+    "passwordDefined": true
+  },
+  "ini": [
+    {
+      "section": "[client]",
+      "key": "port",
+      "value": "3306",
+      "pathPresent": true
+    },
+    {
+      "section": "[mysqld]",
+      "key": "port",
+      "value": "3306",
+      "pathPresent": true
+    },
+    {
+      "section": "[mysqld]",
+      "key": "datadir",
+      "pathPresent": true
+    },
+    {
+      "section": "[mysqld]",
+      "key": "log_error",
+      "pathPresent": true
+    }
+  ],
+  "log": {
+    "modifiedAt": "2026-10-30T19:21:55.126Z",
+    "lastClassifiedEvents": [
+      {
+        "timestamp": "2026-10-27 23:44:09",
+        "kinds": [
+          "socket"
+        ]
+      },
+      {
+        "timestamp": "2026-10-28 23:25:08",
+        "kinds": [
+          "start"
+        ]
+      },
+      {
+        "timestamp": "2026-10-28 23:25:08",
+        "kinds": [
+          "errorOrRecovery"
+        ]
+      },
+      {
+        "timestamp": "2026-10-28 23:25:09",
+        "kinds": [
+          "socket"
+        ]
+      },
+      {
+        "kinds": [
+          "start"
+        ]
+      },
+      {
+        "kinds": [
+          "errorOrRecovery"
+        ]
+      },
+      {
+        "kinds": [
+          "socket"
+        ]
+      },
+      {
+        "kinds": [
+          "start"
+        ]
+      },
+      {
+        "kinds": [
+          "errorOrRecovery"
+        ]
+      },
+      {
+        "kinds": [
+          "socket"
+        ]
+      },
+      {
+        "timestamp": "2026-10-29 14:23:07",
+        "kinds": [
+          "start"
+        ]
+      },
+      {
+        "timestamp": "2026-10-29 14:23:08",
+        "kinds": [
+          "errorOrRecovery"
+        ]
+      },
+      {
+        "timestamp": "2026-10-29 14:23:08",
+        "kinds": [
+          "socket"
+        ]
+      },
+      {
+        "timestamp": "2026-10-30 16:21:54",
+        "kinds": [
+          "start"
+        ]
+      },
+      {
+        "timestamp": "2026-10-30 16:21:54",
+        "kinds": [
+          "errorOrRecovery"
+        ]
+      },
+      {
+        "timestamp": "2026-10-30 16:21:55",
+        "kinds": [
+          "socket"
+        ]
+      }
+    ]
+  },
+  "conclusion": "SEM_PROCESSO_NEM_LISTENER; NAO_E_ERRO_DE_AUTENTICACAO",
+  "mainDataWrites": 0
+}

@@ -1,0 +1,60 @@
+{
+  "at": "2026-10-31T14:42:43.201Z",
+  "inventoryConfirmed": true,
+  "confirmationSource": "Declaracao explicita do proprietario nesta conversa",
+  "confirmation": {
+    "operation": "Exclusivamente no computador do proprietario pelo VS Code",
+    "externalDeploymentsUnderOwnerControl": false
+  },
+  "scope": "Escritores de aplicacao do TrocaTicket sob controle do proprietario; infraestrutura administrativa Supabase reconhecida",
+  "liveEvidence": {
+    "localFile": "escritores-locais-confirmados-20261031.json",
+    "databaseFile": "escritores-bancos-confirmados-20261031.json",
+    "localAt": "2026-10-31T14:36:48.3711340Z",
+    "databaseAt": "2026-10-31T14:38:56.985Z",
+    "mysqlApplicationClients": 0,
+    "mysqlTransactions": 0,
+    "mysqlScheduler": "OFF",
+    "mysqlJobs": 0,
+    "supabaseActiveSessions": 0,
+    "supabaseTransactions": 0,
+    "activeCronJobs": 0,
+    "projectScheduledTasks": 0
+  },
+  "manualWritersRegistered": [
+    "scripts-locais-de-escrita-e-limpeza",
+    "clientes-interativos-locais"
+  ],
+  "plannedInstanceIdPending": true,
+  "globalGateNow": {
+    "status": "BLOQUEADO",
+    "motivos": [
+      "EVIDENCIA_AUSENTE:express-principal",
+      "EVIDENCIA_AUSENTE:scripts-locais-de-escrita-e-limpeza",
+      "EVIDENCIA_AUSENTE:clientes-interativos-locais",
+      "PERSISTENCIA_NAO_CONFIRMADA"
+    ]
+  },
+  "technicalReadiness": {
+    "supervisorFreezeDrainPreviouslyTested": true,
+    "plannedInstanceTransitionAndWriteReleaseAvailable": false,
+    "normalStartupSupabaseBlocked": true,
+    "startupProposalAppliesWithoutModification": true,
+    "proposedStartupRuntimeValidated": false
+  },
+  "readyToExecuteDefinitiveMigration": false,
+  "windowPlan": "JANELA_FINAL_CUTOVER.md",
+  "remaining": [
+    "Implementar e testar transicao autorizada de instancia, leitura controlada e liberacao final pelo supervisor",
+    "Validar especificamente a proposta de startup sem ativa-la no servidor normal",
+    "Na janela autorizada: registrar boot real, suspender escritores manuais, freeze/drain, backups T0 e delta final"
+  ],
+  "dataWritesExecuted": 0,
+  "credentialsChanged": false,
+  "jwtChanged": false,
+  "freezeExecuted": false,
+  "cutoverExecuted": false,
+  "supabaseActivated": false,
+  "computerUseUsed": false,
+  "previousTestSuitesRepeated": 0
+}

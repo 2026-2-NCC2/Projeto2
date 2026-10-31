@@ -1,0 +1,35 @@
+﻿{
+    "at":  "2026-10-31T14:04:15.6378766Z",
+    "node":  [
+                 {
+                     "pid":  27220,
+                     "parent":  7156,
+                     "kind":  "FERRAMENTA_CODEX_MCP",
+                     "started":  "2026-10-31T13:47:39.0685250Z"
+                 },
+                 {
+                     "pid":  29684,
+                     "parent":  29748,
+                     "kind":  "FERRAMENTA_CODEX_MCP",
+                     "started":  "2026-10-31T13:48:27.7110760Z"
+                 },
+                 {
+                     "pid":  30652,
+                     "parent":  29748,
+                     "kind":  "FERRAMENTA_CODEX_MCP",
+                     "started":  "2026-10-31T13:48:27.7136530Z"
+                 },
+                 {
+                     "pid":  28312,
+                     "parent":  29684,
+                     "kind":  "FERRAMENTA_CODEX_MCP",
+                     "started":  "2026-10-31T13:48:27.8079870Z"
+                 }
+             ],
+    "listenersBackend":  [
+
+                         ],
+    "tasksBackend":  0,
+    "servicesBackend":  0,
+    "scope":  "COMPUTADOR_WINDOWS_ATUAL; sem prova de ausencia de ambientes externos"
+}

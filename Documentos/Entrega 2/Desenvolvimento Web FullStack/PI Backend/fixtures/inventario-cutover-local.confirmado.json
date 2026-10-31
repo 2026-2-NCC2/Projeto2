@@ -1,0 +1,28 @@
+{
+  "completoConfirmado": true,
+  "responsavel": "Proprietario do TrocaTicket, confirmacao explicita nesta conversa",
+  "escopo": "Projeto exclusivamente neste computador pelo VS Code; sem deploys ou hospedagens externas sob controle do proprietario",
+  "processos": [
+    {
+      "id": "express-principal",
+      "instancia": null,
+      "situacao": "PARADO; preencher identidade real apos inicio supervisionado autorizado"
+    }
+  ],
+  "escritoresExternos": [
+    {
+      "id": "scripts-locais-de-escrita-e-limpeza",
+      "origem": "LOCAL, externo ao processo Express",
+      "situacao": "NAO_OBSERVADO_EM_EXECUCAO",
+      "controleNaJanela": "Nao iniciar homologacoes de escrita, limpeza, validacoes SQL mutantes ou scripts ad hoc"
+    },
+    {
+      "id": "clientes-interativos-locais",
+      "origem": "VS Code, SQL manual e clientes HTTP locais",
+      "situacao": "VS_CODE_ABERTO; SEM_CLIENTE_SQL_ADICIONAL_OBSERVADO",
+      "controleNaJanela": "Confirmar suspensao das acoes manuais e execucoes automaticas; nao enviar SQL ou REST de escrita"
+    }
+  ],
+  "persistenciaConferida": null,
+  "nota": "Inventario confirmado nao equivale a congelamento ou drenagem. As evidencias operacionais atuais devem ser coletadas na janela autorizada. Instancia nula e persistencia nula impedem aprovar o gate agora."
+}

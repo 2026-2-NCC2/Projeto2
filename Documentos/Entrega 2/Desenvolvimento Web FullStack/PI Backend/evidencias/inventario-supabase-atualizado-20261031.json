@@ -1,0 +1,65 @@
+{
+  "at": "2026-10-31T14:28:05.626Z",
+  "dataWritesExecuted": 0,
+  "sessionsTerminated": 0,
+  "tlsVerified": true,
+  "sessions": [
+    {
+      "pid": 5285,
+      "role": "authenticator",
+      "application": "POSTGREST",
+      "state": "idle",
+      "loopback": true,
+      "unix_socket": false,
+      "transaction_open": false,
+      "backend_start": "2026-10-29T20:51:59.087Z"
+    },
+    {
+      "pid": 6053,
+      "role": "supabase_admin",
+      "application": "METRICAS",
+      "state": "idle",
+      "loopback": true,
+      "unix_socket": false,
+      "transaction_open": false,
+      "backend_start": "2026-10-29T20:52:38.680Z"
+    },
+    {
+      "pid": 50029,
+      "role": "supabase_admin",
+      "application": "SEM_NOME",
+      "state": "idle",
+      "loopback": true,
+      "unix_socket": false,
+      "transaction_open": false,
+      "backend_start": "2026-10-30T06:57:52.009Z"
+    },
+    {
+      "pid": 183195,
+      "role": "pgbouncer",
+      "application": "SEM_NOME",
+      "state": "idle",
+      "loopback": true,
+      "unix_socket": false,
+      "transaction_open": false,
+      "backend_start": "2026-10-31T14:02:14.984Z"
+    },
+    {
+      "pid": 185294,
+      "role": "pgbouncer",
+      "application": "SUPAVISOR",
+      "state": "idle",
+      "loopback": false,
+      "unix_socket": false,
+      "transaction_open": false,
+      "backend_start": "2026-10-31T14:28:07.230Z"
+    }
+  ],
+  "schedulerMetadata": {
+    "cron_jobs_table": false,
+    "net_queue_table": false
+  },
+  "activeCronJobs": 0,
+  "currentConsumerBehindProxyProven": false,
+  "status": "METADADOS_CONSULTADOS"
+}

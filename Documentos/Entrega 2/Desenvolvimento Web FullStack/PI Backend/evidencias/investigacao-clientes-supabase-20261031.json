@@ -1,0 +1,77 @@
+{
+  "at": "2026-10-31T14:20:04.524Z",
+  "mainDataWrites": 0,
+  "sessions": [
+    {
+      "pid": 5285,
+      "usename": "authenticator",
+      "application_name": "PostgREST 14.18",
+      "backend_start": "2026-10-29T20:51:59.087Z",
+      "state_change": "2026-10-29T20:51:59.150Z",
+      "state": "idle",
+      "backend_type": "client backend",
+      "unix_socket": false,
+      "loopback": true,
+      "client_port": 40409,
+      "transaction_open": false,
+      "ssl": true
+    },
+    {
+      "pid": 6053,
+      "usename": "supabase_admin",
+      "application_name": "postgres_exporter",
+      "backend_start": "2026-10-29T20:52:38.680Z",
+      "state_change": "2026-10-31T14:19:38.583Z",
+      "state": "idle",
+      "backend_type": "client backend",
+      "unix_socket": false,
+      "loopback": true,
+      "client_port": 42719,
+      "transaction_open": false,
+      "ssl": false
+    },
+    {
+      "pid": 50029,
+      "usename": "supabase_admin",
+      "application_name": "",
+      "backend_start": "2026-10-30T06:57:52.009Z",
+      "state_change": "2026-10-31T03:40:52.079Z",
+      "state": "idle",
+      "backend_type": "client backend",
+      "unix_socket": false,
+      "loopback": true,
+      "client_port": 39557,
+      "transaction_open": false,
+      "ssl": true
+    },
+    {
+      "pid": 183195,
+      "usename": "pgbouncer",
+      "application_name": "",
+      "backend_start": "2026-10-31T14:02:14.984Z",
+      "state_change": "2026-10-31T14:19:59.981Z",
+      "state": "idle",
+      "backend_type": "client backend",
+      "unix_socket": false,
+      "loopback": true,
+      "client_port": 26839,
+      "transaction_open": false,
+      "ssl": true
+    },
+    {
+      "pid": 184595,
+      "usename": "pgbouncer",
+      "application_name": "NOME_OMITIDO",
+      "backend_start": "2026-10-31T14:20:05.983Z",
+      "state_change": "2026-10-31T14:20:06.002Z",
+      "state": "idle",
+      "backend_type": "client backend",
+      "unix_socket": false,
+      "loopback": false,
+      "client_port": 50306,
+      "transaction_open": false,
+      "ssl": false
+    }
+  ],
+  "tlsVerified": true
+}

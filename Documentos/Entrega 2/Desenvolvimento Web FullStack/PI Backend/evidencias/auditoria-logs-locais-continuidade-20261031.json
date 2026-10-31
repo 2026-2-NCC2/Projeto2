@@ -1,0 +1,12 @@
+[
+    {
+        "log":  "Security",
+        "metadataError":  "LogInfoUnavailable,Microsoft.PowerShell.Commands.GetWinEventCommand",
+        "completeHistory":  false
+    },
+    {
+        "log":  "Microsoft-Windows-TaskScheduler/Operational",
+        "enabled":  false,
+        "completeHistory":  false
+    }
+]

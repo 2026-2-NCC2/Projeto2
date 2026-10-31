@@ -1,0 +1,42 @@
+{
+  "at": "2026-10-31T14:25:37.464Z",
+  "mysql": {
+    "immediateCause": "SERVIDOR_PARADO_SEM_LISTENER",
+    "configuredPortMatches": 3306,
+    "windowsBootUtc": "2026-10-31T13:44:35.500Z",
+    "lastMysqlLogUtc": "2026-10-30T19:21:55.126Z",
+    "startedByAgent": false,
+    "availabilityRestored": false
+  },
+  "supabase": {
+    "administrative": {
+      "pid": 50029,
+      "role": "supabase_admin",
+      "subserviceExactConfirmed": false
+    },
+    "pooler": {
+      "pid": 183195,
+      "role": "pgbouncer",
+      "authFunctionMetadataConfirmed": true
+    },
+    "endConsumerBehindProxyConfirmed": false
+  },
+  "external": {
+    "localBackendDetected": false,
+    "localDeploymentDefinitionDetected": false,
+    "externalAbsenceProven": false,
+    "userConfirmation": "NAO_SABE_CONFIRMAR"
+  },
+  "mainDataWrites": 0,
+  "unknownConnectionsTerminated": 0,
+  "previousTestsRepeated": 0,
+  "freezeExecuted": false,
+  "cutoverExecuted": false,
+  "jwtChanged": false,
+  "credentialsChanged": false,
+  "blockers": [
+    "MySQL permanece parado; disponibilizacao e inventario SQL pendentes",
+    "Subservico administrativo exato nao exposto no pg_stat_activity",
+    "Ambientes e consumidores externos nao confirmados"
+  ]
+}

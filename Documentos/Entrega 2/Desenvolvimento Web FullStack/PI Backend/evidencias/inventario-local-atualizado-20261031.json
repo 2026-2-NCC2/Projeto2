@@ -1,0 +1,56 @@
+﻿{
+    "at":  "2026-10-31T14:28:13.4421008Z",
+    "processes":  [
+                      {
+                          "pid":  27220,
+                          "parent":  7156,
+                          "name":  "node.exe",
+                          "category":  "CODEX_MCP"
+                      },
+                      {
+                          "pid":  29684,
+                          "parent":  29748,
+                          "name":  "node.exe",
+                          "category":  "CODEX_MCP"
+                      },
+                      {
+                          "pid":  30652,
+                          "parent":  29748,
+                          "name":  "node_repl.exe",
+                          "category":  "CODEX_MCP"
+                      },
+                      {
+                          "pid":  28312,
+                          "parent":  29684,
+                          "name":  "node_repl.exe",
+                          "category":  "CODEX_MCP"
+                      },
+                      {
+                          "pid":  19348,
+                          "parent":  23484,
+                          "name":  "mysqld.exe",
+                          "category":  "MYSQL_XAMPP"
+                      }
+                  ],
+    "connections":  [
+                        {
+                            "State":  2,
+                            "LocalPort":  3306,
+                            "RemotePort":  0,
+                            "OwningProcess":  19348
+                        },
+                        {
+                            "State":  11,
+                            "LocalPort":  3306,
+                            "RemotePort":  64534,
+                            "OwningProcess":  0
+                        }
+                    ],
+    "scheduledProjectReferences":  [
+
+                                   ],
+    "containers":  [
+
+                   ],
+    "externalHostCoverageConfirmed":  false
+}

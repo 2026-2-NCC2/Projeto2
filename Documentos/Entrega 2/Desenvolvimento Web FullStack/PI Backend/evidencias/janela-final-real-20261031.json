@@ -1,0 +1,80 @@
+{
+  "run": "fae5b97e-eab2-4ab2-878e-da9ad9c6e784",
+  "started": "2026-10-31T15:41:10.141Z",
+  "status": "INTERROMPIDA",
+  "stage": "smoke_leitura_jwt_permissoes",
+  "checks": [
+    "contas de teste dos quatro perfis conferidas sem exposicao",
+    "origem MySQL unica sob supervisor",
+    "congelamento e drenagem reais confirmados",
+    "backups T0 completos e delta final aprovados",
+    "Supabase iniciado somente leitura por transicao privada",
+    "JWT antigos principal e homologacao recusados"
+  ],
+  "http": [
+    {
+      "method": "GET",
+      "route": "/perfil",
+      "status": 401,
+      "write": false
+    },
+    {
+      "method": "GET",
+      "route": "/perfil",
+      "status": 401,
+      "write": false
+    },
+    {
+      "method": "POST",
+      "route": "/login",
+      "status": 200,
+      "write": false,
+      "role": "admin"
+    },
+    {
+      "method": "GET",
+      "route": "/perfil",
+      "status": 200,
+      "write": false,
+      "role": "admin"
+    }
+  ],
+  "createdIds": {
+    "eventos": [],
+    "custos_evento": []
+  },
+  "t1Attempted": false,
+  "rollbackExecuted": false,
+  "existingRecordsDeleted": false,
+  "journalDirectory": "C:\\Users\\Lucas\\BackupsTrocaTicket\\t0-61d4109cb750808f4560297c5e7204fc",
+  "writersControlled": true,
+  "originalBackendPid": 35808,
+  "freezeActivated": true,
+  "t0Directory": "C:\\Users\\Lucas\\BackupsTrocaTicket\\t0-b89cb0d48a4e99b43ce50a26238621aa",
+  "checkpointId": "349d6df4-7c15-4960-b739-dfd91fd53c8d",
+  "startupPatchApplied": true,
+  "jwtRotated": true,
+  "configurationProvider": "supabase",
+  "supabaseBackendPid": 25552,
+  "failure": {
+    "stage": "smoke_leitura_jwt_permissoes",
+    "code": "ERR_ASSERTION",
+    "diagnosis": "Smoke exigiu p.perfil em GET /perfil; o contrato existente retorna somente id, nome e email nos dois provedores.",
+    "automaticRetryExecuted": false
+  },
+  "postFailureVerification": {
+    "configurationProvider": "supabase",
+    "jwtRotated": true,
+    "freezeActive": true,
+    "sealed": true,
+    "transitionPhase": "INCERTA",
+    "maintenanceHttpStatus": 503,
+    "normalOperationReleased": false,
+    "newDataWritesAttempted": false,
+    "additional10RowsPreserved": true,
+    "mysqlIsolationSmokeCompleted": false,
+    "remainingSmokeTestsCompleted": false,
+    "rollbackExecuted": false
+  },
+  "finished": "2026-10-31T15:43:33.966Z"
+}

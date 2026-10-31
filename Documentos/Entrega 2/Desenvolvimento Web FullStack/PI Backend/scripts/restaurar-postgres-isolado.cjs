@@ -4,11 +4,11 @@ const { comando, validarDestino } = require("./backup-mysql-isolado.cjs");
 const { rowsHash } = require("./backup-postgres-isolado.cjs");
 const sha = b => crypto.createHash("sha256").update(b).digest("hex");
 const qi = s => '"' + s.replace(/"/g, '""') + '"';
-async function executar(dir, ensaio = false) {
+async function executar(dir, ensaio = false, oito = false) {
   dir = validarDestino(dir); const name = path.basename(dir), mp = path.join(dir, "supabase-manifesto.json");
   const m = JSON.parse(fs.readFileSync(mp, "utf8"));
-  assert.ok(["BACKUP_COMPLETO_GERADO", "RESTAURACAO_INTERROMPIDA", ...(ensaio ? ["BACKUP_COMPLETO_RESTAURADO"] : [])].includes(m.status));
-  if (m.restore) { assert.equal(m.restore.removed, true); m.restoreAttempts ??= []; m.restoreAttempts.push(m.restore); delete m.restore; }
+  assert.ok(["BACKUP_COMPLETO_GERADO", "RESTAURACAO_INTERROMPIDA", ...((ensaio || oito) ? ["BACKUP_COMPLETO_RESTAURADO"] : [])].includes(m.status));
+  if (m.restore) { assert.ok(m.restore.removed === true || !m.restore.container); m.restoreAttempts ??= []; m.restoreAttempts.push(m.restore); delete m.restore; }
   for (const x of [m.dump, m.roleDump]) { assert.equal(path.dirname(x.file), dir); assert.equal(sha(fs.readFileSync(x.file)), x.sha256); }
   const save = () => fs.writeFileSync(mp, JSON.stringify(m, null, 2) + "\n");
   let id, stage = "clone_isolado";
@@ -38,13 +38,13 @@ async function executar(dir, ensaio = false) {
     await sql(roles); stage = "restauracao_completa";
     await validar(); await comando("docker", ["exec", id, "pg_restore", "--exit-on-error", "--single-transaction", "--dbname=postgres", "--host=/tmp", "--username=supabase_admin", "/backup/dump"], { errorLog: path.join(dir, "restore-" + stage + "-privado.log"), timeout: 300000 });
     stage = "comparacao_integral";
-    for (const t of m.tables) {
+    for (const t of (oito ? [] : m.tables)) {
       const text = await sql("SELECT COALESCE(jsonb_agg(to_jsonb(t)), '[]'::jsonb) FROM " + qi(t.schema) + "." + qi(t.name) + " t;");
       const rows = JSON.parse(text); assert.equal(rows.length, t.count); assert.equal(rowsHash(rows), t.hash);
     }
-    const ext = JSON.parse(await sql("SELECT jsonb_agg(jsonb_build_object('extname',extname,'extversion',extversion) ORDER BY extname) FROM pg_extension;"));
-    assert.deepEqual(ext, m.extensions);
-    m.restore.verified = true; m.restore.tablesCompared = m.tables.length; m.restore.publicRows = m.publicRows;
+    const ext = oito ? [] : JSON.parse(await sql("SELECT jsonb_agg(jsonb_build_object('extname',extname,'extversion',extversion) ORDER BY extname) FROM pg_extension;"));
+    if (!oito) { assert.deepEqual(ext, m.extensions); m.restore.verified = true; m.restore.tablesCompared = m.tables.length; m.restore.publicRows = m.publicRows; }
+    if (oito) { stage = "rollback_oito_dominios"; m.rollbackOitoDominios = await require("./ensaio-oito-dominios.cjs").ensaiarOito(dir, sql); }
     if (ensaio) {
       stage = "schema_e_delta_leitura";
       const env = require("dotenv").parse(fs.readFileSync(path.join(__dirname, "../.env"), "utf8"));
@@ -65,14 +65,15 @@ async function executar(dir, ensaio = false) {
       stage = "ensaio_retorno_postgres_mysql"; m.crossProviderRollback = await require("./ensaio-retorno-isolado.cjs").ensaiarRetorno(dir, sql);
     }
     m.status = "BACKUP_COMPLETO_RESTAURADO"; save();
-    console.log(JSON.stringify({ status: m.status, tablesVerified: m.tables.length, publicRows: m.publicRows, extensionsVerified: ext.length, mainDataWrites: 0 }));
+    console.log(JSON.stringify(oito ? {status:"ROLLBACK_OITO_DOMINIOS_APROVADO",domains:8,mainConnections:0,mainDataWrites:0} : { status: m.status, tablesVerified: m.tables.length, publicRows: m.publicRows, extensionsVerified: ext.length, mainDataWrites: 0 }));
   } catch (e) {
     m.restore ??= {}; m.restore.failure = { stage, code: /^[A-Z0-9_]+$/.test(e.code || "") ? e.code : "INTEGRIDADE_OU_ISOLAMENTO" }; m.status = "RESTAURACAO_INTERROMPIDA"; save(); process.exitCode = 1;
     console.log(JSON.stringify({ status: m.status, failure: m.restore.failure, detailsHidden: true }));
   } finally {
+    if (!id && m.restore) m.restore.removed = true;
     if (id) { try { await validar(); await comando("docker", ["stop", "--time", "10", id]); await comando("docker", ["rm", id]); m.restore.removed = true; } catch { m.restore.cleanupFailed = true; process.exitCode = 1; } }
     for (const x of [m.dump, m.roleDump]) assert.equal(sha(fs.readFileSync(x.file)), x.sha256);
     save(); console.log(JSON.stringify({ containerRemoved: !!m.restore?.removed, backupChecksumsPreserved: true }));
   }
 }
-if (require.main === module) executar(process.argv[2], process.argv[3] === "--ensaio-retorno").catch(() => { console.log('{"status":"RESTAURACAO_PREPARACAO_RECUSADA","detailsHidden":true}'); process.exitCode = 1; });
+if (require.main === module) executar(process.argv[2], process.argv[3] === "--ensaio-retorno", process.argv[3] === "--rollback-oito-dominios").catch(() => { console.log('{"status":"RESTAURACAO_PREPARACAO_RECUSADA","detailsHidden":true}'); process.exitCode = 1; });

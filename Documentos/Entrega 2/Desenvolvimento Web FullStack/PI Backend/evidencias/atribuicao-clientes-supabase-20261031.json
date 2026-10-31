@@ -1,0 +1,83 @@
+{
+  "at": "2026-10-31T14:22:44.131Z",
+  "mainDataWrites": 0,
+  "terminatedSessions": 0,
+  "roleMetadata": [
+    {
+      "rolname": "pgbouncer",
+      "rolcanlogin": true,
+      "rolsuper": false
+    },
+    {
+      "rolname": "supabase_admin",
+      "rolcanlogin": true,
+      "rolsuper": true
+    }
+  ],
+  "poolerAuthFunctions": [
+    {
+      "schema": "pgbouncer",
+      "name": "get_auth",
+      "poolercanexecute": true
+    }
+  ],
+  "knownUnlabeledSessions": [
+    {
+      "pid": 6053,
+      "usename": "supabase_admin",
+      "state": "idle",
+      "emptyapplicationname": false,
+      "namessupavisor": false,
+      "transactionopen": false,
+      "backend_start": "2026-10-29T20:52:38.680Z",
+      "ipv4Loopback": false,
+      "loopbackIncludingIpv6": true
+    },
+    {
+      "pid": 50029,
+      "usename": "supabase_admin",
+      "state": "idle",
+      "emptyapplicationname": true,
+      "namessupavisor": false,
+      "transactionopen": false,
+      "backend_start": "2026-10-30T06:57:52.009Z",
+      "ipv4Loopback": false,
+      "loopbackIncludingIpv6": true
+    },
+    {
+      "pid": 183195,
+      "usename": "pgbouncer",
+      "state": "idle",
+      "emptyapplicationname": true,
+      "namessupavisor": false,
+      "transactionopen": false,
+      "backend_start": "2026-10-31T14:02:14.984Z",
+      "ipv4Loopback": false,
+      "loopbackIncludingIpv6": true
+    },
+    {
+      "pid": 184627,
+      "usename": "pgbouncer",
+      "state": "idle",
+      "emptyapplicationname": false,
+      "namessupavisor": true,
+      "transactionopen": false,
+      "backend_start": "2026-10-31T14:22:45.545Z",
+      "ipv4Loopback": false,
+      "loopbackIncludingIpv6": null
+    }
+  ],
+  "attribution": {
+    "administrative": {
+      "pid": 50029,
+      "role": "supabase_admin",
+      "subserviceExactConfirmed": false
+    },
+    "pooler": {
+      "pid": 183195,
+      "role": "pgbouncer",
+      "authFunctionMetadataConfirmed": true
+    },
+    "endConsumerBehindProxyConfirmed": false
+  }
+}

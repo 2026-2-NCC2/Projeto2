@@ -1,0 +1,446 @@
+{
+  "startedUtc": "2026-10-31T16:30:40.249Z",
+  "checkpointId": "349d6df4-7c15-4960-b739-dfd91fd53c8d",
+  "checkpointCaptureUtc": {
+    "mysql": {
+      "start": "2026-10-31T15:42:53.099Z",
+      "end": "2026-10-31T15:42:53.116Z"
+    },
+    "supabase": {
+      "start": "2026-10-31T15:42:53.116Z",
+      "end": "2026-10-31T15:42:57.034Z"
+    }
+  },
+  "lastPreTransitionGateUpperBoundUtc": "2026-10-31T15:43:29.922Z",
+  "exactLastDeltaGateTimestampPersisted": false,
+  "auditConservativeStartUtc": "2026-10-31T15:42:53.099Z",
+  "scope": "Oito dominios public do TrocaTicket e origem MySQL; metadados de auditoria/jobs/sessoes e processos locais",
+  "deltaOrchestratorExecuted": false,
+  "checkpointCreated": false,
+  "backupsGenerated": false,
+  "jwtRotated": false,
+  "recoveryExecuted": false,
+  "rawRowsPersisted": false,
+  "queries": [],
+  "gaps": [
+    "MySQL com logs binario/geral desabilitados atualmente, sem plugin de auditoria; configuracao historica nao comprovada.",
+    "Conteudo dos logs PostgreSQL recusado por SQLSTATE 42501; pgaudit.log=none e log_statement=ddl atualmente.",
+    "Logs completos do gateway REST nao disponibilizados; auditoria Auth nao cobre JWT proprio/SQL/REST do TrocaTicket.",
+    "Contadores DML sem baseline temporal no checkpoint; processos encerrados nao cobertos pelo inventario atual.",
+    "Windows Security sem metadados disponiveis e TaskScheduler/Operational desabilitado.",
+    "Igualdade pontual de dados nao exclui escritas revertidas, tentativas ou atividade fora dos oito dominios."
+  ],
+  "mysql": {
+    "readOnly": true,
+    "comparison": {
+      "equal": true,
+      "tables": {
+        "usuarios": {
+          "checkpointCount": 9,
+          "currentCount": 9,
+          "insertedIds": [],
+          "deletedIds": [],
+          "changed": []
+        },
+        "eventos": {
+          "checkpointCount": 5,
+          "currentCount": 5,
+          "insertedIds": [],
+          "deletedIds": [],
+          "changed": []
+        },
+        "custos_evento": {
+          "checkpointCount": 3,
+          "currentCount": 3,
+          "insertedIds": [],
+          "deletedIds": [],
+          "changed": []
+        },
+        "cotacoes": {
+          "checkpointCount": 3,
+          "currentCount": 3,
+          "insertedIds": [],
+          "deletedIds": [],
+          "changed": []
+        },
+        "itens_cotacao": {
+          "checkpointCount": 13,
+          "currentCount": 13,
+          "insertedIds": [],
+          "deletedIds": [],
+          "changed": []
+        },
+        "propostas": {
+          "checkpointCount": 2,
+          "currentCount": 2,
+          "insertedIds": [],
+          "deletedIds": [],
+          "changed": []
+        },
+        "inscricoes": {
+          "checkpointCount": 2,
+          "currentCount": 2,
+          "insertedIds": [],
+          "deletedIds": [],
+          "changed": []
+        },
+        "solicitacoes_acesso": {
+          "checkpointCount": 5,
+          "currentCount": 5,
+          "insertedIds": [],
+          "deletedIds": [],
+          "changed": []
+        }
+      }
+    },
+    "catalogEqual": true,
+    "logging": {
+      "binaryLog": "OFF",
+      "generalLog": "OFF",
+      "logOutput": "FILE",
+      "slowQueryLog": "OFF",
+      "auditPlugins": [],
+      "binlogFiles": [],
+      "fileLogs": [
+        {
+          "kind": "general_log_file",
+          "exists": false
+        },
+        {
+          "kind": "slow_query_log_file",
+          "exists": false
+        }
+      ],
+      "fileLogExistenceLimitation": "Caminhos consultados como configurados; caminhos relativos nao resolvidos e historicos exportados nao cobertos."
+    },
+    "scheduler": "OFF",
+    "jobs": [],
+    "otherClients": [],
+    "otherTransactions": 0,
+    "historyComplete": false
+  },
+  "supabase": {
+    "readOnly": true,
+    "tlsVerified": true,
+    "comparison": {
+      "equal": true,
+      "tables": {
+        "usuarios": {
+          "checkpointCount": 10,
+          "currentCount": 10,
+          "insertedIds": [],
+          "deletedIds": [],
+          "changed": []
+        },
+        "eventos": {
+          "checkpointCount": 6,
+          "currentCount": 6,
+          "insertedIds": [],
+          "deletedIds": [],
+          "changed": []
+        },
+        "custos_evento": {
+          "checkpointCount": 5,
+          "currentCount": 5,
+          "insertedIds": [],
+          "deletedIds": [],
+          "changed": []
+        },
+        "cotacoes": {
+          "checkpointCount": 4,
+          "currentCount": 4,
+          "insertedIds": [],
+          "deletedIds": [],
+          "changed": []
+        },
+        "itens_cotacao": {
+          "checkpointCount": 15,
+          "currentCount": 15,
+          "insertedIds": [],
+          "deletedIds": [],
+          "changed": []
+        },
+        "propostas": {
+          "checkpointCount": 3,
+          "currentCount": 3,
+          "insertedIds": [],
+          "deletedIds": [],
+          "changed": []
+        },
+        "inscricoes": {
+          "checkpointCount": 3,
+          "currentCount": 3,
+          "insertedIds": [],
+          "deletedIds": [],
+          "changed": []
+        },
+        "solicitacoes_acesso": {
+          "checkpointCount": 6,
+          "currentCount": 6,
+          "insertedIds": [],
+          "deletedIds": [],
+          "changed": []
+        }
+      }
+    },
+    "catalogEqual": true,
+    "settings": [
+      {
+        "name": "log_destination",
+        "setting": "csvlog"
+      },
+      {
+        "name": "log_min_duration_statement",
+        "setting": "-1"
+      },
+      {
+        "name": "log_statement",
+        "setting": "ddl"
+      },
+      {
+        "name": "logging_collector",
+        "setting": "on"
+      },
+      {
+        "name": "pgaudit.log",
+        "setting": "none"
+      },
+      {
+        "name": "shared_preload_libraries",
+        "setting": "pg_stat_statements, pgaudit, plpgsql, plpgsql_check, pg_cron, pg_net, pgsodium, auto_explain, pg_tle, plan_filter, supabase_vault"
+      },
+      {
+        "name": "track_commit_timestamp",
+        "setting": "off"
+      }
+    ],
+    "extensions": [
+      "pg_stat_statements"
+    ],
+    "auditTables": [
+      {
+        "table_schema": "auth",
+        "table_name": "audit_log_entries"
+      }
+    ],
+    "clients": [
+      {
+        "role": "supabase_admin",
+        "state": "idle",
+        "transactionOpen": false,
+        "possibleWriteActive": false
+      },
+      {
+        "role": "supabase_admin",
+        "state": "idle",
+        "transactionOpen": false,
+        "possibleWriteActive": false
+      },
+      {
+        "role": "authenticator",
+        "state": "idle",
+        "transactionOpen": false,
+        "possibleWriteActive": false
+      },
+      {
+        "role": "pgbouncer",
+        "state": "idle",
+        "transactionOpen": false,
+        "possibleWriteActive": false
+      },
+      {
+        "role": "pgbouncer",
+        "state": "idle",
+        "transactionOpen": false,
+        "possibleWriteActive": false
+      }
+    ],
+    "statsReset": "2026-10-02T18:01:15.201Z",
+    "tableCounters": [
+      {
+        "relname": "cotacoes",
+        "n_tup_ins": "5",
+        "n_tup_upd": "0",
+        "n_tup_del": "1"
+      },
+      {
+        "relname": "custos_evento",
+        "n_tup_ins": "9",
+        "n_tup_upd": "0",
+        "n_tup_del": "4"
+      },
+      {
+        "relname": "eventos",
+        "n_tup_ins": "10",
+        "n_tup_upd": "4",
+        "n_tup_del": "4"
+      },
+      {
+        "relname": "inscricoes",
+        "n_tup_ins": "4",
+        "n_tup_upd": "0",
+        "n_tup_del": "1"
+      },
+      {
+        "relname": "itens_cotacao",
+        "n_tup_ins": "17",
+        "n_tup_upd": "0",
+        "n_tup_del": "2"
+      },
+      {
+        "relname": "propostas",
+        "n_tup_ins": "5",
+        "n_tup_upd": "3",
+        "n_tup_del": "2"
+      },
+      {
+        "relname": "solicitacoes_acesso",
+        "n_tup_ins": "10",
+        "n_tup_upd": "5",
+        "n_tup_del": "4"
+      },
+      {
+        "relname": "usuarios",
+        "n_tup_ins": "14",
+        "n_tup_upd": "4",
+        "n_tup_del": "4"
+      }
+    ],
+    "counterBaselineAtCheckpointAvailable": false,
+    "jobs": {
+      "configured": {
+        "cron": false,
+        "cron_history": false,
+        "net": false,
+        "auth_log": true
+      },
+      "supabaseAuthAuditSinceCheckpoint": "0"
+    },
+    "fileLogs": {
+      "permitted": true,
+      "files": [
+        {
+          "name": "postgresql.csv",
+          "size": "107619",
+          "modification": "2026-10-31T15:43:24.000Z"
+        },
+        {
+          "name": "auth-failures.csv",
+          "size": "0",
+          "modification": "2026-10-29T20:52:33.000Z"
+        },
+        {
+          "name": "postgresql.log",
+          "size": "506",
+          "modification": "2026-10-29T20:51:56.000Z"
+        }
+      ]
+    },
+    "restGatewayHistoryAvailableViaThisConnection": false,
+    "historyComplete": false,
+    "logContentAudit": {
+      "rawContentPersisted": false,
+      "logs": [
+        {
+          "name": "postgresql.csv",
+          "read": false,
+          "errorCode": "42501"
+        },
+        {
+          "name": "auth-failures.csv",
+          "read": false,
+          "errorCode": "42501"
+        }
+      ],
+      "coverageComplete": false
+    }
+  },
+  "local": {
+    "processes": [
+      {
+        "pid": 27220,
+        "name": "node.exe",
+        "category": "CODEX_MCP"
+      },
+      {
+        "pid": 29684,
+        "name": "node.exe",
+        "category": "CODEX_MCP"
+      },
+      {
+        "pid": 30652,
+        "name": "node_repl.exe",
+        "category": "CODEX_MCP"
+      },
+      {
+        "pid": 28312,
+        "name": "node_repl.exe",
+        "category": "CODEX_MCP"
+      },
+      {
+        "pid": 19348,
+        "name": "mysqld.exe",
+        "category": "MYSQL_LOCAL"
+      },
+      {
+        "pid": 29412,
+        "name": "node.exe",
+        "category": "CODEX_MCP"
+      },
+      {
+        "pid": 25396,
+        "name": "node.exe",
+        "category": "CODEX_MCP"
+      },
+      {
+        "pid": 35344,
+        "name": "node.exe",
+        "category": "BACKEND_POSSIVEL"
+      },
+      {
+        "pid": 25552,
+        "name": "node.exe",
+        "category": "BACKEND_POSSIVEL"
+      },
+      {
+        "pid": 5680,
+        "name": "node.exe",
+        "category": "NAO_ATRIBUIDO"
+      }
+    ],
+    "listeners": [
+      {
+        "port": 3001,
+        "pid": 25552
+      }
+    ],
+    "mysqlClients": [],
+    "tasks": [],
+    "unattributedProcesses": [],
+    "maintenanceStatus": 503,
+    "historicalProcessInventoryComplete": false,
+    "knownParentPid": 35344,
+    "windowsAuditLogs": [
+      {
+        "log": "Security",
+        "metadataError": "LogInfoUnavailable,Microsoft.PowerShell.Commands.GetWinEventCommand",
+        "completeHistory": false
+      },
+      {
+        "log": "Microsoft-Windows-TaskScheduler/Operational",
+        "enabled": false,
+        "completeHistory": false
+      }
+    ]
+  },
+  "finishedUtc": "2026-10-31T16:30:46.985Z",
+  "stateUnchanged": true,
+  "environmentUnchanged": true,
+  "checkpointUnchanged": true,
+  "currentRowsMatchCheckpoint": true,
+  "historicalAbsenceOfWritesProven": false,
+  "normalOperationApproved": false,
+  "recoveryApproved": false,
+  "logsAuditedUtc": "2026-10-31T16:31:50.022Z",
+  "status": "ESTADO_ATUAL_IGUAL_HISTORICO_NAO_COMPROVADO"
+}

@@ -1,0 +1,29 @@
+{
+  "at": "2026-10-31T14:10:00.391Z",
+  "mainDataWrites": 0,
+  "schedulerExtensions": [],
+  "cron": {
+    "status": "AUSENTE"
+  },
+  "net": {
+    "status": "AUSENTE"
+  },
+  "clientCategories": [
+    {
+      "category": "METRICAS",
+      "sessions": 1
+    },
+    {
+      "category": "POSTGREST",
+      "sessions": 1
+    },
+    {
+      "category": "SEM_IDENTIFICACAO",
+      "sessions": 2
+    },
+    {
+      "category": "SESSION_POOLER",
+      "sessions": 1
+    }
+  ]
+}

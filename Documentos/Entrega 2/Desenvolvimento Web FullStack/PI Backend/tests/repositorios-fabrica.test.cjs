@@ -24,6 +24,7 @@ function carregar(env = {}, opcoes = {}) {
   let clientes = 0;
   const context = { module: { exports: {} }, process: { env }, require(name) {
     imports.push(name);
+    if (name === "../config/supervisor-cutover.cjs") return { criarSupervisor: () => require("../config/supervisor-cutover.cjs").criarSupervisor({estado:{ler:()=>({versao:1,congelado:false,selado:false,instancias:[]}),gravar(){throw Error("Estado privado proibido no harness");}}}) };
     if (name === "../config/banco.cjs") return configuracao;
     if (name === "../isolamento.cjs") return { modoExecucao() {
       if (opcoes.falhaModo) throw opcoes.falhaModo;

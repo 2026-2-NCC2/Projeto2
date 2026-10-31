@@ -1,0 +1,44 @@
+{
+  "status": "PREPARADA_NAO_EXECUTADA",
+  "cause": "SMOKE_EXIGIU_CAMPO_PERFIL_FORA_DO_CONTRATO; wrapper conservador marcou INCERTA",
+  "tests": {
+    "newScenarios": 10,
+    "finalPassed": 10,
+    "finalFailed": 0,
+    "realProcessTerminationTested": false
+  },
+  "readOnlyVerification": {
+    "phase": "INCERTA",
+    "freeze": true,
+    "sealed": true,
+    "pid": 25552,
+    "parentPid": 35344,
+    "knownEntry": true,
+    "exclusiveListener": "127.0.0.1:3001",
+    "maintenanceHttpStatus": 503,
+    "stateUnchanged": true,
+    "environmentUnchanged": true,
+    "checkpointMatches": true,
+    "configurationMatches": true,
+    "privateJournalMatches": true,
+    "noT1Recorded": true
+  },
+  "actions": {
+    "realRecovery": false,
+    "databaseConnections": false,
+    "dataWrites": false,
+    "backupsRepeated": false,
+    "deltaRepeated": false,
+    "jwtRotatedAgain": false,
+    "rollback": false,
+    "commits": false
+  },
+  "readyForAuthorization": true,
+  "requiredConditions": [
+    "Confirmacao explicita de janela exclusiva e ausencia de escritas paralelas desde o delta",
+    "Reinspecao atual de identidades e evidencias",
+    "Admissao selada com novos PID/boot e ticket privado, preservando JWT/checkpoint",
+    "Autorizacao separada para abrir somente leituras e retomar smoke"
+  ],
+  "normalOperationApproved": false
+}

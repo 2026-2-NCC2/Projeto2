@@ -15,9 +15,9 @@ if (!homologacao && process.env.TROCATICKET_HOMOLOGACAO !== undefined) {
 
 // Manter a trava de startup antes de criar qualquer cliente/pool.
 const { validarInicializacaoBanco } = require("./config/banco.cjs");
-if (!homologacao) validarInicializacaoBanco(process.env, modoExecucao());
+if (!homologacao) require("./config/startup-controlado.cjs").validarEntrada(process.env, modoExecucao());
 const { criarPersistencia } = require("./repositories/index.cjs");
-const { repositorios, servicos } = criarPersistencia();
+const { repositorios, servicos, supervisor } = criarPersistencia();
 const {
   usuarios: usuariosRepository, eventos: eventosRepository,
   custos: custosRepository, cotacoes: cotacoesRepository,
@@ -35,6 +35,8 @@ function responderErroServico(res, erro, mensagem) {
 }
 
 const app = express();
+// Inativo por padrao; estado congelado privado prevalece inclusive em reinicios.
+if (supervisor) supervisor.instalar(app);
 
 app.use(cors({
   origin: "http://localhost:5173"

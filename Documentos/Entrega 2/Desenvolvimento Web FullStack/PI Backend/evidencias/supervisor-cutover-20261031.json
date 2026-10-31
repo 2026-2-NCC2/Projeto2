@@ -1,0 +1,157 @@
+{
+  "at": "2026-10-31T14:15:49.999Z",
+  "inventory": {
+    "local": {
+      "at": "2026-10-31T14:04:15.6378766Z",
+      "node": [
+        {
+          "pid": 27220,
+          "parent": 7156,
+          "kind": "FERRAMENTA_CODEX_MCP",
+          "started": "2026-10-31T13:47:39.0685250Z"
+        },
+        {
+          "pid": 29684,
+          "parent": 29748,
+          "kind": "FERRAMENTA_CODEX_MCP",
+          "started": "2026-10-31T13:48:27.7110760Z"
+        },
+        {
+          "pid": 30652,
+          "parent": 29748,
+          "kind": "FERRAMENTA_CODEX_MCP",
+          "started": "2026-10-31T13:48:27.7136530Z"
+        },
+        {
+          "pid": 28312,
+          "parent": 29684,
+          "kind": "FERRAMENTA_CODEX_MCP",
+          "started": "2026-10-31T13:48:27.8079870Z"
+        }
+      ],
+      "listenersBackend": [],
+      "tasksBackend": 0,
+      "servicesBackend": 0,
+      "scope": "COMPUTADOR_WINDOWS_ATUAL; sem prova de ausencia de ambientes externos"
+    },
+    "databases": {
+      "at": "2026-10-31T14:03:50.324Z",
+      "mainDataWrites": 0,
+      "mysql": {
+        "status": "INDISPONIVEL",
+        "code": "ECONNREFUSED"
+      },
+      "supabase": {
+        "status": "METADADOS_CONSULTADOS",
+        "tlsVerified": true,
+        "sessions": [
+          {
+            "backend_type": "client backend",
+            "state": "idle",
+            "role": "OUTRA_ROLE",
+            "sessions": 2,
+            "transactions": 0
+          },
+          {
+            "backend_type": "client backend",
+            "state": "idle",
+            "role": "authenticator",
+            "sessions": 1,
+            "transactions": 0
+          },
+          {
+            "backend_type": "client backend",
+            "state": "idle",
+            "role": "supabase_admin",
+            "sessions": 2,
+            "transactions": 0
+          },
+          {
+            "backend_type": "pg_cron launcher",
+            "state": "VISIBILIDADE_LIMITADA",
+            "role": "supabase_admin",
+            "sessions": 1,
+            "transactions": 0
+          },
+          {
+            "backend_type": "pg_net 0.20.4 worker",
+            "state": "idle",
+            "role": "postgres",
+            "sessions": 1,
+            "transactions": 0
+          }
+        ],
+        "globalVisibility": "NAO_IDENTIFICA_CLIENTES_OCIOSOS_DO_SESSION_POOLER_OU_CREDENCIAIS_FORA_DA_REDE"
+      }
+    },
+    "schedulers": {
+      "at": "2026-10-31T14:10:00.391Z",
+      "mainDataWrites": 0,
+      "schedulerExtensions": [],
+      "cron": {
+        "status": "AUSENTE"
+      },
+      "net": {
+        "status": "AUSENTE"
+      },
+      "clientCategories": [
+        {
+          "category": "METRICAS",
+          "sessions": 1
+        },
+        {
+          "category": "POSTGREST",
+          "sessions": 1
+        },
+        {
+          "category": "SEM_IDENTIFICACAO",
+          "sessions": 2
+        },
+        {
+          "category": "SESSION_POOLER",
+          "sessions": 1
+        }
+      ]
+    },
+    "userExternalConfirmation": "NAO_SABE_CONFIRMAR",
+    "globalComplete": false
+  },
+  "implementation": {
+    "serverIntegrationInstalled": true,
+    "repositoryServiceInstrumentation": true,
+    "persistentPrivateStatePrepared": true,
+    "privateIPC": true,
+    "multiReplicaController": true,
+    "finalDeltaExecutorPrepared": true,
+    "readOnlyCollectorPrepared": true
+  },
+  "tests": {
+    "newPassed": 14,
+    "failed": 0,
+    "previousApprovedRepeated": 0,
+    "realDatabaseDriversInTests": false,
+    "realStateFrozenInTests": false,
+    "additionalJsonAsyncAdmissionVerified": true
+  },
+  "state": {
+    "congelado": false,
+    "selado": false
+  },
+  "mainDataWrites": 0,
+  "jwtChanged": false,
+  "cutoverExecuted": false,
+  "normalSupabaseStartupReleased": false,
+  "blockers": [
+    "MySQL local ECONNREFUSED: inventario de sessoes nao disponivel",
+    "Dois clientes Supabase sem identificacao; ambientes/credenciais externos nao confirmados",
+    "Instancias reais ainda nao iniciadas sob supervisor",
+    "Janela autorizada para freeze global, drain, T0 e delta final pendente"
+  ],
+  "security": {
+    "privateDirectoryProtected": true,
+    "invalidAclRules": 0,
+    "privateFilesTracked": 0,
+    "realFreeze": false,
+    "realSeal": false
+  }
+}

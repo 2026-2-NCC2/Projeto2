@@ -1,14 +1,11 @@
-diff --git "a/Documentos/Entrega 2/Desenvolvimento Web FullStack/PI Backend/config/banco.cjs" "b/Documentos/Entrega 2/Desenvolvimento Web FullStack/PI Backend/config/banco.cjs"
---- "a/Documentos/Entrega 2/Desenvolvimento Web FullStack/PI Backend/config/banco.cjs"
-+++ "b/Documentos/Entrega 2/Desenvolvimento Web FullStack/PI Backend/config/banco.cjs"
-@@ -42,7 +42,8 @@
- function validarInicializacaoBanco(env = process.env, modo = "principal") {
-   const config = lerConfiguracaoBanco(env, modo);
--  if (config.provider === "supabase") {
--    throw erroConfiguracao("DB_PROVIDER_NOT_IMPLEMENTED", "Repositorios Supabase ainda nao implementados; inicializacao recusada.");
-+  // Validar o destino aprovado antes de criar qualquer cliente.
-+  if (config.provider === "supabase" && config.url !== "https://gnwybroqfvwosiqzsfla.supabase.co") {
-+    throw erroConfiguracao("SUPABASE_PROJECT", "Projeto Supabase diferente do PI Backend; inicializacao recusada.");
-   }
-   return config;
- }
+diff --git "a/Documentos/Entrega 2/Desenvolvimento Web FullStack/PI Backend/server.js" "b/Documentos/Entrega 2/Desenvolvimento Web FullStack/PI Backend/server.js"
+--- "a/Documentos/Entrega 2/Desenvolvimento Web FullStack/PI Backend/server.js"
++++ "b/Documentos/Entrega 2/Desenvolvimento Web FullStack/PI Backend/server.js"
+@@ -16,6 +16,6 @@
+ // Manter a trava de startup antes de criar qualquer cliente/pool.
+ const { validarInicializacaoBanco } = require("./config/banco.cjs");
+-if (!homologacao) validarInicializacaoBanco(process.env, modoExecucao());
++if (!homologacao) require("./config/startup-controlado.cjs").validarEntrada(process.env, modoExecucao());
+ const { criarPersistencia } = require("./repositories/index.cjs");
+ const { repositorios, servicos, supervisor } = criarPersistencia();
+ const {

@@ -162,6 +162,7 @@ async function iniciar(t, provider, op = {}) {
     const module = { exports: {} };
     const req = name => {
       imports.push(name);
+      if (name === "../config/supervisor-cutover.cjs") return { criarSupervisor: () => op.supervisor ?? require("../../config/supervisor-cutover.cjs").criarSupervisor({estado:{ler:()=>({versao:1,congelado:false,selado:false,instancias:[]}),gravar(){throw Error("Estado real proibido no teste");}}}) };
       if (name === "express") {
         const express = require("express");
         return Object.assign(() => {
@@ -234,7 +235,7 @@ async function iniciar(t, provider, op = {}) {
       req.on("error", reject); req.end(body === undefined ? undefined : raw ? body : JSON.stringify(body));
     });
   }
-  return { state, calls, imports, logs, rpcCalls, request,
+  return { state, calls, imports, logs, rpcCalls, request, app,
     token(id = 7, options = {}) { return jwt.sign({ id, perfil: "ignorado" }, segredo, { algorithm: "HS256", expiresIn: "1h", ...options }); },
     async login(id = 7, password = senha) { return request("POST", "/login", { email: ` TESTE${id}@EXAMPLE.INVALID `, senha: password }); },
     segredo, senha, hash, privado };

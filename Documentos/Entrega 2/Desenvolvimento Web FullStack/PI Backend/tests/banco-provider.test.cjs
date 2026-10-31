@@ -190,6 +190,7 @@ function iniciarSimulado({ env = {}, modo = "principal", dotenv = {} } = {}) {
         else if (nome.startsWith("./mysql/")) nome = "./repositories/" + nome.slice(2);
       }
       estado.imports.push(nome);
+      if (nome === "./config/supervisor-cutover.cjs") return { criarSupervisor: () => require("../config/supervisor-cutover.cjs").criarSupervisor({ estado: { ler: () => ({versao:1,congelado:false,selado:false,instancias:[]}), gravar() { throw Error("Escrita privada proibida no harness"); } } }) };
       if (nome === "./db") return carregar("db.js");
       if (nome === "./repositories/index.cjs") return carregar("repositories/index.cjs");
       if (nome.startsWith("./services/")) return require("../" + nome.slice(2));

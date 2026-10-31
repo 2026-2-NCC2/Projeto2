@@ -1,0 +1,58 @@
+{
+  "at": "2026-10-31T14:27:14.911Z",
+  "dataWritesExecuted": 0,
+  "sessionsTerminated": 0,
+  "connection": {
+    "status": "READ_ONLY_CONFIRMADO",
+    "read_only": 1,
+    "transaction_open": 1,
+    "version": "10.4.32-MariaDB"
+  },
+  "processVisibilityGlobal": true,
+  "sessions": [
+    {
+      "id": 1,
+      "origin": "OUTRA_ORIGEM",
+      "command": "Daemon",
+      "idle_seconds": 0,
+      "state": "InnoDB purge coordinator",
+      "same_database": null
+    },
+    {
+      "id": 2,
+      "origin": "OUTRA_ORIGEM",
+      "command": "Daemon",
+      "idle_seconds": 0,
+      "state": "InnoDB purge worker",
+      "same_database": null
+    },
+    {
+      "id": 3,
+      "origin": "OUTRA_ORIGEM",
+      "command": "Daemon",
+      "idle_seconds": 0,
+      "state": "InnoDB purge worker",
+      "same_database": null
+    },
+    {
+      "id": 4,
+      "origin": "OUTRA_ORIGEM",
+      "command": "Daemon",
+      "idle_seconds": 0,
+      "state": "InnoDB purge worker",
+      "same_database": null
+    },
+    {
+      "id": 5,
+      "origin": "OUTRA_ORIGEM",
+      "command": "Daemon",
+      "idle_seconds": 0,
+      "state": "InnoDB shutdown handler",
+      "same_database": null
+    }
+  ],
+  "transactions": [],
+  "eventScheduler": "OFF",
+  "scheduledEvents": [],
+  "status": "INVENTARIO_MYSQL_CONCLUIDO"
+}

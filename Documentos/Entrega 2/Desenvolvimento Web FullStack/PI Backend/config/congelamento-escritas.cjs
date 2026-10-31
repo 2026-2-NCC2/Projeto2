@@ -1,5 +1,5 @@
 "use strict";
-// Componente preparado, NAO instalado no servidor. Nao le/edita .env.
+// Barreira local utilizada pelo supervisor. Nao le/edita .env.
 // Contabiliza apenas este processo; jobs e outros clientes exigem freeze externo.
 function criarBarreiraDeEscritas() {
   let congelado = false, sequencia = 0;

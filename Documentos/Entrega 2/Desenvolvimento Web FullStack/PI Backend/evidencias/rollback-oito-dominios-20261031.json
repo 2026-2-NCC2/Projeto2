@@ -1,0 +1,151 @@
+{
+  "scope": "oito dominios, apenas clones network=none",
+  "mainConnections": 0,
+  "mainDataWrites": 0,
+  "checks": [
+    "dez adicionais preservados integralmente no retorno",
+    "falha antes COMMIT desfaz operacoes nos oito dominios",
+    "conflito concorrente impede commit parcial",
+    "INSERT UPDATE DELETE preservados nos oito dominios",
+    "reaplicacao bloqueada sem repeticao automatica",
+    "AUTO_INCREMENT sem colisoes apos retorno",
+    "52 registros anteriores intactos, inclusive os dez extras"
+  ],
+  "fixtureIds": {
+    "usuarios": [
+      "1900000000",
+      "1900000001",
+      "1900000002",
+      "1900000100",
+      "1900000101",
+      "1900000102",
+      "1900000200",
+      "1900000201",
+      "1900000202",
+      "1900000203"
+    ],
+    "eventos": [
+      "1900000000",
+      "1900000100",
+      "1900000200"
+    ],
+    "custos_evento": [
+      "1900000000",
+      "1900000100",
+      "1900000200"
+    ],
+    "cotacoes": [
+      "1900000000",
+      "1900000100",
+      "1900000200"
+    ],
+    "itens_cotacao": [
+      "1900000000",
+      "1900000100",
+      "1900000200"
+    ],
+    "propostas": [
+      "1900000000",
+      "1900000100",
+      "1900000200"
+    ],
+    "inscricoes": [
+      "1900000000",
+      "1900000100",
+      "1900000200"
+    ],
+    "solicitacoes_acesso": [
+      "1900000000",
+      "1900000100",
+      "1900000200"
+    ]
+  },
+  "status": "APROVADO",
+  "operations": {
+    "usuarios": {
+      "insert": 3,
+      "update": 3,
+      "delete": 3
+    },
+    "eventos": {
+      "insert": 1,
+      "update": 1,
+      "delete": 1
+    },
+    "custos_evento": {
+      "insert": 1,
+      "update": 1,
+      "delete": 1
+    },
+    "cotacoes": {
+      "insert": 1,
+      "update": 1,
+      "delete": 1
+    },
+    "itens_cotacao": {
+      "insert": 1,
+      "update": 1,
+      "delete": 1
+    },
+    "propostas": {
+      "insert": 1,
+      "update": 1,
+      "delete": 1
+    },
+    "inscricoes": {
+      "insert": 1,
+      "update": 1,
+      "delete": 1
+    },
+    "solicitacoes_acesso": {
+      "insert": 1,
+      "update": 1,
+      "delete": 1
+    }
+  },
+  "autoIncrementUserId": "1900000203",
+  "checkedAt": "2026-10-31T13:57:51.813Z",
+  "caseOnlyConflict": {
+    "status": "APROVADO",
+    "caseOnlyConcurrentConflictRejected": true,
+    "exactPreconditionCommitVerified": true,
+    "fixtureIds": {
+      "usuarios": [
+        2000000000
+      ]
+    },
+    "mainConnections": 0,
+    "mainDataWrites": 0
+  },
+  "cleanup": {
+    "ownedContainersRemaining": 0,
+    "temporaryCredentialsRemaining": 0,
+    "allFixturesRemovedWithContainers": true
+  },
+  "backupChecksumsPreserved": true,
+  "tests": {
+    "newUnitTestsPassed": 6,
+    "currentlyFailed": 0,
+    "previouslyApprovedTestsRepeated": 0,
+    "fixtureCorrection": "Reexecutado somente caso novo de delta final que falhou por fixture sem FKs"
+  },
+  "freeze": {
+    "active": false,
+    "globalValidatorPrepared": true,
+    "actualInventoryConfirmed": false,
+    "supervisorIntegrated": false
+  },
+  "finalDelta": {
+    "validatorPrepared": true,
+    "realCollectionExecuted": false
+  },
+  "cutoverExecuted": false,
+  "jwtChanged": false,
+  "normalSupabaseStartupReleased": false,
+  "blockers": [
+    "Inventario e controle real dos escritores",
+    "Integracao inerte e instrumentacao do supervisor/persistencia",
+    "Janela autorizada para freeze, drain, T0 e delta final",
+    "Autorizacao especifica para JWT e startup Supabase"
+  ]
+}
