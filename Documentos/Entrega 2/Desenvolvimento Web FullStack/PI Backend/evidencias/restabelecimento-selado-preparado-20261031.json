@@ -1,0 +1,43 @@
+{
+  "status": "RESTABELECIMENTO_SELADO_PREPARADO_NAO_EXECUTADO",
+  "cause": "Reinicio Windows encerrou processos temporarios e contexto IPC/WeakSet; ticket original consumido. Respondedor 503 nao e supervisor.",
+  "design": {
+    "originalPhasePreserved": "INCERTA",
+    "checkpointAndConfigurationPreserved": true,
+    "newOneUseCapabilityRequired": true,
+    "newProcessAndBootRequired": true,
+    "pausedAdmissionBeforePortHandoff": true,
+    "unknownPortOwnerNeverTerminated": true,
+    "postAdmissionEvidenceV2Required": true,
+    "normalTrafficReleaseIncluded": false
+  },
+  "tests": {
+    "newCases": 31,
+    "affectedRecoveryCases": 49,
+    "filteredCutoverCases": 4,
+    "totalDistinctPassed": 84,
+    "pendingFailures": 0,
+    "realProcessesInTests": 0,
+    "realDatabaseConnections": 0
+  },
+  "actualVerification": {
+    "httpStatus": 503,
+    "stateUnchanged": true,
+    "environmentUnchanged": true,
+    "checkpointUnchanged": true,
+    "backupArtifactBytesUnchanged": true
+  },
+  "actions": {
+    "realAdmission": false,
+    "realRecovery": false,
+    "privateStateWritten": false,
+    "jwtChanged": false,
+    "dataChanged": false,
+    "backupsChanged": false,
+    "checkpointChanged": false,
+    "rollback": false,
+    "commits": false
+  },
+  "readyForAuthorization": true,
+  "historicalAbsenceOfWritesProven": false
+}

@@ -177,3 +177,41 @@ recuperacao por equivalencia atual, sem comprovar ausencia historica. O gate
 existente ainda exige continuidade historica; precisa de adaptacao explicita
 e testes antes de executar, sem preencher esse fato como verdadeiro.
 Evidencia nova separada: `evidencias/reconciliacao-formal-leitura-20261031.json`.
+
+## Gate adaptado e testado, sem recuperacao
+
+`GATE_RECUPERACAO_RECONCILIACAO.md` registra o novo criterio formal com lacuna
+historica e risco explicitamente aceitos, hashes/vinculacoes, controle atual de
+escritores e bloqueio por alteracoes posteriores. 53 cenarios distintos passaram;
+nenhuma recuperacao real, banco, JWT, backup ou checkpoint foi alterado.
+
+A evidencia formal anterior v1 foi preservada; uma futura evidencia v2 recente
+sera exigida. Na verificacao operacional desta etapa, a porta 3001 retornou
+ECONNREFUSED; PIDs 25552/35344 e listener estavam ausentes. Estado privado
+continua selado/congelado/INCERTA. Nao houve reinicio ou liberacao de manutencao.
+Gate tecnicamente pronto; execucao real exige tratar esse bloqueio operacional.
+
+## Evidencia operacional v2, sem recuperar supervisor
+
+`RESULTADO_EVIDENCIA_OPERACIONAL_V2.md` registra boot Windows posterior a janela,
+MySQL restabelecido no PID 27252 e respondedor independente 503 no PID 22780.
+Nenhum PID antigo foi adotado. Duas capturas READ ONLY confirmaram 42/52 registros
+e os dez adicionais, sem divergencias ou escritores extras observados.
+
+Evidencia v2 nova gerada, porem NAO aprovada pelo gate: o respondedor nao e o
+supervisor principal, ausente no estado operacional. Estado/JWT/checkpoint/
+backups preservados, sem recuperacao ou funcionamento normal liberado.
+Readmissao planejada apos perda do processo original permanece pendente.
+
+## Restabelecimento selado preparado
+
+`RESTABELECIMENTO_SUPERVISOR_PREPARADO.md` descreve a lane privada nova,
+preservando INCERTA/checkpoint/JWT e distinguindo identidade ativa de referencia
+historica. Candidato e admitido sem porta, respondedor conhecido encerra, porta
+livre e confirmada e somente depois o supervisor selado escuta. V2 posterior
+fica vinculada ao processo legitimamente admitido, sem normalizar a lacuna.
+
+84 cenarios isolados passaram (31 novos + 53 regressões afetadas). Nao houve
+admissao real, conexao aos bancos ou alteracao do estado/.env/checkpoint/backups;
+hashes antes/depois identicos e HTTP real 503 confirmado. Restabelecimento real
+aguarda autorizacao explicita; a manutencao nao foi retirada.

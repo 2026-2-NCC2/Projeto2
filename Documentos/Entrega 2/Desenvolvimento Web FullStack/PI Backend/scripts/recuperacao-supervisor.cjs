@@ -4,11 +4,13 @@
 const assert=require('node:assert/strict'),crypto=require('node:crypto');
 const {fingerprint}=require('../config/startup-controlado.cjs');
 const {conferirDrenagem}=require('../config/transicao-controlada.cjs');
+const {validarReconciliacao}=require('./gate-reconciliacao-recuperacao.cjs');
+const {identidadeSupervisor}=require('../config/identidade-supervisor.cjs');
 const hash=x=>crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
-function conferirEvidencias(e,env,v){
+function conferirEvidencias(e,env,v,agora=Date.now()){
   const t=e.transicao,r=v.relatorio,j=v.diario;
   assert.ok(e.congelado&&e.selado&&t?.fase==='INCERTA'&&t.ticket===null,'RECUPERACAO_ESTADO_RECUSADO');
-  assert.deepEqual(e.instancias,[t.destino]);
+  const ativo=identidadeSupervisor(e);assert.deepEqual(e.instancias,[ativo.instancia]);
   assert.equal(t.configuracaoHash,fingerprint(env),'RECUPERACAO_CONFIG_DIVERGENTE');
   assert.equal(v.causaConfirmada,'SMOKE_PERFIL_CAMPO_INEXISTENTE');
   assert.ok(r&&j&&r.run===j.run&&r.checkpointId===j.checkpointId&&r.supabaseBackendPid===j.supabaseBackendPid);
@@ -25,16 +27,26 @@ function conferirEvidencias(e,env,v){
     assert.equal(x.http.at(-1).route,'/perfil');assert.equal(x.http.at(-1).status,200);
   }
   assert.deepEqual(r.http,j.http);
-  assert.equal(v.escritoresControlados,true);assert.equal(v.controleMantidoDesdeFalha,true);
-  assert.ok(v.processo&&v.processo.pid===t.pidDestino&&v.processo.parentPid>0&&typeof v.processo.criadoEm==='string');
+  assert.equal(v.escritoresControlados,true);
+  let decisaoSeguranca;
+  if(v.reconciliacao){decisaoSeguranca=validarReconciliacao({estado:e,env,v,agora});}
+  else{assert.equal(v.controleMantidoDesdeFalha,true);decisaoSeguranca={criterio:'CONTINUIDADE_DECLARADA',continuidadeHistoricaComprovada:false,continuidadeDeclaradaPeloOperador:true};}
+  assert.ok(v.processo&&v.processo.pid===ativo.pid&&v.processo.parentPid>0&&typeof v.processo.criadoEm==='string');
   assert.equal(v.processo.entradaConhecida,true);assert.equal(v.processo.portaExclusivaLocal,true);
   assert.equal(v.httpManutencao,503);
-  return {id:hash([r.run,t.id,t.destino,t.configuracaoHash,t.checkpointId,v.checkpointSha256]),estadoHash:hash(e),evidenciasHash:hash(v),checkpointId:t.checkpointId,pidAnterior:t.pidDestino,instanciaAnterior:t.destino,processo:structuredClone(v.processo),run:r.run};
+  return {id:hash([r.run,t.id,ativo.instancia,t.configuracaoHash,t.checkpointId,v.checkpointSha256,decisaoSeguranca]),estadoHash:hash(e),evidenciasHash:hash({...v,verificacaoAtual:undefined}),checkpointId:t.checkpointId,pidAnterior:ativo.pid,instanciaAnterior:ativo.instancia,processo:structuredClone(v.processo),run:r.run,decisaoSeguranca};
 }
 function criarRecuperacao({estado,ambiente,inspecionar,encerrarConhecido,lancarSelado,consultar,abrirLeitura,adquirirExclusivo,agora=Date.now}){
   let ocupado=false;
+  async function conferirVigencia(plano){
+    const e=estado.ler(),rec=e.transicao.recuperacao;assert.equal(rec.planoHash,hash(plano),'RECUPERACAO_PLANO_ALTERADO');assert.deepEqual(rec.decisaoSeguranca,plano.decisaoSeguranca);
+    if(plano.decisaoSeguranca.criterio==='RECONCILIACAO_ATUAL'){
+      const v=await inspecionar();assert.equal(v.processo.pid,e.transicao.pidDestino);assert.equal(v.processo.entradaConhecida,true);assert.equal(v.processo.portaExclusivaLocal,true);assert.equal(v.httpManutencao,503);assert.equal(v.checkpointSha256,plano.decisaoSeguranca.checkpointSha256);
+      const decisao=validarReconciliacao({estado:e,env:ambiente,v,agora:agora(),estadoBaseHash:plano.estadoHash,processoBase:plano.processo});assert.deepEqual(decisao,plano.decisaoSeguranca);
+    }
+  }
   return {
-    async planejar(){const e=estado.ler();assert.ok(!e.transicao?.recuperacao,'RECUPERACAO_JA_REGISTRADA');return conferirEvidencias(e,ambiente,await inspecionar());},
+    async planejar(){const e=estado.ler();assert.ok(!e.transicao?.recuperacao,'RECUPERACAO_JA_REGISTRADA');return conferirEvidencias(e,ambiente,await inspecionar(),agora());},
     async recuperar(plano,{autorizar=false}={}){
       assert.equal(autorizar,true,'RECUPERACAO_NAO_AUTORIZADA');assert.ok(!ocupado,'RECUPERACAO_EM_ANDAMENTO');ocupado=true;let iniciou=false,soltar;
       try{
@@ -43,11 +55,12 @@ function criarRecuperacao({estado,ambiente,inspecionar,encerrarConhecido,lancarS
         if(rec){
           assert.equal(rec.id,plano.id);assert.equal(rec.etapa,'PRONTA_SMOKE','RECUPERACAO_INTERROMPIDA_SEM_RETRY');
           assert.equal(e.transicao.configuracaoHash,fingerprint(ambiente));assert.ok(e.congelado&&e.selado&&e.transicao.fase==='INICIADA');
+          await conferirVigencia(plano);
           const s=await consultar();conferirDrenagem(s);assert.equal(s.pid,e.transicao.pidDestino);assert.equal(s.instancia,e.transicao.destino);
           return {status:'PRONTA_SMOKE',reutilizada:true};
         }
-        const atual=conferirEvidencias(e,ambiente,await inspecionar());assert.deepEqual(atual,plano,'RECUPERACAO_PLANO_OBSOLETO');assert.equal(hash(estado.ler()),plano.estadoHash,'RECUPERACAO_ESTADO_ALTERADO');
-        estado.gravar({...e,transicao:{...e.transicao,recuperacao:{id:plano.id,etapa:'ENCERRANDO',pidAnterior:plano.pidAnterior,instanciaAnterior:plano.instanciaAnterior,preparadaEm:agora()}}});iniciou=true;
+        const atual=conferirEvidencias(e,ambiente,await inspecionar(),agora());assert.deepEqual(atual,plano,'RECUPERACAO_PLANO_OBSOLETO');assert.equal(hash(estado.ler()),plano.estadoHash,'RECUPERACAO_ESTADO_ALTERADO');
+        estado.gravar({...e,transicao:{...e.transicao,...(e.transicao.restabelecimento?{restabelecimento:{...e.transicao.restabelecimento,etapa:'RECUPERACAO_SUBSEQUENTE'}}:{}),recuperacao:{id:plano.id,etapa:'ENCERRANDO',pidAnterior:plano.pidAnterior,instanciaAnterior:plano.instanciaAnterior,preparadaEm:agora(),planoHash:hash(plano),decisaoSeguranca:structuredClone(plano.decisaoSeguranca)}}});iniciou=true;
         // Adapter deve reconferir PID + criacao + pai + entrada imediatamente antes.
         const saida=await encerrarConhecido(plano.processo);assert.equal(saida.pid,plano.pidAnterior);assert.equal(saida.encerrado,true);assert.equal(saida.portaLivre,true);
         // Adapter apenas inicia a MESMA configuracao Supabase, selada, por ticket
@@ -68,6 +81,7 @@ function criarRecuperacao({estado,ambiente,inspecionar,encerrarConhecido,lancarS
         assert.equal(typeof adquirirExclusivo,'function','RECUPERACAO_TRAVA_OBRIGATORIA');soltar=adquirirExclusivo();
         const e=estado.ler(),t=e.transicao;assert.equal(t?.recuperacao?.id,plano.id);assert.equal(t.recuperacao.etapa,'PRONTA_SMOKE');
         assert.equal(t.configuracaoHash,fingerprint(ambiente));assert.ok(e.congelado&&e.selado&&t.fase==='INICIADA');
+        await conferirVigencia(plano);
         const s=await consultar();conferirDrenagem(s);assert.equal(s.pid,t.pidDestino);assert.equal(s.instancia,t.destino);
         estado.gravar({...e,selado:false,transicao:{...t,fase:'LEITURA',recuperacao:{...t.recuperacao,etapa:'SMOKE'}}});iniciou=true;
         const aberto=await abrirLeitura(t.id);assert.ok(aberto.congelado&&!aberto.selado&&aberto.resultadosIncertos===0);assert.equal(aberto.pid,t.pidDestino);assert.equal(aberto.instancia,t.destino);

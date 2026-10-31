@@ -1,0 +1,303 @@
+{
+  "schemaVersion": 2,
+  "startedUtc": "2026-10-31T19:24:57.108Z",
+  "status": "V2_RECONCILIADA_GATE_NAO_APROVADO",
+  "scopeType": "PRE_RECUPERACAO_SEM_SUPERVISOR",
+  "historicalAbsenceOfWritesProven": false,
+  "historicalGapExplicitlyAcknowledged": true,
+  "readOnly": true,
+  "recoveryExecuted": false,
+  "maintenanceReleased": false,
+  "deltaOrchestratorExecuted": false,
+  "backupsGenerated": false,
+  "checkpointCreated": false,
+  "jwtRotated": false,
+  "dataWrites": false,
+  "rollbackExecuted": false,
+  "commitsCreated": false,
+  "stage": "escritores_depois",
+  "run": "fae5b97e-eab2-4ab2-878e-da9ad9c6e784",
+  "janelaId": "b61595d0-b264-4237-a230-4e08be12af2b",
+  "checkpointId": "349d6df4-7c15-4960-b739-dfd91fd53c8d",
+  "checkpointSha256": "4ca6ae29e558bd34b89971ce6fefa4e39286c9f10a4c6df15a24b8727bd2462c",
+  "estadoSha256": "292fa1ba97a6f5d90cfe20adf24f392bf9666dd029c3ed40314ac45b5241fd5e",
+  "configuracaoHash": "c5e27747dc3346a2a288c1ed71303f9b6813011e03720d6641bfe96872520aa8",
+  "existingBackupIntegrityVerified": true,
+  "maintenanceResponder": {
+    "pid": 22780,
+    "boot": "f461f5bf-74d5-4f69-8796-308f4adc025c",
+    "role": "MANUTENCAO_SEM_BACKEND"
+  },
+  "writersBefore": {
+    "local": {
+      "capturedUtc": "2026-10-31T19:25:01.772Z",
+      "knownBackend": null,
+      "knownMaintenanceResponder": {
+        "pid": 22780,
+        "parentPid": 28212,
+        "criadoEm": "2026-10-31T19:24:59.1716960Z",
+        "role": "MANUTENCAO_SEM_BACKEND",
+        "entradaConhecida": true,
+        "portaExclusivaLocal": true,
+        "backendSupervisor": false,
+        "boot": "f461f5bf-74d5-4f69-8796-308f4adc025c"
+      },
+      "unknownProcessCount": 0,
+      "tasks": 0,
+      "mysqlClientPids": [],
+      "httpStatus": 503,
+      "backendSupervisorPresent": false
+    },
+    "database": {
+      "capturedUtc": "2026-10-31T19:25:01.772Z",
+      "mysql": {
+        "otherClients": 0,
+        "otherTransactions": 0,
+        "enabledJobs": 0,
+        "scheduler": "OFF"
+      },
+      "supabase": {
+        "sessions": [
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "authenticator",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          }
+        ],
+        "activeCron": 0,
+        "httpQueue": 0,
+        "tlsVerified": true
+      }
+    }
+  },
+  "firstCapture": {
+    "mysql": {
+      "inicio": 1793474705100,
+      "fim": 1793474705238
+    },
+    "supabase": {
+      "inicio": 1793474705239,
+      "fim": 1793474709116
+    }
+  },
+  "secondCapture": {
+    "mysql": {
+      "inicio": 1793474709516,
+      "fim": 1793474709523
+    },
+    "supabase": {
+      "inicio": 1793474709523,
+      "fim": 1793474713335
+    }
+  },
+  "dataHashes": {
+    "mysql": "2aa2ee825c85538b01638712d9c3caf7a74fbcfcad8093809c10fbd16fad57d0",
+    "supabase": "c1a31bf5df8944eb33c5fa5c6a5c2b7870a36d5f5a53b6385021219b4370e595",
+    "catalogos": "f2e09f8ba183b735e0bc4888345d7112f7bb16ac62dc3daf8ea1b13ba80bf615"
+  },
+  "comparison": {
+    "counts": {
+      "usuarios": {
+        "mysql": 9,
+        "supabase": 10
+      },
+      "eventos": {
+        "mysql": 5,
+        "supabase": 6
+      },
+      "custos_evento": {
+        "mysql": 3,
+        "supabase": 5
+      },
+      "cotacoes": {
+        "mysql": 3,
+        "supabase": 4
+      },
+      "itens_cotacao": {
+        "mysql": 13,
+        "supabase": 15
+      },
+      "propostas": {
+        "mysql": 2,
+        "supabase": 3
+      },
+      "inscricoes": {
+        "mysql": 2,
+        "supabase": 3
+      },
+      "solicitacoes_acesso": {
+        "mysql": 5,
+        "supabase": 6
+      }
+    },
+    "additionalIds": {
+      "usuarios": [
+        10
+      ],
+      "eventos": [
+        12
+      ],
+      "custos_evento": [
+        7,
+        8
+      ],
+      "cotacoes": [
+        6
+      ],
+      "itens_cotacao": [
+        22,
+        23
+      ],
+      "propostas": [
+        3
+      ],
+      "inscricoes": [
+        3
+      ],
+      "solicitacoes_acesso": [
+        6
+      ]
+    },
+    "mysqlRows": 42,
+    "supabaseRows": 52,
+    "sharedRecordsIdentical": 42,
+    "additionalRecordsPreserved": 10,
+    "identitiesProfilesAndPasswordHashesEqual": true,
+    "uniqueIdsAndEmails": true,
+    "foreignKeysValid": true,
+    "allPersistedFieldsEqual": true
+  },
+  "writersAfter": {
+    "database": {
+      "capturedUtc": "2026-10-31T19:25:13.735Z",
+      "mysql": {
+        "otherClients": 0,
+        "otherTransactions": 0,
+        "enabledJobs": 0,
+        "scheduler": "OFF"
+      },
+      "supabase": {
+        "sessions": [
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "authenticator",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          }
+        ],
+        "activeCron": 0,
+        "httpQueue": 0,
+        "tlsVerified": true
+      }
+    },
+    "local": {
+      "capturedUtc": "2026-10-31T19:25:18.499Z",
+      "knownBackend": null,
+      "knownMaintenanceResponder": {
+        "pid": 22780,
+        "parentPid": 28212,
+        "criadoEm": "2026-10-31T19:24:59.1716960Z",
+        "role": "MANUTENCAO_SEM_BACKEND",
+        "entradaConhecida": true,
+        "portaExclusivaLocal": true,
+        "backendSupervisor": false,
+        "boot": "f461f5bf-74d5-4f69-8796-308f4adc025c"
+      },
+      "unknownProcessCount": 0,
+      "tasks": 0,
+      "mysqlClientPids": [],
+      "httpStatus": 503,
+      "backendSupervisorPresent": false
+    }
+  },
+  "currentOperationalWriterControlConfirmed": true,
+  "databaseEnforcedGlobalWriteLock": false,
+  "catalogsMatchCheckpoint": true,
+  "reconciliationApproved": true,
+  "recoveryGateApproved": false,
+  "knownSupervisorPresent": false,
+  "oldPidsReusedAsCurrentEvidence": false,
+  "gateAssessment": {
+    "approved": false,
+    "formalGateExecuted": true,
+    "reason": "PROCESSO_SUPERVISOR_AUSENTE; RESPONDEDOR_503_NAO_E_BACKEND",
+    "requiredKnownBackendEvidence": false,
+    "supervisorPidAndBootBindingSatisfied": false,
+    "maintenanceResponderMustNotBeAdopted": true,
+    "errorCode": "ERR_ASSERTION",
+    "rejectedAsExpected": true,
+    "approvalPathReached": false,
+    "observedRejection": "Status de evidencia preparatoria nao aceito; nenhum backend principal admitido foi comprovado."
+  },
+  "stateUnchanged": true,
+  "environmentUnchanged": true,
+  "checkpointUnchanged": true,
+  "residualRisks": [
+    "Ausencia historica permanece NAO comprovada.",
+    "Controle operacional atual nao equivale a lock global SQL/REST.",
+    "O startup principal em INCERTA nao pode ser restabelecido sem readmissao planejada; isso constituiria recuperacao real, nao autorizada nesta tarefa.",
+    "HTTP 503 e fornecido por respondedor isolado, sem aplicar os contratos autenticados do backend."
+  ],
+  "finishedUtc": "2026-10-31T19:25:18.506Z",
+  "hostRestart": {
+    "lastBootUtc": "2026-10-31T18:55:29.500Z",
+    "oldTemporaryProcessesLost": true,
+    "mysqlWindowsServiceInstalled": false
+  },
+  "newProcesses": {
+    "mysql": {
+      "pid": 27252,
+      "createdUtc": "2026-10-31T19:23:10.2920730Z",
+      "configurationChanged": false
+    },
+    "maintenanceResponder": {
+      "pid": 22780,
+      "createdUtc": "2026-10-31T19:24:59.1716960Z",
+      "role": "MANUTENCAO_SEM_BACKEND",
+      "backendSupervisor": false
+    }
+  },
+  "newTests": {
+    "passed": 2,
+    "failed": 0
+  }
+}

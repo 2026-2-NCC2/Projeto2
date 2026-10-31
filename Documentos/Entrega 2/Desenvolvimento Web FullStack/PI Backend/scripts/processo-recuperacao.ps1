@@ -1,8 +1,13 @@
 param([Parameter(Mandatory=$true)][int]$PidAlvo,[string]$CriadoEm,[int]$Pai,[switch]$Encerrar)
 $ErrorActionPreference='Stop'
 $entry=Join-Path $PSScriptRoot 'iniciar-instancia-planejada.cjs'
+$restoredEntry=Join-Path $PSScriptRoot 'iniciar-supervisor-restabelecido.cjs'
+$state=Get-Content -LiteralPath (Join-Path $env:USERPROFILE 'BackupsTrocaTicket/SupervisorCutover/estado.json') -Raw|ConvertFrom-Json
 $p=Get-CimInstance Win32_Process -Filter "ProcessId=$PidAlvo"
-if($null -eq $p -or $p.Name -ne 'node.exe' -or !$p.CommandLine.Contains($entry)){throw 'RECUPERACAO_PROCESSO_DESCONHECIDO'}
+$restored=$state.transicao.restabelecimento
+$isRestored=$null -ne $p -and $p.CommandLine.Contains($restoredEntry) -and $restored.pidDestino -eq $PidAlvo -and $restored.ticket -eq $null -and $restored.etapa -in @('ADMITIDA_SELADA','RECUPERACAO_SUBSEQUENTE')
+if($null -eq $p -or $p.Name -ne 'node.exe' -or (!$p.CommandLine.Contains($entry) -and !$isRestored)){throw 'RECUPERACAO_PROCESSO_DESCONHECIDO'}
+if($isRestored){$entry=$restoredEntry}
 $created=$p.CreationDate.ToUniversalTime().ToString('o')
 $listeners=@(Get-NetTCPConnection -LocalPort 3001 -State Listen -ErrorAction Stop)
 $local=$listeners.Count -eq 1 -and $listeners[0].OwningProcess -eq $PidAlvo -and $listeners[0].LocalAddress -eq '127.0.0.1'

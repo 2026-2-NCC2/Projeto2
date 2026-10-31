@@ -1,5 +1,12 @@
 # Recuperacao controlada preparada — 31/10/2026
 
+Atualizacao: `GATE_RECUPERACAO_RECONCILIACAO.md` descreve o novo criterio de
+equivalencia atual com risco aceito e historico NAO comprovado, sem executar
+recuperacao. As exigencias de continuidade declarada abaixo descrevem o modo
+anterior; nao devem ser preenchidas artificialmente no novo modo formal.
+Ao finalizar essa adaptacao, os PIDs conhecidos/listener estavam ausentes;
+a recuperacao operacional permanece bloqueada, sem reinicio automatico.
+
 Preparacao concluida. Recuperacao REAL nao executada. HTTP permanece 503.
 Nao houve novos backups, delta, rotacao JWT, alteracoes de dados ou commits.
 

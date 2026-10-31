@@ -1,0 +1,51 @@
+{
+  "status": "GATE_IMPLEMENTADO_TESTADO_NAO_EXECUTADO",
+  "criterion": "RECONCILIACAO_ATUAL",
+  "historicalAbsenceOfWritesProven": false,
+  "explicitRiskAcceptanceRequired": true,
+  "tests": {
+    "distinctPassed": 53,
+    "pendingFailures": 0,
+    "recoverySuiteCases": 49,
+    "filteredCutoverRegressions": 4,
+    "realDatabaseConnections": 0,
+    "realProcessLaunches": 0
+  },
+  "requiredEvidence": {
+    "schemaVersion": 2,
+    "maxReconciliationAgeSeconds": 900,
+    "maxCurrentObservationAgeSeconds": 30,
+    "fullContentComparison": true,
+    "checkpointConfigurationAndBootBindings": true,
+    "writerControlBeforeAndAfter": true
+  },
+  "liveObservation": {
+    "phase": "INCERTA",
+    "frozen": true,
+    "sealed": true,
+    "recoveryRecordPresent": false,
+    "configurationMatchesExistingState": true,
+    "checkpointMatchesPriorReconciliation": true,
+    "httpError": "ECONNREFUSED",
+    "knownPidsPresent": false,
+    "listener3001Present": false,
+    "priorReconciliationSchemaVersion": 1
+  },
+  "actions": {
+    "recovery": false,
+    "maintenanceReleased": false,
+    "databaseWrites": false,
+    "credentialsChanged": false,
+    "jwtRotated": false,
+    "backupsChanged": false,
+    "checkpointChanged": false,
+    "rollback": false,
+    "commits": false
+  },
+  "technicalGateReady": true,
+  "operationalRecoveryApproved": false,
+  "blockers": [
+    "Processos conhecidos e listener ausentes; procedimento existente recusa recuperacao desse estado sem avaliacao adicional.",
+    "Necessaria evidencia formal v2 recente e aceite explicito vinculado ao hash antes da execucao."
+  ]
+}
