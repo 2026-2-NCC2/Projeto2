@@ -1,0 +1,1269 @@
+{
+  "runId": "f779e63e398b4da5bfb473d218ec7121",
+  "marcador": "TT-HW-f779e63e398b4da5bfb473d218ec7121",
+  "projectRef": "gnwybroqfvwosiqzsfla",
+  "estado": "APROVADA_E_LIMPA",
+  "checks": [
+    "projeto e processo sem MySQL",
+    "quatro cadastros e duplicidade preservada",
+    "decisoes atomicas e perfis atuais com JWT anterior",
+    "evento nega perfil e token sem mutacao",
+    "custos RPC inteiros e decimais via HTTP e GET",
+    "publicacao atomica 201 e revisao obsoleta 409 sem filhos",
+    "avaliar proposta condicional 200 e 404 integrado",
+    "evento ativo e inscricao unica persistidos",
+    "DELETE somente fixture reservada"
+  ],
+  "endpoints": [
+    {
+      "etapa": "preflight",
+      "method": "POST",
+      "route": "/login",
+      "status": 200,
+      "esperado": 200
+    },
+    {
+      "etapa": "cadastros",
+      "method": "POST",
+      "route": "/usuarios",
+      "status": 201,
+      "esperado": 201
+    },
+    {
+      "etapa": "cadastros",
+      "method": "POST",
+      "route": "/login",
+      "status": 200,
+      "esperado": 200
+    },
+    {
+      "etapa": "cadastros",
+      "method": "POST",
+      "route": "/usuarios",
+      "status": 201,
+      "esperado": 201
+    },
+    {
+      "etapa": "cadastros",
+      "method": "POST",
+      "route": "/login",
+      "status": 200,
+      "esperado": 200
+    },
+    {
+      "etapa": "cadastros",
+      "method": "POST",
+      "route": "/usuarios",
+      "status": 201,
+      "esperado": 201
+    },
+    {
+      "etapa": "cadastros",
+      "method": "POST",
+      "route": "/login",
+      "status": 200,
+      "esperado": 200
+    },
+    {
+      "etapa": "cadastros",
+      "method": "POST",
+      "route": "/usuarios",
+      "status": 201,
+      "esperado": 201
+    },
+    {
+      "etapa": "cadastros",
+      "method": "POST",
+      "route": "/login",
+      "status": 200,
+      "esperado": 200
+    },
+    {
+      "etapa": "cadastros",
+      "method": "POST",
+      "route": "/usuarios",
+      "status": 409,
+      "esperado": 409
+    },
+    {
+      "etapa": "acesso",
+      "method": "POST",
+      "route": "/solicitacoes-acesso",
+      "status": 201,
+      "esperado": 201
+    },
+    {
+      "etapa": "acesso",
+      "method": "PATCH",
+      "route": "/solicitacoes-acesso/7",
+      "status": 200,
+      "esperado": 200
+    },
+    {
+      "etapa": "acesso",
+      "method": "POST",
+      "route": "/solicitacoes-acesso",
+      "status": 201,
+      "esperado": 201
+    },
+    {
+      "etapa": "acesso",
+      "method": "PATCH",
+      "route": "/solicitacoes-acesso/8",
+      "status": 200,
+      "esperado": 200
+    },
+    {
+      "etapa": "acesso",
+      "method": "POST",
+      "route": "/solicitacoes-acesso",
+      "status": 201,
+      "esperado": 201
+    },
+    {
+      "etapa": "acesso",
+      "method": "PATCH",
+      "route": "/solicitacoes-acesso/9",
+      "status": 200,
+      "esperado": 200
+    },
+    {
+      "etapa": "acesso",
+      "method": "POST",
+      "route": "/solicitacoes-acesso",
+      "status": 201,
+      "esperado": 201
+    },
+    {
+      "etapa": "acesso",
+      "method": "POST",
+      "route": "/solicitacoes-acesso",
+      "status": 409,
+      "esperado": 409
+    },
+    {
+      "etapa": "acesso",
+      "method": "PATCH",
+      "route": "/solicitacoes-acesso/10",
+      "status": 403,
+      "esperado": 403
+    },
+    {
+      "etapa": "acesso",
+      "method": "PATCH",
+      "route": "/solicitacoes-acesso/10",
+      "status": 200,
+      "esperado": 200
+    },
+    {
+      "etapa": "acesso",
+      "method": "PATCH",
+      "route": "/solicitacoes-acesso/10",
+      "status": 409,
+      "esperado": 409
+    },
+    {
+      "etapa": "eventos",
+      "method": "POST",
+      "route": "/eventos",
+      "status": 201,
+      "esperado": 201
+    },
+    {
+      "etapa": "eventos",
+      "method": "POST",
+      "route": "/eventos",
+      "status": 201,
+      "esperado": 201
+    },
+    {
+      "etapa": "eventos",
+      "method": "POST",
+      "route": "/eventos",
+      "status": 201,
+      "esperado": 201
+    },
+    {
+      "etapa": "eventos",
+      "method": "PUT",
+      "route": "/eventos/13",
+      "status": 200,
+      "esperado": 200
+    },
+    {
+      "etapa": "eventos",
+      "method": "PUT",
+      "route": "/eventos/14",
+      "status": 404,
+      "esperado": 404
+    },
+    {
+      "etapa": "eventos",
+      "method": "POST",
+      "route": "/participante/inscricoes",
+      "status": 404,
+      "esperado": 404
+    },
+    {
+      "etapa": "eventos",
+      "method": "PUT",
+      "route": "/eventos/13",
+      "status": 403,
+      "esperado": 403
+    },
+    {
+      "etapa": "eventos",
+      "method": "POST",
+      "route": "/eventos",
+      "status": 401,
+      "esperado": 401
+    },
+    {
+      "etapa": "custos",
+      "method": "PUT",
+      "route": "/eventos/13/custos",
+      "status": 403,
+      "esperado": 403
+    },
+    {
+      "etapa": "custos",
+      "method": "PUT",
+      "route": "/eventos/13/custos",
+      "status": 200,
+      "esperado": 200
+    },
+    {
+      "etapa": "custos",
+      "method": "GET",
+      "route": "/eventos/13/custos",
+      "status": 200,
+      "esperado": 200
+    },
+    {
+      "etapa": "custos",
+      "method": "PUT",
+      "route": "/eventos/13/custos",
+      "status": 200,
+      "esperado": 200
+    },
+    {
+      "etapa": "custos",
+      "method": "GET",
+      "route": "/eventos/13/custos",
+      "status": 200,
+      "esperado": 200
+    },
+    {
+      "etapa": "custos",
+      "method": "PUT",
+      "route": "/eventos/13/custos",
+      "status": 404,
+      "esperado": 404
+    },
+    {
+      "etapa": "cotacao",
+      "method": "POST",
+      "route": "/cotacoes",
+      "status": 403,
+      "esperado": 403
+    },
+    {
+      "etapa": "cotacao",
+      "method": "POST",
+      "route": "/cotacoes",
+      "status": 409,
+      "esperado": 409
+    },
+    {
+      "etapa": "cotacao",
+      "method": "POST",
+      "route": "/cotacoes",
+      "status": 201,
+      "esperado": 201
+    },
+    {
+      "etapa": "propostas",
+      "method": "POST",
+      "route": "/fornecedor/propostas",
+      "status": 403,
+      "esperado": 403
+    },
+    {
+      "etapa": "propostas",
+      "method": "POST",
+      "route": "/fornecedor/propostas",
+      "status": 201,
+      "esperado": 201
+    },
+    {
+      "etapa": "propostas",
+      "method": "PATCH",
+      "route": "/organizador/propostas/4/status",
+      "status": 403,
+      "esperado": 403
+    },
+    {
+      "etapa": "propostas",
+      "method": "PATCH",
+      "route": "/organizador/propostas/4/status",
+      "status": 404,
+      "esperado": 404
+    },
+    {
+      "etapa": "propostas",
+      "method": "PATCH",
+      "route": "/organizador/propostas/4/status",
+      "status": 200,
+      "esperado": 200
+    },
+    {
+      "etapa": "propostas",
+      "method": "PATCH",
+      "route": "/organizador/propostas/4/status",
+      "status": 404,
+      "esperado": 404
+    },
+    {
+      "etapa": "propostas",
+      "method": "POST",
+      "route": "/fornecedor/propostas",
+      "status": 201,
+      "esperado": 201
+    },
+    {
+      "etapa": "propostas",
+      "method": "PATCH",
+      "route": "/organizador/propostas/5/status",
+      "status": 403,
+      "esperado": 403
+    },
+    {
+      "etapa": "propostas",
+      "method": "PATCH",
+      "route": "/organizador/propostas/5/status",
+      "status": 404,
+      "esperado": 404
+    },
+    {
+      "etapa": "propostas",
+      "method": "PATCH",
+      "route": "/organizador/propostas/5/status",
+      "status": 200,
+      "esperado": 200
+    },
+    {
+      "etapa": "propostas",
+      "method": "PATCH",
+      "route": "/organizador/propostas/5/status",
+      "status": 404,
+      "esperado": 404
+    },
+    {
+      "etapa": "publicacao_inscricao",
+      "method": "PATCH",
+      "route": "/eventos/13/publicar",
+      "status": 200,
+      "esperado": 200
+    },
+    {
+      "etapa": "publicacao_inscricao",
+      "method": "PATCH",
+      "route": "/eventos/13/publicar",
+      "status": 404,
+      "esperado": 404
+    },
+    {
+      "etapa": "publicacao_inscricao",
+      "method": "POST",
+      "route": "/participante/inscricoes",
+      "status": 403,
+      "esperado": 403
+    },
+    {
+      "etapa": "publicacao_inscricao",
+      "method": "POST",
+      "route": "/participante/inscricoes",
+      "status": 201,
+      "esperado": 201
+    },
+    {
+      "etapa": "publicacao_inscricao",
+      "method": "POST",
+      "route": "/participante/inscricoes",
+      "status": 409,
+      "esperado": 409
+    },
+    {
+      "etapa": "exclusao_endpoint",
+      "method": "DELETE",
+      "route": "/eventos/15",
+      "status": 200,
+      "esperado": 200
+    },
+    {
+      "etapa": "exclusao_endpoint",
+      "method": "DELETE",
+      "route": "/eventos/15",
+      "status": 404,
+      "esperado": 404
+    }
+  ],
+  "createdIds": {
+    "usuarios": [
+      11,
+      12,
+      13,
+      14
+    ],
+    "eventos": [
+      13,
+      14,
+      15
+    ],
+    "custos_evento": [
+      9,
+      10,
+      11,
+      12
+    ],
+    "cotacoes": [
+      7
+    ],
+    "itens_cotacao": [
+      24,
+      25
+    ],
+    "propostas": [
+      4,
+      5
+    ],
+    "inscricoes": [
+      4
+    ],
+    "solicitacoes_acesso": [
+      7,
+      8,
+      9,
+      10
+    ]
+  },
+  "registros": {
+    "usuarios": [
+      {
+        "nome": "TT-HW-f779e63e398b4da5bfb473d218ec7121-OA",
+        "email": "tt-hw+f779e63e398b4da5bfb473d218ec7121.oa@example.invalid",
+        "perfil": "participante",
+        "id": 11,
+        "origem": "POST_CONFIRMADO"
+      },
+      {
+        "nome": "TT-HW-f779e63e398b4da5bfb473d218ec7121-OB",
+        "email": "tt-hw+f779e63e398b4da5bfb473d218ec7121.ob@example.invalid",
+        "perfil": "participante",
+        "id": 12,
+        "origem": "POST_CONFIRMADO"
+      },
+      {
+        "nome": "TT-HW-f779e63e398b4da5bfb473d218ec7121-FA",
+        "email": "tt-hw+f779e63e398b4da5bfb473d218ec7121.fa@example.invalid",
+        "perfil": "participante",
+        "id": 13,
+        "origem": "POST_CONFIRMADO"
+      },
+      {
+        "nome": "TT-HW-f779e63e398b4da5bfb473d218ec7121-PA",
+        "email": "tt-hw+f779e63e398b4da5bfb473d218ec7121.pa@example.invalid",
+        "perfil": "participante",
+        "id": 14,
+        "origem": "POST_CONFIRMADO"
+      }
+    ],
+    "eventos": [
+      {
+        "nome": "TT-HW-f779e63e398b4da5bfb473d218ec7121-FLUXO",
+        "data": "2026-11-30",
+        "horario": "14:00",
+        "local": "Local sintetico da homologacao",
+        "categoria": "Corporativo",
+        "publico": 10,
+        "descricao": "TT-HW-f779e63e398b4da5bfb473d218ec7121: registro exclusivamente descartavel",
+        "status": "Em planejamento",
+        "usuario_id": 11,
+        "id": 13,
+        "origem": "POST_CONFIRMADO"
+      },
+      {
+        "nome": "TT-HW-f779e63e398b4da5bfb473d218ec7121-ALHEIO",
+        "data": "2026-11-30",
+        "horario": "14:00",
+        "local": "Local sintetico da homologacao",
+        "categoria": "Corporativo",
+        "publico": 10,
+        "descricao": "TT-HW-f779e63e398b4da5bfb473d218ec7121: fixture de propriedade",
+        "status": "Em planejamento",
+        "usuario_id": 12,
+        "id": 14,
+        "origem": "POST_CONFIRMADO"
+      },
+      {
+        "nome": "TT-HW-f779e63e398b4da5bfb473d218ec7121-EXCLUIR",
+        "data": "2026-11-30",
+        "horario": "14:00",
+        "local": "Local sintetico da homologacao",
+        "categoria": "Corporativo",
+        "publico": 10,
+        "descricao": "TT-HW-f779e63e398b4da5bfb473d218ec7121: fixture sem dependencias",
+        "status": "Em planejamento",
+        "usuario_id": 11,
+        "id": 15,
+        "origem": "POST_CONFIRMADO"
+      }
+    ],
+    "custos_evento": [
+      {
+        "id": 9,
+        "categoria": "TT-HW",
+        "descricao": "TT-HW-f779e63e398b4da5bfb473d218ec7121-item-A",
+        "evento_id": 13,
+        "valor_estimado": "0.10",
+        "origem": "RPC_CUSTOS"
+      },
+      {
+        "id": 10,
+        "categoria": "TT-HW",
+        "descricao": "TT-HW-f779e63e398b4da5bfb473d218ec7121-item-B",
+        "evento_id": 13,
+        "valor_estimado": "0.20",
+        "origem": "RPC_CUSTOS"
+      },
+      {
+        "id": 11,
+        "categoria": "TT-HW",
+        "descricao": "TT-HW-f779e63e398b4da5bfb473d218ec7121-item-A",
+        "evento_id": 13,
+        "valor_estimado": "0.30",
+        "origem": "RPC_CUSTOS"
+      },
+      {
+        "id": 12,
+        "categoria": "TT-HW",
+        "descricao": "TT-HW-f779e63e398b4da5bfb473d218ec7121-item-B",
+        "evento_id": 13,
+        "valor_estimado": "0.20",
+        "origem": "RPC_CUSTOS"
+      }
+    ],
+    "cotacoes": [
+      {
+        "id": 7,
+        "evento_id": 13,
+        "observacoes": "TT-HW-f779e63e398b4da5bfb473d218ec7121",
+        "origem": "RPC_PUBLICACAO"
+      }
+    ],
+    "itens_cotacao": [
+      {
+        "id": 24,
+        "cotacao_id": 7,
+        "categoria": "TT-HW",
+        "descricao": "TT-HW-f779e63e398b4da5bfb473d218ec7121-item-A",
+        "valor_estimado": 0.3,
+        "origem": "FILHO_RPC_CONFIRMADA"
+      },
+      {
+        "id": 25,
+        "cotacao_id": 7,
+        "categoria": "TT-HW",
+        "descricao": "TT-HW-f779e63e398b4da5bfb473d218ec7121-item-B",
+        "valor_estimado": 0.2,
+        "origem": "FILHO_RPC_CONFIRMADA"
+      }
+    ],
+    "propostas": [
+      {
+        "cotacao_id": 7,
+        "fornecedor_id": 13,
+        "valor": 1.1,
+        "condicoes_pagamento": "TT-HW-f779e63e398b4da5bfb473d218ec7121: ficticio",
+        "detalhes_tecnicos": "TT-HW-f779e63e398b4da5bfb473d218ec7121-aprovar",
+        "id": 4,
+        "origem": "POST_CONFIRMADO"
+      },
+      {
+        "cotacao_id": 7,
+        "fornecedor_id": 13,
+        "valor": 1.2,
+        "condicoes_pagamento": "TT-HW-f779e63e398b4da5bfb473d218ec7121: ficticio",
+        "detalhes_tecnicos": "TT-HW-f779e63e398b4da5bfb473d218ec7121-recusar",
+        "id": 5,
+        "origem": "POST_CONFIRMADO"
+      }
+    ],
+    "inscricoes": [
+      {
+        "usuario_id": 14,
+        "evento_id": 13,
+        "id": 4,
+        "origem": "POST_CONFIRMADO"
+      }
+    ],
+    "solicitacoes_acesso": [
+      {
+        "usuario_id": 11,
+        "perfil_solicitado": "organizador",
+        "justificativa": "TT-HW-f779e63e398b4da5bfb473d218ec7121",
+        "id": 7,
+        "origem": "POST_CONFIRMADO"
+      },
+      {
+        "usuario_id": 12,
+        "perfil_solicitado": "organizador",
+        "justificativa": "TT-HW-f779e63e398b4da5bfb473d218ec7121",
+        "id": 8,
+        "origem": "POST_CONFIRMADO"
+      },
+      {
+        "usuario_id": 13,
+        "perfil_solicitado": "fornecedor",
+        "justificativa": "TT-HW-f779e63e398b4da5bfb473d218ec7121",
+        "id": 9,
+        "origem": "POST_CONFIRMADO"
+      },
+      {
+        "usuario_id": 14,
+        "perfil_solicitado": "organizador",
+        "justificativa": "TT-HW-f779e63e398b4da5bfb473d218ec7121",
+        "id": 10,
+        "origem": "POST_CONFIRMADO"
+      }
+    ]
+  },
+  "tentativas": [
+    {
+      "etapa": "cadastros",
+      "method": "POST",
+      "tabela": "usuarios",
+      "body": {
+        "nome": "TT-HW-f779e63e398b4da5bfb473d218ec7121-OA",
+        "email": "tt-hw+f779e63e398b4da5bfb473d218ec7121.oa@example.invalid",
+        "perfil": "participante"
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "cadastros",
+      "method": "POST",
+      "tabela": "usuarios",
+      "body": {
+        "nome": "TT-HW-f779e63e398b4da5bfb473d218ec7121-OB",
+        "email": "tt-hw+f779e63e398b4da5bfb473d218ec7121.ob@example.invalid",
+        "perfil": "participante"
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "cadastros",
+      "method": "POST",
+      "tabela": "usuarios",
+      "body": {
+        "nome": "TT-HW-f779e63e398b4da5bfb473d218ec7121-FA",
+        "email": "tt-hw+f779e63e398b4da5bfb473d218ec7121.fa@example.invalid",
+        "perfil": "participante"
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "cadastros",
+      "method": "POST",
+      "tabela": "usuarios",
+      "body": {
+        "nome": "TT-HW-f779e63e398b4da5bfb473d218ec7121-PA",
+        "email": "tt-hw+f779e63e398b4da5bfb473d218ec7121.pa@example.invalid",
+        "perfil": "participante"
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "acesso",
+      "method": "POST",
+      "tabela": "solicitacoes_acesso",
+      "body": {
+        "usuario_id": 11,
+        "perfil_solicitado": "organizador",
+        "justificativa": "TT-HW-f779e63e398b4da5bfb473d218ec7121"
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "acesso",
+      "method": "POST",
+      "tabela": "rpc/decidir_solicitacao_acesso",
+      "body": {
+        "p_admin_id": 5,
+        "p_solicitacao_id": "7",
+        "p_status": "aprovado"
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "acesso",
+      "method": "POST",
+      "tabela": "solicitacoes_acesso",
+      "body": {
+        "usuario_id": 12,
+        "perfil_solicitado": "organizador",
+        "justificativa": "TT-HW-f779e63e398b4da5bfb473d218ec7121"
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "acesso",
+      "method": "POST",
+      "tabela": "rpc/decidir_solicitacao_acesso",
+      "body": {
+        "p_admin_id": 5,
+        "p_solicitacao_id": "8",
+        "p_status": "aprovado"
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "acesso",
+      "method": "POST",
+      "tabela": "solicitacoes_acesso",
+      "body": {
+        "usuario_id": 13,
+        "perfil_solicitado": "fornecedor",
+        "justificativa": "TT-HW-f779e63e398b4da5bfb473d218ec7121"
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "acesso",
+      "method": "POST",
+      "tabela": "rpc/decidir_solicitacao_acesso",
+      "body": {
+        "p_admin_id": 5,
+        "p_solicitacao_id": "9",
+        "p_status": "aprovado"
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "acesso",
+      "method": "POST",
+      "tabela": "solicitacoes_acesso",
+      "body": {
+        "usuario_id": 14,
+        "perfil_solicitado": "organizador",
+        "justificativa": "TT-HW-f779e63e398b4da5bfb473d218ec7121"
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "acesso",
+      "method": "POST",
+      "tabela": "rpc/decidir_solicitacao_acesso",
+      "body": {
+        "p_admin_id": 5,
+        "p_solicitacao_id": "10",
+        "p_status": "rejeitado"
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "acesso",
+      "method": "POST",
+      "tabela": "rpc/decidir_solicitacao_acesso",
+      "body": {
+        "p_admin_id": 5,
+        "p_solicitacao_id": "10",
+        "p_status": "aprovado"
+      },
+      "estado": "recusada"
+    },
+    {
+      "etapa": "eventos",
+      "method": "POST",
+      "tabela": "eventos",
+      "body": {
+        "nome": "TT-HW-f779e63e398b4da5bfb473d218ec7121-FLUXO",
+        "data": "2026-11-30",
+        "horario": "14:00",
+        "local": "Local sintetico da homologacao",
+        "categoria": "Corporativo",
+        "publico": 10,
+        "descricao": "TT-HW-f779e63e398b4da5bfb473d218ec7121: registro exclusivamente descartavel",
+        "status": "Em planejamento",
+        "usuario_id": 11
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "eventos",
+      "method": "POST",
+      "tabela": "eventos",
+      "body": {
+        "nome": "TT-HW-f779e63e398b4da5bfb473d218ec7121-ALHEIO",
+        "data": "2026-11-30",
+        "horario": "14:00",
+        "local": "Local sintetico da homologacao",
+        "categoria": "Corporativo",
+        "publico": 10,
+        "descricao": "TT-HW-f779e63e398b4da5bfb473d218ec7121: fixture de propriedade",
+        "status": "Em planejamento",
+        "usuario_id": 12
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "eventos",
+      "method": "POST",
+      "tabela": "eventos",
+      "body": {
+        "nome": "TT-HW-f779e63e398b4da5bfb473d218ec7121-EXCLUIR",
+        "data": "2026-11-30",
+        "horario": "14:00",
+        "local": "Local sintetico da homologacao",
+        "categoria": "Corporativo",
+        "publico": 10,
+        "descricao": "TT-HW-f779e63e398b4da5bfb473d218ec7121: fixture sem dependencias",
+        "status": "Em planejamento",
+        "usuario_id": 11
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "eventos",
+      "method": "PATCH",
+      "tabela": "eventos",
+      "body": {
+        "nome": "TT-HW-f779e63e398b4da5bfb473d218ec7121-FLUXO",
+        "data": "2026-11-30",
+        "horario": "14:00",
+        "local": "Local sintetico revisado",
+        "categoria": "Corporativo",
+        "publico": 10,
+        "descricao": "TT-HW-f779e63e398b4da5bfb473d218ec7121: registro exclusivamente descartavel"
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "eventos",
+      "method": "PATCH",
+      "tabela": "eventos",
+      "body": {
+        "nome": "TT-HW-f779e63e398b4da5bfb473d218ec7121-FLUXO",
+        "data": "2026-11-30",
+        "horario": "14:00",
+        "local": "Local sintetico revisado",
+        "categoria": "Corporativo",
+        "publico": 10,
+        "descricao": "TT-HW-f779e63e398b4da5bfb473d218ec7121: registro exclusivamente descartavel"
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "custos",
+      "method": "POST",
+      "tabela": "rpc/substituir_custos_evento",
+      "body": {
+        "p_evento_id": 13,
+        "p_usuario_id": 11,
+        "p_custos": [
+          {
+            "categoria": "TT-HW",
+            "descricao": "TT-HW-f779e63e398b4da5bfb473d218ec7121-item-A",
+            "valor_estimado": "0.10"
+          },
+          {
+            "categoria": "TT-HW",
+            "descricao": "TT-HW-f779e63e398b4da5bfb473d218ec7121-item-B",
+            "valor_estimado": "0.20"
+          }
+        ]
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "custos",
+      "method": "POST",
+      "tabela": "rpc/substituir_custos_evento",
+      "body": {
+        "p_evento_id": 13,
+        "p_usuario_id": 11,
+        "p_custos": [
+          {
+            "categoria": "TT-HW",
+            "descricao": "TT-HW-f779e63e398b4da5bfb473d218ec7121-item-A",
+            "valor_estimado": "0.30"
+          },
+          {
+            "categoria": "TT-HW",
+            "descricao": "TT-HW-f779e63e398b4da5bfb473d218ec7121-item-B",
+            "valor_estimado": "0.20"
+          }
+        ]
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "custos",
+      "method": "POST",
+      "tabela": "rpc/substituir_custos_evento",
+      "body": {
+        "p_evento_id": 13,
+        "p_usuario_id": 12,
+        "p_custos": [
+          {
+            "categoria": "TT-HW",
+            "descricao": "TT-HW-f779e63e398b4da5bfb473d218ec7121-item-A",
+            "valor_estimado": "0.10"
+          },
+          {
+            "categoria": "TT-HW",
+            "descricao": "TT-HW-f779e63e398b4da5bfb473d218ec7121-item-B",
+            "valor_estimado": "0.20"
+          }
+        ]
+      },
+      "estado": "recusada"
+    },
+    {
+      "etapa": "cotacao",
+      "method": "POST",
+      "tabela": "rpc/publicar_cotacao",
+      "body": {
+        "p_usuario_id": 11,
+        "p_evento_id": 13,
+        "p_prazo": "2026-11-07",
+        "p_hoje_utc": "2026-10-31",
+        "p_observacoes": "TT-HW-f779e63e398b4da5bfb473d218ec7121",
+        "p_itens": [
+          {
+            "categoria": "TT-HW",
+            "descricao": "TT-HW-f779e63e398b4da5bfb473d218ec7121-item-A",
+            "valor_estimado": "0.10"
+          },
+          {
+            "categoria": "TT-HW",
+            "descricao": "TT-HW-f779e63e398b4da5bfb473d218ec7121-item-B",
+            "valor_estimado": "0.20"
+          }
+        ]
+      },
+      "estado": "recusada"
+    },
+    {
+      "etapa": "cotacao",
+      "method": "POST",
+      "tabela": "rpc/publicar_cotacao",
+      "body": {
+        "p_usuario_id": 11,
+        "p_evento_id": 13,
+        "p_prazo": "2026-11-07",
+        "p_hoje_utc": "2026-10-31",
+        "p_observacoes": "TT-HW-f779e63e398b4da5bfb473d218ec7121",
+        "p_itens": [
+          {
+            "categoria": "TT-HW",
+            "descricao": "TT-HW-f779e63e398b4da5bfb473d218ec7121-item-A",
+            "valor_estimado": "0.30"
+          },
+          {
+            "categoria": "TT-HW",
+            "descricao": "TT-HW-f779e63e398b4da5bfb473d218ec7121-item-B",
+            "valor_estimado": "0.20"
+          }
+        ]
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "propostas",
+      "method": "POST",
+      "tabela": "propostas",
+      "body": {
+        "cotacao_id": 7,
+        "fornecedor_id": 13,
+        "valor": 1.1,
+        "condicoes_pagamento": "TT-HW-f779e63e398b4da5bfb473d218ec7121: ficticio",
+        "detalhes_tecnicos": "TT-HW-f779e63e398b4da5bfb473d218ec7121-aprovar"
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "propostas",
+      "method": "POST",
+      "tabela": "rpc/avaliar_proposta",
+      "body": {
+        "p_proposta_id": "4",
+        "p_organizador_id": 12,
+        "p_status": "Aprovada"
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "propostas",
+      "method": "POST",
+      "tabela": "rpc/avaliar_proposta",
+      "body": {
+        "p_proposta_id": "4",
+        "p_organizador_id": 11,
+        "p_status": "Aprovada"
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "propostas",
+      "method": "POST",
+      "tabela": "rpc/avaliar_proposta",
+      "body": {
+        "p_proposta_id": "4",
+        "p_organizador_id": 11,
+        "p_status": "Aprovada"
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "propostas",
+      "method": "POST",
+      "tabela": "propostas",
+      "body": {
+        "cotacao_id": 7,
+        "fornecedor_id": 13,
+        "valor": 1.2,
+        "condicoes_pagamento": "TT-HW-f779e63e398b4da5bfb473d218ec7121: ficticio",
+        "detalhes_tecnicos": "TT-HW-f779e63e398b4da5bfb473d218ec7121-recusar"
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "propostas",
+      "method": "POST",
+      "tabela": "rpc/avaliar_proposta",
+      "body": {
+        "p_proposta_id": "5",
+        "p_organizador_id": 12,
+        "p_status": "Recusada"
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "propostas",
+      "method": "POST",
+      "tabela": "rpc/avaliar_proposta",
+      "body": {
+        "p_proposta_id": "5",
+        "p_organizador_id": 11,
+        "p_status": "Recusada"
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "propostas",
+      "method": "POST",
+      "tabela": "rpc/avaliar_proposta",
+      "body": {
+        "p_proposta_id": "5",
+        "p_organizador_id": 11,
+        "p_status": "Recusada"
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "publicacao_inscricao",
+      "method": "PATCH",
+      "tabela": "eventos",
+      "body": {
+        "status": "Ativo"
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "publicacao_inscricao",
+      "method": "PATCH",
+      "tabela": "eventos",
+      "body": {
+        "status": "Ativo"
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "publicacao_inscricao",
+      "method": "POST",
+      "tabela": "inscricoes",
+      "body": {
+        "usuario_id": 14,
+        "evento_id": 13
+      },
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "exclusao_endpoint",
+      "method": "DELETE",
+      "tabela": "eventos",
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "exclusao_endpoint",
+      "method": "DELETE",
+      "tabela": "eventos",
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "reconciliacao_limpeza",
+      "method": "DELETE",
+      "tabela": "propostas",
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "reconciliacao_limpeza",
+      "method": "DELETE",
+      "tabela": "propostas",
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "reconciliacao_limpeza",
+      "method": "DELETE",
+      "tabela": "inscricoes",
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "reconciliacao_limpeza",
+      "method": "DELETE",
+      "tabela": "itens_cotacao",
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "reconciliacao_limpeza",
+      "method": "DELETE",
+      "tabela": "itens_cotacao",
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "reconciliacao_limpeza",
+      "method": "DELETE",
+      "tabela": "cotacoes",
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "reconciliacao_limpeza",
+      "method": "DELETE",
+      "tabela": "custos_evento",
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "reconciliacao_limpeza",
+      "method": "DELETE",
+      "tabela": "custos_evento",
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "reconciliacao_limpeza",
+      "method": "DELETE",
+      "tabela": "solicitacoes_acesso",
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "reconciliacao_limpeza",
+      "method": "DELETE",
+      "tabela": "solicitacoes_acesso",
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "reconciliacao_limpeza",
+      "method": "DELETE",
+      "tabela": "solicitacoes_acesso",
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "reconciliacao_limpeza",
+      "method": "DELETE",
+      "tabela": "solicitacoes_acesso",
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "reconciliacao_limpeza",
+      "method": "DELETE",
+      "tabela": "eventos",
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "reconciliacao_limpeza",
+      "method": "DELETE",
+      "tabela": "eventos",
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "reconciliacao_limpeza",
+      "method": "DELETE",
+      "tabela": "usuarios",
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "reconciliacao_limpeza",
+      "method": "DELETE",
+      "tabela": "usuarios",
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "reconciliacao_limpeza",
+      "method": "DELETE",
+      "tabela": "usuarios",
+      "estado": "confirmada"
+    },
+    {
+      "etapa": "reconciliacao_limpeza",
+      "method": "DELETE",
+      "tabela": "usuarios",
+      "estado": "confirmada"
+    }
+  ],
+  "residuos": {
+    "propostas": [],
+    "inscricoes": [],
+    "itens_cotacao": [],
+    "cotacoes": [],
+    "custos_evento": [],
+    "solicitacoes_acesso": [],
+    "eventos": [],
+    "usuarios": []
+  },
+  "catalogo": [
+    {
+      "name": "avaliar_proposta",
+      "bodyTokensSHA256": "7bf990dfdac9e95a8b49d4b5822967692e4fde7147d25f8965db106251393d9e",
+      "invoker": true,
+      "serviceRoleOnly": true
+    },
+    {
+      "name": "decidir_solicitacao_acesso",
+      "bodyTokensSHA256": "e28adbecfd7363412fda8f355f0bfd96be87a3ab47ded2ac3a56fbb7346d9859",
+      "invoker": true,
+      "serviceRoleOnly": true
+    },
+    {
+      "name": "publicar_cotacao",
+      "bodyTokensSHA256": "3e7125817bf4c88e05229dc9decd924d6e70e0dbe15efc69a4c96da65ecd622f",
+      "invoker": true,
+      "serviceRoleOnly": true
+    },
+    {
+      "name": "substituir_custos_evento",
+      "bodyTokensSHA256": "ce68c8d2443ffd18ac27edb5e1453c00e1455d4ece2fc91bd3645a9cf1d5461d",
+      "invoker": true,
+      "serviceRoleOnly": true
+    }
+  ],
+  "fixturesAusentesAntes": true,
+  "adminPreexistentePreservado": true,
+  "mysqlCarregado": false,
+  "servidorEncerrado": true,
+  "contagem": {
+    "leituras": 158,
+    "escritas": 54,
+    "mysqlTentativas": 0,
+    "recusas": 0
+  }
+}

@@ -128,7 +128,7 @@ test("perfil: importacao inerte e reutilizacao tardia da fabrica existente", asy
   assert.equal(a.criacoes(), 1);
   assert.deepEqual(a.imports, ["../../db-supabase.cjs"]);
   assert.deepEqual(JSON.parse(JSON.stringify(await repo.buscarPerfil(7))), usuario);
-  assert.deepEqual(Object.keys(repo), ["buscarParaLogin", "buscarIdPorEmail", "buscarParaAutenticacao", "buscarPerfil", "listar"]);
+  assert.deepEqual(Object.keys(repo), ["criar", "buscarParaLogin", "buscarIdPorEmail", "buscarParaAutenticacao", "buscarPerfil", "listar"]);
 });
 
 test("perfil: cliente injetado nao le configuracao nem inicializa SDK", async () => {

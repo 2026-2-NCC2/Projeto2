@@ -1,0 +1,40 @@
+{
+  "estado": "MODELO_INERTE_NAO_EXECUTAR",
+  "projectRef": "gnwybroqfvwosiqzsfla",
+  "runId": "${RUN_ID_ALEATORIO}",
+  "marcador": "TT-HW-${RUN_ID_ALEATORIO}",
+  "datas": { "evento": "${HOJE_UTC_MAIS_30_DIAS}", "prazoCotacao": "${HOJE_UTC_MAIS_7_DIAS}" },
+  "atores": [
+    { "alias": "O_A", "nome": "TT-HW-${RUN_ID_ALEATORIO}-OA", "email": "tt-hw+${RUN_ID_ALEATORIO}.oa@example.invalid", "perfilCadastro": "participante", "perfilFinal": "organizador" },
+    { "alias": "O_B", "nome": "TT-HW-${RUN_ID_ALEATORIO}-OB", "email": "tt-hw+${RUN_ID_ALEATORIO}.ob@example.invalid", "perfilCadastro": "participante", "perfilFinal": "organizador" },
+    { "alias": "F_A", "nome": "TT-HW-${RUN_ID_ALEATORIO}-FA", "email": "tt-hw+${RUN_ID_ALEATORIO}.fa@example.invalid", "perfilCadastro": "participante", "perfilFinal": "fornecedor" },
+    { "alias": "P_A", "nome": "TT-HW-${RUN_ID_ALEATORIO}-PA", "email": "tt-hw+${RUN_ID_ALEATORIO}.pa@example.invalid", "perfilCadastro": "participante", "perfilFinal": "participante" }
+  ],
+  "credenciaisNovas": { "gerarSomenteAposAutorizacao": true, "armazenamento": "privado, nunca no manifesto ou logs" },
+  "pedidos": [
+    { "ator": "O_A", "perfil_solicitado": "organizador", "decisao": "aprovado" },
+    { "ator": "O_B", "perfil_solicitado": "organizador", "decisao": "aprovado" },
+    { "ator": "F_A", "perfil_solicitado": "fornecedor", "decisao": "aprovado" },
+    { "ator": "P_A", "perfil_solicitado": "organizador", "decisao": "rejeitado" }
+  ],
+  "eventos": [
+    { "alias": "E_FLUXO", "dono": "O_A", "nome": "TT-HW-${RUN_ID_ALEATORIO}-FLUXO", "horario": "14:00", "local": "Local sintetico da homologacao", "categoria": "Corporativo", "publico": 10, "descricao": "TT-HW-${RUN_ID_ALEATORIO}: registro exclusivamente descartavel" },
+    { "alias": "E_ALHEIO", "dono": "O_B", "nome": "TT-HW-${RUN_ID_ALEATORIO}-ALHEIO", "horario": "14:00", "local": "Local sintetico da homologacao", "categoria": "Corporativo", "publico": 10, "descricao": "TT-HW-${RUN_ID_ALEATORIO}: fixture de propriedade" },
+    { "alias": "E_EXCLUIR", "dono": "O_A", "nome": "TT-HW-${RUN_ID_ALEATORIO}-EXCLUIR", "horario": "14:00", "local": "Local sintetico da homologacao", "categoria": "Corporativo", "publico": 10, "descricao": "TT-HW-${RUN_ID_ALEATORIO}: fixture sem dependencias" }
+  ],
+  "custos": [
+    { "categoria": "TT-HW", "descricao": "TT-HW-${RUN_ID_ALEATORIO}-item-A", "valor_estimado": "0.10" },
+    { "categoria": "TT-HW", "descricao": "TT-HW-${RUN_ID_ALEATORIO}-item-B", "valor_estimado": "0.20" }
+  ],
+  "custosRevisados": [
+    { "categoria": "TT-HW", "descricao": "TT-HW-${RUN_ID_ALEATORIO}-item-A", "valor_estimado": "0.30" },
+    { "categoria": "TT-HW", "descricao": "TT-HW-${RUN_ID_ALEATORIO}-item-B", "valor_estimado": "0.20" }
+  ],
+  "cotacao": { "evento": "E_FLUXO", "observacoes": "TT-HW-${RUN_ID_ALEATORIO}", "itens": "custosRevisados" },
+  "propostas": [
+    { "alias": "PR_APROVAR", "ator": "F_A", "cotacao": "cotacao", "valor": "1.10", "condicoes_pagamento": "TT-HW-${RUN_ID_ALEATORIO}: ficticio", "detalhes_tecnicos": "TT-HW-${RUN_ID_ALEATORIO}-aprovar", "avaliacao": "Aprovada" },
+    { "alias": "PR_RECUSAR", "ator": "F_A", "cotacao": "cotacao", "valor": "1.20", "condicoes_pagamento": "TT-HW-${RUN_ID_ALEATORIO}: ficticio", "detalhes_tecnicos": "TT-HW-${RUN_ID_ALEATORIO}-recusar", "avaliacao": "Recusada" }
+  ],
+  "inscricao": { "ator": "P_A", "evento": "E_FLUXO" },
+  "idsReais": { "usuarios": [], "eventos": [], "solicitacoes_acesso": [], "custos_evento": [], "cotacoes": [], "itens_cotacao": [], "propostas": [], "inscricoes": [] }
+}

@@ -100,7 +100,7 @@ function ambiente(opcoes = {}) {
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, "../server.js"), "utf8"), {
     Buffer, module: { exports: {} }, process: { env: { JWT_SECRET: "segredo-ficticio-exclusivo-da-suite-de-custos" } },
     console: { log() {}, error() {} },
-    require(nome) { assert.ok(Object.hasOwn(dependencias, nome)); return dependencias[nome]; },
+    require(nome) { const nova = require("./helpers/persistencia.cjs").dependencia(nome, db); if (nova) return nova;  assert.ok(Object.hasOwn(dependencias, nome)); return dependencias[nome]; },
   });
   return {
     ordem, get salvos() { return salvos; },

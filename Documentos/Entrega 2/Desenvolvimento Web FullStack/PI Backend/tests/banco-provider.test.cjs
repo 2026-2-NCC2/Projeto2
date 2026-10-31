@@ -169,12 +169,12 @@ test("SDK ausente resulta em erro sanitizado, sem fallback MySQL", () => {
 function iniciarSimulado({ env = {}, modo = "principal", dotenv = {} } = {}) {
   env = { JWT_SECRET: "segredo-ficticio-exclusivo-dos-testes-de-provider-12345", ...env };
   const estado = { imports: [], dotenv: 0, pools: [], isolados: 0, escutas: [], rotas: [] };
-  const pool = {}, isolado = {};
+  const pool = { getConnection() { throw Error("Consulta inesperada"); } }, isolado = { getConnection() { throw Error("Consulta inesperada"); } };
   const app = { use() {}, listen(...args) { estado.escutas.push(args); } };
   for (const metodo of ["get", "post", "put", "patch", "delete"]) app[metodo] = rota => estado.rotas.push(`${metodo} ${rota}`);
   const dependencias = {
     express: Object.assign(() => app, { json: () => () => {} }), bcryptjs: {}, jsonwebtoken: {}, cors: () => () => {},
-    "./config/banco.cjs": { validarInicializacaoBanco },
+    "./config/banco.cjs": require("../config/banco.cjs"),
     "./isolamento.cjs": { modoExecucao: () => modo, obterBancoIsolado() { estado.isolados++; return isolado; } },
     dotenv: { config() { estado.dotenv++; for (const [k, v] of Object.entries(dotenv)) if (env[k] === undefined) env[k] = v; } },
     "mysql2/promise": { createPool(opcoes) { estado.pools.push(opcoes); return pool; } },
@@ -185,8 +185,14 @@ function iniciarSimulado({ env = {}, modo = "principal", dotenv = {} } = {}) {
   function carregar(arquivo, principal = false) {
     const modulo = { exports: {} };
     const requerer = nome => {
+      if (arquivo === "repositories/index.cjs") {
+        if (nome.startsWith("../")) nome = nome.slice(1);
+        else if (nome.startsWith("./mysql/")) nome = "./repositories/" + nome.slice(2);
+      }
       estado.imports.push(nome);
       if (nome === "./db") return carregar("db.js");
+      if (nome === "./repositories/index.cjs") return carregar("repositories/index.cjs");
+      if (nome.startsWith("./services/")) return require("../" + nome.slice(2));
       assert.ok(Object.hasOwn(dependencias, nome), "Importacao proibida: " + nome);
       return dependencias[nome];
     };
@@ -230,6 +236,17 @@ test("selecao considera configuracao carregada por dotenv antes de criar o pool"
   assert.equal(a.erro?.code, "DB_PROVIDER_NOT_IMPLEMENTED");
   assert.deepEqual(a.estado.pools, []);
   assert.deepEqual(a.estado.escutas, []);
+});
+
+test("variaveis HOMOLOG_ no dotenv preservam startup MySQL e bloqueio Supabase normal", () => {
+  const dotenv = { HOMOLOG_SUPABASE_URL: "https://gnwybroqfvwosiqzsfla.supabase.co",
+    HOMOLOG_SUPABASE_SECRET_KEY: "sb_secret_homologacao_ficticia", HOMOLOG_JWT_SECRET: "exclusivo_ficticio" };
+  const mysql = iniciarSimulado({ dotenv });
+  assert.equal(mysql.erro, undefined); assert.equal(mysql.estado.pools.length, 1);
+  assert.ok(!mysql.estado.imports.some(n => /supabase|homologacao/.test(n)));
+  const bloqueado = iniciarSimulado({ dotenv: { ...dotenv, ...supabase() } });
+  assert.equal(bloqueado.erro?.code, "DB_PROVIDER_NOT_IMPLEMENTED");
+  assert.deepEqual(bloqueado.estado.pools, []); assert.deepEqual(bloqueado.estado.escutas, []);
 });
 
 test("provider explicito do processo prevalece sobre dotenv sem fallback entre bancos", () => {

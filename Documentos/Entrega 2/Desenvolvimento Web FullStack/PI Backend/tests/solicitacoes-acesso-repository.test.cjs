@@ -158,7 +158,7 @@ function ambiente(opcoes = {}) {
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, "../server.js"), "utf8"), {
     Buffer, module: { exports: {} }, process: { env: { JWT_SECRET: "segredo-ficticio-exclusivo-da-suite-de-acesso" } },
     console: { log() {}, error() {} },
-    require(nome) { assert.ok(Object.hasOwn(dependencias, nome), nome); return dependencias[nome]; },
+    require(nome) { const nova = require("./helpers/persistencia.cjs").dependencia(nome, db); if (nova) return nova;  assert.ok(Object.hasOwn(dependencias, nome), nome); return dependencias[nome]; },
   });
   return { estado, async request(status) {
     const req = { params: { id: "13" }, body: { status }, headers: { authorization: "Bearer simulado" } };
@@ -230,16 +230,16 @@ for (const primeiroStatus of ["aprovado", "rejeitado"]) test(`concorrencia: ${pr
   assert.deepEqual(a.estado.conexoes[1], ["begin", "lock", "rollback", "release"]);
 });
 
-test("falha do rollback continua propagada, com release no finally", async () => {
+test("falha do rollback preserva resposta global 500, com release no finally", async () => {
   const a = ambiente({ ausente: true, falharEm: "rollback" });
-  await assert.rejects(() => a.request("aprovado"), /falha simulada/);
+  const res = await a.request("aprovado"); assert.equal(res.statusCode, 500); assert.deepEqual(res.body, { erro: "Erro interno no servidor." });
   assert.equal(a.estado.status, "pendente");
   assert.deepEqual(a.estado.conexoes[0], ["begin", "lock", "rollback", "rollback", "release"]);
 });
 
-test("falha do release apos commit continua propagada sem repetir a escrita", async () => {
+test("falha do release apos commit preserva resposta global 500 sem repetir escrita", async () => {
   const a = ambiente({ falharEm: "release" });
-  await assert.rejects(() => a.request("aprovado"), /falha simulada/);
+  const res = await a.request("aprovado"); assert.equal(res.statusCode, 500); assert.deepEqual(res.body, { erro: "Erro interno no servidor." });
   assert.equal(a.estado.status, "aprovado");
   assert.equal(a.estado.perfil, "fornecedor");
   assert.deepEqual(a.estado.conexoes[0], ["begin", "lock", "perfil", "status", "commit", "release"]);

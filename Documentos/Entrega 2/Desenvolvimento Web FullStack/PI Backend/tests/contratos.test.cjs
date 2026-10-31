@@ -77,7 +77,7 @@ function ambiente(perfil = "organizador", passos = []) {
       static now() { return Date.parse("2030-01-01T12:00:00Z"); }
     },
     process: { env: { JWT_SECRET: segredo } }, console: { log() {}, error() {} },
-    require(nome) {
+    require(nome) { const nova = require("./helpers/persistencia.cjs").dependencia(nome, db, { agora: () => new Date("2030-01-01T12:00:00Z") }); if (nova) return nova;
       if (!Object.hasOwn(dependencias, nome)) throw Error("Dependencia proibida: " + nome);
       return dependencias[nome];
     },

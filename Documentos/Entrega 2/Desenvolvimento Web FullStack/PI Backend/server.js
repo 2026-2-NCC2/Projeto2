@@ -4,11 +4,18 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const { modoExecucao } = require("./isolamento.cjs");
-if (modoExecucao() === "principal") require("dotenv").config();
+const homologacao = process.env.TROCATICKET_HOMOLOGACAO === undefined
+  ? false : process.env.TROCATICKET_HOMOLOGACAO === "escrita-descartavel"
+    ? require("./homologacao-escrita.cjs").confirmarEntrada()
+    : require("./homologacao.cjs").confirmarEntrada();
+if (!homologacao && modoExecucao() === "principal") require("dotenv").config();
+if (!homologacao && process.env.TROCATICKET_HOMOLOGACAO !== undefined) {
+  require("./homologacao.cjs").confirmarEntrada(); // Recusar flag vinda do .env sem inicializador.
+}
 
 // Manter a trava de startup antes de criar qualquer cliente/pool.
 const { validarInicializacaoBanco } = require("./config/banco.cjs");
-validarInicializacaoBanco(process.env, modoExecucao());
+if (!homologacao) validarInicializacaoBanco(process.env, modoExecucao());
 const { criarPersistencia } = require("./repositories/index.cjs");
 const { repositorios, servicos } = criarPersistencia();
 const {

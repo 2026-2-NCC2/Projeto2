@@ -114,13 +114,13 @@ test("SQL: inspeção estática do protocolo, sem compilar ou provar rollback", 
 // middleware ou autenticacao; compara a logica real de validacao/resposta.
 async function contratoMySQL(entrada, persistidos = [item]) {
   const src = fs.readFileSync(path.join(__dirname, "../server.js"), "utf8");
-  const inicio = src.indexOf("function normalizarItemCotacao(");
+  const inicio = src.indexOf('app.post("/cotacoes"');
   const fim = src.indexOf('app.get("/cotacoes"', inicio);
   assert.ok(inicio >= 0 && fim > inicio);
   let handler;
   const conexao = { async beginTransaction() {}, async commit() {}, async rollback() {}, release() {} };
   class DataFixa extends Date { constructor(...args) { super(...(args.length ? args : [agora().toISOString()])); } }
-  vm.runInNewContext(src.slice(inicio, fim), {
+  const contextoHandler = {
     Date: DataFixa, console: { error() {} }, autenticar() {}, permitirPerfis: () => () => {},
     app: { post(_url, ...handlers) { handler = handlers.at(-1); } },
     db: { async getConnection() { return conexao; } },
@@ -132,9 +132,12 @@ async function contratoMySQL(entrada, persistidos = [item]) {
       async criar(c) { assert.equal(c, conexao); return 207; },
       async inserirItem(c, id) { assert.equal(c, conexao); assert.equal(id, 207); },
     },
-  });
+  };
+  contextoHandler.responderErroServico = require("./helpers/persistencia.cjs").responderErroServico;
+  contextoHandler.servicos = { cotacoes: require("../services/cotacoes.cjs").criarServicoCotacoes({ db: contextoHandler.db, repositorios: { custos: contextoHandler.custosRepository, cotacoes: contextoHandler.cotacoesRepository }, agora }) };
+  vm.runInNewContext(src.slice(inicio, fim), contextoHandler);
   const res = { statusCode: 200, status(n) { this.statusCode = n; return this; }, json(dados) { this.body = dados; return this; } };
-  await handler({ body: entrada, usuario: { id: 10 } }, res);
+  await handler({ body: entrada, usuario: { id: 10, perfil: "organizador" } }, res);
   return { status: res.statusCode, body: JSON.parse(JSON.stringify(res.body)) };
 }
 

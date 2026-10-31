@@ -88,7 +88,7 @@ function ambiente(opcoes = {}) {
   }
   const express = Object.assign(() => app, { json: () => () => {} });
   const sandbox = { module: { exports: {} }, process: { env: { JWT_SECRET: "segredo-ficticio-exclusivo-dos-testes-simulados-363" } }, console: { log() {}, error: (...args) => logs.push(args) },
-    require(nome) {
+    require(nome) { const nova = require("./helpers/persistencia.cjs").dependencia(nome, db); if (nova) return nova;
       if (nome === "express") return express;
       if (nome === "cors") return () => () => {};
       if (nome === "dotenv") return { config() {} };

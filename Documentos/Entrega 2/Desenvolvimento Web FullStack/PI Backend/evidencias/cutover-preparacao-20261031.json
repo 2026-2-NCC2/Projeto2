@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-31",
+  "state": "PREPARADO_NAO_EXECUTADO",
+  "previousReconciliation": "evidencias/cutover-reconciliacao-b806c01c-4001-4fdb-ae15-261200b583f5.json",
+  "currentReconciliation": "evidencias/cutover-reconciliacao-d9c01871-854a-4419-939e-5655dbd6cf4f.json",
+  "comparisons": {
+    "origemAtualVsDump": true,
+    "destinoVsImportacao": true,
+    "atualVsDestino": true,
+    "identidadesAtuais": true,
+    "integridadeOrigem": true,
+    "integridadeDestino": true,
+    "relacionamentosComOutraIdentidade": true,
+    "instantesTimestamp": true,
+    "classificacaoAdicionais": true
+  },
+  "preserveAdditionalRecords": true,
+  "additionalRecordCount": 10,
+  "limitation": "Comparacao temporal de resumos e dos 42 registros comuns contra baseline; os valores brutos anteriores dos dez extras nao foram exportados. Delta definitivo exige congelamento e snapshot integral atual.",
+  "backups": {
+    "mysqlHistorical": {
+      "rows": 42,
+      "hash": "3ec34c07d2b31c53d79602f3e891473a0898152db5bf6c30cb44bb7dcf6f7777",
+      "restoreVerified": false
+    },
+    "supabaseHistorical": {
+      "rows": 42,
+      "liveRows": 52,
+      "hash": "f438687250d126f18b38947a9abf609ff8c54a87e8f794ba872b25a191994e61",
+      "completeForCurrentTarget": false,
+      "restoreVerified": false
+    },
+    "currentBackupsVerified": false
+  },
+  "freeze": {
+    "component": "config/congelamento-escritas.cjs",
+    "installed": false,
+    "activated": false,
+    "externalWritersFrozen": false
+  },
+  "jwt": {
+    "verifier": "scripts/preparar-rotacao-jwt.cjs",
+    "newKeyGenerated": false,
+    "credentialsChanged": false
+  },
+  "normalSupabaseEnabled": false,
+  "dataWrites": 0
+}

@@ -141,7 +141,7 @@ test("importacao inerte; fabrica reutiliza somente db-supabase existente", async
   assert.equal(criacoes, 1);
   assert.equal(await repo.buscarPorIdDoUsuario(13, 7), undefined);
   assert.deepEqual(chamadas, ["../../db-supabase.cjs"]);
-  const metodos = ["listarPorUsuario", "listarAdministrativo", "listarAtivosParaParticipante", "buscarPorIdDoUsuario"];
+  const metodos = ["publicar", "excluir", "criar", "atualizar", "listarPorUsuario", "listarAdministrativo", "listarAtivosParaParticipante", "buscarPorIdDoUsuario"];
   assert.deepEqual(Object.keys(cliente.repo), metodos);
   assert.deepEqual(Object.keys(repo), metodos);
 });

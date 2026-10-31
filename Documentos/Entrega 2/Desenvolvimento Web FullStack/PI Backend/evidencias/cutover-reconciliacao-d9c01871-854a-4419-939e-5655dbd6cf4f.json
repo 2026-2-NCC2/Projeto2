@@ -1,0 +1,730 @@
+{
+  "inicio": "2026-10-31T05:16:28.120Z",
+  "writes": 0,
+  "status": "COMPARADO_SEM_AUTORIZAR_CUTOVER",
+  "sourceSnapshotCertifiedCurrent": false,
+  "snapshotMysqlSHA256": "3ec34c07d2b31c53d79602f3e891473a0898152db5bf6c30cb44bb7dcf6f7777",
+  "snapshotImportacaoSHA256": "f438687250d126f18b38947a9abf609ff8c54a87e8f794ba872b25a191994e61",
+  "dumps": {
+    "usuarios": {
+      "origem": 9,
+      "destino": 9,
+      "ausentesDestino": [],
+      "extrasDestino": [],
+      "idsDivergentes": [],
+      "camposDivergentes": {}
+    },
+    "eventos": {
+      "origem": 5,
+      "destino": 5,
+      "ausentesDestino": [],
+      "extrasDestino": [],
+      "idsDivergentes": [],
+      "camposDivergentes": {}
+    },
+    "custos_evento": {
+      "origem": 3,
+      "destino": 3,
+      "ausentesDestino": [],
+      "extrasDestino": [],
+      "idsDivergentes": [],
+      "camposDivergentes": {}
+    },
+    "cotacoes": {
+      "origem": 3,
+      "destino": 3,
+      "ausentesDestino": [],
+      "extrasDestino": [],
+      "idsDivergentes": [],
+      "camposDivergentes": {}
+    },
+    "itens_cotacao": {
+      "origem": 13,
+      "destino": 13,
+      "ausentesDestino": [],
+      "extrasDestino": [],
+      "idsDivergentes": [],
+      "camposDivergentes": {}
+    },
+    "propostas": {
+      "origem": 2,
+      "destino": 2,
+      "ausentesDestino": [],
+      "extrasDestino": [],
+      "idsDivergentes": [],
+      "camposDivergentes": {}
+    },
+    "inscricoes": {
+      "origem": 2,
+      "destino": 2,
+      "ausentesDestino": [],
+      "extrasDestino": [],
+      "idsDivergentes": [],
+      "camposDivergentes": {}
+    },
+    "solicitacoes_acesso": {
+      "origem": 5,
+      "destino": 5,
+      "ausentesDestino": [],
+      "extrasDestino": [],
+      "idsDivergentes": [],
+      "camposDivergentes": {}
+    }
+  },
+  "identidadesDumps": {
+    "mesmoIdEEmail": 9,
+    "idsComOutraIdentidade": [],
+    "mesmoEmailIdDiferente": [],
+    "identidadesAusentes": [],
+    "hashesDivergentes": 0,
+    "perfisDivergentes": 0,
+    "emailsDuplicadosDestino": 0
+  },
+  "limitacoes": [
+    "Dumps sao referencia historica; nao certificam a origem atual.",
+    "Snapshots MySQL e REST nao sao atomicos entre provedores.",
+    "TIMESTAMP comparado tambem por UNIX_TIMESTAMP da origem e instante UTC do destino; calendario local isolado nao indica mudanca de dados.",
+    "Hashes bcrypt comparados apenas em memoria; diferenca nao prova mudanca da senha em texto.",
+    "Nao foi identificada reconciliacao integral anterior certificada para datar o delta."
+  ],
+  "etapa": "CONCLUIDA",
+  "origemAtualDisponivel": true,
+  "origemAtualLidaEmSnapshotConsistente": true,
+  "certificacaoCutoverFinal": false,
+  "timezoneDumpMysql": "+00:00",
+  "contextoOrigem": {
+    "bancoEsperado": true,
+    "porta": "3306",
+    "fusoSessao": "SYSTEM",
+    "fusoGlobal": "SYSTEM",
+    "offsetAtualMinutos": "-180",
+    "colunasTemporais": [
+      {
+        "tabela": "cotacoes",
+        "coluna": "criada_em",
+        "tipo": "timestamp"
+      },
+      {
+        "tabela": "inscricoes",
+        "coluna": "data_inscricao",
+        "tipo": "timestamp"
+      },
+      {
+        "tabela": "propostas",
+        "coluna": "criada_em",
+        "tipo": "timestamp"
+      },
+      {
+        "tabela": "solicitacoes_acesso",
+        "coluna": "criada_em",
+        "tipo": "timestamp"
+      }
+    ],
+    "snapshot": "InnoDB READ ONLY consistente"
+  },
+  "origemAtualVsDump": {
+    "usuarios": {
+      "origem": 9,
+      "destino": 9,
+      "ausentesDestino": [],
+      "extrasDestino": [],
+      "idsDivergentes": [],
+      "camposDivergentes": {}
+    },
+    "eventos": {
+      "origem": 5,
+      "destino": 5,
+      "ausentesDestino": [],
+      "extrasDestino": [],
+      "idsDivergentes": [],
+      "camposDivergentes": {}
+    },
+    "custos_evento": {
+      "origem": 3,
+      "destino": 3,
+      "ausentesDestino": [],
+      "extrasDestino": [],
+      "idsDivergentes": [],
+      "camposDivergentes": {}
+    },
+    "cotacoes": {
+      "origem": 3,
+      "destino": 3,
+      "ausentesDestino": [],
+      "extrasDestino": [],
+      "idsDivergentes": [
+        "1",
+        "3",
+        "4"
+      ],
+      "camposDivergentes": {
+        "criada_em": 3
+      }
+    },
+    "itens_cotacao": {
+      "origem": 13,
+      "destino": 13,
+      "ausentesDestino": [],
+      "extrasDestino": [],
+      "idsDivergentes": [],
+      "camposDivergentes": {}
+    },
+    "propostas": {
+      "origem": 2,
+      "destino": 2,
+      "ausentesDestino": [],
+      "extrasDestino": [],
+      "idsDivergentes": [
+        "1",
+        "2"
+      ],
+      "camposDivergentes": {
+        "criada_em": 2
+      }
+    },
+    "inscricoes": {
+      "origem": 2,
+      "destino": 2,
+      "ausentesDestino": [],
+      "extrasDestino": [],
+      "idsDivergentes": [
+        "1",
+        "2"
+      ],
+      "camposDivergentes": {
+        "data_inscricao": 2
+      }
+    },
+    "solicitacoes_acesso": {
+      "origem": 5,
+      "destino": 5,
+      "ausentesDestino": [],
+      "extrasDestino": [],
+      "idsDivergentes": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "camposDivergentes": {
+        "criada_em": 5
+      }
+    }
+  },
+  "projectRef": "gnwybroqfvwosiqzsfla",
+  "destinoVsImportacao": {
+    "usuarios": {
+      "origem": 9,
+      "destino": 10,
+      "ausentesDestino": [],
+      "extrasDestino": [
+        "10"
+      ],
+      "idsDivergentes": [],
+      "camposDivergentes": {}
+    },
+    "eventos": {
+      "origem": 5,
+      "destino": 6,
+      "ausentesDestino": [],
+      "extrasDestino": [
+        "12"
+      ],
+      "idsDivergentes": [],
+      "camposDivergentes": {}
+    },
+    "custos_evento": {
+      "origem": 3,
+      "destino": 5,
+      "ausentesDestino": [],
+      "extrasDestino": [
+        "7",
+        "8"
+      ],
+      "idsDivergentes": [],
+      "camposDivergentes": {}
+    },
+    "cotacoes": {
+      "origem": 3,
+      "destino": 4,
+      "ausentesDestino": [],
+      "extrasDestino": [
+        "6"
+      ],
+      "idsDivergentes": [],
+      "camposDivergentes": {}
+    },
+    "itens_cotacao": {
+      "origem": 13,
+      "destino": 15,
+      "ausentesDestino": [],
+      "extrasDestino": [
+        "22",
+        "23"
+      ],
+      "idsDivergentes": [],
+      "camposDivergentes": {}
+    },
+    "propostas": {
+      "origem": 2,
+      "destino": 3,
+      "ausentesDestino": [],
+      "extrasDestino": [
+        "3"
+      ],
+      "idsDivergentes": [],
+      "camposDivergentes": {}
+    },
+    "inscricoes": {
+      "origem": 2,
+      "destino": 3,
+      "ausentesDestino": [],
+      "extrasDestino": [
+        "3"
+      ],
+      "idsDivergentes": [],
+      "camposDivergentes": {}
+    },
+    "solicitacoes_acesso": {
+      "origem": 5,
+      "destino": 6,
+      "ausentesDestino": [],
+      "extrasDestino": [
+        "6"
+      ],
+      "idsDivergentes": [],
+      "camposDivergentes": {}
+    }
+  },
+  "identidadesVsImportacao": {
+    "mesmoIdEEmail": 9,
+    "idsComOutraIdentidade": [],
+    "mesmoEmailIdDiferente": [],
+    "identidadesAusentes": [],
+    "hashesDivergentes": 0,
+    "perfisDivergentes": 0,
+    "emailsDuplicadosDestino": 0
+  },
+  "integridadeDestino": {
+    "eventos": {
+      "usuario_id": 0
+    },
+    "custos_evento": {
+      "evento_id": 0
+    },
+    "cotacoes": {
+      "evento_id": 0
+    },
+    "itens_cotacao": {
+      "cotacao_id": 0
+    },
+    "propostas": {
+      "cotacao_id": 0,
+      "fornecedor_id": 0
+    },
+    "inscricoes": {
+      "usuario_id": 0,
+      "evento_id": 0
+    },
+    "solicitacoes_acesso": {
+      "usuario_id": 0
+    }
+  },
+  "atualVsDestino": {
+    "usuarios": {
+      "origem": 9,
+      "destino": 10,
+      "ausentesDestino": [],
+      "extrasDestino": [
+        "10"
+      ],
+      "idsDivergentes": [],
+      "camposDivergentes": {}
+    },
+    "eventos": {
+      "origem": 5,
+      "destino": 6,
+      "ausentesDestino": [],
+      "extrasDestino": [
+        "12"
+      ],
+      "idsDivergentes": [],
+      "camposDivergentes": {}
+    },
+    "custos_evento": {
+      "origem": 3,
+      "destino": 5,
+      "ausentesDestino": [],
+      "extrasDestino": [
+        "7",
+        "8"
+      ],
+      "idsDivergentes": [],
+      "camposDivergentes": {}
+    },
+    "cotacoes": {
+      "origem": 3,
+      "destino": 4,
+      "ausentesDestino": [],
+      "extrasDestino": [
+        "6"
+      ],
+      "idsDivergentes": [
+        "1",
+        "3",
+        "4"
+      ],
+      "camposDivergentes": {
+        "criada_em": 3
+      }
+    },
+    "itens_cotacao": {
+      "origem": 13,
+      "destino": 15,
+      "ausentesDestino": [],
+      "extrasDestino": [
+        "22",
+        "23"
+      ],
+      "idsDivergentes": [],
+      "camposDivergentes": {}
+    },
+    "propostas": {
+      "origem": 2,
+      "destino": 3,
+      "ausentesDestino": [],
+      "extrasDestino": [
+        "3"
+      ],
+      "idsDivergentes": [
+        "1",
+        "2"
+      ],
+      "camposDivergentes": {
+        "criada_em": 2
+      }
+    },
+    "inscricoes": {
+      "origem": 2,
+      "destino": 3,
+      "ausentesDestino": [],
+      "extrasDestino": [
+        "3"
+      ],
+      "idsDivergentes": [
+        "1",
+        "2"
+      ],
+      "camposDivergentes": {
+        "data_inscricao": 2
+      }
+    },
+    "solicitacoes_acesso": {
+      "origem": 5,
+      "destino": 6,
+      "ausentesDestino": [],
+      "extrasDestino": [
+        "6"
+      ],
+      "idsDivergentes": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "camposDivergentes": {
+        "criada_em": 5
+      }
+    }
+  },
+  "identidadesAtuais": {
+    "mesmoIdEEmail": 9,
+    "idsComOutraIdentidade": [],
+    "mesmoEmailIdDiferente": [],
+    "identidadesAusentes": [],
+    "hashesDivergentes": 0,
+    "perfisDivergentes": 0,
+    "emailsDuplicadosDestino": 0
+  },
+  "integridadeOrigem": {
+    "eventos": {
+      "usuario_id": 0
+    },
+    "custos_evento": {
+      "evento_id": 0
+    },
+    "cotacoes": {
+      "evento_id": 0
+    },
+    "itens_cotacao": {
+      "cotacao_id": 0
+    },
+    "propostas": {
+      "cotacao_id": 0,
+      "fornecedor_id": 0
+    },
+    "inscricoes": {
+      "usuario_id": 0,
+      "evento_id": 0
+    },
+    "solicitacoes_acesso": {
+      "usuario_id": 0
+    }
+  },
+  "relacionamentosComOutraIdentidade": {
+    "eventos.usuario_id": [],
+    "propostas.fornecedor_id": [],
+    "inscricoes.usuario_id": [],
+    "solicitacoes_acesso.usuario_id": []
+  },
+  "instantesTimestamp": {
+    "cotacoes.criada_em": {
+      "comparados": 3,
+      "idsDivergentes": [],
+      "diferencasMilissegundos": {},
+      "idsSemPrecisaoComparavel": []
+    },
+    "propostas.criada_em": {
+      "comparados": 2,
+      "idsDivergentes": [],
+      "diferencasMilissegundos": {},
+      "idsSemPrecisaoComparavel": []
+    },
+    "inscricoes.data_inscricao": {
+      "comparados": 2,
+      "idsDivergentes": [],
+      "diferencasMilissegundos": {},
+      "idsSemPrecisaoComparavel": []
+    },
+    "solicitacoes_acesso.criada_em": {
+      "comparados": 5,
+      "idsDivergentes": [],
+      "diferencasMilissegundos": {},
+      "idsSemPrecisaoComparavel": []
+    }
+  },
+  "timestampsVerificadosPorEpoch": true,
+  "classificacaoAdicionais": [
+    {
+      "tabela": "usuarios",
+      "id": "10",
+      "origem": "APENAS_NO_DESTINO_ATUAL",
+      "finalidade": "FIXTURE_CONFIRMADA_POR_EVIDENCIA_LOCAL",
+      "camposDivergentesDaOrigemAtual": [],
+      "contaTesteConfigurada": false,
+      "evidencia": "usuarios-criar-https-4313ea84-e760-4889-8f1f-bb90e0fb416c.json",
+      "vinculos": [],
+      "marcadorTeste": true,
+      "decisao": "PRESERVAR_SEM_ALTERACAO_ATE_DECISAO_EXPLICITA"
+    },
+    {
+      "tabela": "eventos",
+      "id": "12",
+      "origem": "APENAS_NO_DESTINO_ATUAL",
+      "finalidade": "FIXTURE_CONFIRMADA_POR_EVIDENCIA_LOCAL",
+      "camposDivergentesDaOrigemAtual": [],
+      "contaTesteConfigurada": false,
+      "evidencia": "eventos-publicar-https-45ad5fa7-6424-4ae7-bf86-33cdb34caa00.json",
+      "eventoRelacionado": "12",
+      "vinculos": [
+        {
+          "campo": "usuario_id",
+          "tabela": "usuarios",
+          "id": "1",
+          "existeDestino": true,
+          "existeOrigemAtual": true
+        }
+      ],
+      "marcadorTeste": true,
+      "decisao": "PRESERVAR_SEM_ALTERACAO_ATE_DECISAO_EXPLICITA"
+    },
+    {
+      "tabela": "custos_evento",
+      "id": "7",
+      "origem": "APENAS_NO_DESTINO_ATUAL",
+      "finalidade": "VINCULADO_A_EVENTO_DE_TESTE_CONFIRMADO",
+      "camposDivergentesDaOrigemAtual": [],
+      "contaTesteConfigurada": false,
+      "eventoRelacionado": "12",
+      "vinculos": [
+        {
+          "campo": "evento_id",
+          "tabela": "eventos",
+          "id": "12",
+          "existeDestino": true,
+          "existeOrigemAtual": false
+        }
+      ],
+      "marcadorTeste": false,
+      "decisao": "PRESERVAR_SEM_ALTERACAO_ATE_DECISAO_EXPLICITA"
+    },
+    {
+      "tabela": "custos_evento",
+      "id": "8",
+      "origem": "APENAS_NO_DESTINO_ATUAL",
+      "finalidade": "VINCULADO_A_EVENTO_DE_TESTE_CONFIRMADO",
+      "camposDivergentesDaOrigemAtual": [],
+      "contaTesteConfigurada": false,
+      "eventoRelacionado": "12",
+      "vinculos": [
+        {
+          "campo": "evento_id",
+          "tabela": "eventos",
+          "id": "12",
+          "existeDestino": true,
+          "existeOrigemAtual": false
+        }
+      ],
+      "marcadorTeste": false,
+      "decisao": "PRESERVAR_SEM_ALTERACAO_ATE_DECISAO_EXPLICITA"
+    },
+    {
+      "tabela": "cotacoes",
+      "id": "6",
+      "origem": "APENAS_NO_DESTINO_ATUAL",
+      "finalidade": "VINCULADO_A_EVENTO_DE_TESTE_CONFIRMADO",
+      "camposDivergentesDaOrigemAtual": [],
+      "contaTesteConfigurada": false,
+      "eventoRelacionado": "12",
+      "vinculos": [
+        {
+          "campo": "evento_id",
+          "tabela": "eventos",
+          "id": "12",
+          "existeDestino": true,
+          "existeOrigemAtual": false
+        }
+      ],
+      "marcadorTeste": true,
+      "decisao": "PRESERVAR_SEM_ALTERACAO_ATE_DECISAO_EXPLICITA"
+    },
+    {
+      "tabela": "itens_cotacao",
+      "id": "22",
+      "origem": "APENAS_NO_DESTINO_ATUAL",
+      "finalidade": "VINCULADO_A_EVENTO_DE_TESTE_CONFIRMADO",
+      "camposDivergentesDaOrigemAtual": [],
+      "contaTesteConfigurada": false,
+      "eventoRelacionado": "12",
+      "vinculos": [
+        {
+          "campo": "cotacao_id",
+          "tabela": "cotacoes",
+          "id": "6",
+          "existeDestino": true,
+          "existeOrigemAtual": false
+        }
+      ],
+      "marcadorTeste": false,
+      "decisao": "PRESERVAR_SEM_ALTERACAO_ATE_DECISAO_EXPLICITA"
+    },
+    {
+      "tabela": "itens_cotacao",
+      "id": "23",
+      "origem": "APENAS_NO_DESTINO_ATUAL",
+      "finalidade": "VINCULADO_A_EVENTO_DE_TESTE_CONFIRMADO",
+      "camposDivergentesDaOrigemAtual": [],
+      "contaTesteConfigurada": false,
+      "eventoRelacionado": "12",
+      "vinculos": [
+        {
+          "campo": "cotacao_id",
+          "tabela": "cotacoes",
+          "id": "6",
+          "existeDestino": true,
+          "existeOrigemAtual": false
+        }
+      ],
+      "marcadorTeste": false,
+      "decisao": "PRESERVAR_SEM_ALTERACAO_ATE_DECISAO_EXPLICITA"
+    },
+    {
+      "tabela": "propostas",
+      "id": "3",
+      "origem": "APENAS_NO_DESTINO_ATUAL",
+      "finalidade": "FIXTURE_CONFIRMADA_POR_EVIDENCIA_LOCAL",
+      "camposDivergentesDaOrigemAtual": [],
+      "contaTesteConfigurada": false,
+      "evidencia": "propostas-criar-https-0a151341-304a-4d00-a4f8-b56dd410e365.json",
+      "eventoRelacionado": "1",
+      "vinculos": [
+        {
+          "campo": "cotacao_id",
+          "tabela": "cotacoes",
+          "id": "1",
+          "existeDestino": true,
+          "existeOrigemAtual": true
+        },
+        {
+          "campo": "fornecedor_id",
+          "tabela": "usuarios",
+          "id": "3",
+          "existeDestino": true,
+          "existeOrigemAtual": true
+        }
+      ],
+      "marcadorTeste": false,
+      "decisao": "PRESERVAR_SEM_ALTERACAO_ATE_DECISAO_EXPLICITA"
+    },
+    {
+      "tabela": "inscricoes",
+      "id": "3",
+      "origem": "APENAS_NO_DESTINO_ATUAL",
+      "finalidade": "VINCULADO_A_EVENTO_DE_TESTE_CONFIRMADO",
+      "camposDivergentesDaOrigemAtual": [],
+      "contaTesteConfigurada": false,
+      "eventoRelacionado": "12",
+      "vinculos": [
+        {
+          "campo": "usuario_id",
+          "tabela": "usuarios",
+          "id": "10",
+          "existeDestino": true,
+          "existeOrigemAtual": false
+        },
+        {
+          "campo": "evento_id",
+          "tabela": "eventos",
+          "id": "12",
+          "existeDestino": true,
+          "existeOrigemAtual": false
+        }
+      ],
+      "marcadorTeste": false,
+      "decisao": "PRESERVAR_SEM_ALTERACAO_ATE_DECISAO_EXPLICITA"
+    },
+    {
+      "tabela": "solicitacoes_acesso",
+      "id": "6",
+      "origem": "APENAS_NO_DESTINO_ATUAL",
+      "finalidade": "FIXTURE_CONFIRMADA_POR_EVIDENCIA_LOCAL",
+      "camposDivergentesDaOrigemAtual": [],
+      "contaTesteConfigurada": false,
+      "evidencia": "solicitacoes-acesso-criar-https-1bfdce4d-7349-43f2-b93a-b5368522cdde.json",
+      "vinculos": [
+        {
+          "campo": "usuario_id",
+          "tabela": "usuarios",
+          "id": "10",
+          "existeDestino": true,
+          "existeOrigemAtual": false
+        }
+      ],
+      "marcadorTeste": false,
+      "decisao": "PRESERVAR_SEM_ALTERACAO_ATE_DECISAO_EXPLICITA"
+    }
+  ],
+  "residuosDaHomologacaoEscrita": {
+    "usuarios": [],
+    "eventos": [],
+    "custos_evento": [],
+    "cotacoes": [],
+    "itens_cotacao": [],
+    "propostas": [],
+    "inscricoes": [],
+    "solicitacoes_acesso": []
+  },
+  "fim": "2026-10-31T05:16:32.998Z"
+}

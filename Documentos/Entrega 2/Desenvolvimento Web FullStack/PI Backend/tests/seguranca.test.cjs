@@ -36,7 +36,7 @@ function ambiente() {
     Date: class extends Date { static now() { return estado.agora; } },
     process: { env: { JWT_SECRET: segredo } },
     console: { log: (...args) => logs.push(args), error: (...args) => logs.push(args) },
-    require(nome) {
+    require(nome) { const nova = require("./helpers/persistencia.cjs").dependencia(nome, db); if (nova) return nova;
       if (nome === "express") return express;
       if (nome === "jsonwebtoken") return jwt;
       if (nome === "bcryptjs") return {

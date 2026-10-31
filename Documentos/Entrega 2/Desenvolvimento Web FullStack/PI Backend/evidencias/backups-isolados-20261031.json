@@ -1,0 +1,72 @@
+{
+    "checkedAt":  "2026-10-31T05:48:04.441Z",
+    "externalDirectory":  "C:\\Users\\Lucas\\BackupsTrocaTicket\\backup-20261031-e51f28697254468aa205e99c9a1fbe15",
+    "mainDataWrites":  0,
+    "mysql":  {
+                  "tables":  8,
+                  "rows":  42,
+                  "bytes":  15631,
+                  "backupSha256":  "1a63095c6b88535c9a15da30ab53fd320bf57f18ab4cc7fb321ee32cb13da0bd",
+                  "restoreVerified":  true,
+                  "sourceUnchanged":  true,
+                  "containersRemoved":  true
+              },
+    "supabase":  {
+                     "tables":  46,
+                     "totalRows":  299,
+                     "publicTables":  8,
+                     "publicRows":  52,
+                     "additionalTestRows":  10,
+                     "bytes":  418007,
+                     "backupSha256":  "a2d6a75b9379d0e6f6014793734e7e675b7f22a2d9210bed1b58604a179b6a9d",
+                     "rolesWithoutPasswords":  true,
+                     "tlsVerified":  true,
+                     "restoreVerified":  true,
+                     "publicCatalogVerified":  true,
+                     "rpcCount":  5,
+                     "extensions":  5,
+                     "sourceUnchanged":  true,
+                     "containersRemoved":  true
+                 },
+    "rollback":  {
+                     "verified":  true,
+                     "scope":  "INSERT UPDATE DELETE em eventos e identidade ficticia, PostgreSQL para MariaDB; nao e reversao generica dos oito dominios",
+                     "atomicFailureRollback":  true,
+                     "originalRowsPreserved":  true,
+                     "fixtureIds":  {
+                                        "usuarios":  [
+                                                         1800000000
+                                                     ],
+                                        "eventos":  [
+                                                        1800000000,
+                                                        1800000001,
+                                                        1800000002
+                                                    ]
+                                    },
+                     "noMainDataWrites":  true
+                 },
+    "tests":  {
+                  "passed":  11,
+                  "failed":  0
+              },
+    "cutoverExecuted":  false,
+    "jwtChanged":  false,
+    "normalSupabaseStartupReleased":  false,
+    "freezeActivated":  false,
+    "freezeIntegration":  "helper e patch preparados, nao aplicados no server.js",
+    "blockers":  [
+                     "Checkpoint final sob congelamento global e drenagem confirmada",
+                     "Reversao de deltas dos oito dominios com conflitos e os dez extras ainda nao comprovada; ensaio cobre eventos e identidade ficticia",
+                     "Aplicar integracao inerte ao servidor e validar supervisor antes da janela autorizada",
+                     "Rotacao JWT e liberacao do startup dependem de autorizacao posterior"
+                 ],
+    "securityVerification":  {
+                                 "protectedDirectory":  true,
+                                 "invalidACL":  0,
+                                 "temporaryCredentialFiles":  0,
+                                 "ownedContainersRemaining":  0,
+                                 "envTracked":  false,
+                                 "privateBackupsTracked":  0,
+                                 "freezePatchAppliesWithoutChanges":  true
+                             }
+}

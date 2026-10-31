@@ -1,0 +1,8 @@
+diff --git "a/Documentos/Entrega 2/Desenvolvimento Web FullStack/PI Backend/server.js" "b/Documentos/Entrega 2/Desenvolvimento Web FullStack/PI Backend/server.js"
+--- "a/Documentos/Entrega 2/Desenvolvimento Web FullStack/PI Backend/server.js"
++++ "b/Documentos/Entrega 2/Desenvolvimento Web FullStack/PI Backend/server.js"
+@@ -37,3 +37,4 @@
+ const app = express();
++require("./config/integrar-congelamento.cjs").integrarCongelamento(app);
+ 
+ app.use(cors({

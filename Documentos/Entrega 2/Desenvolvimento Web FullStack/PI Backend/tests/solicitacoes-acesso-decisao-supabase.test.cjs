@@ -44,7 +44,7 @@ function mysql(opcoes = {}) {
     async commit() { etapas.push("commit"); falhar("commit"); Object.assign(estado, pendente); },
     async rollback() { etapas.push("rollback"); pendente = undefined; }, release() { etapas.push("release"); },
   };
-  vm.runInNewContext(src.slice(inicio, fim), {
+  const contextoHandler = {
     autenticar() {}, permitirPerfis: () => () => {}, console: { error() {} },
     app: { patch(_url, ...handlers) { handler = handlers.at(-1); } },
     db: { async getConnection() { etapas.push("conexao"); falhar("conexao"); return conexao; } },
@@ -64,7 +64,10 @@ function mysql(opcoes = {}) {
         assert.equal(c, conexao); assert.equal(id, 13); etapas.push("status"); falhar("status"); pendente.status = status;
       },
     },
-  });
+  };
+  contextoHandler.responderErroServico = require("./helpers/persistencia.cjs").responderErroServico;
+  contextoHandler.servicos = { solicitacoesAcesso: require("../services/solicitacoes-acesso.cjs").criarServicoSolicitacoesAcesso({ db: contextoHandler.db, repositorios: { solicitacoesAcesso: contextoHandler.solicitacoesAcessoRepository } }) };
+  vm.runInNewContext(src.slice(inicio, fim), contextoHandler);
   return { estado, etapas, async decidir(status, id) {
     if (arguments.length === 1) id = "13";
     const res = { statusCode: 200, status(n) { this.statusCode = n; return this; },

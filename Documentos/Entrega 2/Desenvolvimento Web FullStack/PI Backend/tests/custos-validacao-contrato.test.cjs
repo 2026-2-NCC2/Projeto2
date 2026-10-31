@@ -19,7 +19,7 @@ async function contratoPut(custos, id = "13") {
   let handler;
   const gravados = [];
   const conexao = { async beginTransaction() {}, async commit() {}, async rollback() {}, release() {} };
-  vm.runInNewContext(src.slice(inicio, fim), {
+  const contextoHandler = {
     autenticar() {}, permitirPerfis: () => () => {}, console: { error() {} },
     app: { put(_url, ...handlers) { handler = handlers.at(-1); } },
     db: { async getConnection() { return conexao; } },
@@ -31,9 +31,12 @@ async function contratoPut(custos, id = "13") {
       async inserir(c, evento, dados) { assert.equal(c, conexao); assert.equal(evento, Number(id)); gravados.push(dados); },
       async listarPorEvento(evento, c) { assert.equal(c, conexao); return gravados; },
     },
-  });
+  };
+  contextoHandler.responderErroServico = require("./helpers/persistencia.cjs").responderErroServico;
+  contextoHandler.servicos = { custos: require("../services/custos.cjs").criarServicoCustos({ db: contextoHandler.db, repositorios: { custos: contextoHandler.custosRepository } }) };
+  vm.runInNewContext(src.slice(inicio, fim), contextoHandler);
   const res = { statusCode: 200, status(n) { this.statusCode = n; return this; }, json(dados) { this.body = dados; return this; } };
-  await handler({ body: { custos }, params: { id }, usuario: { id: 10 } }, res);
+  await handler({ body: { custos }, params: { id }, usuario: { id: 10, perfil: "organizador" } }, res);
   return { status: res.statusCode, body: JSON.parse(JSON.stringify(res.body)) };
 }
 

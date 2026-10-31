@@ -72,8 +72,14 @@ function moduloSimulado(nome, { env = {}, stubs = {}, principal = false, mainFil
   processo.env = env;
   processo.argv = ["node", arquivo];
   const logs = [];
-  const carregar = id => Object.hasOwn(stubs, id) ? stubs[id]
-    : id === "./config/banco.cjs" ? require("../config/banco.cjs") : require(id);
+  const carregar = id => {
+    if (nome === "server.js") {
+      const nova = require("./helpers/persistencia.cjs").dependencia(id, stubs["./db"] ?? {}, { modulos: stubs });
+      if (nova) return nova;
+    }
+    return Object.hasOwn(stubs, id) ? stubs[id]
+      : id === "./config/banco.cjs" ? require("../config/banco.cjs") : require(id);
+  };
   carregar.main = principal ? modulo : { filename: mainFile ?? path.join(raiz, "scripts", "iniciar-backend-isolado.cjs") };
   const contexto = vm.createContext({
     require: carregar, module: modulo, exports: modulo.exports, __dirname: path.dirname(arquivo),

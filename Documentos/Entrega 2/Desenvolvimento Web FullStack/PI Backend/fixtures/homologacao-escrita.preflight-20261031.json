@@ -1,0 +1,26 @@
+{
+  "runId": "00daf698-5ebc-459c-84b9-45b2a8baa7c8",
+  "projectRef": "gnwybroqfvwosiqzsfla",
+  "status": "INTERROMPIDA_ANTES_DE_ESCRITAS",
+  "reason": "CATALOGO_SQL_DO_DESTINO_NAO_VERIFICADO",
+  "openApiRpcNamesConfirmed": [
+    "substituir_custos_evento",
+    "publicar_cotacao",
+    "decidir_solicitacao_acesso",
+    "avaliar_proposta"
+  ],
+  "writeEndpointsValidated": 0,
+  "mutations": 0,
+  "createdIds": {
+    "usuarios": [],
+    "eventos": [],
+    "solicitacoes_acesso": [],
+    "custos_evento": [],
+    "cotacoes": [],
+    "itens_cotacao": [],
+    "propostas": [],
+    "inscricoes": []
+  },
+  "remainingCreatedRecords": 0,
+  "cleanup": "NAO_NECESSARIA"
+}
