@@ -1,0 +1,57 @@
+{
+  "checkedUtc": "2026-11-01T19:29:48.783Z",
+  "status": "GATE_V2_REVALIDADO",
+  "evidenceFile": "C:\\Users\\Lucas\\Documents\\GitHub\\Projeto2\\Documentos\\Entrega 2\\Desenvolvimento Web FullStack\\PI Backend\\evidencias\\reconciliacao-formal-leitura-ba3a611d-5da8-4592-9411-1d9d1ed12fc2.json",
+  "aceite": {
+    "criterio": "EQUIVALENCIA_ATUAL",
+    "reconheceLacunaHistorica": true,
+    "aceitaRiscoResidual": true,
+    "aceitaControleOperacionalSemLockGlobal": true,
+    "referenciaAutorizacao": "Usuario autorizou explicitamente recuperacao controlada e smoke em 01/11/2026, registrando aceite do risco residual da lacuna historica nao comprovada. Funcionamento normal nao autorizado.",
+    "aceitoEm": "2026-11-01T19:29:33.438Z",
+    "evidenciaSha256": "b684964c8b2d0e0ff0918338a8b1605ea6221c20edd5dcd640fd6f4e20d60854",
+    "checkpointId": "349d6df4-7c15-4960-b739-dfd91fd53c8d",
+    "checkpointSha256": "4ca6ae29e558bd34b89971ce6fefa4e39286c9f10a4c6df15a24b8727bd2462c",
+    "janelaId": "b61595d0-b264-4237-a230-4e08be12af2b",
+    "configuracaoHash": "c5e27747dc3346a2a288c1ed71303f9b6813011e03720d6641bfe96872520aa8"
+  },
+  "plano": {
+    "id": "4f1e2f0bbd18c73ebf480644e84afba3b0f84b959f7b918d1c55fddf36b3fa19",
+    "estadoHash": "4e55a295bc9b642c631cdc9c50db2695118ec42fd4c4aa03a9e97ff05779041e",
+    "evidenciasHash": "04f5849ac7c1daf75b9360eac076387e3b169ff488a47f6f85c6e173ddf2be39",
+    "checkpointId": "349d6df4-7c15-4960-b739-dfd91fd53c8d",
+    "pidAnterior": 31664,
+    "instanciaAnterior": "703da1b4-96e6-45fb-8b26-64301f26a474",
+    "processo": {
+      "pid": 31664,
+      "parentPid": 34428,
+      "criadoEm": "2026-11-01T19:25:45.4651360Z",
+      "entradaConhecida": true,
+      "portaExclusivaLocal": true
+    },
+    "run": "fae5b97e-eab2-4ab2-878e-da9ad9c6e784",
+    "decisaoSeguranca": {
+      "criterio": "RECONCILIACAO_ATUAL",
+      "continuidadeHistoricaComprovada": false,
+      "lacunaHistoricaReconhecida": true,
+      "riscoResidualAceito": true,
+      "controleOperacionalSemLockGlobalAceito": true,
+      "evidenciaSha256": "b684964c8b2d0e0ff0918338a8b1605ea6221c20edd5dcd640fd6f4e20d60854",
+      "checkpointId": "349d6df4-7c15-4960-b739-dfd91fd53c8d",
+      "checkpointSha256": "4ca6ae29e558bd34b89971ce6fefa4e39286c9f10a4c6df15a24b8727bd2462c",
+      "referenciaAutorizacao": "Usuario autorizou explicitamente recuperacao controlada e smoke em 01/11/2026, registrando aceite do risco residual da lacuna historica nao comprovada. Funcionamento normal nao autorizado.",
+      "aceitoEm": "2026-11-01T19:29:33.438Z"
+    }
+  },
+  "historicalAbsenceOfWritesProven": false,
+  "currentDataEqualCheckpoint": true,
+  "currentOperationalWriterControlConfirmed": true,
+  "noNewWritesObserved": true,
+  "historicalNoWritesProven": false,
+  "recoveryExecuted": false,
+  "maintenanceReleased": false,
+  "checkpointChanged": false,
+  "jwtRotated": false,
+  "backupsGenerated": false,
+  "limitation": "Igualdade atual e observacoes nao excluem escritas transitorias revertidas entre capturas. Historico permanece nao comprovado."
+}

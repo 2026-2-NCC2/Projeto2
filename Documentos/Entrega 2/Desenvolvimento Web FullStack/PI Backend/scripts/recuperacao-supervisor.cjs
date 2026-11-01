@@ -36,7 +36,7 @@ function conferirEvidencias(e,env,v,agora=Date.now()){
   assert.equal(v.httpManutencao,503);
   return {id:hash([r.run,t.id,ativo.instancia,t.configuracaoHash,t.checkpointId,v.checkpointSha256,decisaoSeguranca]),estadoHash:hash(e),evidenciasHash:hash({...v,verificacaoAtual:undefined}),checkpointId:t.checkpointId,pidAnterior:ativo.pid,instanciaAnterior:ativo.instancia,processo:structuredClone(v.processo),run:r.run,decisaoSeguranca};
 }
-function criarRecuperacao({estado,ambiente,inspecionar,encerrarConhecido,lancarSelado,consultar,abrirLeitura,adquirirExclusivo,agora=Date.now}){
+function criarRecuperacao({estado,ambiente,inspecionar,encerrarConhecido,lancarSelado,consultar,abrirLeitura,executarSmokeIsolado,adquirirExclusivo,agora=Date.now}){
   let ocupado=false;
   async function conferirVigencia(plano){
     const e=estado.ler(),rec=e.transicao.recuperacao;assert.equal(rec.planoHash,hash(plano),'RECUPERACAO_PLANO_ALTERADO');assert.deepEqual(rec.decisaoSeguranca,plano.decisaoSeguranca);
@@ -72,6 +72,22 @@ function criarRecuperacao({estado,ambiente,inspecionar,encerrarConhecido,lancarS
         assert.deepEqual(n.instancias,[t.destino]);conferirDrenagem(s);assert.equal(s.pid,t.pidDestino);assert.equal(s.instancia,t.destino);
         estado.gravar({...n,transicao:{...t,recuperacao:{...t.recuperacao,etapa:'PRONTA_SMOKE'}}});
         return {status:'PRONTA_SMOKE',reutilizada:false};
+      }catch(err){if(iniciou){const e=estado.ler();estado.gravar({...e,congelado:true,selado:true,transicao:{...e.transicao,fase:'INCERTA',recuperacao:{...e.transicao.recuperacao,etapa:'INTERROMPIDA'}}});}throw err;}
+      finally{try{soltar?.();}finally{ocupado=false;}}
+    },
+    async smokeIsolado(plano,{autorizar=false}={}){
+      assert.equal(autorizar,true,'SMOKE_NAO_AUTORIZADO');assert.ok(!ocupado,'RECUPERACAO_EM_ANDAMENTO');ocupado=true;let soltar,iniciou=false;
+      try{
+        assert.equal(typeof adquirirExclusivo,'function','RECUPERACAO_TRAVA_OBRIGATORIA');soltar=adquirirExclusivo();
+        const e=estado.ler(),t=e.transicao;assert.equal(t?.recuperacao?.id,plano.id);assert.equal(t.recuperacao.etapa,'PRONTA_SMOKE');assert.equal(t.configuracaoHash,fingerprint(ambiente));assert.ok(e.congelado&&e.selado&&t.fase==='INICIADA');
+        await conferirVigencia(plano);const s=await consultar();conferirDrenagem(s);assert.equal(s.pid,t.pidDestino);assert.equal(s.instancia,t.destino);
+        if(t.recuperacao.smokeIsolado?.aprovado===true)return {status:'SMOKE_ISOLADO_APROVADO',reutilizada:true,maintenanceReleased:false};
+        assert.equal(typeof executarSmokeIsolado,'function','SMOKE_PRIVADO_ADAPTER_AUSENTE');iniciou=true;
+        const result=await executarSmokeIsolado({janela:t.id,recuperacaoId:plano.id});assert.equal(result.status,'SMOKE_ISOLADO_LEITURA_APROVADO');assert.equal(result.dataWrites,false);assert.equal(result.maintenanceReleased,false);assert.equal(result.perfisAprovados,4);assert.ok(result.jwtAntigosRecusados&&result.permissoesAprovadas&&result.escritasBloqueadas&&result.contratoPerfilValidado);
+        await conferirVigencia(plano);const after=await consultar();conferirDrenagem(after);assert.equal(after.pid,t.pidDestino);assert.equal(after.instancia,t.destino);
+        const n=estado.ler();assert.ok(n.congelado&&n.selado&&n.transicao.fase==='INICIADA');assert.equal(n.transicao.recuperacao.id,plano.id);assert.equal(n.transicao.recuperacao.etapa,'PRONTA_SMOKE');
+        estado.gravar({...n,transicao:{...n.transicao,recuperacao:{...n.transicao.recuperacao,smokeIsolado:{aprovado:true,terminadoEm:agora(),resultadoSha256:hash(result)}}}});
+        return {status:'SMOKE_ISOLADO_APROVADO',reutilizada:false,maintenanceReleased:false,result};
       }catch(err){if(iniciou){const e=estado.ler();estado.gravar({...e,congelado:true,selado:true,transicao:{...e.transicao,fase:'INCERTA',recuperacao:{...e.transicao.recuperacao,etapa:'INTERROMPIDA'}}});}throw err;}
       finally{try{soltar?.();}finally{ocupado=false;}}
     },

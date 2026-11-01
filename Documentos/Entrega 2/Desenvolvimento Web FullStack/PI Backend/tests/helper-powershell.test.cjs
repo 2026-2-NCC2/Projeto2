@@ -9,6 +9,7 @@ test('helpers usam RemoteSigned no filho e recusam scripts fora da lista',()=>{
   assert.deepEqual(args.slice(0,5),['-NoProfile','-NonInteractive','-ExecutionPolicy','RemoteSigned','-File']);
   assert.equal(args[5],path.join(root,'scripts/preparar-diretorio-t0.ps1'));
   assert.deepEqual(args.slice(6),['-Destino','C:\\destino com espacos']);
+  assert.equal(argumentosHelper('processo-substituicao-selada.ps1')[5],path.join(root,'scripts/processo-substituicao-selada.ps1'));
   assert.throws(()=>argumentosHelper('../server.js'),/NAO_PERMITIDO/);
   assert.throws(()=>argumentosHelper('inventario-janela-real.ps1',[null]),/ARGUMENTOS_INVALIDOS/);
 });

@@ -24,6 +24,15 @@ function criarTransicao({estado,pedir,obterFilho,registrar,agora=Date.now}){
       estado.gravar({...estado.ler(),selado:false,transicao:{...estado.ler().transicao,fase:'LEITURA'}});
       return pedir(id,'abrir-leitura',prazo,{janela:t.id});
     }),
+    liberarSelado:op=>exclusivo(async()=>{
+      const {id,autorizarEscritas,coletarEvidencias,prazo=30000}=op;assert.equal(autorizarEscritas,true);assert.equal(typeof coletarEvidencias,'function');assert.ok(Number.isSafeInteger(prazo)&&prazo>0&&prazo<=60000);
+      const e=estado.ler(),t=e.transicao;conferirDrenagem(await pedir(id,'status'));
+      const {validarGateFinalSelado,conferirPlanoFinalSelado}=require('./gate-final-selado.cjs');
+      const gate=validarGateFinalSelado({estado:e,ambiente:op.ambiente,v:await coletarEvidencias(),agora:agora(),finalidade:'LIBERACAO'});
+      conferirPlanoFinalSelado(gate,estado.ler(),agora());const s=await pedir(id,'drenar',prazo);conferirDrenagem(s);assert.equal(s.pid,t.pidDestino);assert.equal(s.instancia,t.destino);conferirPlanoFinalSelado(gate,estado.ler(),agora());
+      estado.gravar({...e,transicao:{...t,fase:'LIBERAR',gateSelado:{smokeSha256:gate.smokeSha256,controleNonce:gate.controleNonce,verificadoEm:gate.verificadoEm}}});
+      return pedir(id,'liberar-escritas',prazo,{janela:t.id});
+    }),
     liberar:op=>exclusivo(async()=>{
       const {id,autorizarEscritas,validarSmoke,validarDelta,prazo=30000}=op;assert.equal(autorizarEscritas,true);assert.equal(typeof validarSmoke,'function');assert.equal(typeof validarDelta,'function');
       const e=estado.ler(),t=e.transicao;assert.ok(e.congelado&&t?.fase==='LEITURA');const s=await pedir(id,'status');assert.equal(s.instancia,t.destino);assert.equal(s.pid,t.pidDestino);

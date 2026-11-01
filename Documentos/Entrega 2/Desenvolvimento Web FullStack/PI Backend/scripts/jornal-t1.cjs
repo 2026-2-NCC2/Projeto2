@@ -1,0 +1,14 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict');
+function criarJornalT1({estado}){
+  const dir=fs.realpathSync(estado.diretorio);assert.ok(!fs.lstatSync(estado.diretorio).isSymbolicLink());
+  function file(run){assert.match(run,/^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$/);return path.join(dir,'t1-'+run+'.privado.json');}
+  function conferir(r){const e=estado.ler();assert.ok(e.congelado&&e.selado&&e.transicao.fase==='INICIADA');assert.equal(r.pid,e.transicao.pidDestino);assert.equal(r.instancia,e.transicao.destino);assert.equal(r.checkpointId,e.transicao.checkpointId);assert.equal(r.configuracaoHash,e.transicao.configuracaoHash);assert.ok(r.autorizacao?.length>=8);if(e.transicao.t1?.unknownResult)assert.equal(r.unknownResult,true);if(e.transicao.t1?.etapa==='INTERROMPIDA')assert.equal(r.etapa,'INTERROMPIDA');return e;}
+  function persistirEstado(r){const e=conferir(r);assert.ok(!e.transicao.t1||e.transicao.t1.run===r.run);const journalSha256=crypto.createHash('sha256').update(JSON.stringify(r)+'\n').digest('hex');estado.gravar({...e,transicao:{...e.transicao,t1:{...structuredClone(r),journalSha256}}});}
+  return {existe:run=>fs.existsSync(file(run)),
+    criar(r){const e=conferir(r);assert.ok(!e.transicao.t1,'T1_JA_REGISTRADA');const fd=fs.openSync(file(r.run),'wx',0o600);try{fs.writeFileSync(fd,JSON.stringify(r)+'\n');fs.fsyncSync(fd);}finally{fs.closeSync(fd);}persistirEstado(r);},
+    gravar(r){conferir(r);const target=file(r.run);assert.ok(!fs.lstatSync(target).isSymbolicLink());const old=JSON.parse(fs.readFileSync(target));for(const k of ['run','marker','checkpointId','configuracaoHash','pid','instancia','beforeHash','autorizacao','gateSha256','organizadorId'])assert.equal(old[k],r[k]);assert.ok(!old.unknownResult||r.unknownResult);for(const k of ['createdEventIds','createdCostIds']){assert.ok(r[k].length<=1);assert.deepEqual(r[k].slice(0,old[k].length),old[k]);}assert.ok(r.operacoes.length>=old.operacoes.length&&r.operacoes.length<=3);for(let i=0;i<old.operacoes.length;i++){for(const k of ['id','method','route','iniciadoEm'])assert.equal(old.operacoes[i][k],r.operacoes[i][k]);if(old.operacoes[i].status!=='ENVIANDO')assert.equal(old.operacoes[i].status,r.operacoes[i].status);}assert.deepEqual(r.verificacoes.slice(0,old.verificacoes.length),old.verificacoes);if(old.etapa==='INTERROMPIDA')assert.equal(r.etapa,'INTERROMPIDA');
+      const tmp=path.join(dir,'t1-'+crypto.randomUUID()+'.tmp');let fd;try{fd=fs.openSync(tmp,'wx',0o600);fs.writeFileSync(fd,JSON.stringify(r)+'\n');fs.fsyncSync(fd);fs.closeSync(fd);fd=undefined;fs.renameSync(tmp,target);persistirEstado(r);}finally{if(fd!==undefined)fs.closeSync(fd);if(fs.existsSync(tmp))fs.unlinkSync(tmp);}}
+  };
+}
+module.exports={criarJornalT1};

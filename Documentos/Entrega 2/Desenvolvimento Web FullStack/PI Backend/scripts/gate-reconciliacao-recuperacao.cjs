@@ -67,4 +67,4 @@ function validarReconciliacao({estado,env,v,agora=Date.now(),estadoBaseHash,proc
   for(const key of ['identitiesProfilesAndPasswordHashesEqual','uniqueIdsAndEmails','foreignKeysValid','allPersistedFieldsEqual'])assert.equal(r.comparison[key],true);
   return {criterio:'RECONCILIACAO_ATUAL',continuidadeHistoricaComprovada:false,lacunaHistoricaReconhecida:true,riscoResidualAceito:true,controleOperacionalSemLockGlobalAceito:true,evidenciaSha256:evidenceHash,checkpointId:t.checkpointId,checkpointSha256:v.checkpointSha256,referenciaAutorizacao:a.referenciaAutorizacao,aceitoEm:a.aceitoEm};
 }
-module.exports={validarReconciliacao,resumo,TTL_RECONCILIACAO,TTL_ATUAL};
+module.exports={validarReconciliacao,resumo,TTL_RECONCILIACAO,TTL_ATUAL,conferirEscritores:escritores,conferirCapturas:capturas};

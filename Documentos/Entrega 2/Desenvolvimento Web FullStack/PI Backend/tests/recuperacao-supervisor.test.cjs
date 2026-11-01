@@ -41,6 +41,16 @@ test('retomada autorizada do smoke admite leituras e login e conserva bloqueio d
   assert.equal(request(f.target(),'GET','/perfil').admitted,true);assert.equal(request(f.target(),'POST','/login').admitted,true);assert.equal(request(f.target(),'POST','/eventos').status,503);
   await assert.rejects(f.target().executarPersistencia(async()=>assert.fail('escrita executada')),{code:'FREEZE_NOVA_ESCRITA_BLOQUEADA'});
 });
+test('smoke isolado exige autorizacao e conserva selagem com resultado idempotente',async()=>{
+  const f=fixture();let calls=0;f.hooks.executarSmokeIsolado=async()=>{calls++;assert.equal(request(f.target(),'GET','/perfil').status,503);return {status:'SMOKE_ISOLADO_LEITURA_APROVADO',perfisAprovados:4,dataWrites:false,maintenanceReleased:false,jwtAntigosRecusados:true,permissoesAprovadas:true,escritasBloqueadas:true,contratoPerfilValidado:true};};
+  const api=f.api(),p=await api.planejar();await api.recuperar(p,{autorizar:true});await assert.rejects(api.smokeIsolado(p),/NAO_AUTORIZADO/);const before=f.estado.ler();assert.equal((await api.smokeIsolado(p,{autorizar:true})).status,'SMOKE_ISOLADO_APROVADO');assert.equal((await api.smokeIsolado(p,{autorizar:true})).reutilizada,true);assert.equal(calls,1);assert.equal(f.estado.ler().transicao.fase,'INICIADA');assert.equal(f.estado.ler().selado,true);assert.equal(f.estado.ler().transicao.checkpointId,before.transicao.checkpointId);assert.equal(request(f.target(),'POST','/login').status,503);
+});
+test('falha do smoke isolado marca INCERTA mantendo 503 sem repetir execucao',async()=>{
+  const f=fixture();let calls=0;f.hooks.executarSmokeIsolado=async()=>{calls++;throw Error('SMOKE_FICTICIO_FALHOU');};const api=f.api(),p=await api.planejar();await api.recuperar(p,{autorizar:true});await assert.rejects(api.smokeIsolado(p,{autorizar:true}));assert.equal(f.estado.ler().transicao.fase,'INCERTA');assert.equal(f.estado.ler().selado,true);assert.equal(request(f.target(),'GET','/perfil').status,503);await assert.rejects(api.smokeIsolado(p,{autorizar:true}));assert.equal(calls,1);
+});
+test('smoke isolado bloqueia identidade alterada antes de chamar o adapter',async()=>{
+  const f=fixture();f.hooks.executarSmokeIsolado=async()=>assert.fail('smoke executado');const api=f.api(),p=await api.planejar();await api.recuperar(p,{autorizar:true});const e=f.estado.ler();e.transicao.pidDestino=909;f.estado.gravar(e);await assert.rejects(api.smokeIsolado(p,{autorizar:true}));assert.equal(f.estado.ler().selado,true);
+});
 test('T1 incerteza HTTP e identidades divergentes sao recusados sem encerrar processos',async()=>{
   const mutations=[f=>{f.v.relatorio.t1Attempted=true;},f=>{f.v.diario.http[0].status='ENVIANDO';},f=>{f.v.processo.pid=999;},f=>{f.v.escritoresControlados=false;},f=>{f.v.checkpointId='outro';},f=>{f.env.JWT_SECRET+='alterado';},f=>{f.v.causaConfirmada='DESCONHECIDA';}];
   for(const mutate of mutations){const f=fixture();mutate(f);await assert.rejects(f.api().planejar());assert.deepEqual(f.counts(),{stop:0,launch:0});assert.equal(f.estado.ler().transicao.fase,'INCERTA');}

@@ -1,0 +1,36 @@
+{
+  "checkedUtc": "2026-11-01T19:23:26.609Z",
+  "status": "INTERROMPIDA_ANTES_DA_ADMISSAO",
+  "reason": "CLIENTE_MYSQL_CONCORRENTE",
+  "inventory": {
+    "mysqlPid": 20660,
+    "otherClient": {
+      "pid": 28180,
+      "name": "MySQLWorkbench.exe",
+      "establishedConnections": 2
+    },
+    "knownMaintenanceResponder": null,
+    "knownSupervisor": null,
+    "listeners": [],
+    "tasks": []
+  },
+  "phase": "INCERTA",
+  "frozen": true,
+  "sealed": true,
+  "readmissionExecuted": false,
+  "recoveryExecuted": false,
+  "gateV2Executed": false,
+  "writerControlConfirmed": false,
+  "processesStarted": false,
+  "processesStopped": false,
+  "databaseQueriesExecuted": false,
+  "dataWrites": false,
+  "jwtRotated": false,
+  "historicalAbsenceOfWritesProven": false,
+  "preservation": {
+    "state": true,
+    "environment": true,
+    "checkpoint": true
+  },
+  "requiredAction": "Encerrar voluntariamente o cliente Workbench e revalidar inventario; nao encerrar conexoes desconhecidas automaticamente."
+}

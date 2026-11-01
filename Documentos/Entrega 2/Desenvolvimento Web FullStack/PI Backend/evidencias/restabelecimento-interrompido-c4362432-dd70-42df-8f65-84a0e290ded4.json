@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "checkedUtc": "2026-11-01T19:20:41.229Z",
+  "status": "INTERROMPIDA_ANTES_DA_ADMISSAO",
+  "reason": "RESPONDEDOR_VALIDADO_AUSENTE_E_MYSQL_LOCAL_AUSENTE",
+  "inventory": {
+    "source": "inventario-janela-real.ps1; consulta nativa fora do sandbox",
+    "processes": [
+      {
+        "pid": 23992,
+        "category": "CODEX_MCP"
+      },
+      {
+        "pid": 30280,
+        "category": "CODEX_MCP"
+      },
+      {
+        "pid": 30228,
+        "category": "CODEX_MCP"
+      },
+      {
+        "pid": 28988,
+        "category": "CODEX_MCP"
+      }
+    ],
+    "listeners": [],
+    "mysqlClients": [],
+    "tasks": [],
+    "knownMaintenanceResponder": null,
+    "knownSupervisor": null,
+    "mysqlProcess": null
+  },
+  "http": {
+    "error": "ECONNREFUSED"
+  },
+  "phase": "INCERTA",
+  "frozen": true,
+  "sealed": true,
+  "readmissionExecuted": false,
+  "recoveryExecuted": false,
+  "gateV2Executed": false,
+  "newV2Generated": false,
+  "writerControlConfirmed": false,
+  "processesStarted": false,
+  "processesStopped": false,
+  "dataWrites": false,
+  "jwtRotated": false,
+  "checkpointChanged": false,
+  "unchanged": {
+    "state": true,
+    "environment": true,
+    "checkpoint": true,
+    "backupIntegrity": true
+  },
+  "historicalAbsenceOfWritesProven": false,
+  "blockers": [
+    "Restabelecer os pre-requisitos operacionais de MySQL local e respondedor 503 com identidade atual antes de nova tentativa.",
+    "Sem listener na porta 3001, nao ha resposta HTTP 503; nenhuma abertura de trafego normal foi realizada.",
+    "PIDs historicos nao foram reutilizados como comprovacao."
+  ]
+}

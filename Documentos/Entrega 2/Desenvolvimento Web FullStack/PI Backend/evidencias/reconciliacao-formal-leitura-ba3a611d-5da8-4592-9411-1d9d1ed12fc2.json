@@ -1,0 +1,270 @@
+{
+  "startedUtc": "2026-11-01T19:25:49.636Z",
+  "status": "RECONCILIACAO_ATUAL_APROVADA",
+  "readOnly": true,
+  "historicalAbsenceOfWritesProven": false,
+  "historicalGapExplicitlyAcknowledged": true,
+  "scope": "Oito dominios do TrocaTicket; controle operacional local conforme declaracao do proprietario e autorizacao desta janela",
+  "recoveryExecuted": false,
+  "maintenanceReleased": false,
+  "deltaOrchestratorExecuted": false,
+  "backupsGenerated": false,
+  "checkpointCreated": false,
+  "jwtRotated": false,
+  "dataWrites": false,
+  "rollbackExecuted": false,
+  "commitsCreated": false,
+  "checks": [
+    "manutencao persistida e nenhuma recuperacao iniciada",
+    "duas capturas consistentes com o checkpoint, sem mudanca observada",
+    "nenhum cliente local MySQL adicional observado",
+    "estado do supervisor inalterado",
+    "JWT e configuracao inalterados",
+    "checkpoint original inalterado",
+    "artefatos dos backups existentes preservados"
+  ],
+  "stage": "estabilidade_e_escritores_depois",
+  "schemaVersion": 2,
+  "run": "fae5b97e-eab2-4ab2-878e-da9ad9c6e784",
+  "janelaId": "b61595d0-b264-4237-a230-4e08be12af2b",
+  "configuracaoHash": "c5e27747dc3346a2a288c1ed71303f9b6813011e03720d6641bfe96872520aa8",
+  "estadoSha256": "4e55a295bc9b642c631cdc9c50db2695118ec42fd4c4aa03a9e97ff05779041e",
+  "checkpointId": "349d6df4-7c15-4960-b739-dfd91fd53c8d",
+  "checkpointSha256": "4ca6ae29e558bd34b89971ce6fefa4e39286c9f10a4c6df15a24b8727bd2462c",
+  "currentSupervisorIdentity": {
+    "pid": 31664,
+    "instancia": "703da1b4-96e6-45fb-8b26-64301f26a474",
+    "tipo": "RESTABELECIDO_SELADO",
+    "admissaoId": "9943274e-71b0-42ee-9126-dcc7d1bd83e3"
+  },
+  "readmissionObserved": true,
+  "existingBackupIntegrityVerified": true,
+  "writersBefore": {
+    "local": {
+      "capturedUtc": "2026-11-01T19:25:52.435Z",
+      "knownBackend": {
+        "pid": 31664,
+        "parentPid": 34428,
+        "criadoEm": "2026-11-01T19:25:45.4651360Z",
+        "entradaConhecida": true,
+        "portaExclusivaLocal": true
+      },
+      "processCount": 8,
+      "unknownProcessCount": 0,
+      "tasks": 0,
+      "mysqlClientPids": [],
+      "httpStatus": 503
+    },
+    "database": {
+      "capturedUtc": "2026-11-01T19:25:52.436Z",
+      "mysql": {
+        "otherClients": 0,
+        "otherTransactions": 0,
+        "enabledJobs": 0,
+        "scheduler": "OFF"
+      },
+      "supabase": {
+        "sessions": [
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "authenticator",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          }
+        ],
+        "activeCron": 0,
+        "httpQueue": 0,
+        "tlsVerified": true
+      }
+    }
+  },
+  "comparison": {
+    "counts": {
+      "usuarios": {
+        "mysql": 9,
+        "supabase": 10
+      },
+      "eventos": {
+        "mysql": 5,
+        "supabase": 6
+      },
+      "custos_evento": {
+        "mysql": 3,
+        "supabase": 5
+      },
+      "cotacoes": {
+        "mysql": 3,
+        "supabase": 4
+      },
+      "itens_cotacao": {
+        "mysql": 13,
+        "supabase": 15
+      },
+      "propostas": {
+        "mysql": 2,
+        "supabase": 3
+      },
+      "inscricoes": {
+        "mysql": 2,
+        "supabase": 3
+      },
+      "solicitacoes_acesso": {
+        "mysql": 5,
+        "supabase": 6
+      }
+    },
+    "additionalIds": {
+      "usuarios": [
+        10
+      ],
+      "eventos": [
+        12
+      ],
+      "custos_evento": [
+        7,
+        8
+      ],
+      "cotacoes": [
+        6
+      ],
+      "itens_cotacao": [
+        22,
+        23
+      ],
+      "propostas": [
+        3
+      ],
+      "inscricoes": [
+        3
+      ],
+      "solicitacoes_acesso": [
+        6
+      ]
+    },
+    "additionalRecordsPreserved": 10,
+    "sharedRecordsIdentical": 42,
+    "identitiesProfilesAndPasswordHashesEqual": true,
+    "uniqueIdsAndEmails": true,
+    "foreignKeysValid": true,
+    "allPersistedFieldsEqual": true,
+    "mysqlRows": 42,
+    "supabaseRows": 52
+  },
+  "firstCapture": {
+    "mysql": {
+      "inicio": 1793561155066,
+      "fim": 1793561155087
+    },
+    "supabase": {
+      "inicio": 1793561155088,
+      "fim": 1793561159253
+    }
+  },
+  "secondCapture": {
+    "mysql": {
+      "inicio": 1793561159694,
+      "fim": 1793561159700
+    },
+    "supabase": {
+      "inicio": 1793561159701,
+      "fim": 1793561163836
+    }
+  },
+  "dataHashes": {
+    "mysql": "2aa2ee825c85538b01638712d9c3caf7a74fbcfcad8093809c10fbd16fad57d0",
+    "supabase": "c1a31bf5df8944eb33c5fa5c6a5c2b7870a36d5f5a53b6385021219b4370e595",
+    "catalogos": "f2e09f8ba183b735e0bc4888345d7112f7bb16ac62dc3daf8ea1b13ba80bf615"
+  },
+  "writersAfter": {
+    "database": {
+      "capturedUtc": "2026-11-01T19:26:04.279Z",
+      "mysql": {
+        "otherClients": 0,
+        "otherTransactions": 0,
+        "enabledJobs": 0,
+        "scheduler": "OFF"
+      },
+      "supabase": {
+        "sessions": [
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "authenticator",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          }
+        ],
+        "activeCron": 0,
+        "httpQueue": 0,
+        "tlsVerified": true
+      }
+    },
+    "local": {
+      "capturedUtc": "2026-11-01T19:26:09.466Z",
+      "knownBackend": {
+        "pid": 31664,
+        "parentPid": 34428,
+        "criadoEm": "2026-11-01T19:25:45.4651360Z",
+        "entradaConhecida": true,
+        "portaExclusivaLocal": true
+      },
+      "processCount": 8,
+      "unknownProcessCount": 0,
+      "tasks": 0,
+      "mysqlClientPids": [],
+      "httpStatus": 503
+    }
+  },
+  "currentOperationalWriterControlConfirmed": true,
+  "databaseEnforcedGlobalWriteLock": false,
+  "catalogsMatchCheckpoint": true,
+  "crossDatabaseSnapshotAtomic": false,
+  "residualRisks": [
+    "Ausencia historica de escritas NAO comprovada e nao inferida desta reconciliacao.",
+    "Controle operacional e observacoes antes/depois nao equivalem a revogacao global de SQL/REST; a janela exclusiva deve continuar.",
+    "Capturas por provedor sao independentes, sem transacao distribuida.",
+    "Admissao selada nao resolve INCERTA nem libera leitura ou escrita.",
+    "Smoke final e liberacao normal permanecem pendentes e exigem autorizacao."
+  ],
+  "opinion": "FAVORAVEL_CONDICIONADO_PARA_DECISAO_DE_RECUPERACAO",
+  "liveRecoveryGateUpdated": true,
+  "normalOperationApproved": false,
+  "finishedUtc": "2026-11-01T19:26:09.475Z"
+}

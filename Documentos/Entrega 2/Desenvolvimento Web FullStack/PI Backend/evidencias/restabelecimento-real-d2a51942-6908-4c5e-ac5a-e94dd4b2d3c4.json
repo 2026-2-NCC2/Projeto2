@@ -1,0 +1,40 @@
+{
+  "startedUtc": "2026-11-01T19:25:14.668Z",
+  "controllerPid": 34428,
+  "status": "ADMITIDA_SELADA_GATE_V2_APROVADO",
+  "recoveryExecuted": false,
+  "maintenanceReleased": false,
+  "dataWrites": false,
+  "jwtRotated": false,
+  "backupsGenerated": false,
+  "checkpointCreated": false,
+  "historicalAbsenceOfWritesProven": false,
+  "preEvidenceFile": "C:\\Users\\Lucas\\Documents\\GitHub\\Projeto2\\Documentos\\Entrega 2\\Desenvolvimento Web FullStack\\PI Backend\\evidencias\\operacional-v2-4d57a797-aae0-47a6-98e3-1d61bc1ac628.json",
+  "checkpointId": "349d6df4-7c15-4960-b739-dfd91fd53c8d",
+  "stage": "admissao_selada_handoff_e_gate_v2",
+  "maintenanceResponderPid": 33472,
+  "result": {
+    "status": "ADMITIDA_SELADA",
+    "reutilizada": false,
+    "fase": "INCERTA",
+    "evidencia": {
+      "schemaVersion": 2,
+      "supervisorAdmitido": true,
+      "pid": 31664,
+      "httpStatus": 503,
+      "checkpointId": "349d6df4-7c15-4960-b739-dfd91fd53c8d",
+      "semDivergencias": true,
+      "gateAprovado": true,
+      "evidenceFile": "C:\\Users\\Lucas\\Documents\\GitHub\\Projeto2\\Documentos\\Entrega 2\\Desenvolvimento Web FullStack\\PI Backend\\evidencias\\reconciliacao-formal-leitura-ba3a611d-5da8-4592-9411-1d9d1ed12fc2.json"
+    }
+  },
+  "supervisorPid": 31664,
+  "httpStatus": 503,
+  "phase": "INCERTA",
+  "operationalWriterControlConfirmed": true,
+  "environmentUnchanged": true,
+  "checkpointUnchanged": true,
+  "backupsIntegrityVerified": true,
+  "originalTransitionPreserved": true,
+  "finishedUtc": "2026-11-01T19:26:24.765Z"
+}

@@ -1,0 +1,256 @@
+{
+  "startedUtc": "2026-11-01T19:59:48.997Z",
+  "readOnly": true,
+  "realT1Executed": false,
+  "maintenanceReleased": false,
+  "jwtRotated": false,
+  "checkpointChanged": false,
+  "backupsGenerated": false,
+  "rollbackExecuted": false,
+  "historicalAbsenceOfWritesProven": false,
+  "writersBefore": {
+    "local": {
+      "capturedUtc": "2026-11-01T19:59:52.745Z",
+      "native": {
+        "controlador": {
+          "pid": 29120,
+          "parentPid": 34632,
+          "criadoEm": "2026-11-01T19:38:54.8444150Z",
+          "entradaConhecida": true
+        },
+        "backend": {
+          "pid": 30276,
+          "parentPid": 29120,
+          "criadoEm": "2026-11-01T19:39:29.8543790Z",
+          "entradaConhecida": true,
+          "portaExclusivaLocal": true
+        },
+        "ipcConsultado": false
+      },
+      "knownBackend": {
+        "pid": 30276,
+        "parentPid": 29120,
+        "criadoEm": "2026-11-01T19:39:29.8543790Z",
+        "entradaConhecida": true,
+        "portaExclusivaLocal": true
+      },
+      "unknownProcessCount": 0,
+      "tasks": 0,
+      "mysqlClientPids": [],
+      "httpStatus": 503
+    },
+    "database": {
+      "capturedUtc": "2026-11-01T19:59:52.745Z",
+      "mysql": {
+        "otherClients": 0,
+        "otherTransactions": 0,
+        "enabledJobs": 0,
+        "scheduler": "OFF"
+      },
+      "supabase": {
+        "sessions": [
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "authenticator",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "authenticator",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          }
+        ],
+        "activeCron": 0,
+        "httpQueue": 0,
+        "tlsVerified": true
+      }
+    }
+  },
+  "comparison": {
+    "hashes": {
+      "mysql": "2aa2ee825c85538b01638712d9c3caf7a74fbcfcad8093809c10fbd16fad57d0",
+      "supabase": "c1a31bf5df8944eb33c5fa5c6a5c2b7870a36d5f5a53b6385021219b4370e595",
+      "catalogos": "f2e09f8ba183b735e0bc4888345d7112f7bb16ac62dc3daf8ea1b13ba80bf615"
+    },
+    "counts": {
+      "usuarios": {
+        "mysql": 9,
+        "supabase": 10
+      },
+      "eventos": {
+        "mysql": 5,
+        "supabase": 6
+      },
+      "custos_evento": {
+        "mysql": 3,
+        "supabase": 5
+      },
+      "cotacoes": {
+        "mysql": 3,
+        "supabase": 4
+      },
+      "itens_cotacao": {
+        "mysql": 13,
+        "supabase": 15
+      },
+      "propostas": {
+        "mysql": 2,
+        "supabase": 3
+      },
+      "inscricoes": {
+        "mysql": 2,
+        "supabase": 3
+      },
+      "solicitacoes_acesso": {
+        "mysql": 5,
+        "supabase": 6
+      }
+    },
+    "additionalIds": {
+      "usuarios": [
+        10
+      ],
+      "eventos": [
+        12
+      ],
+      "custos_evento": [
+        7,
+        8
+      ],
+      "cotacoes": [
+        6
+      ],
+      "itens_cotacao": [
+        22,
+        23
+      ],
+      "propostas": [
+        3
+      ],
+      "inscricoes": [
+        3
+      ],
+      "solicitacoes_acesso": [
+        6
+      ]
+    },
+    "mysqlRows": 42,
+    "supabaseRows": 52
+  },
+  "sequenceOwnershipConfirmed": true,
+  "writersAfter": {
+    "database": {
+      "capturedUtc": "2026-11-01T20:00:01.536Z",
+      "mysql": {
+        "otherClients": 0,
+        "otherTransactions": 0,
+        "enabledJobs": 0,
+        "scheduler": "OFF"
+      },
+      "supabase": {
+        "sessions": [
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "authenticator",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "authenticator",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          }
+        ],
+        "activeCron": 0,
+        "httpQueue": 0,
+        "tlsVerified": true
+      }
+    },
+    "local": {
+      "capturedUtc": "2026-11-01T20:00:07.432Z",
+      "native": {
+        "controlador": {
+          "pid": 29120,
+          "parentPid": 34632,
+          "criadoEm": "2026-11-01T19:38:54.8444150Z",
+          "entradaConhecida": true
+        },
+        "backend": {
+          "pid": 30276,
+          "parentPid": 29120,
+          "criadoEm": "2026-11-01T19:39:29.8543790Z",
+          "entradaConhecida": true,
+          "portaExclusivaLocal": true
+        },
+        "ipcConsultado": false
+      },
+      "knownBackend": {
+        "pid": 30276,
+        "parentPid": 29120,
+        "criadoEm": "2026-11-01T19:39:29.8543790Z",
+        "entradaConhecida": true,
+        "portaExclusivaLocal": true
+      },
+      "unknownProcessCount": 0,
+      "tasks": 0,
+      "mysqlClientPids": [],
+      "httpStatus": 503
+    }
+  },
+  "status": "PREPARACAO_READONLY_APROVADA_COM_BLOQUEIO_IPC",
+  "finishedUtc": "2026-11-01T20:00:07.439Z",
+  "stateUnchanged": true,
+  "environmentUnchanged": true,
+  "checkpointUnchanged": true,
+  "backupsIntegrityVerified": true,
+  "checkpointId": "349d6df4-7c15-4960-b739-dfd91fd53c8d",
+  "checkpointSha256": "4ca6ae29e558bd34b89971ce6fefa4e39286c9f10a4c6df15a24b8727bd2462c",
+  "supervisorPid": 30276,
+  "controllerPid": 29120,
+  "additional10Preserved": true,
+  "currentOperationalWriterControlConfirmed": true,
+  "controllerNativeIdentityConfirmed": true,
+  "controllerIpcContinuityConfirmed": false,
+  "gateFinalApproved": false,
+  "blocker": "Controlador atual nao possui canal externo retomavel nem emite recibo de continuidade. Modulos novos nao foram instalados no processo vivo. Exige handoff legitimo autorizado, com novo smoke/evidencia recente.",
+  "historicalGapExplicitlyAcknowledged": true
+}

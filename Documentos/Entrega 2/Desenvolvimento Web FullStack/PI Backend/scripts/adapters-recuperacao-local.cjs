@@ -2,7 +2,7 @@
 // Apenas construir nao cria processos, conexoes, arquivos ou alteracoes de estado.
 const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),crypto=require('node:crypto'),assert=require('node:assert/strict');
 const {executarHelper}=require('./helper-powershell.cjs'),{criarLancadorPlanejado}=require('./lancador-planejado.cjs'),{criarControlador}=require('../config/controlador-supervisor.cjs');
-function criarAdaptersLocais({estado,ambiente,relatorioFile,confirmarJanelaExclusiva=false,confirmarContinuidadeSemEscritas=false,reconciliacaoFile,aceitacaoReconciliacao}){
+function criarAdaptersLocais({estado,ambiente,relatorioFile,confirmarJanelaExclusiva=false,confirmarContinuidadeSemEscritas=false,reconciliacaoFile,aceitacaoReconciliacao,contasSmoke,tokensAntigosSmoke}){
   let filho,ctl;
   const json=file=>JSON.parse(fs.readFileSync(file,'utf8'));
   const ps=async args=>JSON.parse((await executarHelper('processo-recuperacao.ps1',args)).toString().replace(/^\uFEFF/,''));
@@ -69,7 +69,21 @@ function criarAdaptersLocais({estado,ambiente,relatorioFile,confirmarJanelaExclu
       });
       ctl=criarControlador({'express-principal':filho},estado);return {pid:filho.pid,instancia};
     },
-    consultar:()=>pedir('status'),abrirLeitura:janela=>pedir('abrir-leitura',{janela}),obterControlador:()=>ctl
+    executarSmokeIsolado({janela,recuperacaoId}){
+      assert.ok(filho?.connected,'RECUPERACAO_IPC_AUSENTE');assert.ok(Array.isArray(contasSmoke)&&contasSmoke.length===4&&Array.isArray(tokensAntigosSmoke)&&tokensAntigosSmoke.length===2,'SMOKE_PRIVADO_CONTAS_AUSENTES');
+      return new Promise((resolve,reject)=>{
+        const id=crypto.randomUUID(),timer=setTimeout(()=>fim(Error('SMOKE_PRIVADO_IPC_TIMEOUT')),70000);
+        function fim(e,r){clearTimeout(timer);filho.removeListener('message',receber);filho.removeListener('exit',saiu);e?reject(e):resolve(r);}
+        function saiu(){fim(Error('SMOKE_PRIVADO_FILHO_ENCERROU'));}
+        function receber(m){if(m?.tipo==='cutover-smoke-resposta'&&m.id===id)m.ok?fim(null,m.result):fim(Error('SMOKE_PRIVADO_RECUSADO'));}
+        filho.on('message',receber);filho.once('exit',saiu);filho.send({tipo:'cutover-smoke-isolado',id,janela,recuperacaoId,contas:contasSmoke,tokensAntigos:tokensAntigosSmoke},e=>{if(e)fim(Error('SMOKE_PRIVADO_IPC_FALHOU'));});
+      });
+    },
+    requisitarT1Privado({method,route,body,run,organizadorId,credenciais}){
+      assert.ok(filho?.connected,'T1_IPC_AUSENTE');const e=estado.ler();assert.ok(e.congelado&&e.selado&&e.transicao.fase==='INICIADA'&&e.transicao.t1?.run===run);
+      return new Promise((resolve,reject)=>{const id=crypto.randomUUID(),timer=setTimeout(()=>fim(Error('T1_IPC_TIMEOUT')),25000);function fim(err,r){clearTimeout(timer);filho.removeListener('message',receber);filho.removeListener('exit',saiu);err?reject(err):resolve(r);}function saiu(){fim(Error('T1_FILHO_ENCERROU'));}function receber(m){if(m?.tipo==='cutover-t1-resposta'&&m.id===id)m.ok?fim(null,m.result):fim(Error('T1_RECUSADA'));}filho.on('message',receber);filho.once('exit',saiu);filho.send({tipo:'cutover-t1-isolado',id,janela:e.transicao.id,recuperacaoId:e.transicao.recuperacao.id,run,organizadorId,method,route,body,credenciais},err=>{if(err)fim(Error('T1_IPC_FALHOU'));});});
+    },
+    consultar:()=>pedir('status'),abrirLeitura:janela=>pedir('abrir-leitura',{janela}),obterControlador:()=>ctl,obterFilho:()=>filho
   };
 }
 module.exports={criarAdaptersLocais};

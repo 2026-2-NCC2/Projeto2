@@ -11,6 +11,10 @@ function consumirEntrada({estado,env,instancia,ticket,pid=process.pid,instalar=f
   const ctx={estado,instancia,pid,janela:t.id};contextos.add(ctx);if(instalar){assert.equal(pid,process.pid);instalado=ctx;}return ctx;
 }
 function obterInstanciaPlanejada(){return instalado?.pid===process.pid?instalado.instancia:null;}
+function consumirSubstituicao(op){
+  const authority=require('./autoridade-selada.cjs').consumirSupervisor({...op,boot:op.instancia});
+  const ctx={estado:op.estado,instancia:authority.boot,pid:authority.pid,janela:op.estado.ler().transicao.id,autoridade:authority};contextos.add(ctx);if(op.instalar)instalado=ctx;return ctx;
+}
 function consumirRestabelecimento({estado,env,instancia,ticket,pid=process.pid,instalar=false}){
   const e=estado.ler(),t=e.transicao,r=t?.restabelecimento;
   assert.ok(e.congelado&&e.selado&&t?.fase==='INCERTA'&&t.ticket===null&&!t.recuperacao&&r?.etapa==='PREPARADA','RESTABELECIMENTO_SEM_PERMISSAO');
@@ -31,6 +35,7 @@ function validarEntrada(env,modo='principal',{contexto=instalado,estado=contexto
     assert.ok(e.congelado&&e.selado&&['CONSUMIDA','ADMITIDA_SELADA'].includes(r?.etapa)&&r.ticket===null);assert.equal(r.id,contexto.admissaoId);assert.equal(r.destino,contexto.instancia);assert.equal(r.pidDestino,contexto.pid);assert.equal(r.checkpointId,t.checkpointId);assert.equal(r.janelaId,t.id);assert.equal(r.configuracaoHash,fingerprint(env));assert.deepEqual(e.instancias,[r.destino]);return c;
   }
   assert.ok(contextos.has(contexto)&&contexto.estado===estado&&contexto.janela===t.id,'STARTUP_CONTEXTO_RECUSADO');
+  if(e.controleSelado)require('./autoridade-selada.cjs').validarContextoSupervisor(e,contexto.autoridade);
   assert.ok(['INICIADA','LEITURA','LIBERAR'].includes(t.fase)&&e.congelado);assert.equal(contexto.instancia,t.destino);assert.equal(contexto.pid,t.pidDestino);return c;
 }
-module.exports={fingerprint,consumirEntrada,consumirRestabelecimento,obterInstanciaPlanejada,validarEntrada};
+module.exports={fingerprint,consumirEntrada,consumirRestabelecimento,consumirSubstituicao,obterInstanciaPlanejada,validarEntrada};
