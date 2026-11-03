@@ -912,6 +912,12 @@ app.delete("/eventos/:id", autenticar, permitirPerfis("organizador"), async (req
     });
 
   } catch (erro) {
+    if (erro?.code === "23503") {
+      console.error("Exclusao de evento bloqueada por vinculos existentes (23503).");
+      return res.status(409).json({
+        erro: "Não é possível excluir um evento com inscrições ou propostas vinculadas."
+      });
+    }
     console.error("Falha em DELETE /eventos/:id.");
 
     return res.status(500).json({

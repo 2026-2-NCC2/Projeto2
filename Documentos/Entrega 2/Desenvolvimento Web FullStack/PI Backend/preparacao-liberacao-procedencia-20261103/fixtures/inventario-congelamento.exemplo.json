@@ -1,0 +1,13 @@
+{
+  "completoConfirmado": false,
+  "responsavel": null,
+  "processos": [
+    { "id": "express-principal", "instancia": "PREENCHER_PID_HOST_BOOT_ID_DO_SUPERVISOR" }
+  ],
+  "escritoresExternos": [
+    { "id": "outras-replicas", "situacao": "INVENTARIAR" },
+    { "id": "jobs-e-importadores", "situacao": "INVENTARIAR" },
+    { "id": "sql-manual-e-clientes-diretos", "situacao": "INVENTARIAR" }
+  ],
+  "persistenciaConferida": null
+}

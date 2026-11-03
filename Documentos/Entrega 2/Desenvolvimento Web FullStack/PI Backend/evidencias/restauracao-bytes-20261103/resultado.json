@@ -1,0 +1,54 @@
+{
+  "checkedUtc": "2026-11-03T17:20:50.301Z",
+  "restoredFile": "scripts/substituir-controlador-selado.cjs",
+  "source": "preparacao-integracao-retomada-20261103/candidato/substituir-controlador-selado.cjs",
+  "manifestPackageSha256": "79dbdba60a38ef83fa9013ec429cc3f916eda0ef3b7b32d8ccee2ae3ab648179",
+  "originalManifestChanged": false,
+  "verification": {
+    "ok": true,
+    "exit_code": 0,
+    "mode": "APLICADO_NAO_REAPLICAR",
+    "protectedHashesVerified": 27,
+    "deltaFiles": 1,
+    "admissionExecuted": false
+  },
+  "attributePolicy": "-text nos 27 arquivos e quatro pastas seladas; configuracao global intacta",
+  "tests": {
+    "specific": 3,
+    "passed": 3,
+    "failures": 0,
+    "previousSuitesRepeated": false
+  },
+  "otherFiles": {
+    "baselineFiles": 492,
+    "changed": [
+      "scripts/substituir-controlador-selado.cjs"
+    ],
+    "missing": [],
+    "unexpectedAdded": [],
+    "policyAdded": ".gitattributes"
+  },
+  "preserved": {
+    "environment": true,
+    "state": true,
+    "journal": true,
+    "checkpoint": true
+  },
+  "operational": {
+    "httpStatus": null,
+    "port3001Listening": false,
+    "previousControllerPresent": false,
+    "previousSupervisorPresent": false,
+    "processesStarted": false,
+    "admissionExecuted": false,
+    "admissionReady": false,
+    "blocker": "PORTA_3001_SEM_LISTENER_E_PROCESSOS_ANTIGOS_AUSENTES"
+  },
+  "databaseConnections": false,
+  "dataWrites": false,
+  "jwtChanged": false,
+  "checkpointChanged": false,
+  "backupChanged": false,
+  "rollbackExecuted": false,
+  "commitCreated": false
+}

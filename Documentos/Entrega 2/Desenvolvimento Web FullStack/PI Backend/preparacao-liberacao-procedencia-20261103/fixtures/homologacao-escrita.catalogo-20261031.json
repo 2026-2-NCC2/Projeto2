@@ -1,0 +1,334 @@
+[
+  {
+    "preflight_homologacao_escrita": {
+      "tables": [
+        {
+          "rls": true,
+          "name": "cotacoes",
+          "force_rls": false,
+          "privileges_by_role": {
+            "anon": {
+              "delete": false,
+              "insert": false,
+              "select": false,
+              "update": false
+            },
+            "service_role": {
+              "delete": true,
+              "insert": true,
+              "select": true,
+              "update": true
+            },
+            "authenticated": {
+              "delete": false,
+              "insert": false,
+              "select": false,
+              "update": false
+            }
+          }
+        },
+        {
+          "rls": true,
+          "name": "custos_evento",
+          "force_rls": false,
+          "privileges_by_role": {
+            "anon": {
+              "delete": false,
+              "insert": false,
+              "select": false,
+              "update": false
+            },
+            "service_role": {
+              "delete": true,
+              "insert": true,
+              "select": true,
+              "update": true
+            },
+            "authenticated": {
+              "delete": false,
+              "insert": false,
+              "select": false,
+              "update": false
+            }
+          }
+        },
+        {
+          "rls": true,
+          "name": "eventos",
+          "force_rls": false,
+          "privileges_by_role": {
+            "anon": {
+              "delete": false,
+              "insert": false,
+              "select": false,
+              "update": false
+            },
+            "service_role": {
+              "delete": true,
+              "insert": true,
+              "select": true,
+              "update": true
+            },
+            "authenticated": {
+              "delete": false,
+              "insert": false,
+              "select": false,
+              "update": false
+            }
+          }
+        },
+        {
+          "rls": true,
+          "name": "inscricoes",
+          "force_rls": false,
+          "privileges_by_role": {
+            "anon": {
+              "delete": false,
+              "insert": false,
+              "select": false,
+              "update": false
+            },
+            "service_role": {
+              "delete": true,
+              "insert": true,
+              "select": true,
+              "update": true
+            },
+            "authenticated": {
+              "delete": false,
+              "insert": false,
+              "select": false,
+              "update": false
+            }
+          }
+        },
+        {
+          "rls": true,
+          "name": "itens_cotacao",
+          "force_rls": false,
+          "privileges_by_role": {
+            "anon": {
+              "delete": false,
+              "insert": false,
+              "select": false,
+              "update": false
+            },
+            "service_role": {
+              "delete": true,
+              "insert": true,
+              "select": true,
+              "update": true
+            },
+            "authenticated": {
+              "delete": false,
+              "insert": false,
+              "select": false,
+              "update": false
+            }
+          }
+        },
+        {
+          "rls": true,
+          "name": "propostas",
+          "force_rls": false,
+          "privileges_by_role": {
+            "anon": {
+              "delete": false,
+              "insert": false,
+              "select": false,
+              "update": false
+            },
+            "service_role": {
+              "delete": true,
+              "insert": true,
+              "select": true,
+              "update": true
+            },
+            "authenticated": {
+              "delete": false,
+              "insert": false,
+              "select": false,
+              "update": false
+            }
+          }
+        },
+        {
+          "rls": true,
+          "name": "solicitacoes_acesso",
+          "force_rls": false,
+          "privileges_by_role": {
+            "anon": {
+              "delete": false,
+              "insert": false,
+              "select": false,
+              "update": false
+            },
+            "service_role": {
+              "delete": true,
+              "insert": true,
+              "select": true,
+              "update": true
+            },
+            "authenticated": {
+              "delete": false,
+              "insert": false,
+              "select": false,
+              "update": false
+            }
+          }
+        },
+        {
+          "rls": true,
+          "name": "usuarios",
+          "force_rls": false,
+          "privileges_by_role": {
+            "anon": {
+              "delete": false,
+              "insert": false,
+              "select": false,
+              "update": false
+            },
+            "service_role": {
+              "delete": true,
+              "insert": true,
+              "select": true,
+              "update": true
+            },
+            "authenticated": {
+              "delete": false,
+              "insert": false,
+              "select": false,
+              "update": false
+            }
+          }
+        }
+      ],
+      "database": "postgres",
+      "functions": [
+        {
+          "name": "avaliar_proposta",
+          "result": "integer",
+          "definition": "CREATE OR REPLACE FUNCTION public.avaliar_proposta(p_proposta_id numeric, p_organizador_id bigint, p_status text)\n RETURNS integer\n LANGUAGE plpgsql\n SET search_path TO ''\nAS $function$\r\nDECLARE\r\n  v_afetadas integer;\r\nBEGIN\r\n  IF current_user <> 'service_role' THEN\r\n    RAISE EXCEPTION USING\r\n      ERRCODE = 'TA403',\r\n      MESSAGE = 'Acesso recusado.';\r\n  END IF;\r\n\r\n  -- Identidade fornecida pelo backend autenticado.\r\n  IF p_organizador_id IS NULL\r\n     OR p_organizador_id <= 0\r\n     OR p_organizador_id > 9007199254740991 THEN\r\n    RAISE EXCEPTION USING\r\n      ERRCODE = 'TA403',\r\n      MESSAGE = 'Ator invalido.';\r\n  END IF;\r\n\r\n  IF p_proposta_id IS NULL\r\n     OR p_proposta_id <= 0\r\n     OR p_proposta_id::text IN ('NaN', 'Infinity', '-Infinity')\r\n     OR p_proposta_id <> pg_catalog.trunc(p_proposta_id)\r\n     OR p_status IS NULL\r\n     OR p_status COLLATE pg_catalog.\"C\"\r\n        NOT IN ('Aprovada', 'Recusada') THEN\r\n    RAISE EXCEPTION USING\r\n      ERRCODE = 'TA400',\r\n      MESSAGE = 'Entrada invalida.';\r\n  END IF;\r\n\r\n  IF p_proposta_id > 2147483647 THEN\r\n    RETURN 0;\r\n  END IF;\r\n\r\n  UPDATE public.propostas AS p\r\n     SET status = p_status\r\n   WHERE p.id = p_proposta_id::integer\r\n     AND p.status = 'Em avaliação'\r\n     AND EXISTS (\r\n       SELECT 1\r\n         FROM public.cotacoes AS c\r\n         INNER JOIN public.eventos AS e\r\n           ON e.id = c.evento_id\r\n        WHERE c.id = p.cotacao_id\r\n          AND e.usuario_id = p_organizador_id\r\n     );\r\n\r\n  GET DIAGNOSTICS v_afetadas = ROW_COUNT;\r\n  RETURN v_afetadas;\r\nEND;\r\n$function$\n",
+          "configuration": [
+            "search_path=\"\""
+          ],
+          "execute_by_role": {
+            "anon": false,
+            "service_role": true,
+            "authenticated": false
+          },
+          "security_definer": false,
+          "identity_arguments": "p_proposta_id numeric, p_organizador_id bigint, p_status text",
+          "public_execute_grant": false
+        },
+        {
+          "name": "decidir_solicitacao_acesso",
+          "result": "jsonb",
+          "definition": "CREATE OR REPLACE FUNCTION public.decidir_solicitacao_acesso(p_admin_id bigint, p_solicitacao_id numeric, p_status text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SET search_path TO ''\nAS $function$\r\nDECLARE\r\n  v_solicitacao record;\r\n  v_usuarios_afetados bigint;\r\nBEGIN\r\n  IF current_user <> 'service_role' THEN\r\n    RAISE EXCEPTION USING\r\n      ERRCODE = 'TA403', MESSAGE = 'Acesso recusado.';\r\n  END IF;\r\n\r\n  IF p_admin_id IS NULL\r\n     OR p_admin_id <= 0\r\n     OR p_admin_id > 9007199254740991 THEN\r\n    RAISE EXCEPTION USING\r\n      ERRCODE = 'TA403', MESSAGE = 'Ator invalido.';\r\n  END IF;\r\n\r\n  IF p_solicitacao_id IS NULL\r\n     OR p_solicitacao_id <= 0\r\n     OR p_solicitacao_id::text IN ('NaN', 'Infinity', '-Infinity')\r\n     OR p_solicitacao_id <> pg_catalog.trunc(p_solicitacao_id)\r\n     OR p_status IS NULL\r\n     OR p_status COLLATE pg_catalog.\"C\"\r\n        NOT IN ('aprovado', 'rejeitado') THEN\r\n    RAISE EXCEPTION USING\r\n      ERRCODE = 'TA400', MESSAGE = 'Entrada invalida.';\r\n  END IF;\r\n\r\n  -- Identidade deve vir do backend autenticado.\r\n  PERFORM u.id\r\n    FROM public.usuarios AS u\r\n   WHERE u.id = p_admin_id\r\n     AND u.perfil = 'admin';\r\n\r\n  IF NOT FOUND THEN\r\n    RAISE EXCEPTION USING\r\n      ERRCODE = 'TA403', MESSAGE = 'Acesso recusado.';\r\n  END IF;\r\n\r\n  IF p_solicitacao_id > 2147483647 THEN\r\n    RAISE EXCEPTION USING\r\n      ERRCODE = 'TA404', MESSAGE = 'Solicitacao ausente.';\r\n  END IF;\r\n\r\n  SELECT s.usuario_id, s.perfil_solicitado, s.status\r\n    INTO v_solicitacao\r\n    FROM public.solicitacoes_acesso AS s\r\n   WHERE s.id = p_solicitacao_id::integer\r\n   FOR UPDATE;\r\n\r\n  IF NOT FOUND THEN\r\n    RAISE EXCEPTION USING\r\n      ERRCODE = 'TA404', MESSAGE = 'Solicitacao ausente.';\r\n  END IF;\r\n\r\n  IF v_solicitacao.status IS DISTINCT FROM\r\n     'pendente'::public.solicitacoes_acesso_status_enum THEN\r\n    RAISE EXCEPTION USING\r\n      ERRCODE = 'TA409', MESSAGE = 'Solicitacao ja analisada.';\r\n  END IF;\r\n\r\n  IF p_status = 'aprovado' THEN\r\n    UPDATE public.usuarios\r\n       SET perfil =\r\n         (v_solicitacao.perfil_solicitado::text)::public.usuarios_perfil_enum\r\n     WHERE id = v_solicitacao.usuario_id\r\n       AND perfil = 'participante';\r\n\r\n    GET DIAGNOSTICS v_usuarios_afetados = ROW_COUNT;\r\n\r\n    IF v_usuarios_afetados <> 1 THEN\r\n      RAISE EXCEPTION USING\r\n        ERRCODE = 'TA412',\r\n        MESSAGE = 'Perfil atual incompativel.';\r\n    END IF;\r\n  END IF;\r\n\r\n  -- Rejeição não modifica nem restringe o perfil atual.\r\n  UPDATE public.solicitacoes_acesso\r\n     SET status = p_status::public.solicitacoes_acesso_status_enum\r\n   WHERE id = p_solicitacao_id::integer;\r\n\r\n  RETURN pg_catalog.jsonb_build_object(\r\n    'mensagem',\r\n    CASE WHEN p_status = 'aprovado'\r\n      THEN 'Solicitação aprovada com sucesso!'\r\n      ELSE 'Solicitação rejeitada com sucesso!'\r\n    END\r\n  );\r\nEND;\r\n$function$\n",
+          "configuration": [
+            "search_path=\"\""
+          ],
+          "execute_by_role": {
+            "anon": false,
+            "service_role": true,
+            "authenticated": false
+          },
+          "security_definer": false,
+          "identity_arguments": "p_admin_id bigint, p_solicitacao_id numeric, p_status text",
+          "public_execute_grant": false
+        },
+        {
+          "name": "publicar_cotacao",
+          "result": "jsonb",
+          "definition": "CREATE OR REPLACE FUNCTION public.publicar_cotacao(p_evento_id bigint, p_usuario_id bigint, p_prazo text, p_hoje_utc text, p_observacoes text, p_itens jsonb)\n RETURNS jsonb\n LANGUAGE plpgsql\n SET search_path TO ''\nAS $function$\r\nDECLARE\r\n  v_item jsonb;\r\n  v_normalizados jsonb := '[]'::jsonb;\r\n  v_persistidos jsonb := '[]'::jsonb;\r\n  v_categoria text;\r\n  v_descricao text;\r\n  v_valor text;\r\n  v_custo record;\r\n  v_id bigint;\r\n  v_prazo date;\r\n  v_hoje date;\r\n\r\n  v_espacos constant text :=\r\n    U&'\\0009\\000A\\000B\\000C\\000D\\0020\\00A0\\1680\\2000\\2001\\2002\\2003\\2004\\2005\\2006\\2007\\2008\\2009\\200A\\2028\\2029\\202F\\205F\\3000\\FEFF';\r\nBEGIN\r\n  IF current_user <> 'service_role' THEN\r\n    RAISE EXCEPTION USING\r\n      ERRCODE = 'TP403', MESSAGE = 'Acesso recusado.';\r\n  END IF;\r\n\r\n  IF p_evento_id IS NULL\r\n     OR p_evento_id <= 0\r\n     OR p_evento_id > 9007199254740991\r\n     OR p_usuario_id IS NULL\r\n     OR p_usuario_id <= 0\r\n     OR p_usuario_id > 9007199254740991 THEN\r\n    RAISE EXCEPTION USING\r\n      ERRCODE = 'TP400', MESSAGE = 'Identificador invalido.';\r\n  END IF;\r\n\r\n  IF p_itens IS NULL\r\n     OR pg_catalog.jsonb_typeof(p_itens) <> 'array' THEN\r\n    RAISE EXCEPTION USING\r\n      ERRCODE = 'TP400', MESSAGE = 'Lista de custos invalida.';\r\n  END IF;\r\n\r\n  -- Validação integral antes de bloquear ou escrever.\r\n  -- Decimais chegam normalizados em texto pelo adaptador.\r\n  FOR v_item IN\r\n    SELECT j.value\r\n      FROM pg_catalog.jsonb_array_elements(p_itens)\r\n        WITH ORDINALITY AS j(value, ordem)\r\n     ORDER BY j.ordem\r\n  LOOP\r\n    IF pg_catalog.jsonb_typeof(v_item) <> 'object'\r\n       OR pg_catalog.jsonb_typeof(v_item -> 'categoria')\r\n          IS DISTINCT FROM 'string'\r\n       OR pg_catalog.jsonb_typeof(v_item -> 'descricao')\r\n          IS DISTINCT FROM 'string'\r\n       OR pg_catalog.jsonb_typeof(v_item -> 'valor_estimado')\r\n          IS DISTINCT FROM 'string' THEN\r\n      RAISE EXCEPTION USING\r\n        ERRCODE = 'TP400', MESSAGE = 'Item de custo invalido.';\r\n    END IF;\r\n\r\n    v_categoria :=\r\n      pg_catalog.btrim(v_item ->> 'categoria', v_espacos);\r\n    v_descricao :=\r\n      pg_catalog.btrim(v_item ->> 'descricao', v_espacos);\r\n    v_valor := v_item ->> 'valor_estimado';\r\n\r\n    IF pg_catalog.char_length(v_categoria) NOT BETWEEN 1 AND 100\r\n       OR pg_catalog.char_length(v_descricao) NOT BETWEEN 1 AND 255\r\n       OR v_valor !~ '^(0|[1-9][0-9]{0,9})[.][0-9]{2}$' THEN\r\n      RAISE EXCEPTION USING\r\n        ERRCODE = 'TP400', MESSAGE = 'Item de custo invalido.';\r\n    END IF;\r\n\r\n    v_normalizados := v_normalizados ||\r\n      pg_catalog.jsonb_build_array(\r\n        pg_catalog.jsonb_build_object(\r\n          'categoria', v_categoria,\r\n          'descricao', v_descricao,\r\n          'valor_estimado', v_valor\r\n        )\r\n      );\r\n  END LOOP;\r\n\r\n  -- Dia UTC capturado pelo backend antes de esperar locks.\r\n  -- Identidade e dia confiável não devem vir do corpo público.\r\n  IF p_prazo IS NULL\r\n     OR p_hoje_utc IS NULL\r\n     OR p_observacoes IS NULL\r\n     OR p_prazo !~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'\r\n     OR p_hoje_utc !~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' THEN\r\n    RAISE EXCEPTION USING\r\n      ERRCODE = 'TP400', MESSAGE = 'Data invalida.';\r\n  END IF;\r\n\r\n  BEGIN\r\n    v_prazo := p_prazo::date;\r\n    v_hoje := p_hoje_utc::date;\r\n  EXCEPTION\r\n    WHEN SQLSTATE '22007' OR SQLSTATE '22008' THEN\r\n      RAISE EXCEPTION USING\r\n        ERRCODE = 'TP401', MESSAGE = 'Prazo invalido.';\r\n  END;\r\n\r\n  IF pg_catalog.to_char(v_prazo, 'YYYY-MM-DD') <> p_prazo\r\n     OR pg_catalog.to_char(v_hoje, 'YYYY-MM-DD') <> p_hoje_utc\r\n     OR v_prazo < v_hoje THEN\r\n    RAISE EXCEPTION USING\r\n      ERRCODE = 'TP401',\r\n      MESSAGE = 'Prazo passado ou invalido.';\r\n  END IF;\r\n\r\n  PERFORM u.id\r\n    FROM public.usuarios AS u\r\n   WHERE u.id = p_usuario_id\r\n     AND u.perfil = 'organizador';\r\n\r\n  IF NOT FOUND THEN\r\n    RAISE EXCEPTION USING\r\n      ERRCODE = 'TP403', MESSAGE = 'Acesso recusado.';\r\n  END IF;\r\n\r\n  -- Ordem compatível com substituição: evento → custos → escritas.\r\n  PERFORM e.id\r\n    FROM public.eventos AS e\r\n   WHERE e.id = p_evento_id\r\n     AND e.usuario_id = p_usuario_id\r\n   FOR UPDATE;\r\n\r\n  IF NOT FOUND THEN\r\n    RAISE EXCEPTION USING\r\n      ERRCODE = 'TP404', MESSAGE = 'Evento ausente.';\r\n  END IF;\r\n\r\n  FOR v_custo IN\r\n    SELECT c.id, c.categoria, c.descricao, c.valor_estimado\r\n      FROM public.custos_evento AS c\r\n     WHERE c.evento_id = p_evento_id\r\n     ORDER BY c.id\r\n     FOR UPDATE\r\n  LOOP\r\n    v_categoria :=\r\n      pg_catalog.btrim(v_custo.categoria, v_espacos);\r\n    v_descricao :=\r\n      pg_catalog.btrim(v_custo.descricao, v_espacos);\r\n    v_valor := v_custo.valor_estimado::text;\r\n\r\n    IF v_categoria IS NULL\r\n       OR v_descricao IS NULL\r\n       OR v_valor IS NULL\r\n       OR pg_catalog.char_length(v_categoria) NOT BETWEEN 1 AND 100\r\n       OR pg_catalog.char_length(v_descricao) NOT BETWEEN 1 AND 255\r\n       OR v_valor !~ '^(0|[1-9][0-9]{0,9})[.][0-9]{2}$' THEN\r\n      RAISE EXCEPTION USING\r\n        ERRCODE = 'TP500',\r\n        MESSAGE = 'Custos persistidos invalidos.';\r\n    END IF;\r\n\r\n    v_persistidos := v_persistidos ||\r\n      pg_catalog.jsonb_build_array(\r\n        pg_catalog.jsonb_build_object(\r\n          'categoria', v_categoria,\r\n          'descricao', v_descricao,\r\n          'valor_estimado', v_valor\r\n        )\r\n      );\r\n  END LOOP;\r\n\r\n  IF pg_catalog.jsonb_array_length(v_persistidos) = 0 THEN\r\n    RAISE EXCEPTION USING\r\n      ERRCODE = 'TP402', MESSAGE = 'Sem custos.';\r\n  END IF;\r\n\r\n  -- Comparação exata dos itens normalizados, incluindo ordem.\r\n  IF v_normalizados::text COLLATE pg_catalog.\"C\"\r\n     IS DISTINCT FROM\r\n     v_persistidos::text COLLATE pg_catalog.\"C\" THEN\r\n    RAISE EXCEPTION USING\r\n      ERRCODE = 'TP409', MESSAGE = 'Revisao divergente.';\r\n  END IF;\r\n\r\n  INSERT INTO public.cotacoes (\r\n    evento_id, prazo, modalidade, observacoes, status\r\n  )\r\n  VALUES (\r\n    p_evento_id, v_prazo, 'Fechada', p_observacoes, 'Aberta'\r\n  )\r\n  RETURNING id INTO v_id;\r\n\r\n  -- Itens exclusivamente dos custos persistidos.\r\n  FOR v_item IN\r\n    SELECT j.value\r\n      FROM pg_catalog.jsonb_array_elements(v_persistidos)\r\n        WITH ORDINALITY AS j(value, ordem)\r\n     ORDER BY j.ordem\r\n  LOOP\r\n    INSERT INTO public.itens_cotacao (\r\n      cotacao_id, categoria, descricao, valor_estimado\r\n    )\r\n    VALUES (\r\n      v_id,\r\n      v_item ->> 'categoria',\r\n      v_item ->> 'descricao',\r\n      (v_item ->> 'valor_estimado')::numeric(12,2)\r\n    );\r\n  END LOOP;\r\n\r\n  RETURN pg_catalog.jsonb_build_object(\r\n    'id', v_id,\r\n    'evento_id', p_evento_id,\r\n    'prazo', p_prazo,\r\n    'modalidade', 'Fechada',\r\n    'observacoes', p_observacoes,\r\n    'status', 'Aberta',\r\n    'itens', v_persistidos\r\n  );\r\n\r\n  -- Falhas nas escritas propagam e revertem a publicação inteira.\r\nEND;\r\n$function$\n",
+          "configuration": [
+            "search_path=\"\""
+          ],
+          "execute_by_role": {
+            "anon": false,
+            "service_role": true,
+            "authenticated": false
+          },
+          "security_definer": false,
+          "identity_arguments": "p_evento_id bigint, p_usuario_id bigint, p_prazo text, p_hoje_utc text, p_observacoes text, p_itens jsonb",
+          "public_execute_grant": false
+        },
+        {
+          "name": "substituir_custos_evento",
+          "result": "jsonb",
+          "definition": "CREATE OR REPLACE FUNCTION public.substituir_custos_evento(p_evento_id bigint, p_usuario_id bigint, p_custos jsonb)\n RETURNS jsonb\n LANGUAGE plpgsql\n SET search_path TO ''\nAS $function$\r\nDECLARE\r\n  v_item jsonb;\r\n  v_normalizados jsonb := '[]'::jsonb;\r\n  v_categoria text;\r\n  v_descricao text;\r\n  v_valor text;\r\n  v_resultado jsonb;\r\n\r\n  -- Mesmo whitespace do String.trim do ECMAScript.\r\n  v_espacos constant text :=\r\n    U&'\\0009\\000A\\000B\\000C\\000D\\0020\\00A0\\1680\\2000\\2001\\2002\\2003\\2004\\2005\\2006\\2007\\2008\\2009\\200A\\2028\\2029\\202F\\205F\\3000\\FEFF';\r\nBEGIN\r\n  -- Identidade fornecida pelo backend autenticado.\r\n  IF current_user <> 'service_role' THEN\r\n    RAISE EXCEPTION USING\r\n      ERRCODE = 'TC403', MESSAGE = 'Acesso recusado.';\r\n  END IF;\r\n\r\n  IF p_evento_id IS NULL\r\n     OR p_evento_id <= 0\r\n     OR p_evento_id > 9007199254740991\r\n     OR p_usuario_id IS NULL\r\n     OR p_usuario_id <= 0\r\n     OR p_usuario_id > 9007199254740991 THEN\r\n    RAISE EXCEPTION USING\r\n      ERRCODE = 'TC400', MESSAGE = 'Identificador invalido.';\r\n  END IF;\r\n\r\n  IF p_custos IS NULL\r\n     OR pg_catalog.jsonb_typeof(p_custos) <> 'array' THEN\r\n    RAISE EXCEPTION USING\r\n      ERRCODE = 'TC400', MESSAGE = 'Lista de custos invalida.';\r\n  END IF;\r\n\r\n  -- Validação integral antes de bloquear ou escrever.\r\n  -- Dinheiro recebido em texto normalizado.\r\n  FOR v_item IN\r\n    SELECT j.value\r\n      FROM pg_catalog.jsonb_array_elements(p_custos)\r\n        WITH ORDINALITY AS j(value, ordem)\r\n     ORDER BY j.ordem\r\n  LOOP\r\n    IF pg_catalog.jsonb_typeof(v_item) <> 'object'\r\n       OR pg_catalog.jsonb_typeof(v_item -> 'categoria')\r\n          IS DISTINCT FROM 'string'\r\n       OR pg_catalog.jsonb_typeof(v_item -> 'descricao')\r\n          IS DISTINCT FROM 'string'\r\n       OR pg_catalog.jsonb_typeof(v_item -> 'valor_estimado')\r\n          IS DISTINCT FROM 'string' THEN\r\n      RAISE EXCEPTION USING\r\n        ERRCODE = 'TC400', MESSAGE = 'Item de custo invalido.';\r\n    END IF;\r\n\r\n    v_categoria :=\r\n      pg_catalog.btrim(v_item ->> 'categoria', v_espacos);\r\n    v_descricao :=\r\n      pg_catalog.btrim(v_item ->> 'descricao', v_espacos);\r\n    v_valor := v_item ->> 'valor_estimado';\r\n\r\n    IF pg_catalog.char_length(v_categoria) NOT BETWEEN 1 AND 100\r\n       OR pg_catalog.char_length(v_descricao) NOT BETWEEN 1 AND 255\r\n       OR v_valor !~ '^(0|[1-9][0-9]{0,9})[.][0-9]{2}$' THEN\r\n      RAISE EXCEPTION USING\r\n        ERRCODE = 'TC400', MESSAGE = 'Item de custo invalido.';\r\n    END IF;\r\n\r\n    v_normalizados := v_normalizados ||\r\n      pg_catalog.jsonb_build_array(\r\n        pg_catalog.jsonb_build_object(\r\n          'categoria', v_categoria,\r\n          'descricao', v_descricao,\r\n          'valor_estimado', v_valor\r\n        )\r\n      );\r\n  END LOOP;\r\n\r\n  PERFORM u.id\r\n    FROM public.usuarios AS u\r\n   WHERE u.id = p_usuario_id\r\n     AND u.perfil = 'organizador';\r\n\r\n  IF NOT FOUND THEN\r\n    RAISE EXCEPTION USING\r\n      ERRCODE = 'TC403', MESSAGE = 'Acesso recusado.';\r\n  END IF;\r\n\r\n  -- Primeiro bloqueio: evento, compartilhado com publicação.\r\n  PERFORM e.id\r\n    FROM public.eventos AS e\r\n   WHERE e.id = p_evento_id\r\n     AND e.usuario_id = p_usuario_id\r\n   FOR UPDATE;\r\n\r\n  IF NOT FOUND THEN\r\n    RAISE EXCEPTION USING\r\n      ERRCODE = 'TC404', MESSAGE = 'Evento nao encontrado.';\r\n  END IF;\r\n\r\n  DELETE FROM public.custos_evento\r\n   WHERE evento_id = p_evento_id;\r\n\r\n  FOR v_item IN\r\n    SELECT j.value\r\n      FROM pg_catalog.jsonb_array_elements(v_normalizados)\r\n        WITH ORDINALITY AS j(value, ordem)\r\n     ORDER BY j.ordem\r\n  LOOP\r\n    INSERT INTO public.custos_evento (\r\n      evento_id, categoria, descricao, valor_estimado\r\n    )\r\n    VALUES (\r\n      p_evento_id,\r\n      v_item ->> 'categoria',\r\n      v_item ->> 'descricao',\r\n      (v_item ->> 'valor_estimado')::numeric(12,2)\r\n    );\r\n  END LOOP;\r\n\r\n  -- Releitura na mesma transação; decimais em texto.\r\n  SELECT COALESCE(\r\n    pg_catalog.jsonb_agg(\r\n      pg_catalog.jsonb_build_object(\r\n        'id', c.id,\r\n        'evento_id', c.evento_id,\r\n        'categoria', c.categoria,\r\n        'descricao', c.descricao,\r\n        'valor_estimado', c.valor_estimado::text\r\n      )\r\n      ORDER BY c.id\r\n    ),\r\n    '[]'::jsonb\r\n  )\r\n    INTO v_resultado\r\n    FROM public.custos_evento AS c\r\n   WHERE c.evento_id = p_evento_id;\r\n\r\n  RETURN v_resultado;\r\n  -- Falhas propagam e abortam a transação inteira.\r\nEND;\r\n$function$\n",
+          "configuration": [
+            "search_path=\"\""
+          ],
+          "execute_by_role": {
+            "anon": false,
+            "service_role": true,
+            "authenticated": false
+          },
+          "security_definer": false,
+          "identity_arguments": "p_evento_id bigint, p_usuario_id bigint, p_custos jsonb",
+          "public_execute_grant": false
+        }
+      ],
+      "foreign_keys": [
+        {
+          "name": "fk_cotacao_evento",
+          "table": "cotacoes",
+          "definition": "FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE CASCADE",
+          "references": "eventos"
+        },
+        {
+          "name": "fk_custos_evento_evento",
+          "table": "custos_evento",
+          "definition": "FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE CASCADE",
+          "references": "eventos"
+        },
+        {
+          "name": "fk_evento_usuario",
+          "table": "eventos",
+          "definition": "FOREIGN KEY (usuario_id) REFERENCES usuarios(id)",
+          "references": "usuarios"
+        },
+        {
+          "name": "fk_inscricao_evento",
+          "table": "inscricoes",
+          "definition": "FOREIGN KEY (evento_id) REFERENCES eventos(id)",
+          "references": "eventos"
+        },
+        {
+          "name": "fk_inscricao_usuario",
+          "table": "inscricoes",
+          "definition": "FOREIGN KEY (usuario_id) REFERENCES usuarios(id)",
+          "references": "usuarios"
+        },
+        {
+          "name": "fk_item_cotacao",
+          "table": "itens_cotacao",
+          "definition": "FOREIGN KEY (cotacao_id) REFERENCES cotacoes(id) ON DELETE CASCADE",
+          "references": "cotacoes"
+        },
+        {
+          "name": "fk_propostas_cotacao",
+          "table": "propostas",
+          "definition": "FOREIGN KEY (cotacao_id) REFERENCES cotacoes(id)",
+          "references": "cotacoes"
+        },
+        {
+          "name": "fk_propostas_fornecedor",
+          "table": "propostas",
+          "definition": "FOREIGN KEY (fornecedor_id) REFERENCES usuarios(id)",
+          "references": "usuarios"
+        },
+        {
+          "name": "solicitacoes_acesso_ibfk_1",
+          "table": "solicitacoes_acesso",
+          "definition": "FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE",
+          "references": "usuarios"
+        }
+      ],
+      "session_user": "postgres",
+      "custom_triggers": [],
+      "transaction_read_only": "on"
+    }
+  }
+]

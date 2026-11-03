@@ -1,0 +1,43 @@
+{
+    "status":  "LIBERACAO_INTERROMPIDA",
+    "recordedUtc":  "2026-11-03T18:57:23.7218774Z",
+    "controllerPid":  3416,
+    "supervisorPid":  31312,
+    "controllerSession":  63384,
+    "renewal":  {
+                    "gateApproved":  true,
+                    "report":  "C:\\Users\\Lucas\\Documents\\GitHub\\Projeto2\\Documentos\\Entrega 2\\Desenvolvimento Web FullStack\\PI Backend\\evidencias\\smoke-pos-t1-03910dd0-92c2-4ca3-9ef2-46085c1b018b.json",
+                    "gateVerificadoEm":  1793732171929,
+                    "gateExpiraEm":  1793732199256,
+                    "pedido":  "98c708f3-08fa-46d4-8133-761022a8ce41",
+                    "status":  "SMOKE_POS_T1_RENOVADO"
+                },
+    "release":  {
+                    "ok":  false,
+                    "attempts":  1,
+                    "pedido":  "c6152bb3-9b02-442c-8cc4-1be88aaf2e4c",
+                    "code":  "CONTROLE_OPERACAO_RECUSADA",
+                    "internalCauseExposed":  false
+                },
+    "phase":  "INCERTA",
+    "congelado":  true,
+    "selado":  true,
+    "gateSeladoPresent":  true,
+    "httpStatusVerified":  503,
+    "smokeRequests":  26,
+    "profiles":  4,
+    "dataHashes":  {
+                       "mysql":  "2aa2ee825c85538b01638712d9c3caf7a74fbcfcad8093809c10fbd16fad57d0",
+                       "supabase":  "c1a31bf5df8944eb33c5fa5c6a5c2b7870a36d5f5a53b6385021219b4370e595",
+                       "catalogos":  "f2e09f8ba183b735e0bc4888345d7112f7bb16ac62dc3daf8ea1b13ba80bf615"
+                   },
+    "eightDomainsVerifiedBeforeAttempt":  true,
+    "additional10PreservedBeforeAttempt":  true,
+    "t1ConcludedAndClean":  true,
+    "protectedHashesUnchanged":  true,
+    "normalHttpSmokeExecuted":  false,
+    "historicalContinuityProven":  false,
+    "historicalGapAndResidualRiskAcknowledged":  true,
+    "retryExecuted":  false,
+    "rollbackExecuted":  false
+}

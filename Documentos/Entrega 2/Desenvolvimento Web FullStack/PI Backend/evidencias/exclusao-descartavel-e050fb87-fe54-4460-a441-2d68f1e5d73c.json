@@ -1,0 +1,34 @@
+{
+  "marker": "TT-DELETE-e050fb87-fe54-4460-a441-2d68f1e5d73c",
+  "ids": {
+    "usuarios": [
+      15,
+      16,
+      17
+    ],
+    "eventos": [],
+    "inscricoes": []
+  },
+  "requests": [
+    {
+      "method": "POST",
+      "route": "/login",
+      "status": 429
+    }
+  ],
+  "status": "INTERROMPIDO",
+  "dataWritesOnlyDisposable": true,
+  "preexistingCounts": {
+    "usuarios": 10,
+    "eventos": 6,
+    "custos_evento": 4,
+    "cotacoes": 5,
+    "itens_cotacao": 16,
+    "propostas": 4,
+    "inscricoes": 4,
+    "solicitacoes_acesso": 6
+  },
+  "failureCode": "ERR_ASSERTION",
+  "cleanupVerified": true,
+  "residualRows": 0
+}

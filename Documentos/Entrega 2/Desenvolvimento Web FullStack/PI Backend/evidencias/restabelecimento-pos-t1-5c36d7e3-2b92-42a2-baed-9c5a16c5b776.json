@@ -1,0 +1,21 @@
+{
+  "startedUtc": "2026-11-03T17:50:46.407Z",
+  "status": "INTERROMPIDO",
+  "controllerPid": 31996,
+  "stage": "PREPARAR_MANUTENCAO",
+  "maintenanceReleased": false,
+  "t1Executed": false,
+  "dataWrites": false,
+  "jwtRotated": false,
+  "checkpointChanged": false,
+  "backupsGenerated": false,
+  "rollbackExecuted": false,
+  "historicalAbsenceOfWritesProven": false,
+  "historicalGapAcknowledged": true,
+  "finishedUtc": "2026-11-03T17:50:47.780Z",
+  "diagnostic": {
+    "code": "READMISSAO_RECUSADA",
+    "file": "backup-mysql-isolado.cjs",
+    "line": 27
+  }
+}

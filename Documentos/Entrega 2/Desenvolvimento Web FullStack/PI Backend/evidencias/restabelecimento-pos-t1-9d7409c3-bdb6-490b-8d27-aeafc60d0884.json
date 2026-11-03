@@ -1,0 +1,31 @@
+{
+  "startedUtc": "2026-11-03T17:55:44.044Z",
+  "status": "INTERROMPIDO",
+  "controllerPid": 7260,
+  "stage": "READMISSAO_SELADA_POS_T1",
+  "maintenanceReleased": false,
+  "t1Executed": false,
+  "dataWrites": false,
+  "jwtRotated": false,
+  "checkpointChanged": false,
+  "backupsGenerated": false,
+  "rollbackExecuted": false,
+  "historicalAbsenceOfWritesProven": false,
+  "historicalGapAcknowledged": true,
+  "maintenanceResponder": {
+    "pid": 22332,
+    "parentPid": 7260,
+    "criadoEm": "2026-11-03T17:55:47.8981350Z",
+    "role": "MANUTENCAO_SEM_BACKEND",
+    "entradaConhecida": true,
+    "portaExclusivaLocal": true,
+    "backendSupervisor": false,
+    "boot": "e935ef45-3311-4923-8481-dd48ea35088f"
+  },
+  "finishedUtc": "2026-11-03T17:56:51.318Z",
+  "diagnostic": {
+    "code": "READMISSAO_RECUSADA",
+    "file": "backup-mysql-isolado.cjs",
+    "line": 27
+  }
+}

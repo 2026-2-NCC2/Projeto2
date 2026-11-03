@@ -32,8 +32,8 @@ function harness(repo){
   return async req=>{const res={status(n){this.code=n;return this;},json(body){this.body=JSON.parse(JSON.stringify(body));return this;}};let allowed=false;authorize(req,res,()=>{allowed=true;});if(allowed)await action(req,res);return res;};
 }
 const request=()=>({params:{id:'13'},usuario:{id:7,perfil:'organizador'},body:{usuario_id:999}});
-test('handler real: sucesso 200, ausente/alheio 404 e FK 500 com mensagens existentes',async()=>{
-  for(const [response,code,body] of [[{data:[{id:13}]},200,{mensagem:'Evento excluído com sucesso!'}],[{data:[]},404,{erro:'Evento não encontrado.'}],[{error:{code:'23503'}},500,{erro:'Erro interno ao excluir evento.'}]]){const m=mock(response),res=await harness(criar(m.client))(request());assert.equal(res.code,code);assert.deepEqual(res.body,body);assert.deepEqual(m.calls.filter(c=>c[0]==='eq'),[['eq','id',13],['eq','usuario_id',7]]);}
+test('handler real: sucesso 200, ausente/alheio 404 e FK 409 com mensagem de conflito',async()=>{
+  for(const [response,code,body] of [[{data:[{id:13}]},200,{mensagem:'Evento excluído com sucesso!'}],[{data:[]},404,{erro:'Evento não encontrado.'}],[{error:{code:'23503'}},409,{erro:'Não é possível excluir um evento com inscrições ou propostas vinculadas.'}]]){const m=mock(response),res=await harness(criar(m.client))(request());assert.equal(res.code,code);assert.deepEqual(res.body,body);assert.deepEqual(m.calls.filter(c=>c[0]==='eq'),[['eq','id',13],['eq','usuario_id',7]]);}
 });
 test('middleware real conserva perfis: 401/403 sem DELETE',async()=>{
   for(const perfil of [undefined,'participante','fornecedor','admin']){const m=mock({data:[]}),req=request();req.usuario=perfil?{id:7,perfil}:undefined;assert.equal((await harness(criar(m.client))(req)).code,perfil?403:401);assert.equal(m.calls.length,0);}

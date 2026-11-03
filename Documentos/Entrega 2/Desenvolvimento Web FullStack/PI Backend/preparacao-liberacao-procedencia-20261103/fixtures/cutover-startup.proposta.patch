@@ -1,0 +1,11 @@
+diff --git "a/Documentos/Entrega 2/Desenvolvimento Web FullStack/PI Backend/server.js" "b/Documentos/Entrega 2/Desenvolvimento Web FullStack/PI Backend/server.js"
+--- "a/Documentos/Entrega 2/Desenvolvimento Web FullStack/PI Backend/server.js"
++++ "b/Documentos/Entrega 2/Desenvolvimento Web FullStack/PI Backend/server.js"
+@@ -16,6 +16,6 @@
+ // Manter a trava de startup antes de criar qualquer cliente/pool.
+ const { validarInicializacaoBanco } = require("./config/banco.cjs");
+-if (!homologacao) validarInicializacaoBanco(process.env, modoExecucao());
++if (!homologacao) require("./config/startup-controlado.cjs").validarEntrada(process.env, modoExecucao());
+ const { criarPersistencia } = require("./repositories/index.cjs");
+ const { repositorios, servicos, supervisor } = criarPersistencia();
+ const {

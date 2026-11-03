@@ -1,0 +1,31 @@
+{
+    "schemaVersion":  1,
+    "preparationOnly":  true,
+    "liveDeploymentExecuted":  false,
+    "liveManifestBefore":  "43b4c0131ab9178329f6d02107af6fd586d4818dd16b1efa5a82c8fe189fbb82",
+    "files":  [
+                  {
+                      "file":  "config/procedencia-t1-selada.cjs",
+                      "beforeSha256":  "4f165f5a3ac01b9facab8610bb239478f4e6ee809ba3a86f409c8e333c15b82b",
+                      "afterSha256":  "b9f844b9f85e8edda074793933bff43249785238de672098c7c019a6e749b6b2"
+                  },
+                  {
+                      "file":  "config/transicao-controlada.cjs",
+                      "beforeSha256":  "0c3cb93a887f7648e8781ca5b9eef2d1d49fcc52c52dd69dc0bde18b6da1a399",
+                      "afterSha256":  "f87361ff8979b5f964b02e66d443a3e26afc616a8c915902e7fb5041f4177daf"
+                  },
+                  {
+                      "file":  "config/comandos-controlador.cjs",
+                      "beforeSha256":  "0bdab77ad95aeade70c9d63712fb6957a6142c1fc45e97617f24455c1a8b3412",
+                      "afterSha256":  "ca193e6b4108248148437bd1bbff897430041a5100f2d1cb73a538a17cde138d"
+                  }
+              ],
+    "tests":  {
+                  "skipped":  0,
+                  "failed":  0,
+                  "passed":  167
+              },
+    "recoveryAdapterReady":  false,
+    "recoveryExecuted":  false,
+    "releaseExecuted":  false
+}

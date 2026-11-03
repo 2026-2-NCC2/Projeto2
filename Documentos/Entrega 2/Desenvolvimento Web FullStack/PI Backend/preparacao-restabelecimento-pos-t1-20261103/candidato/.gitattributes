@@ -1,0 +1,37 @@
+# Arquivos selados: Git deve preservar os bytes exatos (LF ou CRLF).
+# Nao renormalizar nem recalcular manifestos para aceitar conversoes.
+/config/autoridade-selada.cjs -text
+/config/comandos-controlador.cjs -text
+/config/evidencias-pos-t1.cjs -text
+/config/gate-final-selado.cjs -text
+/config/procedencia-t1-selada.cjs -text
+/scripts/iniciar-supervisor-substituido.cjs -text
+/scripts/operacoes-controlador-selado.cjs -text
+/scripts/preflight-implantacao-pos-t1.cjs -text
+/scripts/processo-substituicao-selada.ps1 -text
+/scripts/runtime-substituicao-selada.cjs -text
+/scripts/substituicao-controlador-selada.cjs -text
+/scripts/substituir-controlador-selado.cjs -text
+/scripts/validar-fence-pos-t1.cjs -text
+/tests/fence-implantacao.mock.ps1 -text
+/tests/fixtures/runtime-controlador-anterior.cjs -text
+/tests/helpers/implantacao-pos-t1.cjs -text
+/tests/helpers/operacoes-controlador.cjs -text
+/tests/helpers/pos-t1.cjs -text
+/tests/helpers/runtime-selado.cjs -text
+/tests/helpers/substituicao-selada.cjs -text
+/tests/implantacao-pos-t1.test.cjs -text
+/tests/operacoes-pos-substituicao.test.cjs -text
+/tests/perda-controle-pos-t1.test.cjs -text
+/tests/renovacao-smoke-pos-t1.test.cjs -text
+/tests/runtime-implantacao-pos-t1.test.cjs -text
+/tests/runtime-substituicao-integrada.test.cjs -text
+/tests/substituicao-controlador-selada.test.cjs -text
+/preparacao-implantacao-pos-t1-20261102/** -text
+/preparacao-retomada-status-20261102/** -text
+/preparacao-diagnostico-retomada-20261103/** -text
+/preparacao-integracao-retomada-20261103/** -text
+/scripts/preflight-reinicio-pos-t1.cjs -text
+/preparacao-restabelecimento-pos-t1-20261103/** -text
+/scripts/manutencao-validacao.cjs -text
+/scripts/restabelecer-controlador-apos-reinicio.cjs -text

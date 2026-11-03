@@ -1,0 +1,38 @@
+{
+  "checkedUtc": "2026-11-03T17:39:00.491Z",
+  "status": "PREPARADO_EM_COPIA_ISOLADA",
+  "tests": {
+    "new": 45,
+    "targetedRegressions": 5,
+    "total": 50,
+    "passed": 50,
+    "failed": 0,
+    "skipped": 0
+  },
+  "liveVerification": {
+    "ok": true,
+    "exit_code": 0,
+    "mode": "APLICADO_NAO_REAPLICAR",
+    "protectedHashesVerified": 27,
+    "deltaFiles": 1,
+    "admissionExecuted": false
+  },
+  "originPureValidationPassed": true,
+  "preserved": {
+    "state": true,
+    "environmentJwt": true,
+    "checkpoint": true,
+    "journal": true
+  },
+  "deltaFiles": 5,
+  "packageSha256": "63db2f155e9fe8c3fb11f98615d1f2e960f01d5f8b2f8ef945fcab386d2e3bb4",
+  "packageTargetManifest": "e8ca559e9852521be559643aa88de6ff4bb36f5b4c71920ab4e63ed21bee78da",
+  "realReadmissionExecuted": false,
+  "realDeploymentExecuted": false,
+  "realSmokeExecuted": false,
+  "realDatabaseConnections": false,
+  "realT1": false,
+  "maintenanceReleased": false,
+  "commitsCreated": false,
+  "readyForAuthorization": true
+}

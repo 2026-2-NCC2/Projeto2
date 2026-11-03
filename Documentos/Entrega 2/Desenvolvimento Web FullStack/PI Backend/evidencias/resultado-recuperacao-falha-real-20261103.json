@@ -1,0 +1,126 @@
+{
+  "checkedUtc": "2026-11-03T18:43:43.455Z",
+  "status": "RECUPERACAO_FALHA_CONCLUIDA_EM_MANUTENCAO",
+  "attempts": 1,
+  "automaticRetry": false,
+  "controllerPid": 3416,
+  "controllerParentPid": 32428,
+  "controllerCreatedUtc": "2026-11-03T18:40:40.2771910Z",
+  "supervisorPid": 31312,
+  "supervisorParentPid": 3416,
+  "supervisorCreatedUtc": "2026-11-03T18:41:38.2554740Z",
+  "mysqlPid": 10080,
+  "controllerSession": 63384,
+  "phase": "INICIADA",
+  "controlStage": "ATIVO",
+  "epoch": 4,
+  "httpStatus": 503,
+  "exclusiveListener": "127.0.0.1:3001",
+  "nativeIdentitiesConfirmed": true,
+  "genuineIpcConfirmed": true,
+  "statusRequest": "35b7df54-a4d0-49a9-9a77-2dba8edc337a",
+  "ipcVerifiedAt": 1793731361077,
+  "authorityExclusive": true,
+  "ticketsConsumedAndInvalidated": true,
+  "oldConsumedCount": 6,
+  "currentConsumedCount": 8,
+  "preserved": {
+    "environmentJwt": true,
+    "checkpoint": true,
+    "journal": true,
+    "failedStateBytes": true,
+    "originalStateBytes": true,
+    "t1Record": true,
+    "allOldConsumedTickets": true
+  },
+  "backupsIntegrityVerified": true,
+  "verification": {
+    "ok": true,
+    "exit_code": 0,
+    "mode": "ALVO_PUBLICADO_SEM_READMISSAO_AUTOMATICA",
+    "deltaFiles": 8,
+    "targetHashesVerified": 33,
+    "readmissionExecuted": false
+  },
+  "eightDomainsApproved": true,
+  "additional10Preserved": true,
+  "dataHashes": {
+    "mysql": "2aa2ee825c85538b01638712d9c3caf7a74fbcfcad8093809c10fbd16fad57d0",
+    "supabase": "c1a31bf5df8944eb33c5fa5c6a5c2b7870a36d5f5a53b6385021219b4370e595",
+    "catalogos": "f2e09f8ba183b735e0bc4888345d7112f7bb16ac62dc3daf8ea1b13ba80bf615"
+  },
+  "counts": {
+    "usuarios": {
+      "mysql": 9,
+      "supabase": 10
+    },
+    "eventos": {
+      "mysql": 5,
+      "supabase": 6
+    },
+    "custos_evento": {
+      "mysql": 3,
+      "supabase": 5
+    },
+    "cotacoes": {
+      "mysql": 3,
+      "supabase": 4
+    },
+    "itens_cotacao": {
+      "mysql": 13,
+      "supabase": 15
+    },
+    "propostas": {
+      "mysql": 2,
+      "supabase": 3
+    },
+    "inscricoes": {
+      "mysql": 2,
+      "supabase": 3
+    },
+    "solicitacoes_acesso": {
+      "mysql": 5,
+      "supabase": 6
+    }
+  },
+  "additionalIds": {
+    "usuarios": [
+      10
+    ],
+    "eventos": [
+      12
+    ],
+    "custos_evento": [
+      7,
+      8
+    ],
+    "cotacoes": [
+      6
+    ],
+    "itens_cotacao": [
+      22,
+      23
+    ],
+    "propostas": [
+      3
+    ],
+    "inscricoes": [
+      3
+    ],
+    "solicitacoes_acesso": [
+      6
+    ]
+  },
+  "historicalAbsenceOfWritesProven": false,
+  "historicalGapAcknowledged": true,
+  "newSmokeRequired": true,
+  "finalReleaseGateApproved": false,
+  "newT1Executed": false,
+  "rollbackExecuted": false,
+  "newBackups": false,
+  "jwtRotated": false,
+  "dataWrites": false,
+  "maintenanceReleased": false,
+  "commitsCreated": false,
+  "originalReport": "restabelecimento-pos-t1-05f38f77-fe15-41ad-b27f-c112cb043960.json"
+}

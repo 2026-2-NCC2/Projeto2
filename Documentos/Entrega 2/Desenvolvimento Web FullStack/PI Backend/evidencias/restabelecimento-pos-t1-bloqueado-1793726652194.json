@@ -1,0 +1,44 @@
+{
+  "checkedUtc": "2026-11-03T17:24:12.194Z",
+  "status": "BLOQUEADO_PROTOCOLO_INCOMPATIVEL_POS_T1",
+  "mysql": {
+    "connectionApproved": true,
+    "readOnlyVerified": true
+  },
+  "guard": "REINICIO_ESTADO_RECUSADO",
+  "phase": "INICIADA",
+  "persistedControlStage": "ATIVO",
+  "t1Stage": "CONCLUIDA",
+  "t1CleanupVerified": true,
+  "existingControlRecord": true,
+  "preserved": {
+    "state": true,
+    "environmentJwt": true,
+    "checkpoint": true,
+    "journal": true
+  },
+  "stateSha256": "083542b81235f5b68e6e98c140cef38abee5a1c4a63117f61283eb7865535d45",
+  "controllerPid": null,
+  "supervisorPid": null,
+  "mysqlPid": 10080,
+  "nativeInventoryCaptured": true,
+  "lastBootUtc": "2026-11-03T17:02:39.5000000Z",
+  "port3001Listening": false,
+  "http503Confirmed": false,
+  "ipcConfirmed": false,
+  "exclusiveActiveControllerConfirmed": false,
+  "tests": {
+    "existingTargetedTests": 2,
+    "passed": 2,
+    "failed": 0
+  },
+  "sealedHashesVerified": 27,
+  "newDeploymentAdmissionExecuted": false,
+  "serviceReadmissionExecuted": false,
+  "newProcessesStarted": false,
+  "dataWrites": false,
+  "jwtRotated": false,
+  "rollbackExecuted": false,
+  "maintenanceReleased": false,
+  "commitsCreated": false
+}

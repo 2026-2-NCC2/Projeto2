@@ -383,6 +383,11 @@ const aoExcluirEvento = async (evento) => {
 
     const resposta = await excluirEvento(evento.id, token)
 
+    if (resposta.status === 409) {
+      alert('Este evento possui inscrições ou propostas vinculadas e não pode ser excluído.')
+      return
+    }
+
     if (!resposta.ok) {
       const dados = await resposta.json()
       alert(dados.erro || 'Erro ao excluir evento.')

@@ -1,0 +1,69 @@
+{
+  "checkedUtc": "2026-11-03T17:59:12.032Z",
+  "status": "READMISSAO_INTERROMPIDA_PROTECAO_503",
+  "attemptsThisAuthorization": 1,
+  "automaticRetry": false,
+  "canonicalPathsUsed": true,
+  "sealedFilesModified": false,
+  "verification": {
+    "ok": true,
+    "exit_code": 0,
+    "mode": "ALVO_PUBLICADO_SEM_READMISSAO_AUTOMATICA",
+    "deltaFiles": 5,
+    "targetHashesVerified": 30,
+    "readmissionExecuted": false
+  },
+  "preserved": {
+    "environmentJwt": true,
+    "checkpoint": true,
+    "journal": true,
+    "originalStateBytes": true,
+    "t1Record": true
+  },
+  "backupsIntegrityVerified": true,
+  "phase": "INICIADA",
+  "controlStage": "FALHA",
+  "controlMode": "IMPLANTACAO_POS_T1",
+  "operation": "RESTABELECIMENTO_POS_T1",
+  "controllerPid": null,
+  "supervisorPid": null,
+  "revokedControllerPid": 7260,
+  "revokedSupervisorPid": 14360,
+  "mysqlPid": 10080,
+  "maintenancePid": 27672,
+  "httpStatus": 503,
+  "exclusiveControllerAuthorityConfirmed": false,
+  "ipcContinuityConfirmed": false,
+  "controllerTicketInvalidated": true,
+  "supervisorTicketInvalidated": true,
+  "consumedHashesUnique": true,
+  "currentDataHashes": {
+    "mysql": "2aa2ee825c85538b01638712d9c3caf7a74fbcfcad8093809c10fbd16fad57d0",
+    "supabase": "c1a31bf5df8944eb33c5fa5c6a5c2b7870a36d5f5a53b6385021219b4370e595",
+    "catalogos": "f2e09f8ba183b735e0bc4888345d7112f7bb16ac62dc3daf8ea1b13ba80bf615"
+  },
+  "postFenceReadDataHashes": {
+    "mysql": "2aa2ee825c85538b01638712d9c3caf7a74fbcfcad8093809c10fbd16fad57d0",
+    "supabase": "c1a31bf5df8944eb33c5fa5c6a5c2b7870a36d5f5a53b6385021219b4370e595",
+    "catalogos": "f2e09f8ba183b735e0bc4888345d7112f7bb16ac62dc3daf8ea1b13ba80bf615"
+  },
+  "originalReport": "restabelecimento-pos-t1-9d7409c3-bdb6-490b-8d27-aeafc60d0884.json",
+  "failure": {
+    "recordedSource": "backup-mysql-isolado.cjs:27",
+    "recordedCode": "READMISSAO_RECUSADA",
+    "originalStderrAvailable": false,
+    "inspector": "scripts/inspecionar-controlador-persistente.ps1",
+    "restartEntryRequiredMode": "RESTABELECIMENTO_POS_REINICIO",
+    "actualMode": "IMPLANTACAO_POS_T1",
+    "modeMismatchProven": true
+  },
+  "newT1": false,
+  "newBackup": false,
+  "rollback": false,
+  "maintenanceReleased": false,
+  "commitsCreated": false,
+  "pending": [
+    "COMPATIBILIZAR_INSPETOR_NATIVO_COM_ESTADO_POS_T1",
+    "PREPARAR_RETOMADA_CONTROLADA_DE_FALHA_SEM_REUSAR_TICKETS"
+  ]
+}

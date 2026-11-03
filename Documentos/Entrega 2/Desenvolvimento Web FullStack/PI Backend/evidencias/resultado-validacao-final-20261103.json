@@ -1,0 +1,39 @@
+{
+    "status":  "VALIDACAO_FINAL_APROVADA",
+    "recordedUtc":  "2026-11-03T18:51:14.1109149Z",
+    "controllerPid":  3416,
+    "supervisorPid":  31312,
+    "controllerSessionKeptOpen":  63384,
+    "ipcStatusReceipt":  {
+                             "nonce":  "9d52e9b6-2546-448a-8d0c-b8650a360e18",
+                             "pedido":  "452db624-ce42-4c87-82a2-af868c963304",
+                             "verificadoEm":  1793731744777
+                         },
+    "gateReceipt":  {
+                        "gateApproved":  true,
+                        "finalidade":  "LIBERACAO",
+                        "ok":  true,
+                        "gateVerificadoEm":  1793731856624,
+                        "gateExpiraEm":  1793731883824,
+                        "pedido":  "53f98ce0-4e99-4c29-b19c-d4789205a26b",
+                        "status":  "SMOKE_POS_T1_RENOVADO"
+                    },
+    "smokeReport":  "C:\\Users\\Lucas\\Documents\\GitHub\\Projeto2\\Documentos\\Entrega 2\\Desenvolvimento Web FullStack\\PI Backend\\evidencias\\smoke-pos-t1-3b027a74-402f-4eef-97d1-f8c5f2b7dafb.json",
+    "requests":  26,
+    "profiles":  4,
+    "dataHashes":  {
+                       "mysql":  "2aa2ee825c85538b01638712d9c3caf7a74fbcfcad8093809c10fbd16fad57d0",
+                       "supabase":  "c1a31bf5df8944eb33c5fa5c6a5c2b7870a36d5f5a53b6385021219b4370e595",
+                       "catalogos":  "f2e09f8ba183b735e0bc4888345d7112f7bb16ac62dc3daf8ea1b13ba80bf615"
+                   },
+    "eightDomainsVerified":  true,
+    "additional10Preserved":  true,
+    "t1ConcludedAndClean":  true,
+    "protectedHashesUnchanged":  true,
+    "httpStatus":  503,
+    "dataWrites":  false,
+    "maintenanceReleased":  false,
+    "historicalContinuityProven":  false,
+    "historicalGapAndResidualRiskAcknowledged":  true,
+    "releaseRequiresAuthorizationAndFreshGate":  true
+}

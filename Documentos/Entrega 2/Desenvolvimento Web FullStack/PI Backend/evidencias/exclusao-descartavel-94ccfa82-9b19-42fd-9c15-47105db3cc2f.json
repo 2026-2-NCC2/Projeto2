@@ -1,0 +1,120 @@
+{
+  "marker": "TT-DELETE-94ccfa82-9b19-42fd-9c15-47105db3cc2f",
+  "ids": {
+    "usuarios": [
+      18,
+      19,
+      20
+    ],
+    "eventos": [
+      17,
+      18
+    ],
+    "inscricoes": [
+      6
+    ]
+  },
+  "requests": [
+    {
+      "method": "POST",
+      "route": "/login",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "/login",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "/login",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "/eventos",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "route": "/eventos",
+      "status": 201
+    },
+    {
+      "method": "DELETE",
+      "route": "/eventos/18",
+      "status": 404
+    },
+    {
+      "method": "PATCH",
+      "route": "/eventos/17/publicar",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "/participante/inscricoes",
+      "status": 201
+    },
+    {
+      "method": "DELETE",
+      "route": "/eventos/17",
+      "status": 500
+    },
+    {
+      "method": "DELETE",
+      "route": "/eventos/17",
+      "status": 409
+    },
+    {
+      "method": "DELETE",
+      "route": "/eventos/17",
+      "status": 404
+    },
+    {
+      "method": "DELETE",
+      "route": "/eventos/17",
+      "status": 403
+    },
+    {
+      "method": "DELETE",
+      "route": "/eventos/17",
+      "status": 200
+    },
+    {
+      "method": "DELETE",
+      "route": "/eventos/18",
+      "status": 200
+    },
+    {
+      "method": "DELETE",
+      "route": "/eventos/17",
+      "status": 404
+    }
+  ],
+  "status": "EXCLUSAO_E_LIMPEZA_APROVADAS",
+  "dataWritesOnlyDisposable": true,
+  "preexistingCounts": {
+    "usuarios": 10,
+    "eventos": 6,
+    "custos_evento": 4,
+    "cotacoes": 5,
+    "itens_cotacao": 16,
+    "propostas": 4,
+    "inscricoes": 4,
+    "solicitacoes_acesso": 6
+  },
+  "beforeCorrection": {
+    "httpStatus": 500,
+    "error": "Erro interno ao excluir evento."
+  },
+  "databaseCause": {
+    "code": "23503",
+    "constraint": "fk_inscricao_evento"
+  },
+  "afterCorrection": {
+    "status": 409,
+    "error": "Não é possível excluir um evento com inscrições ou propostas vinculadas."
+  },
+  "existingDataPreserved": true,
+  "residualRows": 0
+}

@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "preparedUtc": "2026-11-03T18:31:26.756Z",
+  "scope": "RECUPERACAO_FALHA_POS_T1",
+  "manifestBefore": "e8ca559e9852521be559643aa88de6ff4bb36f5b4c71920ab4e63ed21bee78da",
+  "manifestAfter": "43b4c0131ab9178329f6d02107af6fd586d4818dd16b1efa5a82c8fe189fbb82",
+  "files": [
+    {
+      "file": "config/autoridade-selada.cjs",
+      "afterSha256": "2f7569a3cdc3cb4fc965742a9b4440e21e932e5a1202b6829463a7fab1202073"
+    },
+    {
+      "file": "config/comandos-controlador.cjs",
+      "afterSha256": "0bdab77ad95aeade70c9d63712fb6957a6142c1fc45e97617f24455c1a8b3412"
+    },
+    {
+      "file": "config/evidencias-pos-t1.cjs",
+      "afterSha256": "5d9ce7d7351ea2f867e3952af1986c1f92e03092f55fe7f197e203831eb173f1"
+    },
+    {
+      "file": "config/gate-final-selado.cjs",
+      "afterSha256": "6d09aaa390873e30bbad576598df8e60811b9bbf54a7a37526f7d5c4edb10db4"
+    },
+    {
+      "file": "config/procedencia-t1-selada.cjs",
+      "afterSha256": "4f165f5a3ac01b9facab8610bb239478f4e6ee809ba3a86f409c8e333c15b82b"
+    },
+    {
+      "file": "scripts/iniciar-supervisor-substituido.cjs",
+      "afterSha256": "3bb874c4df02565c067dabec6d61dfe5a7b52f06fab78cb863c4e074394543ef"
+    },
+    {
+      "file": "scripts/inspecionar-controlador-persistente.ps1",
+      "afterSha256": "8b2572f39e8caa0ef3ecc63444be9408d1bdc86453224efb0386ab10c129ca8e"
+    },
+    {
+      "file": "scripts/manutencao-validacao.cjs",
+      "afterSha256": "e858f89d5d83842f6b11b8d7360f24d88c3c268c7ece964b836f5527a75a9ef3"
+    },
+    {
+      "file": "scripts/operacoes-controlador-selado.cjs",
+      "afterSha256": "a4e183c4abd9f2d279f8d52c8fbf992afb8d1a8b41564da9fe9d09d1165ce53a"
+    },
+    {
+      "file": "scripts/preflight-falha-pos-t1.cjs",
+      "afterSha256": "da6d61d785d89b6618bf2ce5fb99380dd80b8afd1700808301eaadad6865a63c"
+    },
+    {
+      "file": "scripts/preflight-implantacao-pos-t1.cjs",
+      "afterSha256": "afad17a79d90f03b0e24fd772aa4d3efe98ed261824c7f8bc1bf2482a4b1350f"
+    },
+    {
+      "file": "scripts/preflight-reinicio-pos-t1.cjs",
+      "afterSha256": "7d99e8649ffbbb3415e8f31debb3f5deb904dc4776d93ed69409d42c05f9297c"
+    },
+    {
+      "file": "scripts/processo-substituicao-selada.ps1",
+      "afterSha256": "e7d6b9613cc4019dafac1f8849fbc8ab8587c74338191676f038ee5a11c9d124"
+    },
+    {
+      "file": "scripts/restabelecer-controlador-apos-reinicio.cjs",
+      "afterSha256": "eb209631b3f6a3e35b68efcf43b6840aeac04cd74e9e449b0a6f7d564fe0953e"
+    },
+    {
+      "file": "scripts/runtime-substituicao-selada.cjs",
+      "afterSha256": "cd0f52953f0ddeb4cb83cb6e03c817b33aea7a8e0783755ca20d20ff69cfafb7"
+    },
+    {
+      "file": "scripts/substituicao-controlador-selada.cjs",
+      "afterSha256": "8a5c82ffd964588ab1644bdfdad87a496a7cae8f17ae857d8af4c776a1eafaf6"
+    },
+    {
+      "file": "scripts/substituir-controlador-selado.cjs",
+      "afterSha256": "9a69ecd0bb42678911909192f8c1e054dcdec56e8cea73d147259166fbb389db"
+    },
+    {
+      "file": "scripts/validar-fence-pos-t1.cjs",
+      "afterSha256": "c3413805e29bcc02a2518237911b401600140dc01abfe397e405c12749684955"
+    },
+    {
+      "file": "scripts/validar-inspecao-pos-t1.cjs",
+      "afterSha256": "b4df2cb5033d854be481ecd931e9b9d770dc402e56035e004e807654ea51391d"
+    },
+    {
+      "file": "tests/fence-implantacao.mock.ps1",
+      "afterSha256": "b4c57978c36ffd61834448ddc3ac81c0c275d23bf4fcf3209d508d5f5cb84b48"
+    },
+    {
+      "file": "tests/fixtures/runtime-controlador-anterior.cjs",
+      "afterSha256": "cfb219ad1b3824c78ef8a370a91ed09c34bd9cc16a41d856c45a7c921152d80d"
+    },
+    {
+      "file": "tests/helpers/implantacao-pos-t1.cjs",
+      "afterSha256": "26ce5a58b87b6183a60ce3d4fa575a7b9ab2cfa2a511ae739d8d6ccaac645c9b"
+    },
+    {
+      "file": "tests/helpers/operacoes-controlador.cjs",
+      "afterSha256": "50db3c752e98f004876b387591d90e842508e0ae689f7f73d69d1825020925f0"
+    },
+    {
+      "file": "tests/helpers/pos-t1.cjs",
+      "afterSha256": "4368cc040f0f9d7a2a80c5c5dbfa26780dda6ba608fe2a7e75c45d5edcf6b537"
+    },
+    {
+      "file": "tests/helpers/runtime-selado.cjs",
+      "afterSha256": "cf7050b0d003f7a1a9836055183ff177a1067be5658796aee39c5a0310b06fe3"
+    },
+    {
+      "file": "tests/helpers/substituicao-selada.cjs",
+      "afterSha256": "3ecb2143411acb07c8777ef3ae400c4808ed685c8df42115e190788d0e0a3d23"
+    },
+    {
+      "file": "tests/implantacao-pos-t1.test.cjs",
+      "afterSha256": "55376590ff4904f03e645c3b7951f7e2c17c92682fd763ca3a20a564b1a494a7"
+    },
+    {
+      "file": "tests/operacoes-pos-substituicao.test.cjs",
+      "afterSha256": "5c5dddb1f506d9116f56ad607ed7273dbc558991c6d52cf63e56dd1d0fa364df"
+    },
+    {
+      "file": "tests/perda-controle-pos-t1.test.cjs",
+      "afterSha256": "582be23d2210edb1adab3fc408dc3e1a52a57eeab6b54ce83c6aca0425f38e53"
+    },
+    {
+      "file": "tests/renovacao-smoke-pos-t1.test.cjs",
+      "afterSha256": "089e145253b1a9ac778c8ebbcf8ffcd03a2e3fe64fc742378a464c366c0028f4"
+    },
+    {
+      "file": "tests/runtime-implantacao-pos-t1.test.cjs",
+      "afterSha256": "4ff91e5ecd9a2bc2061be73c84e41d4f65d172adf210c9c5a134b62c5985b98d"
+    },
+    {
+      "file": "tests/runtime-substituicao-integrada.test.cjs",
+      "afterSha256": "45f66ae9c54217a0737d96b786504303d19cc4e6ff70f502e39301cf34fcd31e"
+    },
+    {
+      "file": "tests/substituicao-controlador-selada.test.cjs",
+      "afterSha256": "1d6a585157de64917bb35773f9463225fea4428b13853274f6f8adc655fcd6e0"
+    }
+  ]
+}

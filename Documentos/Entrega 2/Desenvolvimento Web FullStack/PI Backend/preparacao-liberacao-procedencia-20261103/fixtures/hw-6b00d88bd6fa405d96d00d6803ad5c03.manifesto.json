@@ -1,0 +1,56 @@
+{
+  "runId": "6b00d88bd6fa405d96d00d6803ad5c03",
+  "marcador": "TT-HW-6b00d88bd6fa405d96d00d6803ad5c03",
+  "projectRef": "gnwybroqfvwosiqzsfla",
+  "estado": "PREPARACAO",
+  "checks": [],
+  "endpoints": [],
+  "createdIds": {
+    "usuarios": [],
+    "eventos": [],
+    "custos_evento": [],
+    "cotacoes": [],
+    "itens_cotacao": [],
+    "propostas": [],
+    "inscricoes": [],
+    "solicitacoes_acesso": []
+  },
+  "registros": {
+    "usuarios": [],
+    "eventos": [],
+    "custos_evento": [],
+    "cotacoes": [],
+    "itens_cotacao": [],
+    "propostas": [],
+    "inscricoes": [],
+    "solicitacoes_acesso": []
+  },
+  "tentativas": [],
+  "residuos": null,
+  "catalogo": [
+    {
+      "name": "avaliar_proposta",
+      "bodyTokensSHA256": "7bf990dfdac9e95a8b49d4b5822967692e4fde7147d25f8965db106251393d9e",
+      "invoker": true,
+      "serviceRoleOnly": true
+    },
+    {
+      "name": "decidir_solicitacao_acesso",
+      "bodyTokensSHA256": "e28adbecfd7363412fda8f355f0bfd96be87a3ab47ded2ac3a56fbb7346d9859",
+      "invoker": true,
+      "serviceRoleOnly": true
+    },
+    {
+      "name": "publicar_cotacao",
+      "bodyTokensSHA256": "3e7125817bf4c88e05229dc9decd924d6e70e0dbe15efc69a4c96da65ecd622f",
+      "invoker": true,
+      "serviceRoleOnly": true
+    },
+    {
+      "name": "substituir_custos_evento",
+      "bodyTokensSHA256": "ce68c8d2443ffd18ac27edb5e1453c00e1455d4ece2fc91bd3645a9cf1d5461d",
+      "invoker": true,
+      "serviceRoleOnly": true
+    }
+  ]
+}

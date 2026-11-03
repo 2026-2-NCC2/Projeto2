@@ -1,0 +1,119 @@
+{
+  "startedUtc": "2026-11-03T18:40:40.332Z",
+  "status": "RECUPERACAO_FALHA_POS_T1_APROVADA",
+  "controllerPid": 3416,
+  "stage": "GATE_RESTABELECIMENTO",
+  "maintenanceReleased": false,
+  "t1Executed": false,
+  "dataWrites": false,
+  "jwtRotated": false,
+  "checkpointChanged": false,
+  "backupsGenerated": false,
+  "rollbackExecuted": false,
+  "historicalAbsenceOfWritesProven": false,
+  "historicalGapAcknowledged": true,
+  "maintenanceResponder": {
+    "pid": 27672,
+    "parentPid": 7260,
+    "criadoEm": "2026-11-03T17:56:50.2851830Z",
+    "role": "MANUTENCAO_SEM_BACKEND",
+    "entradaConhecida": true,
+    "portaExclusivaLocal": true,
+    "backendSupervisor": false,
+    "boot": "251f9901-62c8-4caa-bd87-559eed12d30d"
+  },
+  "finishedUtc": "2026-11-03T18:42:04.600Z",
+  "reutilizada": false,
+  "receipt": {
+    "pid": 31312,
+    "controllerPid": 3416,
+    "nonce": "aa947019-24ad-4910-8deb-56b41fe6748c",
+    "epoch": 4,
+    "httpStatus": 503
+  },
+  "smokeNovoObrigatorio": true,
+  "gate": {
+    "status": "RESTABELECIMENTO_POS_T1_GATE_APROVADO",
+    "httpStatus": 503,
+    "comparison": {
+      "hashes": {
+        "mysql": "2aa2ee825c85538b01638712d9c3caf7a74fbcfcad8093809c10fbd16fad57d0",
+        "supabase": "c1a31bf5df8944eb33c5fa5c6a5c2b7870a36d5f5a53b6385021219b4370e595",
+        "catalogos": "f2e09f8ba183b735e0bc4888345d7112f7bb16ac62dc3daf8ea1b13ba80bf615"
+      },
+      "counts": {
+        "usuarios": {
+          "mysql": 9,
+          "supabase": 10
+        },
+        "eventos": {
+          "mysql": 5,
+          "supabase": 6
+        },
+        "custos_evento": {
+          "mysql": 3,
+          "supabase": 5
+        },
+        "cotacoes": {
+          "mysql": 3,
+          "supabase": 4
+        },
+        "itens_cotacao": {
+          "mysql": 13,
+          "supabase": 15
+        },
+        "propostas": {
+          "mysql": 2,
+          "supabase": 3
+        },
+        "inscricoes": {
+          "mysql": 2,
+          "supabase": 3
+        },
+        "solicitacoes_acesso": {
+          "mysql": 5,
+          "supabase": 6
+        }
+      },
+      "additionalIds": {
+        "usuarios": [
+          10
+        ],
+        "eventos": [
+          12
+        ],
+        "custos_evento": [
+          7,
+          8
+        ],
+        "cotacoes": [
+          6
+        ],
+        "itens_cotacao": [
+          22,
+          23
+        ],
+        "propostas": [
+          3
+        ],
+        "inscricoes": [
+          3
+        ],
+        "solicitacoes_acesso": [
+          6
+        ]
+      },
+      "mysqlRows": 42,
+      "supabaseRows": 52
+    },
+    "exclusiveAuthorityConfirmed": true,
+    "newSmokeRequired": true,
+    "finalReleaseGateApproved": false,
+    "historicalAbsenceOfWritesProven": false
+  },
+  "oldStateSha256": "1bf7c17369ebbaa9f0fff4ae93bfcff5bcea132acb63bc1d19660bfda2f46924",
+  "checkpointId": "349d6df4-7c15-4960-b739-dfd91fd53c8d",
+  "journalSha256": "0c8d38c0ff4f05334f433b5d581b4d97f05bb901f751ed0f6058bff3fd8212b1",
+  "newSmokeRequired": true,
+  "finalReleaseGateApproved": false
+}

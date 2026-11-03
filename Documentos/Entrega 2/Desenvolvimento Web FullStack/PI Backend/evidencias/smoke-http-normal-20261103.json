@@ -1,0 +1,99 @@
+{
+  "status": "SMOKE_HTTP_NORMAL_APROVADO",
+  "finishedUtc": "2026-11-03T19:36:19.426Z",
+  "profiles": 4,
+  "requests": 18,
+  "http": [
+    {
+      "method": "GET",
+      "route": "/perfil",
+      "status": 401
+    },
+    {
+      "method": "POST",
+      "route": "/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/perfil",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/admin/eventos",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/usuarios",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "route": "/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/perfil",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/participante/eventos",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/usuarios",
+      "status": 403
+    },
+    {
+      "method": "POST",
+      "route": "/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/perfil",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/cotacoes",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/usuarios",
+      "status": 403
+    },
+    {
+      "method": "POST",
+      "route": "/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/perfil",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/fornecedor/cotacoes",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "route": "/usuarios",
+      "status": 403
+    },
+    {
+      "method": "GET",
+      "route": "/fornecedor/cotacoes",
+      "status": 403
+    }
+  ],
+  "dataWrites": false
+}
