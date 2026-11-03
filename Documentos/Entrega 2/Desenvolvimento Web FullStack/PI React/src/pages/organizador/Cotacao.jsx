@@ -248,13 +248,7 @@ const aoPublicarCotacao = async () => {
                 <strong>Status:</strong> {proposta.status}
               </p>
               {proposta.status === 'Em avaliação' && (
-              <div
-                style={{
-                display: 'flex',
-                gap: '12px',
-                marginTop: '16px'
-              }}
-              >
+              <div className="acoes acoesProposta">
               <button
                 type="button"
                 className="principal"

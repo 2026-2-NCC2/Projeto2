@@ -206,7 +206,7 @@ export function Custos({
           </div>
         ))}
       </div>
-      <div className="tabela">
+      <div className="tabela" role="region" aria-label="Itens de custo do evento" tabIndex={0}>
         {custos.length === 0 ? (
           <p role="status">Nenhum item de custo cadastrado neste evento. Adicione o primeiro item ao rascunho.</p>
         ) : (

@@ -1,5 +1,8 @@
+import { IdentidadeConta } from '../layout/IdentidadeConta.jsx'
 import { apiUrl } from '../../services/api.js'
 import { useEffect, useState } from 'react';
+import { NavegacaoRecolhivel } from '../layout/NavegacaoRecolhivel.jsx'
+import { useFocoModal } from '../../hooks/useFocoModal.js'
 
 export function AdminTopo({ aoSair }) {
   return (
@@ -8,25 +11,25 @@ export function AdminTopo({ aoSair }) {
       <div className="adminSeguro">Ambiente Seguro SSL 256-bit</div>
       <label className="adminBusca"><span>⌕</span><input aria-label="Busca geral" placeholder="Buscar por CNPJ, Razão Social ou Protocolo" /></label>
       <button className="adminIcone" aria-label="Notificações">●</button>
-      <button className="adminUsuario" onClick={aoSair}><span>RA</span><strong>Roberto Albuquerque<small>Administrador & Compliance Sênior</small></strong></button>
+      <button className="adminUsuario" aria-label="Sair da conta de administrador" onClick={aoSair}><span aria-hidden="true">◉</span><IdentidadeConta /></button>
     </header>
   )
 }
 
 export function AdminMenu({ secao, setSecao, aoSair }) {
   const itens = [
-    ['painel', '▦', 'Painel de evento'],
+    ['painel', '▦', 'Painel de evento', true],
     ['eventos', '□', 'Eventos'],
     ['usuarios', '♙', 'Usuários'],
     ['cotacoes', '▣', 'Cotações'],
     ['propostas', '◇', 'Propostas'],
     ['contas', '▥', 'Fornecedores & Contas'],
-    ['relatorios', '▤', 'Relatórios'],
+    ['relatorios', '▤', 'Relatórios', true],
   ]
   return (
-    <aside className="adminMenu">
+    <aside className="adminMenu" aria-label="Navegação administrativa">
       <button className="adminNovo">⊕ &nbsp; + Novo evento</button>
-      <nav>{itens.map(([id, icone, texto]) => <button key={id} className={secao === id ? 'ativo' : ''} onClick={() => setSecao(id)}><span>{icone}</span>{texto}</button>)}</nav>
+      <nav aria-label="Seções administrativas">{itens.map(([id, icone, texto, indisponivel]) => <button key={id} disabled={indisponivel} title={indisponivel ? 'Funcionalidade em desenvolvimento' : undefined} aria-current={!indisponivel && secao === id ? 'page' : undefined} className={!indisponivel && secao === id ? 'ativo' : ''} onClick={indisponivel ? undefined : () => setSecao(id)}><span>{icone}</span>{texto}{indisponivel && <small className="adminEmDesenvolvimento">Em desenvolvimento</small>}</button>)}</nav>
       <div className="adminAuditoria"><strong>♙ AUDITORIA ATIVA</strong><p>Sessão sob custódia de compliance. Todos os registros auditados geram hash SHA-256 irrevogável.</p></div>
       <div className="adminMenuRodape"><button>◎ Perfil</button><button className="sair" onClick={aoSair}>↪ Sair</button></div>
     </aside>
@@ -39,76 +42,20 @@ export function CartaoMetrica({ titulo, valor, texto, tom = 'roxo' }) {
 
 export function AdminPortal({ aoSair }) {
   const [propostaSelecionada, setPropostaSelecionada] = useState(null)
-  useEffect(() => {
-  if (!propostaSelecionada) return
-
-  function fecharComEsc(evento) {
-    if (evento.key === 'Escape') {
-      setPropostaSelecionada(null)
-    }
-  }
-
-  window.addEventListener('keydown', fecharComEsc)
-
-  return () => {
-    window.removeEventListener('keydown', fecharComEsc)
-  }
-}, [propostaSelecionada])
+  const propostaModalRef = useFocoModal(propostaSelecionada, setPropostaSelecionada)
   const [propostasAdmin, setPropostasAdmin] = useState([])
   const [carregandoPropostas, setCarregandoPropostas] = useState(false)
   const [erroPropostas, setErroPropostas] = useState('')
   const [cotacaoSelecionada, setCotacaoSelecionada] = useState(null)
-  useEffect(() => {
-  if (!cotacaoSelecionada) return
-
-  function fecharComEsc(evento) {
-    if (evento.key === 'Escape') {
-      setCotacaoSelecionada(null)
-    }
-  }
-
-  window.addEventListener('keydown', fecharComEsc)
-
-  return () => {
-    window.removeEventListener('keydown', fecharComEsc)
-  }
-}, [cotacaoSelecionada])
+  const cotacaoModalRef = useFocoModal(cotacaoSelecionada, setCotacaoSelecionada)
   const [cotacoesAdmin, setCotacoesAdmin] = useState([])
   const [carregandoCotacoes, setCarregandoCotacoes] = useState(false)
   const [erroCotacoes, setErroCotacoes] = useState('')
   const [usuarioSelecionado, setUsuarioSelecionado] = useState(null)
-  useEffect(() => {
-    if (!usuarioSelecionado) return
-  
-    function fecharComEsc(evento) {
-      if (evento.key === 'Escape') {
-        setUsuarioSelecionado(null)
-      }
-    }
-  
-    window.addEventListener('keydown', fecharComEsc)
-  
-    return () => {
-      window.removeEventListener('keydown', fecharComEsc)
-    }
-  }, [usuarioSelecionado])
+  const usuarioModalRef = useFocoModal(usuarioSelecionado, setUsuarioSelecionado)
   const [filtroPerfil, setFiltroPerfil] = useState('todos')
   const [eventoSelecionado, setEventoSelecionado] = useState(null)
-  useEffect(() => {
-    if (!eventoSelecionado) return
-  
-    function fecharComEsc(evento) {
-      if (evento.key === 'Escape') {
-        setEventoSelecionado(null)
-      }
-    }
-  
-    window.addEventListener('keydown', fecharComEsc)
-  
-    return () => {
-      window.removeEventListener('keydown', fecharComEsc)
-    }
-  }, [eventoSelecionado])
+  const eventoModalRef = useFocoModal(eventoSelecionado, setEventoSelecionado)
   const [secao, setSecao] = useState('contas')
   const [eventosAdmin, setEventosAdmin] = useState([])
   const [usuariosAdmin, setUsuariosAdmin] = useState([])
@@ -390,7 +337,9 @@ export function AdminPortal({ aoSair }) {
     <div className="adminApp">
       <AdminTopo aoSair={aoSair} />
       <div className="adminEstrutura">
-        <AdminMenu secao={secao} setSecao={setSecao} aoSair={aoSair} />
+        <NavegacaoRecolhivel id="menu-administrador" rotulo="Menu do administrador" className="adminNavegacao">
+          <AdminMenu secao={secao} setSecao={setSecao} aoSair={aoSair} />
+        </NavegacaoRecolhivel>
         <main className="adminConteudo">
           {secao === 'eventos' ? (
   <section className="adminHero">
@@ -448,7 +397,7 @@ export function AdminPortal({ aoSair }) {
 ) : eventosAdmin.length === 0 ? (
   <p>Nenhum evento cadastrado.</p>
 ) : (
-  <div className="adminTabelaEventos">
+  <div className="adminTabelaEventos" role="region" aria-label="Eventos cadastrados" tabIndex={0}>
   <table>
     <thead>
       <tr>
@@ -483,7 +432,8 @@ export function AdminPortal({ aoSair }) {
       <button
         type="button"
         className="adminBotaoVisualizar"
-        onClick={() => {
+        onClick={(e) => {
+          e.currentTarget.focus()
           setEventoSelecionado(evento)
         }}
       >
@@ -503,6 +453,8 @@ export function AdminPortal({ aoSair }) {
   >
     <div
       className="adminDetalhesEvento"
+      ref={eventoModalRef}
+      tabIndex={-1}
       role="dialog"
       aria-modal="true"
       aria-label="Detalhes do evento"
@@ -583,7 +535,7 @@ export function AdminPortal({ aoSair }) {
     ) : usuariosAdmin.length === 0 ? (
       <p>Nenhum usuário cadastrado.</p>
     ) : (
-      <div className="adminTabelaEventos">
+      <div className="adminTabelaEventos" role="region" aria-label="Usuários cadastrados" tabIndex={0}>
         <table>
           <thead>
             <tr>
@@ -619,7 +571,7 @@ export function AdminPortal({ aoSair }) {
                 <td><button
                     type="button"
                     className="adminBotaoVisualizar"
-                    onClick={() => setUsuarioSelecionado(usuario)}>Visualizar</button>
+                    onClick={(e) => { e.currentTarget.focus(); setUsuarioSelecionado(usuario) }}>Visualizar</button>
                 </td>
               </tr>
             ))}
@@ -639,6 +591,8 @@ export function AdminPortal({ aoSair }) {
       role="dialog"
       aria-modal="true"
       aria-label="Detalhes do usuário"
+      ref={usuarioModalRef}
+      tabIndex={-1}
       onClick={(e) => e.stopPropagation()}
     >
       <h2>Detalhes do Usuário</h2>
@@ -675,7 +629,7 @@ export function AdminPortal({ aoSair }) {
 
     <p>Consulte e acompanhe as cotações cadastradas no TrocaTicket.</p>
 
-    <div className="adminTabelaEventos">
+    <div className="adminTabelaEventos" role="region" aria-label="Cotações cadastradas" tabIndex={0}>
       <table>
         <thead>
           <tr>
@@ -711,7 +665,7 @@ export function AdminPortal({ aoSair }) {
   <button
     type="button"
     className="adminBotaoVisualizar"
-    onClick={() => setCotacaoSelecionada(cotacao)}
+    onClick={(e) => { e.currentTarget.focus(); setCotacaoSelecionada(cotacao) }}
   >
     Visualizar
   </button>
@@ -733,6 +687,8 @@ export function AdminPortal({ aoSair }) {
       role="dialog"
       aria-modal="true"
       aria-label="Detalhes da cotação"
+      ref={cotacaoModalRef}
+      tabIndex={-1}
       onClick={(e) => e.stopPropagation()}
     >
       <h2>Detalhes da Cotação</h2>
@@ -784,7 +740,7 @@ export function AdminPortal({ aoSair }) {
       Consulte e acompanhe as propostas enviadas pelos fornecedores.
     </p>
 
-    <div className="adminTabelaEventos">
+    <div className="adminTabelaEventos" role="region" aria-label="Propostas cadastradas" tabIndex={0}>
       <table>
         <thead>
           <tr>
@@ -827,7 +783,7 @@ export function AdminPortal({ aoSair }) {
   <button
     type="button"
     className="adminBotaoVisualizar"
-    onClick={() => setPropostaSelecionada(proposta)}
+    onClick={(e) => { e.currentTarget.focus(); setPropostaSelecionada(proposta) }}
   >
     Visualizar
   </button>
@@ -849,6 +805,8 @@ export function AdminPortal({ aoSair }) {
       role="dialog"
       aria-modal="true"
       aria-label="Detalhes da proposta"
+      ref={propostaModalRef}
+      tabIndex={-1}
       onClick={(e) => e.stopPropagation()}
     >
       <h2>Detalhes da Proposta</h2>
@@ -890,7 +848,7 @@ export function AdminPortal({ aoSair }) {
 )}
 </>
 
-) : (
+) : secao === 'contas' ? (
   <>
           
           <div className="adminTrilha">
@@ -999,7 +957,7 @@ export function AdminPortal({ aoSair }) {
             ({totalOrganizadores} solicitações)</b><span><i style={{ width: `${percentualOrganizadores}%` }} /></span><b>{percentualFornecedores}% Fornecedores({totalFornecedores} solicitações)</b></div>
             <div className="adminOrdenacao">Ordenar por: <select value={ordem} onChange={(e) => setOrdem(e.target.value)}><option>Risco</option><option>Prioridade</option><option>Mais recentes</option></select></div>
             {mensagem && <div className="adminMensagem" role="status">✓ {mensagem}<button onClick={() => setMensagem('')}>×</button></div>}
-            <div className="adminTabelaWrap"><table className="adminTabela"><thead><tr><th><input type="checkbox" aria-label="Selecionar todos" checked={filtradas.length > 0 && filtradas.every((item) => selecionados.includes(item.id))} onChange={(e) => setSelecionados(e.target.checked ? filtradas.map((item) => item.id) : [])} /></th><th>PROTOCOLO / DATA</th><th>SOLICITANTE</th><th>ATUAÇÃO</th><th>RESPONSÁVEL</th><th>JUSTIFICATIVA</th><th>AÇÕES</th></tr></thead>
+            <div className="adminTabelaWrap" role="region" aria-label="Solicitações de acesso" tabIndex={0}><table className="adminTabela"><thead><tr><th><input type="checkbox" aria-label="Selecionar todos" checked={filtradas.length > 0 && filtradas.every((item) => selecionados.includes(item.id))} onChange={(e) => setSelecionados(e.target.checked ? filtradas.map((item) => item.id) : [])} /></th><th>PROTOCOLO / DATA</th><th>SOLICITANTE</th><th>ATUAÇÃO</th><th>RESPONSÁVEL</th><th>JUSTIFICATIVA</th><th>AÇÕES</th></tr></thead>
               <tbody>{filtradas.map((item) => <tr key={item.id} className={item.urgente ? 'urgente' : ''}><td><input type="checkbox" aria-label={`Selecionar ${item.nome}`} checked={selecionados.includes(item.id)} onChange={() => alternar(item.id)} /></td><td><strong>#HOM-{item.id}</strong><small className={item.urgente ? 'atraso' : ''}>{item.hora}</small></td><td><strong>{item.nome}</strong><small>{item.documento}</small></td><td><strong>{item.atuacao}</strong><small>{item.detalhe}</small></td><td><strong>{item.responsavel}</strong><small>{item.cargo}</small></td><td>
   <span>{item.detalhe || 'Não informada'}</span>
 </td><td><div className="adminAcoesLinha"><button className="aprovar" onClick={() => atualizar(item.id, 'homologado')}>Aprovar</button><button className="recusar" onClick={() => atualizar(item.id, 'recusado')}>Recusar</button></div></td></tr>)}</tbody></table></div>
@@ -1010,9 +968,11 @@ export function AdminPortal({ aoSair }) {
 </div>
           </section>
             </>
+          ) : (
+            <p role="status">Funcionalidade em desenvolvimento.</p>
           )}
         </main>
       </div>
-      <footer className="adminBarraLote"><div><b>{selecionados.length}</b><span><strong>{selecionados.length} cadastros selecionados para ação em lote</strong><small>Organizadores e fornecedores de estrutura técnica</small></span></div><div><button type="button"className="recusar" disabled title="Funcionalidade em desenvolvimento">⊘ Reprovar em lote (em breve)</button><button type="button"className="aprovarLote"disabledtitle="Funcionalidade em desenvolvimento">✥ Aprovar em lote (em breve)</button></div></footer></div>
+      <footer className="adminBarraLote"><div><b>{selecionados.length}</b><span><strong>{selecionados.length} cadastros selecionados para ação em lote</strong><small>Organizadores e fornecedores de estrutura técnica</small></span></div><div><button type="button"className="recusar" disabled title="Funcionalidade em desenvolvimento">⊘ Reprovar em lote (em breve)</button><button type="button"className="aprovarLote" disabled title="Funcionalidade em desenvolvimento">✥ Aprovar em lote (em breve)</button></div></footer></div>
   )
 }

@@ -24,4 +24,4 @@ A implantacao pos-T1 preparada exige origem viva e observacao IPC recente. Nao s
 
 Pende preparar e validar um procedimento especifico de restabelecimento pos-T1, preservando diario/limpeza, checkpoint e historico de tickets. O procedimento existente nao pode ser executado neste estado sem alterar seus controles. Essa alteracao nao foi feita nesta tarefa. A futura admissao da nova implantacao permanece separada e nao foi executada.
 
-Evidencia operacional recente, sem credenciais: [resultado estruturado](evidencias/restabelecimento-pos-t1-bloqueado-1793726652194.json).
+Evidencia operacional recente, sem credenciais: [resultado estruturado](<../../PI Backend/evidencias/restabelecimento-pos-t1-bloqueado-1793726652194.json>).

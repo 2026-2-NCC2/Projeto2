@@ -30,4 +30,4 @@ As reconciliacoes READ ONLY do fluxo conferiram os dados antes do fence e depois
 
 Pendencias: compatibilizar e testar o inspetor nativo para o modo pos-T1, preservando as recusas antigas; preparar retomada idempotente do estado **FALHA**, sem reutilizar tickets, apagar procedencia ou executar rollback. Nao basta repetir esta mesma invocacao. A manutencao 503 deve permanecer com o respondedor conhecido ate nova operacao autorizada.
 
-Evidencias: [precheck](evidencias/precheck-admissao-pos-t1-1793728524903.json), [relatorio original](evidencias/restabelecimento-pos-t1-9d7409c3-bdb6-490b-8d27-aeafc60d0884.json), [resultado consolidado](evidencias/resultado-readmissao-canonica-20261103.json).
+Evidencias: [precheck](<../../PI Backend/evidencias/precheck-admissao-pos-t1-1793728524903.json>), [relatorio original](<../../PI Backend/evidencias/restabelecimento-pos-t1-9d7409c3-bdb6-490b-8d27-aeafc60d0884.json>), [resultado consolidado](<../../PI Backend/evidencias/resultado-readmissao-canonica-20261103.json>).

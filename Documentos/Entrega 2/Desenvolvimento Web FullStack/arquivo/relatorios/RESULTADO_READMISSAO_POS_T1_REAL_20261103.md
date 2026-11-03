@@ -26,4 +26,4 @@ Para futura autorizacao, resolver a entrada oficial com `(Resolve-Path -LiteralP
 
 As 50 simulacoes anteriormente aprovadas nao foram repetidas. Nesta operacao foram executados prechecks de MySQL READ ONLY, diario/checkpoint/backups, integridade de pacote, publicacao unica, verificacao dos hashes-alvo, inventario depois da falha e diagnosticos de leitura/formato.
 
-Evidencias: [precheck](evidencias/precheck-admissao-pos-t1-1793728208316.json), [relatorio original](evidencias/restabelecimento-pos-t1-5c36d7e3-2b92-42a2-baed-9c5a16c5b776.json), [resultado consolidado](evidencias/resultado-readmissao-pos-t1-real-20261103.json).
+Evidencias: [precheck](<../../PI Backend/evidencias/precheck-admissao-pos-t1-1793728208316.json>), [relatorio original](<../../PI Backend/evidencias/restabelecimento-pos-t1-5c36d7e3-2b92-42a2-baed-9c5a16c5b776.json>), [resultado consolidado](<../../PI Backend/evidencias/resultado-readmissao-pos-t1-real-20261103.json>).

@@ -1,20 +1,23 @@
+import { usePerfil } from '../../hooks/usePerfil.js'
 import { useState } from 'react'
 
 export function PerfilOrganizador() {
-  const [perfil, setPerfil] = useState({ nome: 'Roberto Albuquerque', cargo: 'Organizador Sênior', email: 'roberto@empresa.com', telefone: '(11) 98765-4321', empresa: 'Albuquerque Eventos Corporativos', cnpj: '12.345.678/0001-90', bio: 'Especialista em eventos corporativos, conferências e experiências de marca.' })
+  const { perfil: identidade, erro } = usePerfil()
+  const [perfil, setPerfil] = useState({ cargo: '', telefone: '', empresa: '', cnpj: '', bio: '' })
   const [preferencias, setPreferencias] = useState({ cotacoes: true, propostas: true, relatorios: false, seguranca: true })
   const [editando, setEditando] = useState(false)
   const [salvo, setSalvo] = useState(false)
   const alterar = (campo, valor) => { setPerfil((atual) => ({ ...atual, [campo]: valor })); setSalvo(false) }
   const salvar = (evento) => { evento.preventDefault(); setEditando(false); setSalvo(true) }
   return <div className="perfilPagina">
+    {erro && <p role="alert">{erro}</p>}
     <div className="perfilCabecalho"><div><p className="trilhaNavegacao">TrocaTicket › Gestão Corporativa › Meu Perfil</p><h1>Meu perfil</h1><p>Gerencie seus dados, sua empresa e as preferências da conta.</p></div><span className="perfilContaAtiva">● Conta verificada</span></div>
-    {salvo && <div className="perfilSucesso" role="status">✓ Alterações salvas com sucesso.</div>}
-    <section className="perfilResumo"><div className="perfilAvatar">RA</div><div className="perfilIdentidade"><h2>{perfil.nome}</h2><p>{perfil.cargo} · {perfil.empresa}</p><div><span>Organizador</span><span>Conta corporativa</span></div></div><div className="perfilResumoNumeros"><div><strong>4</strong><small>Eventos ativos</small></div><div><strong>18</strong><small>Cotações publicadas</small></div><div><strong>98,4%</strong><small>Precisão de auditoria</small></div></div></section>
+    {salvo && <div className="perfilSucesso" role="status">Rascunho local atualizado; não salvo no servidor.</div>}
+    <section className="perfilResumo"><div className="perfilAvatar">◉</div><div className="perfilIdentidade"><h2>{identidade?.nome || 'Conta'}</h2><p>{perfil.cargo} · {perfil.empresa}</p><div><span>Organizador</span><span>Conta corporativa</span></div></div><div className="perfilResumoNumeros"><div><strong>4</strong><small>Eventos ativos</small></div><div><strong>18</strong><small>Cotações publicadas</small></div><div><strong>98,4%</strong><small>Precisão de auditoria</small></div></div></section>
     <div className="perfilGrade">
       <form className="perfilCartao perfilDados" onSubmit={salvar}>
-        <div className="perfilTituloCartao"><div><h2>Informações pessoais</h2><p>Dados utilizados na identificação e comunicação da conta.</p></div><button type="button" className="perfilEditar" onClick={() => { setEditando((valor) => !valor); setSalvo(false) }}>{editando ? 'Cancelar' : '✎ Editar dados'}</button></div>
-        <div className="perfilCampos"><label>Nome completo<input disabled={!editando} value={perfil.nome} onChange={(e) => alterar('nome', e.target.value)} /></label><label>Cargo<input disabled={!editando} value={perfil.cargo} onChange={(e) => alterar('cargo', e.target.value)} /></label><label>E-mail corporativo<input type="email" disabled={!editando} value={perfil.email} onChange={(e) => alterar('email', e.target.value)} /></label><label>Telefone<input disabled={!editando} value={perfil.telefone} onChange={(e) => alterar('telefone', e.target.value)} /></label><label className="perfilCampoInteiro">Sobre você<textarea rows="3" disabled={!editando} value={perfil.bio} onChange={(e) => alterar('bio', e.target.value)} /></label></div>
+        <div className="perfilTituloCartao"><div><h2>Informações pessoais</h2><p>Nome e e-mail da conta. Demais campos são rascunhos locais.</p></div><button type="button" className="perfilEditar" onClick={() => { setEditando((valor) => !valor); setSalvo(false) }}>{editando ? 'Cancelar' : '✎ Editar dados'}</button></div>
+        <div className="perfilCampos"><label>Nome completo<input disabled={!editando} value={identidade?.nome || ''} readOnly /></label><label>Cargo<input disabled={!editando} value={perfil.cargo} onChange={(e) => alterar('cargo', e.target.value)} /></label><label>E-mail corporativo<input type="email" disabled={!editando} value={identidade?.email || ''} readOnly /></label><label>Telefone<input disabled={!editando} value={perfil.telefone} onChange={(e) => alterar('telefone', e.target.value)} /></label><label className="perfilCampoInteiro">Sobre você<textarea rows="3" disabled={!editando} value={perfil.bio} onChange={(e) => alterar('bio', e.target.value)} /></label></div>
         {editando && <div className="perfilAcoes"><button type="button" className="secundario" onClick={() => setEditando(false)}>Cancelar</button><button className="principal" type="submit">Salvar alterações</button></div>}
       </form>
       <aside className="perfilColuna">
