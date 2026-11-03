@@ -1,0 +1,327 @@
+diff --git a/PI Backend/config/comandos-controlador.cjs b/PI Backend/config/comandos-controlador.cjs
+--- a/PI Backend/config/comandos-controlador.cjs
++++ b/PI Backend/config/comandos-controlador.cjs
+@@ -1,6 +1,6 @@
+ 'use strict';
+ // Futuro dono do IPC: entrada herdada, sem endpoint HTTP nem adocao de outro pai.
+-function criarComandosControlador({entrada,saida,continuidade,preparar,executar,liberar,smoke,revogarPlano,validarPlano}){
++function criarComandosControlador({entrada,saida,continuidade,preparar,executar,liberar,smoke,renovarSmokePosT1,revogarPlano,validarPlano}){
+   let instalado=false,fechado=false,ocupado=false,buffer='',planejado,concluida;const usados=new Set();
+   const enviar=x=>{if(fechado)return;try{saida.write(JSON.stringify(x)+'\n');}catch{fechar();}};
+   function descartarAtual(){const old=planejado;planejado=undefined;if(old)revogarPlano?.(old);}
+@@ -13,6 +13,13 @@
+     try{
+       if(m.acao==='status'){const r=await continuidade.conferir();enviar({pedido:m.pedido,ok:true,controllerPid:r.controller.pid,supervisorPid:r.backend.pid,nonce:r.nonce,verificadoEm:r.fim});}
+       else if(m.acao==='smoke-isolado'){if(m.autorizarSmoke!==true||typeof smoke!=='function')throw Error();descartarAtual();await continuidade.conferir();if(fechado)throw Error();const r=await smoke();enviar({pedido:m.pedido,ok:true,status:r.status,requests:r.requests,reportFile:r.reportFile});}
++      else if(m.acao==='renovar-smoke-pos-t1'){
++        if(typeof renovarSmokePosT1!=='function'||m.autorizarRenovacao!==true||typeof m.run!=='string'||!/^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(m.run)||typeof m.referenciaAutorizacao!=='string'||m.referenciaAutorizacao.trim().length<8)throw Error();
++        descartarAtual();concluida=undefined;await continuidade.conferir();if(fechado)throw Error();
++        const r=await renovarSmokePosT1({autorizarRenovacao:true,run:m.run,referenciaAutorizacao:m.referenciaAutorizacao});
++        if(fechado||r.status!=='SMOKE_POS_T1_RENOVADO'||r.run!==m.run||r.gateApproved!==true||r.finalidade!=='LIBERACAO'||r.requests!==26||!Number.isSafeInteger(r.gateExpiraEm)||Date.now()>=r.gateExpiraEm)throw Error();
++        concluida={run:r.run};enviar({pedido:m.pedido,ok:true,status:r.status,run:r.run,requests:r.requests,reportFile:r.reportFile,gateApproved:true,finalidade:r.finalidade,gateVerificadoEm:r.gateVerificadoEm,gateExpiraEm:r.gateExpiraEm});
++      }
+       else if(m.acao==='preparar-t1'){if(planejado||concluida)throw Error();await emitir(m);}
+       else if(m.acao==='renovar-plano-t1'){if(!planejado||concluida||m.autorizarReemissao!==true||m.runAnterior!==planejado.run||typeof revogarPlano!=='function')throw Error();const anterior=planejado.run;descartarAtual();await emitir(m,anterior);}
+       else if(m.acao==='executar-t1'){if(!planejado||m.autorizarT1!==true||m.run!==planejado.run||typeof m.referenciaAutorizacao!=='string'||m.referenciaAutorizacao.length<8)throw Error();await continuidade.conferir();if(fechado)throw Error();validarPlano?.(planejado);const p=planejado;planejado=undefined;const r=await executar(p,{autorizarT1:true,referenciaAutorizacao:m.referenciaAutorizacao});if(r.etapa==='CONCLUIDA'&&r.cleanupVerified&&r.unknownResult===false)concluida={run:r.run};enviar({pedido:m.pedido,ok:true,run:r.run,etapa:r.etapa,createdEventIds:r.createdEventIds,createdCostIds:r.createdCostIds,cleanupVerified:r.cleanupVerified,unknownResult:r.unknownResult});}
+diff --git a/PI Backend/config/gate-final-selado.cjs b/PI Backend/config/gate-final-selado.cjs
+--- a/PI Backend/config/gate-final-selado.cjs
++++ b/PI Backend/config/gate-final-selado.cjs
+@@ -28,10 +28,11 @@
+   const snapshotNormalizado=finalidade==='LIBERACAO'?{...s,catalogos:{...s.catalogos,supabase:require('../scripts/catalogo-t1.cjs').catalogoT1(saved.checkpoint.catalogos.supabase,s.catalogos.supabase,t.t1||{})}}:s;
+   const current=resumo(saved.checkpoint,snapshotNormalizado,v.columns);assert.equal(v.currentStateSha256,hash(e));
+   if(finalidade==='LIBERACAO'){
+-    assert.ok(Buffer.isBuffer(v.t1JournalBytes));const journal=JSON.parse(v.t1JournalBytes),stateRecord={...t.t1};delete stateRecord.journalSha256;assert.equal(sha(v.t1JournalBytes),t.t1?.journalSha256);assert.deepEqual(journal,stateRecord);
+-    const x=t.t1;assert.ok(x?.etapa==='CONCLUIDA'&&x.cleanupVerified===true&&x.unknownResult===false&&typeof x.run==='string');assert.equal(x.marker,'TT-T1-'+x.run);assert.equal(x.checkpointId,t.checkpointId);assert.equal(x.configuracaoHash,t.configuracaoHash);assert.equal(x.pid,t.pidDestino);assert.equal(x.instancia,t.destino);assert.equal(x.afterHash,current.hashes.supabase);assert.equal(x.beforeHash,current.hashes.supabase);assert.ok(Array.isArray(x.createdEventIds)&&x.createdEventIds.length===1&&Array.isArray(x.createdCostIds)&&x.createdCostIds.length===1);assert.ok(x.createdEventIds.every(id=>Number.isSafeInteger(id)&&id>0&&!s.supabase.eventos.some(row=>Number(row.id)===id))&&x.createdCostIds.every(id=>Number.isSafeInteger(id)&&id>0&&!s.supabase.custos_evento.some(row=>Number(row.id)===id)));assert.equal(x.retryCount,0);assert.ok(x.autorizacao?.length>=8);
+-    const eventId=x.createdEventIds[0],costId=x.createdCostIds[0];assert.deepEqual(x.operacoes.map(q=>[q.method,q.route,q.status]),[['POST','/eventos',201],['PUT','/eventos/'+eventId+'/custos',200],['SQL','LIMPEZA_IDS',200]]);assert.equal(new Set(x.operacoes.map(q=>q.id)).size,3);assert.equal(x.verificacoes.length,3);
+-    for(let i=0;i<3;i++){const proof=x.verificacoes[i];assert.equal(proof.baseHash,current.hashes.supabase);assert.equal(proof.mysqlHash,current.hashes.mysql);assert.equal(proof.eventosNovos.length,i===2?0:1);assert.equal(proof.custosNovos.length,i===1?1:0);for(const ev of proof.eventosNovos){assert.equal(ev.id,eventId);assert.equal(ev.usuario_id,x.organizadorId);assert.equal(ev.nome,x.marker);assert.equal(ev.descricao,x.marker);}for(const cost of proof.custosNovos){assert.equal(cost.id,costId);assert.equal(cost.evento_id,eventId);assert.equal(cost.descricao,x.marker);assert.equal(Number(cost.valor_estimado),0.1);}}
++    require('./evidencias-pos-t1.cjs').conferirT1Concluida({estado:e,snapshot:s,current,t1JournalBytes:v.t1JournalBytes,agora});
++    const renewal=rec.renovacaoPosT1;if(renewal){
++      const rr=r.renovacaoPosT1;assert.equal(renewal.etapa,'VALIDADA','GATE_SELADO_RENOVACAO_INCOMPLETA');assert.ok(rr);assert.equal(rr.id,renewal.id);assert.equal(rr.run,t.t1.run);assert.equal(renewal.run,t.t1.run);assert.equal(rr.journalSha256,t.t1.journalSha256);assert.equal(renewal.journalSha256,t.t1.journalSha256);assert.equal(renewal.relatorioSha256,v.smokeSha256);assert.equal(rr.referenciaAutorizacao,renewal.referenciaAutorizacao);assert.ok(rr.referenciaAutorizacao?.trim().length>=8);assert.equal(r.t1ExecutedInThisSmoke,false);assert.deepEqual(renewal.dataHashes,current.hashes);assert.ok(Number.isSafeInteger(renewal.iniciadoEm)&&Number.isSafeInteger(renewal.terminadoEm)&&renewal.iniciadoEm<=renewal.terminadoEm&&renewal.terminadoEm<=agora);
++    }else assert.equal(r.renovacaoPosT1,undefined);
++
+   }else assert.ok(!t.t1,'GATE_SELADO_T1_JA_REGISTRADA');
+   const plano=Object.freeze({status:'GATE_SELADO_APROVADO',finalidade,estadoSha256:hash(e),janelaId:t.id,checkpointId:t.checkpointId,checkpointSha256:d.checkpointSha256,configuracaoHash:t.configuracaoHash,pid:t.pidDestino,instancia:t.destino,controllerPid:c.controller.pid,controleNonce:c.nonce,smokeSha256:v.smokeSha256,dataHashes:current.hashes,verificadoEm:agora,expiraEm:Math.min(agora,c.inicio)+TTL_ATUAL,continuidadeHistoricaComprovada:false,riscoResidualAceito:true});planos.set(plano,{hash:hash(plano),controle:c});return plano;
+ }
+diff --git a/PI Backend/config/evidencias-pos-t1.cjs b/PI Backend/config/evidencias-pos-t1.cjs
+new file mode 100644
+--- /dev/null
++++ b/PI Backend/config/evidencias-pos-t1.cjs
+@@ -0,0 +1,49 @@
++'use strict';
++// Validacao pura compartilhada: nunca emite capacidade T1 nem altera o diario.
++const assert=require('node:assert/strict'),crypto=require('node:crypto');
++const sha=x=>crypto.createHash('sha256').update(x).digest('hex'),hash=x=>sha(JSON.stringify(x));
++function conferirT1Concluida({estado:e,snapshot:s,current,t1JournalBytes,agora=Date.now()}){
++  const t=e.transicao,x=t?.t1;
++  assert.ok(Buffer.isBuffer(t1JournalBytes),'POS_T1_DIARIO_AUSENTE');
++  const stateRecord={...x};delete stateRecord.journalSha256;
++  assert.equal(sha(t1JournalBytes),x?.journalSha256,'POS_T1_DIARIO_ALTERADO');
++  assert.deepEqual(JSON.parse(t1JournalBytes),stateRecord);
++  assert.ok(x?.etapa==='CONCLUIDA'&&x.cleanupVerified===true&&x.unknownResult===false&&typeof x.run==='string','POS_T1_NAO_CONCLUIDA');
++  assert.equal(x.marker,'TT-T1-'+x.run);assert.equal(x.checkpointId,t.checkpointId);assert.equal(x.configuracaoHash,t.configuracaoHash);
++  assert.equal(x.pid,t.pidDestino);assert.equal(x.instancia,t.destino);
++  assert.equal(x.afterHash,current.hashes.supabase);assert.equal(x.beforeHash,current.hashes.supabase);
++  assert.ok(Array.isArray(x.createdEventIds)&&x.createdEventIds.length===1&&Array.isArray(x.createdCostIds)&&x.createdCostIds.length===1);
++  assert.ok(x.createdEventIds.every(id=>Number.isSafeInteger(id)&&id>0&&!s.supabase.eventos.some(row=>Number(row.id)===id))&&x.createdCostIds.every(id=>Number.isSafeInteger(id)&&id>0&&!s.supabase.custos_evento.some(row=>Number(row.id)===id)));
++  assert.equal(x.retryCount,0);assert.ok(x.autorizacao?.length>=8);
++  assert.ok(Number.isSafeInteger(x.terminadoEm)&&x.terminadoEm<=agora,'POS_T1_CONCLUSAO_INVALIDA');
++  assert.equal(x.additional10RowsPreserved,true);
++  const eventId=x.createdEventIds[0],costId=x.createdCostIds[0];
++  assert.deepEqual(x.operacoes.map(q=>[q.method,q.route,q.status]),[['POST','/eventos',201],['PUT','/eventos/'+eventId+'/custos',200],['SQL','LIMPEZA_IDS',200]]);
++  assert.equal(new Set(x.operacoes.map(q=>q.id)).size,3);assert.equal(x.verificacoes.length,3);
++  for(let i=0;i<3;i++){
++    const proof=x.verificacoes[i];assert.equal(proof.baseHash,current.hashes.supabase);assert.equal(proof.mysqlHash,current.hashes.mysql);
++    assert.equal(proof.eventosNovos.length,i===2?0:1);assert.equal(proof.custosNovos.length,i===1?1:0);
++    for(const ev of proof.eventosNovos){assert.equal(ev.id,eventId);assert.equal(ev.usuario_id,x.organizadorId);assert.equal(ev.nome,x.marker);assert.equal(ev.descricao,x.marker);}
++    for(const cost of proof.custosNovos){assert.equal(cost.id,costId);assert.equal(cost.evento_id,eventId);assert.equal(cost.descricao,x.marker);assert.equal(Number(cost.valor_estimado),0.1);}
++  }
++  return {run:x.run,journalSha256:x.journalSha256,dataHashes:current.hashes};
++}
++function validarEvidenciasPosT1({estado:e,ambiente,v,agora=Date.now()}){
++  const t=e.transicao,d=t?.recuperacao?.decisaoSeguranca;
++  assert.ok(e.congelado&&e.selado&&t?.fase==='INICIADA'&&t.ticket===null&&t.recuperacao?.etapa==='PRONTA_SMOKE');
++  assert.deepEqual(e.instancias,[t.destino]);assert.equal(require('./startup-controlado.cjs').fingerprint(ambiente),t.configuracaoHash);
++  const c=require('./continuidade-controlador.cjs').validarContinuidadeControlador(v.controle,e,agora);
++  assert.ok(d?.criterio==='RECONCILIACAO_ATUAL'&&d.continuidadeHistoricaComprovada===false&&d.lacunaHistoricaReconhecida&&d.riscoResidualAceito&&d.controleOperacionalSemLockGlobalAceito);
++  assert.ok(d.referenciaAutorizacao?.length>=8);assert.equal(d.checkpointId,t.checkpointId);
++  assert.ok(Buffer.isBuffer(v.checkpointBytes));assert.equal(sha(v.checkpointBytes),d.checkpointSha256);
++  const saved=JSON.parse(v.checkpointBytes);assert.equal(saved.checkpointId,t.checkpointId);assert.equal(v.backupsVerificados,true);
++  const s=v.snapshot;assert.equal(s.projeto,'gnwybroqfvwosiqzsfla');
++  for(const key of ['mysqlReadOnly','supabaseReadOnly','tlsVerificado','catalogoConferido'])assert.equal(s[key],true);
++  const {conferirEscritores,conferirCapturas,TTL_ATUAL,resumo}=require('../scripts/gate-reconciliacao-recuperacao.cjs');
++  conferirEscritores(v.writersBefore,c.backend,agora-TTL_ATUAL,agora);conferirEscritores(v.writersAfter,c.backend,agora-TTL_ATUAL,agora);conferirCapturas(s.capturas,agora-TTL_ATUAL,agora);
++  for(const p of ['mysql','supabase'])assert.ok(Math.max(Date.parse(v.writersBefore.local.capturedUtc),Date.parse(v.writersBefore.database.capturedUtc))<=s.capturas[p].inicio&&Math.min(Date.parse(v.writersAfter.local.capturedUtc),Date.parse(v.writersAfter.database.capturedUtc))>=s.capturas[p].fim);
++  const normalized={...s,catalogos:{...s.catalogos,supabase:require('../scripts/catalogo-t1.cjs').catalogoT1(saved.checkpoint.catalogos.supabase,s.catalogos.supabase,t.t1||{})}};
++  const current=resumo(saved.checkpoint,normalized,v.columns);assert.equal(v.currentStateSha256,hash(e));
++  return {...conferirT1Concluida({estado:e,snapshot:s,current,t1JournalBytes:v.t1JournalBytes,agora}),comparison:current};
++}
++module.exports={conferirT1Concluida,validarEvidenciasPosT1};
+diff --git a/PI Backend/scripts/operacoes-controlador-selado.cjs b/PI Backend/scripts/operacoes-controlador-selado.cjs
+--- a/PI Backend/scripts/operacoes-controlador-selado.cjs
++++ b/PI Backend/scripts/operacoes-controlador-selado.cjs
+@@ -3,25 +3,56 @@
+ const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict');
+ const sha=b=>crypto.createHash('sha256').update(b).digest('hex'),root=path.resolve(__dirname,'..');
+ function criarOperacoesControlador(o){
+-  let latest,planoAtual,emitindo=false,executando=false;
++  let latest,planoAtual,emitindo=false,executando=false,renovando=false,liberando=false;
+   function revogarPlano(p=planoAtual){if(!p)return;require('./t1-controlada.cjs').revogarPlanoT1(p);if(planoAtual===p)planoAtual=undefined;}
+   function ativo(){o.confirmarAutoridade();assert.equal(o.estado.ler().controleSelado.etapa,'ATIVO');}
+   function pedir(tipo,resposta,extra,timeout=70000){ativo();const child=o.obterFilho();assert.ok(child?.connected);return new Promise((resolve,reject)=>{const id=crypto.randomUUID(),timer=setTimeout(()=>done(Error('CONTROLE_PRIVADO_TIMEOUT')),timeout);function done(e,m){clearTimeout(timer);child.removeListener('message',receive);child.removeListener('exit',exit);e?reject(e):resolve(m);}function receive(m){if(m?.tipo===resposta&&m.id===id)m.ok?done(null,m.result):done(Error('CONTROLE_PRIVADO_RECUSADO'));}function exit(){done(Error('CONTROLE_FILHO_ENCERROU'));}child.on('message',receive);child.once('exit',exit);child.send({tipo,id,...extra},e=>{if(e)done(Error('CONTROLE_PRIVADO_ENVIO_FALHOU'));});});}
+   async function contas(){const ref=o.referencias(),env=o.ambiente,selectors=[['admin',env.HOMOLOG_ADMIN_EMAIL,env.HOMOLOG_ADMIN_PASSWORD],['participante',env.HOMOLOG_PARTICIPANTE_EMAIL,env.HOMOLOG_PARTICIPANTE_PASSWORD],['organizador',null,env.HOMOLOG_PARTICIPANTE_PASSWORD,4],['fornecedor',null,env.HOMOLOG_PARTICIPANTE_PASSWORD,3]],out=[];for(const [perfil,email,password,id] of selectors){const u=ref.saved.checkpoint.supabase.usuarios.find(x=>email?x.email.trim().toLowerCase()===email.trim().toLowerCase():Number(x.id)===id&&/teste/i.test(x.email));assert.ok(u&&u.perfil===perfil&&typeof password==='string'&&await require('bcryptjs').compare(password,u.senha));out.push({id:Number(u.id),perfil,email:u.email,password});}return out;}
+   async function read(){ativo();const e=o.estado.ler(),actor=JSON.parse((await require('./helper-powershell.cjs').executarHelper('processo-recuperacao.ps1',['-PidAlvo',String(e.transicao.pidDestino)])).toString());return o.leitura(actor,false,!!e.transicao.t1);}
+-  async function evidencias(){const d=await read(),e=o.estado.ler(),file=latest||e.controleSelado.relatorioAtual;assert.ok(file,'SMOKE_RECENTE_OBRIGATORIO');const bytes=fs.readFileSync(file),controle=await o.obterContinuidade().conferir();ativo();return {...d,smokeBytes:bytes,smokeSha256:sha(bytes),controle,currentStateSha256:sha(JSON.stringify(e)),...(e.transicao.t1?{t1JournalBytes:fs.readFileSync(path.join(o.estado.diretorio,'t1-'+e.transicao.t1.run+'.privado.json'))}:{})};}
++  async function evidenciasBase(){const d=await read(),e=o.estado.ler(),controle=await o.obterContinuidade().conferir();ativo();return {...d,controle,currentStateSha256:sha(JSON.stringify(e)),...(e.transicao.t1?{t1JournalBytes:fs.readFileSync(path.join(o.estado.diretorio,'t1-'+e.transicao.t1.run+'.privado.json'))}:{})};}
++  async function evidencias(){const d=await evidenciasBase(),e=o.estado.ler(),file=latest||e.controleSelado.relatorioAtual;assert.ok(file,'SMOKE_RECENTE_OBRIGATORIO');const bytes=fs.readFileSync(file);return {...d,smokeBytes:bytes,smokeSha256:sha(bytes)};}
++  async function executarSmokePrivado(e){const a=await contas(),admin=a.find(x=>x.perfil==='admin'),baseline=JSON.parse(fs.readFileSync(path.join(root,'evidencias/janela-final-real-20261031.json'))),oldEnv=require('dotenv').parse(fs.readFileSync(path.join(baseline.journalDirectory,'ambiente-anterior.privado.env'))),tokens=[oldEnv.JWT_SECRET,o.ambiente.HOMOLOG_JWT_SECRET].map(key=>require('jsonwebtoken').sign({id:admin.id,perfil:'admin'},key,{algorithm:'HS256',expiresIn:'1h'}));return pedir('cutover-smoke-isolado','cutover-smoke-resposta',{janela:e.transicao.id,recuperacaoId:e.transicao.recuperacao.id,contas:a,tokensAntigos:tokens});}
++  function protegidos(e){const n=structuredClone(e);delete n.transicao.recuperacao.smokeIsolado;delete n.transicao.recuperacao.renovacaoPosT1;delete n.controleSelado.relatorioAtual;return sha(JSON.stringify(n));}
++  async function renovarSmokePosT1(auth){
++    ativo();assert.ok(!emitindo&&!executando&&!renovando&&!liberando,'POS_T1_OPERACAO_EM_ANDAMENTO');
++    const initial=o.estado.ler(),x=initial.transicao.t1;
++    assert.ok(auth?.autorizarRenovacao===true&&typeof auth.referenciaAutorizacao==='string'&&auth.referenciaAutorizacao.trim().length>=8,'POS_T1_NAO_AUTORIZADA');
++    assert.ok(x?.etapa==='CONCLUIDA'&&x.cleanupVerified===true&&x.unknownResult===false&&auth.run===x.run,'POS_T1_NAO_CONCLUIDA');
++    const protectedHash=protegidos(initial),envFile=path.join(root,'.env'),envBytes=fs.readFileSync(envFile),priorBytes=fs.readFileSync(latest||initial.controleSelado.relatorioAtual||initial.controleSelado.relatorioFile),prior=JSON.parse(priorBytes),id=crypto.randomUUID(),start=new Date().toISOString();
++    renovando=true;
++    function conferir(){ativo();assert.equal(protegidos(o.estado.ler()),protectedHash,'POS_T1_ESTADO_ALTERADO');assert.ok(fs.readFileSync(envFile).equals(envBytes),'POS_T1_AMBIENTE_ALTERADO');}
++    try{
++      revogarPlano();
++      o.estado.gravar({...initial,transicao:{...initial.transicao,recuperacao:{...initial.transicao.recuperacao,smokeIsolado:{aprovado:false,substituicaoId:initial.controleSelado.id},renovacaoPosT1:{id,run:x.run,etapa:'EM_VALIDACAO',iniciadoEm:Date.now(),referenciaAutorizacao:auth.referenciaAutorizacao}}}});
++      const validator=require('../config/evidencias-pos-t1.cjs').validarEvidenciasPosT1;
++      const before=await evidenciasBase();conferir();const proof=validator({estado:o.estado.ler(),ambiente:o.ambiente,v:before});
++      const result=await executarSmokePrivado(o.estado.ler());conferir();
++      assert.equal(result.status,'SMOKE_ISOLADO_LEITURA_APROVADO');assert.equal(result.mysqlModulesLoaded,false);assert.equal(result.dataWrites,false);assert.equal(result.maintenanceReleased,false);
++      const after=await evidenciasBase();conferir();const afterProof=validator({estado:o.estado.ler(),ambiente:o.ambiente,v:after});assert.deepEqual(afterProof.dataHashes,proof.dataHashes);
++      const n=o.estado.ler(),report={...prior,startedUtc:start,finishedUtc:new Date().toISOString(),controllerPid:process.pid,supervisorPid:n.transicao.pidDestino,phase:n.transicao.fase,status:'RECUPERACAO_E_SMOKE_ISOLADO_APROVADOS',gateApproved:true,gateFinalApproved:false,maintenanceReleased:false,dataWrites:false,jwtRotated:false,checkpointChanged:false,backupsGenerated:false,smokeResult:{status:'SMOKE_ISOLADO_APROVADO',result},httpStatus:503,currentOperationalWriterControlConfirmed:true,renovacaoPosT1:{id,run:x.run,journalSha256:x.journalSha256,referenciaAutorizacao:auth.referenciaAutorizacao,anteriorSha256:sha(priorBytes)},t1ExecutedInThisSmoke:false};
++      const file=path.join(root,'evidencias','smoke-pos-t1-'+id+'.json'),bytes=Buffer.from(JSON.stringify(report,null,2)+'\n');
++      fs.writeFileSync(file,bytes,{flag:'wx'});conferir();
++      o.estado.gravar({...n,transicao:{...n.transicao,recuperacao:{...n.transicao.recuperacao,smokeIsolado:{aprovado:true,terminadoEm:Date.now(),resultadoSha256:sha(JSON.stringify(result))},renovacaoPosT1:{...n.transicao.recuperacao.renovacaoPosT1,etapa:'VALIDADA',terminadoEm:Date.now(),relatorioSha256:sha(bytes),journalSha256:x.journalSha256,dataHashes:proof.dataHashes}}},controleSelado:{...n.controleSelado,relatorioAtual:file}});latest=file;
++      const v=await evidencias();conferir();const gateApi=require('../config/gate-final-selado.cjs'),gate=gateApi.validarGateFinalSelado({estado:o.estado.ler(),ambiente:o.ambiente,v,finalidade:'LIBERACAO'});gateApi.conferirPlanoFinalSelado(gate,o.estado.ler());
++      return {status:'SMOKE_POS_T1_RENOVADO',run:x.run,requests:result.http.length,reportFile:file,gateApproved:true,finalidade:gate.finalidade,gateVerificadoEm:gate.verificadoEm,gateExpiraEm:gate.expiraEm};
++    }catch(error){
++      // Nao restaurar selo anterior, T1 ou estado protegido como fallback.
++      try{ativo();const n=o.estado.ler();if(n.transicao.recuperacao.renovacaoPosT1?.id===id)o.estado.gravar({...n,transicao:{...n.transicao,recuperacao:{...n.transicao.recuperacao,smokeIsolado:{aprovado:false,substituicaoId:n.controleSelado.id},renovacaoPosT1:{...n.transicao.recuperacao.renovacaoPosT1,etapa:'REJEITADA'}}}});}catch{}
++      throw error;
++    }finally{renovando=false;}
++  }
+   return {
+-    revogarPlano,
++    revogarPlano,renovarSmokePosT1,
+     validarPlano(p){ativo();return require('./t1-controlada.cjs').conferirPlanoT1(p,o.estado.ler());},
+-    async smoke(){ativo();assert.ok(!emitindo&&!executando);revogarPlano();const initial=o.estado.ler();assert.ok(!initial.transicao.t1);o.estado.gravar({...initial,transicao:{...initial.transicao,recuperacao:{...initial.transicao.recuperacao,smokeIsolado:{aprovado:false,substituicaoId:initial.controleSelado.id}}}});const start=new Date().toISOString(),envFile=path.join(root,'.env'),envBytes=fs.readFileSync(envFile),before=await read(),e=o.estado.ler();const ref=o.referencias(),baseline=JSON.parse(fs.readFileSync(path.join(root,'evidencias/janela-final-real-20261031.json'))),prior=JSON.parse(fs.readFileSync(e.controleSelado.relatorioFile));require('./gate-reconciliacao-recuperacao.cjs').resumo(ref.saved.checkpoint,before.snapshot,ref.columns);
++    async smoke(){ativo();assert.ok(!emitindo&&!executando&&!renovando&&!liberando);renovando=true;try{revogarPlano();const initial=o.estado.ler();assert.ok(!initial.transicao.t1);o.estado.gravar({...initial,transicao:{...initial.transicao,recuperacao:{...initial.transicao.recuperacao,smokeIsolado:{aprovado:false,substituicaoId:initial.controleSelado.id}}}});const start=new Date().toISOString(),envFile=path.join(root,'.env'),envBytes=fs.readFileSync(envFile),before=await read(),e=o.estado.ler();const ref=o.referencias(),baseline=JSON.parse(fs.readFileSync(path.join(root,'evidencias/janela-final-real-20261031.json'))),prior=JSON.parse(fs.readFileSync(e.controleSelado.relatorioFile));require('./gate-reconciliacao-recuperacao.cjs').resumo(ref.saved.checkpoint,before.snapshot,ref.columns);
+       const a=await contas(),admin=a.find(x=>x.perfil==='admin'),oldEnv=require('dotenv').parse(fs.readFileSync(path.join(baseline.journalDirectory,'ambiente-anterior.privado.env'))),tokens=[oldEnv.JWT_SECRET,o.ambiente.HOMOLOG_JWT_SECRET].map(key=>require('jsonwebtoken').sign({id:admin.id,perfil:'admin'},key,{algorithm:'HS256',expiresIn:'1h'}));
+       const result=await pedir('cutover-smoke-isolado','cutover-smoke-resposta',{janela:e.transicao.id,recuperacaoId:e.transicao.recuperacao.id,contas:a,tokensAntigos:tokens});assert.equal(result.status,'SMOKE_ISOLADO_LEITURA_APROVADO');assert.equal(result.mysqlModulesLoaded,false);const after=await read();require('./gate-reconciliacao-recuperacao.cjs').resumo(ref.saved.checkpoint,after.snapshot,ref.columns);assert.ok(fs.readFileSync(envFile).equals(envBytes));const n=o.estado.ler();assert.ok(n.congelado&&n.selado&&n.transicao.id===e.transicao.id&&n.transicao.pidDestino===e.transicao.pidDestino);
+       const report={...prior,startedUtc:start,finishedUtc:new Date().toISOString(),controllerPid:process.pid,supervisorPid:n.transicao.pidDestino,phase:n.transicao.fase,status:'RECUPERACAO_E_SMOKE_ISOLADO_APROVADOS',gateApproved:true,gateFinalApproved:false,handoffGatesApproved:true,handoffId:n.controleSelado.id,recoveryExecutedInThisHandoff:false,maintenanceReleased:false,dataWrites:false,jwtRotated:false,checkpointChanged:false,backupsGenerated:false,smokeResult:{status:'SMOKE_ISOLADO_APROVADO',result},httpStatus:503,currentOperationalWriterControlConfirmed:true};
+-      latest=path.join(root,'evidencias','smoke-pos-substituicao-'+crypto.randomUUID()+'.json');fs.writeFileSync(latest,JSON.stringify(report,null,2)+'\n',{flag:'wx'});o.estado.gravar({...n,transicao:{...n.transicao,recuperacao:{...n.transicao.recuperacao,smokeIsolado:{aprovado:true,terminadoEm:Date.now(),resultadoSha256:sha(JSON.stringify(result))}}},controleSelado:{...n.controleSelado,relatorioAtual:latest}});return {status:report.status,requests:result.http.length,reportFile:latest};
++      latest=path.join(root,'evidencias','smoke-pos-substituicao-'+crypto.randomUUID()+'.json');fs.writeFileSync(latest,JSON.stringify(report,null,2)+'\n',{flag:'wx'});o.estado.gravar({...n,transicao:{...n.transicao,recuperacao:{...n.transicao.recuperacao,smokeIsolado:{aprovado:true,terminadoEm:Date.now(),resultadoSha256:sha(JSON.stringify(result))}}},controleSelado:{...n.controleSelado,relatorioAtual:latest}});return {status:report.status,requests:result.http.length,reportFile:latest};}finally{renovando=false;}
+     },
+-    async preparar(){ativo();if(emitindo||executando)throw Object.assign(Error('Emissao ocupada.'),{code:'T1_EMISSAO_EM_ANDAMENTO'});revogarPlano();emitindo=true;try{const e=o.estado.ler(),v=await evidencias(),gate=require('../config/gate-final-selado.cjs').validarGateFinalSelado({estado:e,ambiente:o.ambiente,v});planoAtual=require('./t1-controlada.cjs').prepararT1({gate,estado:e,checkpointBytes:v.checkpointBytes,columns:v.columns});return planoAtual;}finally{emitindo=false;}},
+-    async executar(p,auth){ativo();assert.ok(!emitindo&&!executando&&p===planoAtual);require('./t1-controlada.cjs').conferirPlanoT1(p,o.estado.ler());executando=true;try{const accounts=await contas(),org=accounts.find(x=>x.perfil==='organizador');const api=require('./t1-controlada.cjs').criarExecucaoT1({estado:o.estado,jornal:require('./jornal-t1.cjs').criarJornalT1({estado:o.estado}),adquirirExclusivo(){const file=path.join(o.estado.diretorio,'recuperacao-exclusiva.lock'),key=crypto.randomUUID(),fd=fs.openSync(file,'wx',0o600);try{fs.writeFileSync(fd,key);fs.fsyncSync(fd);}finally{fs.closeSync(fd);}return ()=>{assert.equal(fs.readFileSync(file,'utf8'),key);fs.unlinkSync(file);};},revalidarGate:async()=>require('../config/gate-final-selado.cjs').validarGateFinalSelado({estado:o.estado.ler(),ambiente:o.ambiente,v:await evidencias()}),conferirControleAtual:async()=>{ativo();const data=await read();for(const w of [data.writersBefore,data.writersAfter])require('./gate-reconciliacao-recuperacao.cjs').conferirEscritores(w,w.local.knownBackend,Date.now()-30000,Date.now());return o.obterContinuidade().conferir();},snapshot:async()=>(await read()).snapshot,requisitarPrivado:q=>pedir('cutover-t1-isolado','cutover-t1-resposta',{...q,janela:o.estado.ler().transicao.id,recuperacaoId:o.estado.ler().transicao.recuperacao.id,credenciais:{email:org.email,senha:org.password}},25000),limparPorIdsTransacional:require('./limpeza-t1-transacional.cjs').criarLimpezaT1Postgres({ambiente:o.ambiente,ca:o.ca})});return await api.executar(p,{...auth,organizadorId:org.id});}finally{executando=false;revogarPlano(p);}},
+-    async liberar(auth){ativo();return o.obterControlador().liberarSeladoPlanejado({id:'express-principal',autorizarEscritas:auth.autorizarEscritas,ambiente:o.ambiente,coletarEvidencias:evidencias});}
++    async preparar(){ativo();if(emitindo||executando||renovando||liberando)throw Object.assign(Error('Emissao ocupada.'),{code:'T1_EMISSAO_EM_ANDAMENTO'});revogarPlano();emitindo=true;try{const e=o.estado.ler(),v=await evidencias(),gate=require('../config/gate-final-selado.cjs').validarGateFinalSelado({estado:e,ambiente:o.ambiente,v});planoAtual=require('./t1-controlada.cjs').prepararT1({gate,estado:e,checkpointBytes:v.checkpointBytes,columns:v.columns});return planoAtual;}finally{emitindo=false;}},
++    async executar(p,auth){ativo();assert.ok(!emitindo&&!executando&&!renovando&&!liberando&&p===planoAtual);require('./t1-controlada.cjs').conferirPlanoT1(p,o.estado.ler());executando=true;try{const accounts=await contas(),org=accounts.find(x=>x.perfil==='organizador');const api=require('./t1-controlada.cjs').criarExecucaoT1({estado:o.estado,jornal:require('./jornal-t1.cjs').criarJornalT1({estado:o.estado}),adquirirExclusivo(){const file=path.join(o.estado.diretorio,'recuperacao-exclusiva.lock'),key=crypto.randomUUID(),fd=fs.openSync(file,'wx',0o600);try{fs.writeFileSync(fd,key);fs.fsyncSync(fd);}finally{fs.closeSync(fd);}return ()=>{assert.equal(fs.readFileSync(file,'utf8'),key);fs.unlinkSync(file);};},revalidarGate:async()=>require('../config/gate-final-selado.cjs').validarGateFinalSelado({estado:o.estado.ler(),ambiente:o.ambiente,v:await evidencias()}),conferirControleAtual:async()=>{ativo();const data=await read();for(const w of [data.writersBefore,data.writersAfter])require('./gate-reconciliacao-recuperacao.cjs').conferirEscritores(w,w.local.knownBackend,Date.now()-30000,Date.now());return o.obterContinuidade().conferir();},snapshot:async()=>(await read()).snapshot,requisitarPrivado:q=>pedir('cutover-t1-isolado','cutover-t1-resposta',{...q,janela:o.estado.ler().transicao.id,recuperacaoId:o.estado.ler().transicao.recuperacao.id,credenciais:{email:org.email,senha:org.password}},25000),limparPorIdsTransacional:require('./limpeza-t1-transacional.cjs').criarLimpezaT1Postgres({ambiente:o.ambiente,ca:o.ca})});return await api.executar(p,{...auth,organizadorId:org.id});}finally{executando=false;revogarPlano(p);}},
++    async liberar(auth){ativo();assert.ok(!emitindo&&!executando&&!renovando&&!liberando);liberando=true;try{return await o.obterControlador().liberarSeladoPlanejado({id:'express-principal',autorizarEscritas:auth.autorizarEscritas,ambiente:o.ambiente,coletarEvidencias:evidencias});}finally{liberando=false;}}
+   };
+ }
+ module.exports={criarOperacoesControlador};
+diff --git a/PI Backend/tests/operacoes-pos-substituicao.test.cjs b/PI Backend/tests/operacoes-pos-substituicao.test.cjs
+--- a/PI Backend/tests/operacoes-pos-substituicao.test.cjs
++++ b/PI Backend/tests/operacoes-pos-substituicao.test.cjs
+@@ -1,25 +1,6 @@
+ 'use strict';
+-const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),{EventEmitter}=require('node:events');
+-const {fixture:base,hash}=require('./helpers/gate-final-selado.cjs');
+-async function fixture(){
+-  const f=await base();f.advance(Date.now()-f.now());const now=f.now(),root=path.resolve(__dirname,'..'),normalize=p=>path.normalize(p),files=new Map(),writes=[],messages=[];
+-  f.native.controlador.criadoEm=new Date(now-120000).toISOString();f.native.backend.criadoEm=new Date(now-110000).toISOString();
+-  for(const provider of ['mysql','supabase']){f.checkpoint[provider].usuarios[0].email='base@example.invalid';f.checkpoint[provider].usuarios.push(...[[3,'fornecedor'],[4,'organizador'],[9,'participante'],[10,'admin']].map(([id,perfil])=>({id:String(id),perfil,email:perfil+'.teste@example.invalid'})));}
+-  const bytes=Buffer.from(JSON.stringify({checkpointId:'cp-ficticio',checkpoint:f.checkpoint})),e=f.estado.ler();e.transicao.recuperacao.decisaoSeguranca.checkpointSha256=hash(bytes);e.transicao.recuperacao.decisaoSeguranca.aceitoEm=new Date(now-90000).toISOString();e.controleSelado={id:'handoff-teste',etapa:'ATIVO',relatorioFile:'/ficticio/prior.json',controlador:{pid:process.pid}};e.transicao.recuperacao.smokeIsolado={aprovado:false};f.estado.gravar(e);
+-  const prior=structuredClone(f.report);prior.aceiteRiscoResidual.checkpointSha256=hash(bytes);prior.aceiteRiscoResidual.aceitoEm=e.transicao.recuperacao.decisaoSeguranca.aceitoEm;
+-  const baseline={journalDirectory:'/ficticio/journal'};files.set(normalize(path.join(root,'.env')),Buffer.from('configuracao-ficticia'));files.set(normalize(path.join(root,'evidencias/janela-final-real-20261031.json')),Buffer.from(JSON.stringify(baseline)));files.set(normalize('/ficticio/prior.json'),Buffer.from(JSON.stringify(prior)));files.set(normalize(path.join('/ficticio/journal','ambiente-anterior.privado.env')),Buffer.from('JWT_SECRET=jwt-antigo-ficticio'));
+-  f.env.HOMOLOG_ADMIN_EMAIL='admin.teste@example.invalid';f.env.HOMOLOG_ADMIN_PASSWORD='pw-ficticia';f.env.HOMOLOG_PARTICIPANTE_EMAIL='participante.teste@example.invalid';f.env.HOMOLOG_PARTICIPANTE_PASSWORD='pw-ficticia';
+-  const child=new EventEmitter();child.connected=true;child.send=(m,cb)=>{messages.push(m.tipo);queueMicrotask(()=>child.emit('message',{tipo:'cutover-smoke-resposta',id:m.id,ok:true,result:prior.smokeResult.result}));cb?.();};
+-  function writers(t){return {local:{capturedUtc:new Date(t).toISOString(),knownBackend:structuredClone(f.native.backend),unknownProcessCount:0,tasks:0,mysqlClientPids:[],httpStatus:503},database:{capturedUtc:new Date(t).toISOString(),mysql:{otherClients:0,otherTransactions:0,enabledJobs:0,scheduler:'OFF'},supabase:{sessions:[{usename:'authenticator',state:'idle',transaction_open:false}],activeCron:0,httpQueue:0,tlsVerified:true}}};}
+-  const o={estado:f.estado,ambiente:f.env,referencias:()=>({bytes,saved:{checkpoint:f.checkpoint},columns:f.columns}),leitura:async()=>({checkpointBytes:bytes,columns:f.columns,backupsVerificados:true,snapshot:{...structuredClone(f.checkpoint),projeto:'gnwybroqfvwosiqzsfla',mysqlReadOnly:true,supabaseReadOnly:true,tlsVerificado:true,catalogoConferido:true,capturas:{mysql:{inicio:now-5000,fim:now-4900},supabase:{inicio:now-4800,fim:now-4000}}},writersBefore:writers(now-6000),writersAfter:writers(now-3000)}),obterFilho:()=>child,obterContinuidade:()=>f.continuidade,confirmarAutoridade(){assert.equal(f.estado.ler().controleSelado.etapa,'ATIVO');}};
+-  const context={module:{exports:{}},__dirname:path.join(root,'scripts'),process:{pid:process.pid},Buffer,setTimeout,clearTimeout,Date:class extends Date{constructor(...args){super(...(args.length?args:[now]));}static now(){return now;}},require(name){
+-    if(name==='node:fs')return {readFileSync(file){assert.ok(files.has(normalize(file)),'arquivo inesperado');return files.get(normalize(file));},writeFileSync(file,bytes,options){assert.equal(options.flag,'wx');assert.ok(!files.has(normalize(file)));files.set(normalize(file),Buffer.from(bytes));writes.push(file);}};
+-    if(name==='bcryptjs')return {async compare(password){assert.equal(password,'pw-ficticia');return true;}};
+-    if(name==='./helper-powershell.cjs')return {async executarHelper(n){assert.equal(n,'processo-recuperacao.ps1');return Buffer.from(JSON.stringify(f.native.backend));}};
+-    return require(name.startsWith('.')?path.resolve(root,'scripts',name):name);
+-  }};
+-  vm.runInNewContext(fs.readFileSync(path.join(root,'scripts/operacoes-controlador-selado.cjs'),'utf8'),context);const ops=context.module.exports.criarOperacoesControlador(o);return {...f,o,ops,files,writes,messages,child};
+-}
++const test=require('node:test'),assert=require('node:assert/strict'),{fixture}=require('./helpers/operacoes-controlador.cjs');
++
+ test('novo dono gera smoke e prova final validos sem T1 ou liberacao',async()=>{const f=await fixture(),r=await f.ops.smoke();assert.equal(r.requests,26);assert.equal(f.messages.length,1);assert.equal(f.messages[0],'cutover-smoke-isolado');assert.equal(f.estado.ler().transicao.recuperacao.smokeIsolado.aprovado,true);assert.equal(f.estado.ler().transicao.t1,undefined);assert.equal(f.estado.ler().selado,true);assert.equal(f.writes.length,1);const p=await f.ops.preparar();assert.equal(p.gate.status,'GATE_SELADO_APROVADO');assert.equal(p.gate.pid,200);assert.equal(f.messages.length,1);});
+ test('sem smoke novo o controlador nao prepara T1',async()=>{const f=await fixture();await assert.rejects(f.ops.preparar());assert.equal(f.estado.ler().transicao.t1,undefined);assert.equal(f.writes.length,0);assert.equal(f.messages.length,0);});
+ test('falha no novo smoke invalida selo anterior sem liberar HTTP ou escrever',async()=>{const f=await fixture();await f.ops.smoke();f.child.send=m=>queueMicrotask(()=>f.child.emit('message',{tipo:'cutover-smoke-resposta',id:m.id,ok:false}));await assert.rejects(f.ops.smoke());assert.equal(f.estado.ler().transicao.recuperacao.smokeIsolado.aprovado,false);await assert.rejects(f.ops.preparar());assert.equal(f.estado.ler().selado,true);assert.equal(f.estado.ler().transicao.t1,undefined);});
+diff --git a/PI Backend/tests/helpers/operacoes-controlador.cjs b/PI Backend/tests/helpers/operacoes-controlador.cjs
+new file mode 100644
+--- /dev/null
++++ b/PI Backend/tests/helpers/operacoes-controlador.cjs
+@@ -0,0 +1,23 @@
++'use strict';
++const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),{EventEmitter}=require('node:events');
++const {fixture:base,hash}=require('./gate-final-selado.cjs');
++async function fixture(options){
++  const f=await base(options);f.advance(Date.now()-f.now());const now=f.now(),root=path.resolve(__dirname,'../..'),normalize=p=>path.normalize(p),files=new Map(),writes=[],messages=[];
++  f.native.controlador.criadoEm=new Date(now-120000).toISOString();f.native.backend.criadoEm=new Date(now-110000).toISOString();
++  for(const provider of ['mysql','supabase']){f.checkpoint[provider].usuarios[0].email='base@example.invalid';f.checkpoint[provider].usuarios.push(...[[3,'fornecedor'],[4,'organizador'],[9,'participante'],[10,'admin']].map(([id,perfil])=>({id:String(id),perfil,email:perfil+'.teste@example.invalid'})));}
++  const bytes=Buffer.from(JSON.stringify({checkpointId:'cp-ficticio',checkpoint:f.checkpoint})),e=f.estado.ler();e.transicao.recuperacao.decisaoSeguranca.checkpointSha256=hash(bytes);e.transicao.recuperacao.decisaoSeguranca.aceitoEm=new Date(now-90000).toISOString();e.controleSelado={id:'handoff-teste',etapa:'ATIVO',relatorioFile:'/ficticio/prior.json',controlador:{pid:process.pid}};e.transicao.recuperacao.smokeIsolado={aprovado:false};f.estado.gravar(e);
++  const prior=structuredClone(f.report);prior.aceiteRiscoResidual.checkpointSha256=hash(bytes);prior.aceiteRiscoResidual.aceitoEm=e.transicao.recuperacao.decisaoSeguranca.aceitoEm;
++  const baseline={journalDirectory:'/ficticio/journal'};files.set(normalize(path.join(root,'.env')),Buffer.from('configuracao-ficticia'));files.set(normalize(path.join(root,'evidencias/janela-final-real-20261031.json')),Buffer.from(JSON.stringify(baseline)));files.set(normalize('/ficticio/prior.json'),Buffer.from(JSON.stringify(prior)));files.set(normalize(path.join('/ficticio/journal','ambiente-anterior.privado.env')),Buffer.from('JWT_SECRET=jwt-antigo-ficticio'));
++  f.env.HOMOLOG_ADMIN_EMAIL='admin.teste@example.invalid';f.env.HOMOLOG_ADMIN_PASSWORD='pw-ficticia';f.env.HOMOLOG_PARTICIPANTE_EMAIL='participante.teste@example.invalid';f.env.HOMOLOG_PARTICIPANTE_PASSWORD='pw-ficticia';
++  const child=new EventEmitter();child.connected=true;child.send=(m,cb)=>{messages.push(m.tipo);queueMicrotask(()=>child.emit('message',{tipo:'cutover-smoke-resposta',id:m.id,ok:true,result:prior.smokeResult.result}));cb?.();};
++  function writers(t){return {local:{capturedUtc:new Date(t).toISOString(),knownBackend:structuredClone(f.native.backend),unknownProcessCount:0,tasks:0,mysqlClientPids:[],httpStatus:503},database:{capturedUtc:new Date(t).toISOString(),mysql:{otherClients:0,otherTransactions:0,enabledJobs:0,scheduler:'OFF'},supabase:{sessions:[{usename:'authenticator',state:'idle',transaction_open:false}],activeCron:0,httpQueue:0,tlsVerified:true}}};}
++  const o={estado:f.estado,ambiente:f.env,referencias:()=>({bytes,saved:{checkpoint:f.checkpoint},columns:f.columns}),leitura:async()=>({checkpointBytes:bytes,columns:f.columns,backupsVerificados:true,snapshot:{...structuredClone(f.checkpoint),projeto:'gnwybroqfvwosiqzsfla',mysqlReadOnly:true,supabaseReadOnly:true,tlsVerificado:true,catalogoConferido:true,capturas:{mysql:{inicio:now-5000,fim:now-4900},supabase:{inicio:now-4800,fim:now-4000}}},writersBefore:writers(now-6000),writersAfter:writers(now-3000)}),obterFilho:()=>child,obterContinuidade:()=>f.continuidade,confirmarAutoridade(){assert.equal(f.estado.ler().controleSelado.etapa,'ATIVO');}};
++  const context={module:{exports:{}},__dirname:path.join(root,'scripts'),process:{pid:process.pid},Buffer,structuredClone,setTimeout,clearTimeout,Date:class extends Date{constructor(...args){super(...(args.length?args:[now]));}static now(){return now;}},require(name){
++    if(name==='node:fs')return {readFileSync(file){assert.ok(files.has(normalize(file)),'arquivo inesperado');return files.get(normalize(file));},writeFileSync(file,bytes,options){assert.equal(options.flag,'wx');assert.ok(!files.has(normalize(file)));files.set(normalize(file),Buffer.from(bytes));writes.push(file);}};
++    if(name==='bcryptjs')return {async compare(password){assert.equal(password,'pw-ficticia');return true;}};
++    if(name==='./helper-powershell.cjs')return {async executarHelper(n){assert.equal(n,'processo-recuperacao.ps1');return Buffer.from(JSON.stringify(f.native.backend));}};
++    return require(name.startsWith('.')?path.resolve(root,'scripts',name):name);
++  }};
++  vm.runInNewContext(fs.readFileSync(path.join(root,'scripts/operacoes-controlador-selado.cjs'),'utf8'),context);const ops=context.module.exports.criarOperacoesControlador(o);return {...f,o,ops,files,writes,messages,child};
++}
++module.exports={fixture};
+diff --git a/PI Backend/tests/helpers/pos-t1.cjs b/PI Backend/tests/helpers/pos-t1.cjs
+new file mode 100644
+--- /dev/null
++++ b/PI Backend/tests/helpers/pos-t1.cjs
+@@ -0,0 +1,15 @@
++'use strict';
++const path=require('node:path'),{randomUUID}=require('node:crypto'),{hash}=require('./gate-final-selado.cjs');
++async function fixture(options){
++  const f=await require('./operacoes-controlador.cjs').fixture(options);await f.ops.smoke();
++  f.estado.diretorio='/ficticio/state';const before=await f.o.leitura();
++  const summary=require('../../scripts/gate-reconciliacao-recuperacao.cjs').resumo(f.checkpoint,before.snapshot,f.columns),e=f.estado.ler(),run=randomUUID(),marker='TT-T1-'+run;
++  const ev={id:99,usuario_id:4,nome:marker,descricao:marker},cost={id:99,evento_id:99,descricao:marker,valor_estimado:'0.10'};
++  const journal={run,marker,organizadorId:4,checkpointId:e.transicao.checkpointId,configuracaoHash:e.transicao.configuracaoHash,pid:e.transicao.pidDestino,instancia:e.transicao.destino,etapa:'CONCLUIDA',autorizacao:'Autorizacao ficticia T1',createdEventIds:[99],createdCostIds:[99],beforeHash:summary.hashes.supabase,afterHash:summary.hashes.supabase,unknownResult:false,retryCount:0,cleanupVerified:true,additional10RowsPreserved:true,terminadoEm:f.now()-1000,operacoes:[['POST','/eventos',201],['PUT','/eventos/99/custos',200],['SQL','LIMPEZA_IDS',200]].map(([method,route,status])=>({id:randomUUID(),method,route,status,iniciadoEm:f.now()-2000})),verificacoes:[0,1,2].map(i=>({baseHash:summary.hashes.supabase,mysqlHash:summary.hashes.mysql,eventosNovos:i===2?[]:[ev],custosNovos:i===1?[cost]:[]}))};
++  const file=path.normalize(path.join(f.estado.diretorio,'t1-'+run+'.privado.json'));
++  function saveJournal(x=journal){const bytes=Buffer.from(JSON.stringify(x)+'\n');f.files.set(file,bytes);const n=f.estado.ler();n.transicao.t1={...structuredClone(x),journalSha256:hash(bytes)};f.estado.gravar(n);}
++  saveJournal();const originalRead=f.o.leitura;let readCount=0;
++  f.o.leitura=async(...args)=>{readCount++;const v=await originalRead(...args);if(options?.sequencias)for(const seq of v.snapshot.catalogos.supabase.sequences)if(['eventos_id_seq','custos_evento_id_seq'].includes(seq.sequencename))seq.last_value=99;return v;};
++  return {...f,journal,journalFile:file,saveJournal,summary,reads:()=>readCount,auth:{run,autorizarRenovacao:true,referenciaAutorizacao:'Autorizacao ficticia renovacao pos T1'}};
++}
++module.exports={fixture};
+diff --git a/PI Backend/tests/renovacao-smoke-pos-t1.test.cjs b/PI Backend/tests/renovacao-smoke-pos-t1.test.cjs
+new file mode 100644
+--- /dev/null
++++ b/PI Backend/tests/renovacao-smoke-pos-t1.test.cjs
+@@ -0,0 +1,77 @@
++'use strict';
++const test=require('node:test'),assert=require('node:assert/strict'),path=require('node:path'),{PassThrough}=require('node:stream'),{randomUUID}=require('node:crypto');
++const {fixture}=require('./helpers/pos-t1.cjs');
++const wait=()=>new Promise(r=>setImmediate(r));
++function protectedState(e){const n=structuredClone(e);delete n.transicao.recuperacao.smokeIsolado;delete n.transicao.recuperacao.renovacaoPosT1;delete n.controleSelado.relatorioAtual;return n;}
++function expireOldSmoke(f){const file=path.normalize(f.estado.ler().controleSelado.relatorioAtual),report=JSON.parse(f.files.get(file));report.startedUtc=new Date(f.now()-3600000).toISOString();report.finishedUtc=new Date(f.now()-3500000).toISOString();f.files.set(file,Buffer.from(JSON.stringify(report)));}
++test('renova smoke vencido pos T1 com tres reconciliacoes gate completo e diario intacto',async()=>{
++  const f=await fixture(),before=protectedState(f.estado.ler()),bytes=Buffer.from(f.files.get(f.journalFile));expireOldSmoke(f);
++  const r=await f.ops.renovarSmokePosT1(f.auth);
++  assert.equal(r.status,'SMOKE_POS_T1_RENOVADO');assert.equal(r.requests,26);assert.equal(r.gateApproved,true);assert.equal(r.finalidade,'LIBERACAO');assert.ok(r.gateExpiraEm>Date.now());
++  assert.equal(f.reads(),3);assert.deepEqual(protectedState(f.estado.ler()),before);assert.ok(bytes.equals(f.files.get(f.journalFile)));
++  assert.deepEqual(f.messages,['cutover-smoke-isolado','cutover-smoke-isolado']);assert.equal(f.estado.ler().transicao.recuperacao.renovacaoPosT1.etapa,'VALIDADA');assert.equal(f.estado.ler().congelado,true);assert.equal(f.estado.ler().selado,true);
++  const report=JSON.parse(f.files.get(path.normalize(r.reportFile)));assert.equal(report.t1ExecutedInThisSmoke,false);assert.equal(report.renovacaoPosT1.run,f.auth.run);assert.equal(report.additional10RowsPreserved,true);assert.equal(report.historicalAbsenceOfWritesProven,false);
++});
++test('renovacao preserva os avancos esperados de sequencias sem reset',async()=>{const f=await fixture({sequencias:true});await f.ops.renovarSmokePosT1(f.auth);assert.equal(f.checkpoint.catalogos.supabase.sequences[0].last_value,98);const after=await f.o.leitura();assert.equal(after.snapshot.catalogos.supabase.sequences[0].last_value,99);});
++test('renovacoes sucessivas exigem novos smoke nonce e arquivo sem reusar evidencia',async()=>{const f=await fixture(),a=await f.ops.renovarSmokePosT1(f.auth),b=await f.ops.renovarSmokePosT1(f.auth);assert.notEqual(a.reportFile,b.reportFile);assert.equal(a.run,b.run);assert.equal(f.reads(),6);assert.equal(f.messages.length,3);});
++for(const [name,change] of [
++  ['autorizacao ausente',a=>delete a.autorizarRenovacao],['run diferente',a=>a.run=randomUUID()],['referencia ausente',a=>delete a.referenciaAutorizacao]
++])test('recusa '+name+' antes de smoke ou coleta',async()=>{const f=await fixture(),before=f.estado.ler();change(f.auth);await assert.rejects(f.ops.renovarSmokePosT1(f.auth));assert.deepEqual(f.estado.ler(),before);assert.equal(f.reads(),0);assert.equal(f.messages.length,1);});
++for(const [name,change] of [
++  ['T1 ausente',f=>{const e=f.estado.ler();delete e.transicao.t1;f.estado.gravar(e);}],
++  ['T1 incompleta',f=>{f.journal.etapa='EM_EXECUCAO';f.saveJournal();}],
++  ['limpeza incompleta',f=>{f.journal.cleanupVerified=false;f.saveJournal();}],
++  ['resultado incerto',f=>{f.journal.unknownResult=true;f.saveJournal();}],
++  ['diario adulterado',f=>f.files.set(f.journalFile,Buffer.from('{}'))],
++  ['diario ausente',f=>f.files.delete(f.journalFile)],
++  ['retry registrado',f=>{f.journal.retryCount=1;f.saveJournal();}],
++  ['prova de limpeza adulterada',f=>{f.journal.verificacoes[2].eventosNovos=[f.journal.verificacoes[0].eventosNovos[0]];f.saveJournal();}],
++  ['conclusao futura',f=>{f.journal.terminadoEm=Date.now()+60000;f.saveJournal();}],
++  ['operacao inesperada',f=>{f.journal.operacoes[1].route='/usuarios';f.saveJournal();}]
++])test('recusa '+name+' sem transporte de escrita ou nova T1',async()=>{const f=await fixture();change(f);const record=JSON.stringify(f.estado.ler().transicao.t1),bytes=f.files.get(f.journalFile);await assert.rejects(f.ops.renovarSmokePosT1(f.auth));assert.equal(JSON.stringify(f.estado.ler().transicao.t1),record);assert.equal(f.files.get(f.journalFile),bytes);assert.equal(f.messages.length,1);assert.equal(f.estado.ler().selado,true);});
++for(const [name,change] of [
++  ['campo divergente com contagem igual',v=>v.snapshot.supabase.eventos[0].nome='Alterado'],
++  ['um dos dez adicionais alterado',v=>v.snapshot.supabase.eventos[1].descricao='Alterado'],
++  ['relacionamento invalido',v=>v.snapshot.supabase.propostas[0].cotacao_id='999'],
++  ['residuo da T1',v=>v.snapshot.supabase.eventos.push({id:'99',usuario_id:'4',nome:'residuo'})],
++  ['captura expirada',v=>v.snapshot.capturas.mysql.inicio-=60000],
++  ['escritor concorrente',v=>v.writersBefore.local.unknownProcessCount=1],
++  ['job ativo',v=>v.writersAfter.database.supabase.activeCron=1],
++  ['REST ativo',v=>v.writersBefore.database.supabase.sessions[0].state='active'],
++  ['TLS ausente',v=>v.snapshot.tlsVerificado=false],
++  ['checkpoint invalido',v=>v.checkpointBytes=Buffer.from('{}')],
++  ['backup nao verificado',v=>v.backupsVerificados=false],
++  ['catalogo divergente',v=>v.snapshot.catalogos.mysql.schema='outro']
++])test('reconciliacao recusa '+name+' antes de renovar smoke',async()=>{const f=await fixture(),read=f.o.leitura;f.o.leitura=async(...a)=>{const v=await read(...a);change(v);return v;};await assert.rejects(f.ops.renovarSmokePosT1(f.auth));assert.equal(f.messages.length,1);assert.equal(f.estado.ler().transicao.recuperacao.smokeIsolado.aprovado,false);assert.equal(f.estado.ler().selado,true);});
++test('divergencia posterior ao smoke impede selo e preserva T1',async()=>{const f=await fixture(),read=f.o.leitura;let calls=0;f.o.leitura=async(...a)=>{const v=await read(...a);if(++calls===2)v.snapshot.supabase.usuarios[0].perfil='admin';return v;};await assert.rejects(f.ops.renovarSmokePosT1(f.auth));assert.equal(f.estado.ler().transicao.recuperacao.smokeIsolado.aprovado,false);assert.equal(f.estado.ler().transicao.t1.cleanupVerified,true);});
++test('divergencia na coleta final impede aprovacao mesmo depois do arquivo novo',async()=>{const f=await fixture(),read=f.o.leitura;let calls=0;f.o.leitura=async(...a)=>{const v=await read(...a);if(++calls===3)v.snapshot.supabase.eventos[1].nome='Alterado';return v;};await assert.rejects(f.ops.renovarSmokePosT1(f.auth));assert.equal(f.estado.ler().transicao.recuperacao.renovacaoPosT1.etapa,'REJEITADA');assert.equal(f.estado.ler().transicao.recuperacao.smokeIsolado.aprovado,false);});
++test('IPC revogado interrompe renovacao sem restaurar selo anterior',async()=>{const f=await fixture(),read=f.o.leitura;f.o.leitura=async(...a)=>{f.continuidade.revogar();return read(...a);};await assert.rejects(f.ops.renovarSmokePosT1(f.auth));assert.equal(f.estado.ler().transicao.recuperacao.smokeIsolado.aprovado,false);assert.equal(f.messages.length,1);});
++test('mudanca de autoridade interrompe sem escrever estado como novo dono',async()=>{const f=await fixture(),read=f.o.leitura;f.o.leitura=async(...a)=>{const e=f.estado.ler();e.controleSelado.etapa='FALHA';f.estado.gravar(e);return read(...a);};await assert.rejects(f.ops.renovarSmokePosT1(f.auth));assert.equal(f.estado.ler().controleSelado.etapa,'FALHA');assert.equal(f.estado.ler().transicao.recuperacao.smokeIsolado.aprovado,false);});
++test('ambiente alterado durante smoke impede selo sem reverter arquivo',async()=>{const f=await fixture(),send=f.child.send;f.child.send=(...a)=>{for(const [file]of f.files)if(file.endsWith(path.sep+'.env'))f.files.set(file,Buffer.from('alteracao-ficticia'));return send(...a);};await assert.rejects(f.ops.renovarSmokePosT1(f.auth));assert.equal(f.estado.ler().transicao.recuperacao.smokeIsolado.aprovado,false);});
++test('falha no transporte deixa manutencao e permite so nova tentativa explicita',async()=>{const f=await fixture(),send=f.child.send;f.child.send=m=>queueMicrotask(()=>f.child.emit('message',{tipo:'cutover-smoke-resposta',id:m.id,ok:false}));await assert.rejects(f.ops.renovarSmokePosT1(f.auth));assert.equal(f.estado.ler().transicao.recuperacao.smokeIsolado.aprovado,false);f.child.send=send;const r=await f.ops.renovarSmokePosT1(f.auth);assert.equal(r.gateApproved,true);assert.equal(f.estado.ler().transicao.t1.run,f.auth.run);});
++test('concorrencia bloqueia renovacao T1 smoke legado e liberacao',async()=>{const f=await fixture(),read=f.o.leitura;let release,entered;const barrier=new Promise(r=>{release=r;}),start=new Promise(r=>{entered=r;});f.o.leitura=async(...a)=>{entered();await barrier;return read(...a);};const one=f.ops.renovarSmokePosT1(f.auth);await start;await assert.rejects(f.ops.renovarSmokePosT1(f.auth));await assert.rejects(f.ops.preparar());await assert.rejects(f.ops.executar({}));await assert.rejects(f.ops.smoke());await assert.rejects(f.ops.liberar({}));release();assert.equal((await one).gateApproved,true);assert.equal(f.messages.length,2);});
++test('renovacao nao reabre T1 nem aceita plano ou ticket serializado',async()=>{const f=await fixture();await f.ops.renovarSmokePosT1(f.auth);await assert.rejects(f.ops.preparar());await assert.rejects(f.ops.executar(JSON.parse(JSON.stringify({run:f.auth.run,expiraEm:Date.now()+30000}))));await assert.rejects(f.ops.smoke());assert.equal(f.messages.length,2);assert.equal(f.estado.ler().transicao.t1.etapa,'CONCLUIDA');});
++test('gate rejeita smoke renovado expirado e metadados de outra renovacao',async()=>{const f=await fixture();await f.ops.renovarSmokePosT1(f.auth);let collected;f.o.obterControlador=()=>({async liberarSeladoPlanejado(q){collected=await q.coletarEvidencias();}});await f.ops.liberar({});const gate=require('../config/gate-final-selado.cjs');assert.throws(()=>gate.validarGateFinalSelado({estado:f.estado.ler(),ambiente:f.env,v:collected,agora:f.now()+900001,finalidade:'LIBERACAO'}));const e=f.estado.ler();e.transicao.recuperacao.renovacaoPosT1.id=randomUUID();f.estado.gravar(e);collected.controle=await f.continuidade.conferir();collected.currentStateSha256=require('./helpers/gate-final-selado.cjs').hash(e);assert.throws(()=>gate.validarGateFinalSelado({estado:e,ambiente:f.env,v:collected,agora:f.now(),finalidade:'LIBERACAO'}));});
++for(const [name,change] of [
++  ['perfil ausente',r=>r.perfisAprovados=3],['JWT antigo aceito',r=>r.jwtAntigosRecusados=false],['contrato incorreto',r=>r.contratoPerfilValidado=false],['MySQL carregado',r=>r.mysqlModulesLoaded=true],['permissao incorreta',r=>r.http[6].status=403],['escrita desbloqueada',r=>r.http[20].status=201],['requisicao ausente',r=>r.http.pop()],['smoke com escrita',r=>r.dataWrites=true],['manutencao aberta',r=>r.maintenanceReleased=true]
++])test('smoke invalido '+name+' nao pode renovar selo',async()=>{const f=await fixture();f.child.send=(m,cb)=>{f.messages.push(m.tipo);const result=structuredClone(f.report.smokeResult.result);change(result);queueMicrotask(()=>f.child.emit('message',{tipo:'cutover-smoke-resposta',id:m.id,ok:true,result}));cb?.();};await assert.rejects(f.ops.renovarSmokePosT1(f.auth));assert.equal(f.estado.ler().transicao.recuperacao.smokeIsolado.aprovado,false);assert.equal(f.estado.ler().transicao.t1.cleanupVerified,true);assert.equal(f.estado.ler().selado,true);});
++test('TTL do smoke continua 15 minutos mesmo com diario concluido e IPC novo',async()=>{const f=await fixture();await f.ops.renovarSmokePosT1(f.auth);let v;f.o.obterControlador=()=>({async liberarSeladoPlanejado(q){v=await q.coletarEvidencias();}});await f.ops.liberar({});const r=JSON.parse(v.smokeBytes);r.startedUtc=new Date(f.now()-900001).toISOString();const {hash}=require('./helpers/gate-final-selado.cjs');v.smokeBytes=Buffer.from(JSON.stringify(r));v.smokeSha256=hash(v.smokeBytes);const e=f.estado.ler();e.transicao.recuperacao.renovacaoPosT1.relatorioSha256=v.smokeSha256;f.estado.gravar(e);v.controle=await f.continuidade.conferir();v.currentStateSha256=hash(e);assert.throws(()=>require('../config/gate-final-selado.cjs').validarGateFinalSelado({estado:e,ambiente:f.env,v,agora:f.now(),finalidade:'LIBERACAO'}),/GATE_SELADO_SMOKE_EXPIRADO/);});
++test('capturas finais expiradas impedem aprovar renovacao sem aumentar TTL atual',async()=>{const f=await fixture(),read=f.o.leitura;let calls=0;f.o.leitura=async(...a)=>{const v=await read(...a);if(++calls===3)v.snapshot.capturas.supabase.inicio-=31000;return v;};await assert.rejects(f.ops.renovarSmokePosT1(f.auth));assert.equal(f.estado.ler().transicao.recuperacao.smokeIsolado.aprovado,false);});
++for(const table of ['usuarios','eventos','custos_evento','cotacoes','itens_cotacao','propostas','inscricoes','solicitacoes_acesso'])test('renovacao exige conteudo atual do dominio '+table,async()=>{const f=await fixture(),read=f.o.leitura;f.o.leitura=async(...a)=>{const v=await read(...a),row=v.snapshot.supabase[table][0],key=Object.keys(row).find(k=>k!=='id');row[key]='DIVERGENCIA_FICTICIA';return v;};await assert.rejects(f.ops.renovarSmokePosT1(f.auth));assert.equal(f.estado.ler().transicao.recuperacao.smokeIsolado.aprovado,false);assert.equal(f.messages.length,1);});
++test('interrupcao do filho durante smoke rejeita sem retry automatico',async()=>{const f=await fixture();f.child.send=m=>{f.messages.push(m.tipo);queueMicrotask(()=>f.child.emit('exit',1));};await assert.rejects(f.ops.renovarSmokePosT1(f.auth),/CONTROLE_FILHO_ENCERROU/);assert.equal(f.messages.length,2);assert.equal(f.estado.ler().transicao.recuperacao.smokeIsolado.aprovado,false);assert.equal(f.estado.ler().transicao.t1.cleanupVerified,true);});
++function channelFixture(renew){const entrada=new PassThrough(),saida=new PassThrough(),responses=[];saida.on('data',b=>responses.push(JSON.parse(b)));let revoked=0,calls=0,releases=0;const run=randomUUID(),r={status:'SMOKE_POS_T1_RENOVADO',run,requests:26,gateApproved:true,finalidade:'LIBERACAO',gateVerificadoEm:Date.now(),gateExpiraEm:Date.now()+30000,reportFile:'/ficticio/report',segredo:'NAO_PUBLICAR'};
++  const api=require('../config/comandos-controlador.cjs').criarComandosControlador({entrada,saida,continuidade:{async conferir(){return {};},revogar(){revoked++;}},renovarSmokePosT1:async auth=>{calls++;return renew?renew(r,auth):r;},liberar:async()=>{releases++;},preparar:async()=>{throw Error('T1_PROIBIDA');},executar:async()=>{throw Error('T1_PROIBIDA');}});api.instalar();return {entrada,saida,responses,api,run,r,calls:()=>calls,releases:()=>releases,revoked:()=>revoked,msg:{acao:'renovar-smoke-pos-t1',run,autorizarRenovacao:true,referenciaAutorizacao:'Referencia ficticia de renovacao'},async send(m){const n=responses.length;entrada.write(JSON.stringify({pedido:randomUUID(),...m})+'\n');for(let i=0;i<40&&responses.length===n;i++)await wait();return responses.at(-1);}};}
++test('pedido duplicado nao executa outra renovacao nem publica dados privados',async()=>{const f=channelFixture(),m={...f.msg,pedido:randomUUID()};assert.equal((await f.send(m)).ok,true);assert.equal((await f.send(m)).ok,false);assert.equal(f.calls(),1);assert.ok(!JSON.stringify(f.responses).includes('NAO_PUBLICAR'));assert.equal(f.releases(),0);f.api.fechar();});
++test('canal ocupado recusa renovacao concorrente e liberacao',async()=>{let done;const f=channelFixture(r=>new Promise(resolve=>{done=()=>resolve(r);}));f.entrada.write(JSON.stringify({...f.msg,pedido:randomUUID()})+'\n');await wait();assert.equal((await f.send(f.msg)).code,'CONTROLE_PEDIDO_RECUSADO');assert.equal((await f.send({acao:'liberar-selado',run:f.run,autorizarLiberacao:true,referenciaAutorizacao:'Liberacao ficticia'})).ok,false);assert.equal(f.releases(),0);done();await wait();assert.equal(f.responses.at(-1).ok,true);f.api.fechar();});
++test('fechamento durante renovacao nao restaura autoridade ou confirma aprovacao tardia',async()=>{let done;const f=channelFixture(r=>new Promise(resolve=>{done=()=>resolve(r);}));f.entrada.write(JSON.stringify({...f.msg,pedido:randomUUID()})+'\n');await wait();f.api.fechar();done();await wait();assert.equal(f.responses.length,0);assert.equal(f.revoked(),1);assert.equal(f.releases(),0);});
++for(const [name,change] of [
++ ['gate expirado',r=>r.gateExpiraEm=Date.now()-1],['gate ausente',r=>r.gateApproved=false],['outro run',r=>r.run=randomUUID()],['finalidade T1',r=>r.finalidade='T1']
++])test('canal recusa retorno '+name+' sem recompor autoridade de liberacao',async()=>{const f=channelFixture(r=>{change(r);return r;});assert.equal((await f.send(f.msg)).ok,false);assert.equal((await f.send({acao:'liberar-selado',run:f.run,autorizarLiberacao:true,referenciaAutorizacao:'Liberacao ficticia'})).ok,false);assert.equal(f.releases(),0);f.api.fechar();});
++test('canal exige autorizacao separada restaura conclusao validada e nunca libera automaticamente',async()=>{
++  const f=await fixture(),entrada=new PassThrough(),saida=new PassThrough(),responses=[];saida.on('data',b=>responses.push(JSON.parse(b)));let writes=0,releases=0;
++  const api=require('../config/comandos-controlador.cjs').criarComandosControlador({entrada,saida,continuidade:f.continuidade,...f.ops,executar:async()=>{writes++;},liberar:async()=>{releases++;}});api.instalar();
++  const send=async m=>{const n=responses.length;entrada.write(JSON.stringify({pedido:randomUUID(),...m})+'\n');for(let i=0;i<100&&responses.length===n;i++)await wait();return responses.at(-1);};
++  const renewal={acao:'renovar-smoke-pos-t1',...f.auth};assert.equal((await send({...renewal,autorizarRenovacao:false})).ok,false);assert.equal((await send(renewal)).ok,true);assert.equal(writes,0);assert.equal(releases,0);
++  assert.equal((await send({acao:'preparar-t1'})).ok,false);assert.equal((await send({acao:'renovar-plano-t1',autorizarReemissao:true,runAnterior:f.auth.run})).ok,false);assert.equal((await send({acao:'executar-t1',run:f.auth.run,autorizarT1:true,referenciaAutorizacao:'Ficticia autorizacao'})).ok,false);
++  assert.equal((await send({acao:'liberar-selado',run:f.auth.run,autorizarLiberacao:true,referenciaAutorizacao:'Ficticia liberacao separada'})).ok,true);assert.equal(releases,1);assert.equal(writes,0);api.fechar();
++});

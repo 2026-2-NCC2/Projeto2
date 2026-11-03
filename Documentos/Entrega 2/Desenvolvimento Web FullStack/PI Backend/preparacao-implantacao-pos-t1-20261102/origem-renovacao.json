@@ -1,0 +1,53 @@
+{
+  "patchSha256": "f6e4cb820291fd7b57eb63790c65fc4d947463eef7a2d88adf973c08fd6ea600",
+  "files": [
+    {
+      "file": "config/comandos-controlador.cjs",
+      "added": false,
+      "beforeSha256": "b0ba56b0d2c3daa0c06a065fb43dcadf76421f9bbc9ba7765a372a084df6e351",
+      "afterSha256": "0bdab77ad95aeade70c9d63712fb6957a6142c1fc45e97617f24455c1a8b3412"
+    },
+    {
+      "file": "config/gate-final-selado.cjs",
+      "added": false,
+      "beforeSha256": "c3bf4d5bb0aa5034da1f09d4b518905f49e210823b2dd17e8ad2c1a23ca5e6cf",
+      "afterSha256": "926ec12fe82785612c4df5ca1676d60630a45de5bc3f20896f867bd652d5d2ea"
+    },
+    {
+      "file": "config/evidencias-pos-t1.cjs",
+      "added": true,
+      "beforeSha256": null,
+      "afterSha256": "3017fdfd74ff30e8b836d4acf58f5d03c87511661bba7d0ad350b67c4c9c751e"
+    },
+    {
+      "file": "scripts/operacoes-controlador-selado.cjs",
+      "added": false,
+      "beforeSha256": "84ab375c67b7726704df900cbbd9102a733969363460c5d71dd06e397c0d0ddc",
+      "afterSha256": "a4e183c4abd9f2d279f8d52c8fbf992afb8d1a8b41564da9fe9d09d1165ce53a"
+    },
+    {
+      "file": "tests/operacoes-pos-substituicao.test.cjs",
+      "added": false,
+      "beforeSha256": "058f14c5cedc8bac9c27336f1b114fae448f42c8b05cd9cc5b0a74a425c028b8",
+      "afterSha256": "5c5dddb1f506d9116f56ad607ed7273dbc558991c6d52cf63e56dd1d0fa364df"
+    },
+    {
+      "file": "tests/helpers/operacoes-controlador.cjs",
+      "added": true,
+      "beforeSha256": null,
+      "afterSha256": "50db3c752e98f004876b387591d90e842508e0ae689f7f73d69d1825020925f0"
+    },
+    {
+      "file": "tests/helpers/pos-t1.cjs",
+      "added": true,
+      "beforeSha256": null,
+      "afterSha256": "4368cc040f0f9d7a2a80c5c5dbfa26780dda6ba608fe2a7e75c45d5edcf6b537"
+    },
+    {
+      "file": "tests/renovacao-smoke-pos-t1.test.cjs",
+      "added": true,
+      "beforeSha256": null,
+      "afterSha256": "089e145253b1a9ac778c8ebbcf8ffcd03a2e3fe64fc742378a464c366c0028f4"
+    }
+  ]
+}

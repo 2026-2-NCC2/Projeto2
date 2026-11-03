@@ -1,0 +1,43 @@
+{
+  "checkedUtc": "2026-11-03T04:02:02.462Z",
+  "status": "PREPARACAO_INTEGRADA_SELADA_NAO_IMPLANTADA",
+  "bundleSha256": "2802961c64bf07cf7c8167f8e376f750d68fb71914214ac9b1126091c869e999",
+  "verification": {
+    "ok": true,
+    "exit_code": 0,
+    "mode": "PREPARADO_NAO_IMPLANTADO",
+    "protectedHashesVerified": 27,
+    "deltaFiles": 1,
+    "admissionExecuted": false
+  },
+  "tests": {
+    "node": 12,
+    "powershellIntegration": 10,
+    "total": 22,
+    "failures": 0,
+    "skipped": 0,
+    "previous55Rerun": false,
+    "previousComponentsByteIdentical": true
+  },
+  "patchCheckApproved": true,
+  "patchFiles": 1,
+  "powershellSyntaxApproved": true,
+  "historicalInternalRefusalCauseConfirmed": false,
+  "preserved": {
+    "state": true,
+    "jwtEnvironment": true,
+    "checkpoint": true,
+    "journal": true
+  },
+  "realAdmissionExecuted": false,
+  "realDeploymentExecuted": false,
+  "realStatusPublication": false,
+  "dataWrites": false,
+  "maintenanceChanged": false,
+  "commitsCreated": false,
+  "pending": [
+    "AUTORIZACAO_IMPLANTACAO_CLI_DIAGNOSTICO",
+    "CONTROLES_OPERACIONAIS_RECENTES",
+    "CAUSA_INTERNA_HISTORICA_NAO_REGISTRADA"
+  ]
+}

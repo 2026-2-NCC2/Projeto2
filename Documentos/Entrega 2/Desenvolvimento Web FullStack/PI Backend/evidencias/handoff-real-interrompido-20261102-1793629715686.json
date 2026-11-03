@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "status": "INTERROMPIDO_ANTES_DO_HANDOFF",
+  "capturedUtc": "2026-11-02T14:27:29.792Z",
+  "reason": "PAR_LEGADO_AUSENTE_APOS_REINICIO_WINDOWS",
+  "persistedBackendPid": 30276,
+  "previousControllerPid": 29120,
+  "previousPidNumbersUsedAsCurrentProof": false,
+  "oldPidsNativeAbsence": {
+    "todosAusentes": true,
+    "presentes": []
+  },
+  "lastBootUtc": "2026-11-02T14:18:01.5000000Z",
+  "mysqlServices": [],
+  "localInventory": {
+    "projectProcesses": [],
+    "mysqlProcesses": [],
+    "listenersOnProjectPorts": [],
+    "mysqlClients": [],
+    "projectTasks": []
+  },
+  "http": {
+    "httpStatus": null,
+    "code": "ECONNREFUSED",
+    "expected503": false
+  },
+  "checkpointId": "349d6df4-7c15-4960-b739-dfd91fd53c8d",
+  "persistedPhase": "INICIADA",
+  "frozen": true,
+  "sealed": true,
+  "configMatches": true,
+  "finalPreservationHashCheck": { "stateUnchanged": true, "envJwtUnchanged": true, "checkpointUnchanged": true },
+  "t1Recorded": false,
+  "existingControlRecord": false,
+  "exclusiveLockPresent": false,
+  "existingBackupHashesVerified": true,
+  "checkpointRows": {
+    "mysql": 42,
+    "supabase": 52
+  },
+  "checkpointAdditionalIds": {
+    "usuarios": [
+      10
+    ],
+    "eventos": [
+      12
+    ],
+    "custos_evento": [
+      7,
+      8
+    ],
+    "cotacoes": [
+      6
+    ],
+    "itens_cotacao": [
+      22,
+      23
+    ],
+    "propostas": [
+      3
+    ],
+    "inscricoes": [
+      3
+    ],
+    "solicitacoes_acesso": [
+      6
+    ]
+  },
+  "additionalRecordsCurrentDatabaseVerification": false,
+  "historicalAbsenceOfWritesProven": false,
+  "readOnlyDatabaseConnectionExecuted": false,
+  "handoffExecuted": false,
+  "controllerAdmitted": false,
+  "processStarted": false,
+  "processStopped": false,
+  "smokeExecuted": false,
+  "finalGateApproved": false,
+  "finalGateReason": "SEM_CONTROLADOR_ATIVO_E_RECIBO_IPC_GENUINO",
+  "t1Executed": false,
+  "maintenanceReleased": false,
+  "jwtChanged": false,
+  "checkpointChanged": false,
+  "backupChanged": false,
+  "dataWrites": false,
+  "rollbackExecuted": false,
+  "commitsCreated": false,
+  "requiredNextPreparation": "RESTABELECIMENTO_SELADO_APOS_REINICIO_SEM_ALTERAR_FASE_E_SEM_REUTILIZAR_PIDS_OU_TICKETS"
+}

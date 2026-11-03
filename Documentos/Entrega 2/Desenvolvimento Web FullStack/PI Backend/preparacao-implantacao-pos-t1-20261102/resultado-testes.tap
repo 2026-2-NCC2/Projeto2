@@ -1,0 +1,1786 @@
+TAP version 13
+# Subtest: plano pos reboot e inerte e preserva estado JWT e checkpoint
+ok 1 - plano pos reboot e inerte e preserva estado JWT e checkpoint
+  ---
+  duration_ms: 17.2824
+  type: 'test'
+  ...
+# Subtest: readmissao rejeita sem reboot
+ok 2 - readmissao rejeita sem reboot
+  ---
+  duration_ms: 1.2893
+  type: 'test'
+  ...
+# Subtest: readmissao rejeita PID antigo presente
+ok 3 - readmissao rejeita PID antigo presente
+  ---
+  duration_ms: 1.1521
+  type: 'test'
+  ...
+# Subtest: readmissao rejeita PIDs consultados adulterados
+ok 4 - readmissao rejeita PIDs consultados adulterados
+  ---
+  duration_ms: 1.1457
+  type: 'test'
+  ...
+# Subtest: readmissao rejeita prova nativa expirada
+ok 5 - readmissao rejeita prova nativa expirada
+  ---
+  duration_ms: 0.8291
+  type: 'test'
+  ...
+# Subtest: readmissao rejeita candidato anterior ao boot
+ok 6 - readmissao rejeita candidato anterior ao boot
+  ---
+  duration_ms: 4.7794
+  type: 'test'
+  ...
+# Subtest: readmissao rejeita PID historico no candidato
+ok 7 - readmissao rejeita PID historico no candidato
+  ---
+  duration_ms: 1.1223
+  type: 'test'
+  ...
+# Subtest: readmissao rejeita entrada nao conhecida
+ok 8 - readmissao rejeita entrada nao conhecida
+  ---
+  duration_ms: 0.9098
+  type: 'test'
+  ...
+# Subtest: readmissao rejeita sem canal retomavel
+ok 9 - readmissao rejeita sem canal retomavel
+  ---
+  duration_ms: 0.8628
+  type: 'test'
+  ...
+# Subtest: readmissao rejeita ponte de outro pai
+ok 10 - readmissao rejeita ponte de outro pai
+  ---
+  duration_ms: 1.0187
+  type: 'test'
+  ...
+# Subtest: readmissao rejeita sem TLS
+ok 11 - readmissao rejeita sem TLS
+  ---
+  duration_ms: 0.7811
+  type: 'test'
+  ...
+# Subtest: readmissao rejeita cliente MySQL
+ok 12 - readmissao rejeita cliente MySQL
+  ---
+  duration_ms: 0.7167
+  type: 'test'
+  ...
+# Subtest: readmissao rejeita REST concorrente
+ok 13 - readmissao rejeita REST concorrente
+  ---
+  duration_ms: 0.9549
+  type: 'test'
+  ...
+# Subtest: readmissao rejeita job ativo
+ok 14 - readmissao rejeita job ativo
+  ---
+  duration_ms: 0.8282
+  type: 'test'
+  ...
+# Subtest: readmissao rejeita conteudo alterado com contagens iguais
+ok 15 - readmissao rejeita conteudo alterado com contagens iguais
+  ---
+  duration_ms: 1.5823
+  type: 'test'
+  ...
+# Subtest: readmissao rejeita adicional modificado
+ok 16 - readmissao rejeita adicional modificado
+  ---
+  duration_ms: 0.9142
+  type: 'test'
+  ...
+# Subtest: readmissao rejeita checkpoint adulterado
+ok 17 - readmissao rejeita checkpoint adulterado
+  ---
+  duration_ms: 0.5937
+  type: 'test'
+  ...
+# Subtest: readmissao rejeita relatorio adulterado
+ok 18 - readmissao rejeita relatorio adulterado
+  ---
+  duration_ms: 0.5795
+  type: 'test'
+  ...
+# Subtest: readmissao rejeita backups nao comprovados
+ok 19 - readmissao rejeita backups nao comprovados
+  ---
+  duration_ms: 0.6296
+  type: 'test'
+  ...
+# Subtest: readmissao rejeita risco nao aceito
+ok 20 - readmissao rejeita risco nao aceito
+  ---
+  duration_ms: 0.5843
+  type: 'test'
+  ...
+# Subtest: INCERTA T1 ou controle existente nao sao promovidos pela lane nova
+ok 21 - INCERTA T1 ou controle existente nao sao promovidos pela lane nova
+  ---
+  duration_ms: 1.3104
+  type: 'test'
+  ...
+# Subtest: executar exige autorizacao plano genuino e estado inalterado antes de efeitos
+ok 22 - executar exige autorizacao plano genuino e estado inalterado antes de efeitos
+  ---
+  duration_ms: 2.0999
+  type: 'test'
+  ...
+# Subtest: CLI nova e inerte e recusa flags incompletas antes de acessar arquivos privados
+ok 23 - CLI nova e inerte e recusa flags incompletas antes de acessar arquivos privados
+  ---
+  duration_ms: 1.5154
+  type: 'test'
+  ...
+# Subtest: ponte 503 INCERTA
+ok 24 - ponte 503 INCERTA
+  ---
+  duration_ms: 1.4251
+  type: 'test'
+  ...
+# Subtest: ponte 503 INICIADA selada
+ok 25 - ponte 503 INICIADA selada
+  ---
+  duration_ms: 1.1116
+  type: 'test'
+  ...
+# Subtest: ponte 503 sem freeze
+ok 26 - ponte 503 sem freeze
+  ---
+  duration_ms: 1.1295
+  type: 'test'
+  ...
+# Subtest: ponte 503 sem selo
+ok 27 - ponte 503 sem selo
+  ---
+  duration_ms: 1.0902
+  type: 'test'
+  ...
+# Subtest: ponte 503 T1 registrada
+ok 28 - ponte 503 T1 registrada
+  ---
+  duration_ms: 1.2589
+  type: 'test'
+  ...
+# Subtest: ponte 503 fase normal
+ok 29 - ponte 503 fase normal
+  ---
+  duration_ms: 1.3759
+  type: 'test'
+  ...
+# Subtest: capacidade do controlador e de uso unico e vinculada a PID boot pai e epoch
+ok 30 - capacidade do controlador e de uso unico e vinculada a PID boot pai e epoch
+  ---
+  duration_ms: 1.8965
+  type: 'test'
+  ...
+# Subtest: nova admissao de supervisor preserva INICIADA e recusa JSON e ticket reutilizado
+ok 31 - nova admissao de supervisor preserva INICIADA e recusa JSON e ticket reutilizado
+  ---
+  duration_ms: 1.6716
+  type: 'test'
+  ...
+# Subtest: digest consumido nao pode ser rearmado em outra geracao
+ok 32 - digest consumido nao pode ser rearmado em outra geracao
+  ---
+  duration_ms: 0.8179
+  type: 'test'
+  ...
+# Subtest: bootstrap recusa outro projeto antes da aplicacao
+ok 33 - bootstrap recusa outro projeto antes da aplicacao
+  ---
+  duration_ms: 0.8306
+  type: 'test'
+  ...
+# Subtest: bootstrap recusa outro JWT antes da aplicacao
+ok 34 - bootstrap recusa outro JWT antes da aplicacao
+  ---
+  duration_ms: 0.9775
+  type: 'test'
+  ...
+# Subtest: bootstrap recusa outro pai antes da aplicacao
+ok 35 - bootstrap recusa outro pai antes da aplicacao
+  ---
+  duration_ms: 0.7233
+  type: 'test'
+  ...
+# Subtest: bootstrap recusa outro PID antes da aplicacao
+ok 36 - bootstrap recusa outro PID antes da aplicacao
+  ---
+  duration_ms: 1.1759
+  type: 'test'
+  ...
+# Subtest: bootstrap recusa outro boot antes da aplicacao
+ok 37 - bootstrap recusa outro boot antes da aplicacao
+  ---
+  duration_ms: 0.6675
+  type: 'test'
+  ...
+# Subtest: bootstrap real em VM aguarda ticket e nunca vincula porta antes da ordem
+ok 38 - bootstrap real em VM aguarda ticket e nunca vincula porta antes da ordem
+  ---
+  duration_ms: 4.7088
+  type: 'test'
+  ...
+# Subtest: construir runtime e importar CLI nao abre arquivo privado driver processo ou socket
+ok 39 - construir runtime e importar CLI nao abre arquivo privado driver processo ou socket
+  ---
+  duration_ms: 2.0287
+  type: 'test'
+  ...
+# Subtest: prazo nasce do recibo original e nao recebe outros 30 segundos na emissao
+ok 40 - prazo nasce do recibo original e nao recebe outros 30 segundos na emissao
+  ---
+  duration_ms: 2.6069
+  type: 'test'
+  ...
+# Subtest: expiracao e irreversivel mesmo se o relogio civil retornar
+ok 41 - expiracao e irreversivel mesmo se o relogio civil retornar
+  ---
+  duration_ms: 1.3926
+  type: 'test'
+  ...
+# Subtest: relogio monotono rejeita expiracao escondida por ajuste do relogio civil
+ok 42 - relogio monotono rejeita expiracao escondida por ajuste do relogio civil
+  ---
+  duration_ms: 1.204
+  type: 'test'
+  ...
+# Subtest: retrocesso civil invalida plano definitivamente sem ampliar janela
+ok 43 - retrocesso civil invalida plano definitivamente sem ampliar janela
+  ---
+  duration_ms: 1.2909
+  type: 'test'
+  ...
+# Subtest: JSON copiado nao e um plano autentico
+ok 44 - JSON copiado nao e um plano autentico
+  ---
+  duration_ms: 1.2186
+  type: 'test'
+  ...
+# Subtest: alterar e restaurar fixture nao reativa plano revogado
+ok 45 - alterar e restaurar fixture nao reativa plano revogado
+  ---
+  duration_ms: 1.5147
+  type: 'test'
+  ...
+# Subtest: plano novo tem run nonce e prazo proprios e revoga o anterior
+ok 46 - plano novo tem run nonce e prazo proprios e revoga o anterior
+  ---
+  duration_ms: 1.9787
+  type: 'test'
+  ...
+# Subtest: gate ja usado nao emite outro plano ainda que nao tenha expirado
+ok 47 - gate ja usado nao emite outro plano ainda que nao tenha expirado
+  ---
+  duration_ms: 1.1331
+  type: 'test'
+  ...
+# Subtest: novo objeto de gate nao permite reciclar o mesmo recibo IPC
+ok 48 - novo objeto de gate nao permite reciclar o mesmo recibo IPC
+  ---
+  duration_ms: 1.5668
+  type: 'test'
+  ...
+# Subtest: run anterior nao pode ser reutilizado com evidencias novas
+ok 49 - run anterior nao pode ser reutilizado com evidencias novas
+  ---
+  duration_ms: 1.999
+  type: 'test'
+  ...
+# Subtest: renovar somente recibo nao torna snapshots antigos aceitaveis
+ok 50 - renovar somente recibo nao torna snapshots antigos aceitaveis
+  ---
+  duration_ms: 1.3346
+  type: 'test'
+  ...
+# Subtest: execucao expirada nao adquire lock nem cria diario ou transporte
+ok 51 - execucao expirada nao adquire lock nem cria diario ou transporte
+  ---
+  duration_ms: 1.2404
+  type: 'test'
+  ...
+# Subtest: uma admissao consome plano antes de qualquer await e bloqueia executor concorrente
+ok 52 - uma admissao consome plano antes de qualquer await e bloqueia executor concorrente
+  ---
+  duration_ms: 2.413
+  type: 'test'
+  ...
+# Subtest: falha de lock nao permite reutilizar capacidade consumida
+ok 53 - falha de lock nao permite reutilizar capacidade consumida
+  ---
+  duration_ms: 2.1121
+  type: 'test'
+  ...
+# Subtest: gate antigo nao pode ser apresentado como revalidacao nova
+ok 54 - gate antigo nao pode ser apresentado como revalidacao nova
+  ---
+  duration_ms: 1.2289
+  type: 'test'
+  ...
+# Subtest: gate novo expirado durante preflight impede criar diario
+ok 55 - gate novo expirado durante preflight impede criar diario
+  ---
+  duration_ms: 2.178
+  type: 'test'
+  ...
+# Subtest: consumo valido nao reativa plano; preflight longo exige gate realmente novo
+ok 56 - consumo valido nao reativa plano; preflight longo exige gate realmente novo
+  ---
+  duration_ms: 2.7897
+  type: 'test'
+  ...
+# Subtest: renovacao exige autorizacao separada e run anterior correto
+ok 57 - renovacao exige autorizacao separada e run anterior correto
+  ---
+  duration_ms: 13.4852
+  type: 'test'
+  ...
+# Subtest: renovacao publica apenas novo run sem executar T1 e rejeita replay
+ok 58 - renovacao publica apenas novo run sem executar T1 e rejeita replay
+  ---
+  duration_ms: 2.8272
+  type: 'test'
+  ...
+# Subtest: run antigo e rejeitado mesmo com pedido e autorizacao de execucao novos
+ok 59 - run antigo e rejeitado mesmo com pedido e autorizacao de execucao novos
+  ---
+  duration_ms: 0.5507
+  type: 'test'
+  ...
+# Subtest: canal informa expiracao e nao chama executor para capacidade vencida
+ok 60 - canal informa expiracao e nao chama executor para capacidade vencida
+  ---
+  duration_ms: 1.8008
+  type: 'test'
+  ...
+# Subtest: falha de IPC na reemissao nao conserva plano anterior
+ok 61 - falha de IPC na reemissao nao conserva plano anterior
+  ---
+  duration_ms: 0.5567
+  type: 'test'
+  ...
+# Subtest: falha da coleta permite nova emissao explicita sem reativar anterior
+ok 62 - falha da coleta permite nova emissao explicita sem reativar anterior
+  ---
+  duration_ms: 0.5589
+  type: 'test'
+  ...
+# Subtest: novo callback nao pode devolver o mesmo run revogado
+ok 63 - novo callback nao pode devolver o mesmo run revogado
+  ---
+  duration_ms: 0.4424
+  type: 'test'
+  ...
+# Subtest: duas emissoes concorrentes no canal nao publicam duas autoridades
+ok 64 - duas emissoes concorrentes no canal nao publicam duas autoridades
+  ---
+  duration_ms: 0.4258
+  type: 'test'
+  ...
+# Subtest: fechar canal durante emissao revoga tambem plano resolvido tardiamente
+ok 65 - fechar canal durante emissao revoga tambem plano resolvido tardiamente
+  ---
+  duration_ms: 0.9207
+  type: 'test'
+  ...
+# Subtest: construir canal e inerte; status nao executa T1
+ok 66 - construir canal e inerte; status nao executa T1
+  ---
+  duration_ms: 0.6129
+  type: 'test'
+  ...
+# Subtest: T1 exige plano run e autorizacao explicita sem publicar conteudo privado
+ok 67 - T1 exige plano run e autorizacao explicita sem publicar conteudo privado
+  ---
+  duration_ms: 0.5349
+  type: 'test'
+  ...
+# Subtest: mesmo pedido nao repete comando e canal nao oferece liberacao HTTP
+ok 68 - mesmo pedido nao repete comando e canal nao oferece liberacao HTTP
+  ---
+  duration_ms: 0.4367
+  type: 'test'
+  ...
+# Subtest: fim do canal revoga continuidade e rejeita novo uso
+ok 69 - fim do canal revoga continuidade e rejeita novo uso
+  ---
+  duration_ms: 0.3396
+  type: 'test'
+  ...
+# Subtest: limite de entrada recusa mensagem sem ecoar segredos
+ok 70 - limite de entrada recusa mensagem sem ecoar segredos
+  ---
+  duration_ms: 0.2787
+  type: 'test'
+  ...
+# Subtest: liberacao exige T1 concluida e autorizacao separada sem ser automatica
+ok 71 - liberacao exige T1 concluida e autorizacao separada sem ser automatica
+  ---
+  duration_ms: 0.6634
+  type: 'test'
+  ...
+# Subtest: perda da saida tambem revoga o controle
+ok 72 - perda da saida tambem revoga o controle
+  ---
+  duration_ms: 0.1605
+  type: 'test'
+  ...
+# Subtest: JSON nulo ou primitivo e recusado sem derrubar controlador ou executar acoes
+ok 73 - JSON nulo ou primitivo e recusado sem derrubar controlador ou executar acoes
+  ---
+  duration_ms: 0.5852
+  type: 'test'
+  ...
+# Subtest: gate selado aceita prova completa sem mudar fase freeze JWT ou checkpoint
+ok 74 - gate selado aceita prova completa sem mudar fase freeze JWT ou checkpoint
+  ---
+  duration_ms: 0.9193
+  type: 'test'
+  ...
+# Subtest: gate selado recusa sem continuidade IPC
+ok 75 - gate selado recusa sem continuidade IPC
+  ---
+  duration_ms: 0.4683
+  type: 'test'
+  ...
+# Subtest: gate selado recusa recibo JSON forjado
+ok 76 - gate selado recusa recibo JSON forjado
+  ---
+  duration_ms: 0.4252
+  type: 'test'
+  ...
+# Subtest: gate selado recusa PID alterado
+ok 77 - gate selado recusa PID alterado
+  ---
+  duration_ms: 0.4683
+  type: 'test'
+  ...
+# Subtest: gate selado recusa recibo revogado
+ok 78 - gate selado recusa recibo revogado
+  ---
+  duration_ms: 0.4134
+  type: 'test'
+  ...
+# Subtest: gate selado recusa controle expirado
+ok 79 - gate selado recusa controle expirado
+  ---
+  duration_ms: 0.4348
+  type: 'test'
+  ...
+# Subtest: gate selado recusa sem smoke
+ok 80 - gate selado recusa sem smoke
+  ---
+  duration_ms: 0.4858
+  type: 'test'
+  ...
+# Subtest: gate selado recusa bytes adulterados
+ok 81 - gate selado recusa bytes adulterados
+  ---
+  duration_ms: 0.4848
+  type: 'test'
+  ...
+# Subtest: gate selado recusa smoke expirado
+ok 82 - gate selado recusa smoke expirado
+  ---
+  duration_ms: 0.5062
+  type: 'test'
+  ...
+# Subtest: gate selado recusa smoke de outro processo
+ok 83 - gate selado recusa smoke de outro processo
+  ---
+  duration_ms: 0.5979
+  type: 'test'
+  ...
+# Subtest: gate selado recusa MySQL carregado
+ok 84 - gate selado recusa MySQL carregado
+  ---
+  duration_ms: 0.5005
+  type: 'test'
+  ...
+# Subtest: gate selado recusa trafego liberado
+ok 85 - gate selado recusa trafego liberado
+  ---
+  duration_ms: 0.4722
+  type: 'test'
+  ...
+# Subtest: gate selado recusa perfil nao testado
+ok 86 - gate selado recusa perfil nao testado
+  ---
+  duration_ms: 0.513
+  type: 'test'
+  ...
+# Subtest: gate selado recusa permissao falhou
+ok 87 - gate selado recusa permissao falhou
+  ---
+  duration_ms: 0.4878
+  type: 'test'
+  ...
+# Subtest: gate selado recusa escrita incerta
+ok 88 - gate selado recusa escrita incerta
+  ---
+  duration_ms: 0.4678
+  type: 'test'
+  ...
+# Subtest: gate selado recusa checkpoint alterado
+ok 89 - gate selado recusa checkpoint alterado
+  ---
+  duration_ms: 0.5103
+  type: 'test'
+  ...
+# Subtest: gate selado recusa sem integridade backup
+ok 90 - gate selado recusa sem integridade backup
+  ---
+  duration_ms: 0.5254
+  type: 'test'
+  ...
+# Subtest: gate selado recusa TLS nao comprovado
+ok 91 - gate selado recusa TLS nao comprovado
+  ---
+  duration_ms: 0.5042
+  type: 'test'
+  ...
+# Subtest: gate selado recusa leitura nao protegida
+ok 92 - gate selado recusa leitura nao protegida
+  ---
+  duration_ms: 1.2818
+  type: 'test'
+  ...
+# Subtest: gate selado recusa contador igual mas campo divergente
+ok 93 - gate selado recusa contador igual mas campo divergente
+  ---
+  duration_ms: 0.7947
+  type: 'test'
+  ...
+# Subtest: gate selado recusa adicional modificado
+ok 94 - gate selado recusa adicional modificado
+  ---
+  duration_ms: 0.8987
+  type: 'test'
+  ...
+# Subtest: gate selado recusa vinculo invalido
+ok 95 - gate selado recusa vinculo invalido
+  ---
+  duration_ms: 0.7813
+  type: 'test'
+  ...
+# Subtest: gate selado recusa catalogo alterado
+ok 96 - gate selado recusa catalogo alterado
+  ---
+  duration_ms: 0.7197
+  type: 'test'
+  ...
+# Subtest: gate selado recusa escritor desconhecido
+ok 97 - gate selado recusa escritor desconhecido
+  ---
+  duration_ms: 0.5116
+  type: 'test'
+  ...
+# Subtest: gate selado recusa cliente MySQL adicional
+ok 98 - gate selado recusa cliente MySQL adicional
+  ---
+  duration_ms: 0.5048
+  type: 'test'
+  ...
+# Subtest: gate selado recusa sessao REST ativa
+ok 99 - gate selado recusa sessao REST ativa
+  ---
+  duration_ms: 0.5096
+  type: 'test'
+  ...
+# Subtest: gate selado recusa job ativo
+ok 100 - gate selado recusa job ativo
+  ---
+  duration_ms: 0.5184
+  type: 'test'
+  ...
+# Subtest: gate selado recusa transacao aberta
+ok 101 - gate selado recusa transacao aberta
+  ---
+  duration_ms: 0.4959
+  type: 'test'
+  ...
+# Subtest: gate selado recusa captura velha
+ok 102 - gate selado recusa captura velha
+  ---
+  duration_ms: 0.569
+  type: 'test'
+  ...
+# Subtest: gate selado recusa inventario fora da captura
+ok 103 - gate selado recusa inventario fora da captura
+  ---
+  duration_ms: 0.592
+  type: 'test'
+  ...
+# Subtest: gate selado nao libera funcionamento sem T1 concluida e diario autentico
+ok 104 - gate selado nao libera funcionamento sem T1 concluida e diario autentico
+  ---
+  duration_ms: 3.0826
+  type: 'test'
+  ...
+# Subtest: plano nao pode ser reconstruido por JSON nem ter hashes internos adulterados
+ok 105 - plano nao pode ser reconstruido por JSON nem ter hashes internos adulterados
+  ---
+  duration_ms: 1.8713
+  type: 'test'
+  ...
+# Subtest: continuidade autentica exige controlador correto e revoga imediatamente apos saida
+ok 106 - continuidade autentica exige controlador correto e revoga imediatamente apos saida
+  ---
+  duration_ms: 0.7244
+  type: 'test'
+  ...
+# Subtest: continuidade recusa identidade nativa divergente e resposta IPC pendente
+ok 107 - continuidade recusa identidade nativa divergente e resposta IPC pendente
+  ---
+  duration_ms: 1.0472
+  type: 'test'
+  ...
+# Subtest: continuidade recusa resposta IPC antiga e alteracao durante inspecao
+ok 108 - continuidade recusa resposta IPC antiga e alteracao durante inspecao
+  ---
+  duration_ms: 1.1409
+  type: 'test'
+  ...
+# Subtest: outro processo nao pode declarar ser o controlador persistente
+ok 109 - outro processo nao pode declarar ser o controlador persistente
+  ---
+  duration_ms: 0.4845
+  type: 'test'
+  ...
+# Subtest: desconexao revoga tambem plano final emitido anteriormente
+ok 110 - desconexao revoga tambem plano final emitido anteriormente
+  ---
+  duration_ms: 0.9684
+  type: 'test'
+  ...
+# Subtest: implantacao pos T1 preserva diario original com novo pai legitimo e autoridade exclusiva
+ok 111 - implantacao pos T1 preserva diario original com novo pai legitimo e autoridade exclusiva
+  ---
+  duration_ms: 106.5106
+  type: 'test'
+  ...
+# Subtest: somente planejar nao admite candidato e autorizacao especifica e obrigatoria
+ok 112 - somente planejar nao admite candidato e autorizacao especifica e obrigatoria
+  ---
+  duration_ms: 5.8255
+  type: 'test'
+  ...
+# Subtest: planos expirados copiados ou consumidos nao permitem nova implantacao
+ok 113 - planos expirados copiados ou consumidos nao permitem nova implantacao
+  ---
+  duration_ms: 16.6259
+  type: 'test'
+  ...
+# Subtest: preflight pos T1 rejeita T1 incompleta sem parar processos
+ok 114 - preflight pos T1 rejeita T1 incompleta sem parar processos
+  ---
+  duration_ms: 5.2661
+  type: 'test'
+  ...
+# Subtest: preflight pos T1 rejeita limpeza nao validada sem parar processos
+ok 115 - preflight pos T1 rejeita limpeza nao validada sem parar processos
+  ---
+  duration_ms: 4.5908
+  type: 'test'
+  ...
+# Subtest: preflight pos T1 rejeita diario adulterado sem parar processos
+ok 116 - preflight pos T1 rejeita diario adulterado sem parar processos
+  ---
+  duration_ms: 4.7762
+  type: 'test'
+  ...
+# Subtest: preflight pos T1 rejeita checkpoint adulterado sem parar processos
+ok 117 - preflight pos T1 rejeita checkpoint adulterado sem parar processos
+  ---
+  duration_ms: 4.6086
+  type: 'test'
+  ...
+# Subtest: preflight pos T1 rejeita conteudo divergente sem parar processos
+ok 118 - preflight pos T1 rejeita conteudo divergente sem parar processos
+  ---
+  duration_ms: 5.1358
+  type: 'test'
+  ...
+# Subtest: preflight pos T1 rejeita adicional modificado sem parar processos
+ok 119 - preflight pos T1 rejeita adicional modificado sem parar processos
+  ---
+  duration_ms: 4.593
+  type: 'test'
+  ...
+# Subtest: preflight pos T1 rejeita escritor concorrente sem parar processos
+ok 120 - preflight pos T1 rejeita escritor concorrente sem parar processos
+  ---
+  duration_ms: 4.266
+  type: 'test'
+  ...
+# Subtest: preflight pos T1 rejeita REST ativo sem parar processos
+ok 121 - preflight pos T1 rejeita REST ativo sem parar processos
+  ---
+  duration_ms: 4.9261
+  type: 'test'
+  ...
+# Subtest: preflight pos T1 rejeita status antigo sem parar processos
+ok 122 - preflight pos T1 rejeita status antigo sem parar processos
+  ---
+  duration_ms: 4.2534
+  type: 'test'
+  ...
+# Subtest: preflight pos T1 rejeita status de outro PID sem parar processos
+ok 123 - preflight pos T1 rejeita status de outro PID sem parar processos
+  ---
+  duration_ms: 4.2215
+  type: 'test'
+  ...
+# Subtest: preflight pos T1 rejeita origem nativa alterada sem parar processos
+ok 124 - preflight pos T1 rejeita origem nativa alterada sem parar processos
+  ---
+  duration_ms: 4.8195
+  type: 'test'
+  ...
+# Subtest: preflight pos T1 rejeita codigo novo nao aprovado sem parar processos
+ok 125 - preflight pos T1 rejeita codigo novo nao aprovado sem parar processos
+  ---
+  duration_ms: 4.1446
+  type: 'test'
+  ...
+# Subtest: preflight pos T1 rejeita codigo anterior divergente sem parar processos
+ok 126 - preflight pos T1 rejeita codigo anterior divergente sem parar processos
+  ---
+  duration_ms: 4.0854
+  type: 'test'
+  ...
+# Subtest: preflight pos T1 rejeita arquivo aplicado nao confirmado sem parar processos
+ok 127 - preflight pos T1 rejeita arquivo aplicado nao confirmado sem parar processos
+  ---
+  duration_ms: 4.7313
+  type: 'test'
+  ...
+# Subtest: preflight pos T1 rejeita TLS ausente sem parar processos
+ok 128 - preflight pos T1 rejeita TLS ausente sem parar processos
+  ---
+  duration_ms: 4.4981
+  type: 'test'
+  ...
+# Subtest: preflight pos T1 rejeita backup nao conferido sem parar processos
+ok 129 - preflight pos T1 rejeita backup nao conferido sem parar processos
+  ---
+  duration_ms: 4.2462
+  type: 'test'
+  ...
+# Subtest: preflight pos T1 rejeita autorizacao ausente sem parar processos
+ok 130 - preflight pos T1 rejeita autorizacao ausente sem parar processos
+  ---
+  duration_ms: 3.9398
+  type: 'test'
+  ...
+# Subtest: preflight pos T1 rejeita captura expirada sem parar processos
+ok 131 - preflight pos T1 rejeita captura expirada sem parar processos
+  ---
+  duration_ms: 4.6523
+  type: 'test'
+  ...
+# Subtest: falha em parada antiga preserva T1 e manutencao sem retry ou rollback
+ok 132 - falha em parada antiga preserva T1 e manutencao sem retry ou rollback
+  ---
+  duration_ms: 6.9078
+  type: 'test'
+  ...
+# Subtest: falha em leitura apos parada preserva T1 e manutencao sem retry ou rollback
+ok 133 - falha em leitura apos parada preserva T1 e manutencao sem retry ou rollback
+  ---
+  duration_ms: 7.1416
+  type: 'test'
+  ...
+# Subtest: falha em ticket controlador preserva T1 e manutencao sem retry ou rollback
+ok 134 - falha em ticket controlador preserva T1 e manutencao sem retry ou rollback
+  ---
+  duration_ms: 7.6574
+  type: 'test'
+  ...
+# Subtest: falha em lancamento candidato preserva T1 e manutencao sem retry ou rollback
+ok 135 - falha em lancamento candidato preserva T1 e manutencao sem retry ou rollback
+  ---
+  duration_ms: 8.1331
+  type: 'test'
+  ...
+# Subtest: falha em admissao supervisor preserva T1 e manutencao sem retry ou rollback
+ok 136 - falha em admissao supervisor preserva T1 e manutencao sem retry ou rollback
+  ---
+  duration_ms: 8.4111
+  type: 'test'
+  ...
+# Subtest: falha em troca de porta preserva T1 e manutencao sem retry ou rollback
+ok 137 - falha em troca de porta preserva T1 e manutencao sem retry ou rollback
+  ---
+  duration_ms: 9.1887
+  type: 'test'
+  ...
+# Subtest: falha em IPC final preserva T1 e manutencao sem retry ou rollback
+ok 138 - falha em IPC final preserva T1 e manutencao sem retry ou rollback
+  ---
+  duration_ms: 9.8044
+  type: 'test'
+  ...
+# Subtest: admissao expirada inutiliza ticket preservando comprovacao da T1
+ok 139 - admissao expirada inutiliza ticket preservando comprovacao da T1
+  ---
+  duration_ms: 8.401
+  type: 'test'
+  ...
+# Subtest: divergencia apos parada impede admissao e nunca altera registros
+ok 140 - divergencia apos parada impede admissao e nunca altera registros
+  ---
+  duration_ms: 6.9602
+  type: 'test'
+  ...
+# Subtest: candidatos concorrentes nao podem manter duas autoridades
+ok 141 - candidatos concorrentes nao podem manter duas autoridades
+  ---
+  duration_ms: 10.9533
+  type: 'test'
+  ...
+# Subtest: diario aprovado continua valido no novo supervisor sem alterar PID de origem
+ok 142 - diario aprovado continua valido no novo supervisor sem alterar PID de origem
+  ---
+  duration_ms: 9.9728
+  type: 'test'
+  ...
+# Subtest: vinculo inventado ou procedencia adulterada revoga a continuidade
+ok 143 - vinculo inventado ou procedencia adulterada revoga a continuidade
+  ---
+  duration_ms: 10.3192
+  type: 'test'
+  ...
+# Subtest: fence somente leitura valida bytes originais e recusa diario diferente
+ok 144 - fence somente leitura valida bytes originais e recusa diario diferente
+  ---
+  duration_ms: 11.4197
+  type: 'test'
+  ...
+# Subtest: nova admissao pos T1 continua recusando ticket vencido
+ok 145 - nova admissao pos T1 continua recusando ticket vencido
+  ---
+  duration_ms: 8.4789
+  type: 'test'
+  ...
+# Subtest: nova admissao pos T1 continua recusando ticket consumido
+ok 146 - nova admissao pos T1 continua recusando ticket consumido
+  ---
+  duration_ms: 9.7997
+  type: 'test'
+  ...
+# Subtest: nova admissao pos T1 continua recusando pai diferente
+ok 147 - nova admissao pos T1 continua recusando pai diferente
+  ---
+  duration_ms: 9.7966
+  type: 'test'
+  ...
+# Subtest: nova admissao pos T1 continua recusando boot diferente
+ok 148 - nova admissao pos T1 continua recusando boot diferente
+  ---
+  duration_ms: 8.2003
+  type: 'test'
+  ...
+# Subtest: novo dono gera smoke e prova final validos sem T1 ou liberacao
+ok 149 - novo dono gera smoke e prova final validos sem T1 ou liberacao
+  ---
+  duration_ms: 3.9953
+  type: 'test'
+  ...
+# Subtest: sem smoke novo o controlador nao prepara T1
+ok 150 - sem smoke novo o controlador nao prepara T1
+  ---
+  duration_ms: 1.5641
+  type: 'test'
+  ...
+# Subtest: falha no novo smoke invalida selo anterior sem liberar HTTP ou escrever
+ok 151 - falha no novo smoke invalida selo anterior sem liberar HTTP ou escrever
+  ---
+  duration_ms: 4.1681
+  type: 'test'
+  ...
+# Subtest: reemissao real dos callbacks recolhe evidencias e invalida capacidade anterior
+ok 152 - reemissao real dos callbacks recolhe evidencias e invalida capacidade anterior
+  ---
+  duration_ms: 4.9539
+  type: 'test'
+  ...
+# Subtest: falha de evidencia na renovacao deixa anterior revogado e aceita nova tentativa explicita
+ok 153 - falha de evidencia na renovacao deixa anterior revogado e aceita nova tentativa explicita
+  ---
+  duration_ms: 5.0423
+  type: 'test'
+  ...
+# Subtest: snapshot velho nao emite plano nem conserva o anterior
+ok 154 - snapshot velho nao emite plano nem conserva o anterior
+  ---
+  duration_ms: 5.1289
+  type: 'test'
+  ...
+# Subtest: emissoes concorrentes no callback sao recusadas antes de outra coleta
+ok 155 - emissoes concorrentes no callback sao recusadas antes de outra coleta
+  ---
+  duration_ms: 3.5858
+  type: 'test'
+  ...
+# Subtest: perda de IPC durante coleta nao reativa plano anterior
+ok 156 - perda de IPC durante coleta nao reativa plano anterior
+  ---
+  duration_ms: 3.7745
+  type: 'test'
+  ...
+# Subtest: canal privado reemite plano autentico com gate completo sem executar T1
+ok 157 - canal privado reemite plano autentico com gate completo sem executar T1
+  ---
+  duration_ms: 15.0033
+  type: 'test'
+  ...
+# Subtest: callback original do controlador retirado respeita fence antes da parada do filho
+ok 158 - callback original do controlador retirado respeita fence antes da parada do filho
+  ---
+  duration_ms: 6.07
+  type: 'test'
+  ...
+# Subtest: novo controlador nao marca T1 concluida como incerta ao perder entrada
+ok 159 - novo controlador nao marca T1 concluida como incerta ao perder entrada
+  ---
+  duration_ms: 9.2859
+  type: 'test'
+  ...
+# Subtest: novo supervisor preserva diario concluido ao perder o pai sem abrir manutencao
+ok 160 - novo supervisor preserva diario concluido ao perder o pai sem abrir manutencao
+  ---
+  duration_ms: 11.1472
+  type: 'test'
+  ...
+# Subtest: bootstrap pos T1 em VM admite contexto Supabase e conserva a porta fechada
+ok 161 - bootstrap pos T1 em VM admite contexto Supabase e conserva a porta fechada
+  ---
+  duration_ms: 11.6379
+  type: 'test'
+  ...
+# Subtest: bootstrap pos T1 em VM recusa diario adulterado antes do Express
+ok 162 - bootstrap pos T1 em VM recusa diario adulterado antes do Express
+  ---
+  duration_ms: 9.757
+  type: 'test'
+  ...
+# Subtest: renova smoke vencido pos T1 com tres reconciliacoes gate completo e diario intacto
+ok 163 - renova smoke vencido pos T1 com tres reconciliacoes gate completo e diario intacto
+  ---
+  duration_ms: 9.3849
+  type: 'test'
+  ...
+# Subtest: renovacao preserva os avancos esperados de sequencias sem reset
+ok 164 - renovacao preserva os avancos esperados de sequencias sem reset
+  ---
+  duration_ms: 8.0329
+  type: 'test'
+  ...
+# Subtest: renovacoes sucessivas exigem novos smoke nonce e arquivo sem reusar evidencia
+ok 165 - renovacoes sucessivas exigem novos smoke nonce e arquivo sem reusar evidencia
+  ---
+  duration_ms: 12.2107
+  type: 'test'
+  ...
+# Subtest: recusa autorizacao ausente antes de smoke ou coleta
+ok 166 - recusa autorizacao ausente antes de smoke ou coleta
+  ---
+  duration_ms: 3.7717
+  type: 'test'
+  ...
+# Subtest: recusa run diferente antes de smoke ou coleta
+ok 167 - recusa run diferente antes de smoke ou coleta
+  ---
+  duration_ms: 3.444
+  type: 'test'
+  ...
+# Subtest: recusa referencia ausente antes de smoke ou coleta
+ok 168 - recusa referencia ausente antes de smoke ou coleta
+  ---
+  duration_ms: 3.1565
+  type: 'test'
+  ...
+# Subtest: recusa T1 ausente sem transporte de escrita ou nova T1
+ok 169 - recusa T1 ausente sem transporte de escrita ou nova T1
+  ---
+  duration_ms: 3.2112
+  type: 'test'
+  ...
+# Subtest: recusa T1 incompleta sem transporte de escrita ou nova T1
+ok 170 - recusa T1 incompleta sem transporte de escrita ou nova T1
+  ---
+  duration_ms: 3.2826
+  type: 'test'
+  ...
+# Subtest: recusa limpeza incompleta sem transporte de escrita ou nova T1
+ok 171 - recusa limpeza incompleta sem transporte de escrita ou nova T1
+  ---
+  duration_ms: 3.3416
+  type: 'test'
+  ...
+# Subtest: recusa resultado incerto sem transporte de escrita ou nova T1
+ok 172 - recusa resultado incerto sem transporte de escrita ou nova T1
+  ---
+  duration_ms: 3.304
+  type: 'test'
+  ...
+# Subtest: recusa diario adulterado sem transporte de escrita ou nova T1
+ok 173 - recusa diario adulterado sem transporte de escrita ou nova T1
+  ---
+  duration_ms: 4.5541
+  type: 'test'
+  ...
+# Subtest: recusa diario ausente sem transporte de escrita ou nova T1
+ok 174 - recusa diario ausente sem transporte de escrita ou nova T1
+  ---
+  duration_ms: 3.9059
+  type: 'test'
+  ...
+# Subtest: recusa retry registrado sem transporte de escrita ou nova T1
+ok 175 - recusa retry registrado sem transporte de escrita ou nova T1
+  ---
+  duration_ms: 5.3125
+  type: 'test'
+  ...
+# Subtest: recusa prova de limpeza adulterada sem transporte de escrita ou nova T1
+ok 176 - recusa prova de limpeza adulterada sem transporte de escrita ou nova T1
+  ---
+  duration_ms: 4.5994
+  type: 'test'
+  ...
+# Subtest: recusa conclusao futura sem transporte de escrita ou nova T1
+ok 177 - recusa conclusao futura sem transporte de escrita ou nova T1
+  ---
+  duration_ms: 4.5584
+  type: 'test'
+  ...
+# Subtest: recusa operacao inesperada sem transporte de escrita ou nova T1
+ok 178 - recusa operacao inesperada sem transporte de escrita ou nova T1
+  ---
+  duration_ms: 4.6225
+  type: 'test'
+  ...
+# Subtest: reconciliacao recusa campo divergente com contagem igual antes de renovar smoke
+ok 179 - reconciliacao recusa campo divergente com contagem igual antes de renovar smoke
+  ---
+  duration_ms: 4.5059
+  type: 'test'
+  ...
+# Subtest: reconciliacao recusa um dos dez adicionais alterado antes de renovar smoke
+ok 180 - reconciliacao recusa um dos dez adicionais alterado antes de renovar smoke
+  ---
+  duration_ms: 4.3803
+  type: 'test'
+  ...
+# Subtest: reconciliacao recusa relacionamento invalido antes de renovar smoke
+ok 181 - reconciliacao recusa relacionamento invalido antes de renovar smoke
+  ---
+  duration_ms: 4.856
+  type: 'test'
+  ...
+# Subtest: reconciliacao recusa residuo da T1 antes de renovar smoke
+ok 182 - reconciliacao recusa residuo da T1 antes de renovar smoke
+  ---
+  duration_ms: 4.6395
+  type: 'test'
+  ...
+# Subtest: reconciliacao recusa captura expirada antes de renovar smoke
+ok 183 - reconciliacao recusa captura expirada antes de renovar smoke
+  ---
+  duration_ms: 4.7762
+  type: 'test'
+  ...
+# Subtest: reconciliacao recusa escritor concorrente antes de renovar smoke
+ok 184 - reconciliacao recusa escritor concorrente antes de renovar smoke
+  ---
+  duration_ms: 4.1733
+  type: 'test'
+  ...
+# Subtest: reconciliacao recusa job ativo antes de renovar smoke
+ok 185 - reconciliacao recusa job ativo antes de renovar smoke
+  ---
+  duration_ms: 4.2045
+  type: 'test'
+  ...
+# Subtest: reconciliacao recusa REST ativo antes de renovar smoke
+ok 186 - reconciliacao recusa REST ativo antes de renovar smoke
+  ---
+  duration_ms: 4.2889
+  type: 'test'
+  ...
+# Subtest: reconciliacao recusa TLS ausente antes de renovar smoke
+ok 187 - reconciliacao recusa TLS ausente antes de renovar smoke
+  ---
+  duration_ms: 4.2366
+  type: 'test'
+  ...
+# Subtest: reconciliacao recusa checkpoint invalido antes de renovar smoke
+ok 188 - reconciliacao recusa checkpoint invalido antes de renovar smoke
+  ---
+  duration_ms: 4.1266
+  type: 'test'
+  ...
+# Subtest: reconciliacao recusa backup nao verificado antes de renovar smoke
+ok 189 - reconciliacao recusa backup nao verificado antes de renovar smoke
+  ---
+  duration_ms: 4.8574
+  type: 'test'
+  ...
+# Subtest: reconciliacao recusa catalogo divergente antes de renovar smoke
+ok 190 - reconciliacao recusa catalogo divergente antes de renovar smoke
+  ---
+  duration_ms: 4.4149
+  type: 'test'
+  ...
+# Subtest: divergencia posterior ao smoke impede selo e preserva T1
+ok 191 - divergencia posterior ao smoke impede selo e preserva T1
+  ---
+  duration_ms: 5.8927
+  type: 'test'
+  ...
+# Subtest: divergencia na coleta final impede aprovacao mesmo depois do arquivo novo
+ok 192 - divergencia na coleta final impede aprovacao mesmo depois do arquivo novo
+  ---
+  duration_ms: 7.4223
+  type: 'test'
+  ...
+# Subtest: IPC revogado interrompe renovacao sem restaurar selo anterior
+ok 193 - IPC revogado interrompe renovacao sem restaurar selo anterior
+  ---
+  duration_ms: 3.746
+  type: 'test'
+  ...
+# Subtest: mudanca de autoridade interrompe sem escrever estado como novo dono
+ok 194 - mudanca de autoridade interrompe sem escrever estado como novo dono
+  ---
+  duration_ms: 3.8921
+  type: 'test'
+  ...
+# Subtest: ambiente alterado durante smoke impede selo sem reverter arquivo
+ok 195 - ambiente alterado durante smoke impede selo sem reverter arquivo
+  ---
+  duration_ms: 5.6166
+  type: 'test'
+  ...
+# Subtest: falha no transporte deixa manutencao e permite so nova tentativa explicita
+ok 196 - falha no transporte deixa manutencao e permite so nova tentativa explicita
+  ---
+  duration_ms: 9.0379
+  type: 'test'
+  ...
+# Subtest: concorrencia bloqueia renovacao T1 smoke legado e liberacao
+ok 197 - concorrencia bloqueia renovacao T1 smoke legado e liberacao
+  ---
+  duration_ms: 8.2742
+  type: 'test'
+  ...
+# Subtest: renovacao nao reabre T1 nem aceita plano ou ticket serializado
+ok 198 - renovacao nao reabre T1 nem aceita plano ou ticket serializado
+  ---
+  duration_ms: 8.608
+  type: 'test'
+  ...
+# Subtest: gate rejeita smoke renovado expirado e metadados de outra renovacao
+ok 199 - gate rejeita smoke renovado expirado e metadados de outra renovacao
+  ---
+  duration_ms: 10.0874
+  type: 'test'
+  ...
+# Subtest: smoke invalido perfil ausente nao pode renovar selo
+ok 200 - smoke invalido perfil ausente nao pode renovar selo
+  ---
+  duration_ms: 7.6452
+  type: 'test'
+  ...
+# Subtest: smoke invalido JWT antigo aceito nao pode renovar selo
+ok 201 - smoke invalido JWT antigo aceito nao pode renovar selo
+  ---
+  duration_ms: 7.5943
+  type: 'test'
+  ...
+# Subtest: smoke invalido contrato incorreto nao pode renovar selo
+ok 202 - smoke invalido contrato incorreto nao pode renovar selo
+  ---
+  duration_ms: 6.8672
+  type: 'test'
+  ...
+# Subtest: smoke invalido MySQL carregado nao pode renovar selo
+ok 203 - smoke invalido MySQL carregado nao pode renovar selo
+  ---
+  duration_ms: 5.7418
+  type: 'test'
+  ...
+# Subtest: smoke invalido permissao incorreta nao pode renovar selo
+ok 204 - smoke invalido permissao incorreta nao pode renovar selo
+  ---
+  duration_ms: 7.3944
+  type: 'test'
+  ...
+# Subtest: smoke invalido escrita desbloqueada nao pode renovar selo
+ok 205 - smoke invalido escrita desbloqueada nao pode renovar selo
+  ---
+  duration_ms: 7.417
+  type: 'test'
+  ...
+# Subtest: smoke invalido requisicao ausente nao pode renovar selo
+ok 206 - smoke invalido requisicao ausente nao pode renovar selo
+  ---
+  duration_ms: 7.2288
+  type: 'test'
+  ...
+# Subtest: smoke invalido smoke com escrita nao pode renovar selo
+ok 207 - smoke invalido smoke com escrita nao pode renovar selo
+  ---
+  duration_ms: 5.0945
+  type: 'test'
+  ...
+# Subtest: smoke invalido manutencao aberta nao pode renovar selo
+ok 208 - smoke invalido manutencao aberta nao pode renovar selo
+  ---
+  duration_ms: 5.7432
+  type: 'test'
+  ...
+# Subtest: TTL do smoke continua 15 minutos mesmo com diario concluido e IPC novo
+ok 209 - TTL do smoke continua 15 minutos mesmo com diario concluido e IPC novo
+  ---
+  duration_ms: 8.6192
+  type: 'test'
+  ...
+# Subtest: capturas finais expiradas impedem aprovar renovacao sem aumentar TTL atual
+ok 210 - capturas finais expiradas impedem aprovar renovacao sem aumentar TTL atual
+  ---
+  duration_ms: 7.3891
+  type: 'test'
+  ...
+# Subtest: renovacao exige conteudo atual do dominio usuarios
+ok 211 - renovacao exige conteudo atual do dominio usuarios
+  ---
+  duration_ms: 4.3118
+  type: 'test'
+  ...
+# Subtest: renovacao exige conteudo atual do dominio eventos
+ok 212 - renovacao exige conteudo atual do dominio eventos
+  ---
+  duration_ms: 4.1781
+  type: 'test'
+  ...
+# Subtest: renovacao exige conteudo atual do dominio custos_evento
+ok 213 - renovacao exige conteudo atual do dominio custos_evento
+  ---
+  duration_ms: 4.2617
+  type: 'test'
+  ...
+# Subtest: renovacao exige conteudo atual do dominio cotacoes
+ok 214 - renovacao exige conteudo atual do dominio cotacoes
+  ---
+  duration_ms: 4.8171
+  type: 'test'
+  ...
+# Subtest: renovacao exige conteudo atual do dominio itens_cotacao
+ok 215 - renovacao exige conteudo atual do dominio itens_cotacao
+  ---
+  duration_ms: 4.1487
+  type: 'test'
+  ...
+# Subtest: renovacao exige conteudo atual do dominio propostas
+ok 216 - renovacao exige conteudo atual do dominio propostas
+  ---
+  duration_ms: 7.4232
+  type: 'test'
+  ...
+# Subtest: renovacao exige conteudo atual do dominio inscricoes
+ok 217 - renovacao exige conteudo atual do dominio inscricoes
+  ---
+  duration_ms: 4.435
+  type: 'test'
+  ...
+# Subtest: renovacao exige conteudo atual do dominio solicitacoes_acesso
+ok 218 - renovacao exige conteudo atual do dominio solicitacoes_acesso
+  ---
+  duration_ms: 4.4806
+  type: 'test'
+  ...
+# Subtest: interrupcao do filho durante smoke rejeita sem retry automatico
+ok 219 - interrupcao do filho durante smoke rejeita sem retry automatico
+  ---
+  duration_ms: 4.9863
+  type: 'test'
+  ...
+# Subtest: pedido duplicado nao executa outra renovacao nem publica dados privados
+ok 220 - pedido duplicado nao executa outra renovacao nem publica dados privados
+  ---
+  duration_ms: 6.0211
+  type: 'test'
+  ...
+# Subtest: canal ocupado recusa renovacao concorrente e liberacao
+ok 221 - canal ocupado recusa renovacao concorrente e liberacao
+  ---
+  duration_ms: 0.4142
+  type: 'test'
+  ...
+# Subtest: fechamento durante renovacao nao restaura autoridade ou confirma aprovacao tardia
+ok 222 - fechamento durante renovacao nao restaura autoridade ou confirma aprovacao tardia
+  ---
+  duration_ms: 0.3324
+  type: 'test'
+  ...
+# Subtest: canal recusa retorno gate expirado sem recompor autoridade de liberacao
+ok 223 - canal recusa retorno gate expirado sem recompor autoridade de liberacao
+  ---
+  duration_ms: 0.3576
+  type: 'test'
+  ...
+# Subtest: canal recusa retorno gate ausente sem recompor autoridade de liberacao
+ok 224 - canal recusa retorno gate ausente sem recompor autoridade de liberacao
+  ---
+  duration_ms: 0.3192
+  type: 'test'
+  ...
+# Subtest: canal recusa retorno outro run sem recompor autoridade de liberacao
+ok 225 - canal recusa retorno outro run sem recompor autoridade de liberacao
+  ---
+  duration_ms: 0.3151
+  type: 'test'
+  ...
+# Subtest: canal recusa retorno finalidade T1 sem recompor autoridade de liberacao
+ok 226 - canal recusa retorno finalidade T1 sem recompor autoridade de liberacao
+  ---
+  duration_ms: 0.3338
+  type: 'test'
+  ...
+# Subtest: canal exige autorizacao separada restaura conclusao validada e nunca libera automaticamente
+ok 227 - canal exige autorizacao separada restaura conclusao validada e nunca libera automaticamente
+  ---
+  duration_ms: 9.5372
+  type: 'test'
+  ...
+# Subtest: runtime pos T1 executa o protocolo com processos e bancos exclusivamente falsos
+ok 228 - runtime pos T1 executa o protocolo com processos e bancos exclusivamente falsos
+  ---
+  duration_ms: 731.1383
+  type: 'test'
+  ...
+# Subtest: runtime rejeita ACK de outro PID preservando T1 e ponte
+ok 229 - runtime rejeita ACK de outro PID preservando T1 e ponte
+  ---
+  duration_ms: 589.6577
+  type: 'test'
+  ...
+# Subtest: runtime rejeita escritor concorrente antes de parar o par antigo
+ok 230 - runtime rejeita escritor concorrente antes de parar o par antigo
+  ---
+  duration_ms: 288.9162
+  type: 'test'
+  ...
+# Subtest: gate novo exige smoke pos implantacao com recibo IPC genuino e diario original
+ok 231 - gate novo exige smoke pos implantacao com recibo IPC genuino e diario original
+  ---
+  duration_ms: 771.3608
+  type: 'test'
+  ...
+# Subtest: runtime integrado troca o par com IO falso e conserva stdin retomavel depois da admissao
+ok 232 - runtime integrado troca o par com IO falso e conserva stdin retomavel depois da admissao
+  ---
+  duration_ms: 545.5872
+  type: 'test'
+  ...
+# Subtest: runtime recusa ack de outro PID antes de vincular e mantem ponte conhecida
+ok 233 - runtime recusa ack de outro PID antes de vincular e mantem ponte conhecida
+  ---
+  duration_ms: 428.4604
+  type: 'test'
+  ...
+# Subtest: retomada explicita encerra apenas remanescente original e admite nova geracao
+ok 234 - retomada explicita encerra apenas remanescente original e admite nova geracao
+  ---
+  duration_ms: 531.1854
+  type: 'test'
+  ...
+# Subtest: retomada recusa escritor de banco antes de encerrar remanescente
+ok 235 - retomada recusa escritor de banco antes de encerrar remanescente
+  ---
+  duration_ms: 144.2693
+  type: 'test'
+  ...
+# Subtest: retomada nao encerra candidato anterior ainda vivo
+ok 236 - retomada nao encerra candidato anterior ainda vivo
+  ---
+  duration_ms: 141.6511
+  type: 'test'
+  ...
+# Subtest: readmissao apos reboot gera autoridade IPC genuina e gate sem encerrar controlador
+ok 237 - readmissao apos reboot gera autoridade IPC genuina e gate sem encerrar controlador
+  ---
+  duration_ms: 432.4455
+  type: 'test'
+  ...
+# Subtest: readmissao recusa par antigo vivo antes de iniciar ponte ou gravar estado
+ok 238 - readmissao recusa par antigo vivo antes de iniciar ponte ou gravar estado
+  ---
+  duration_ms: 141.3967
+  type: 'test'
+  ...
+# Subtest: readmissao com ack invalido conserva ponte 503 e nao tenta substituir controladores
+ok 239 - readmissao com ack invalido conserva ponte 503 e nao tenta substituir controladores
+  ---
+  duration_ms: 282.4495
+  type: 'test'
+  ...
+# Subtest: primeira T1 da lane anterior conserva autoridade e status sem exigir procedencia de substituicao
+ok 240 - primeira T1 da lane anterior conserva autoridade e status sem exigir procedencia de substituicao
+  ---
+  duration_ms: 491.8179
+  type: 'test'
+  ...
+# Subtest: substituicao selada valida preserva fase checkpoint JWT e tem somente uma autoridade
+ok 241 - substituicao selada valida preserva fase checkpoint JWT e tem somente uma autoridade
+  ---
+  duration_ms: 3.2066
+  type: 'test'
+  ...
+# Subtest: autorizacao obrigatoria; somente planejar nao muda processos ou estado
+ok 242 - autorizacao obrigatoria; somente planejar nao muda processos ou estado
+  ---
+  duration_ms: 0.9527
+  type: 'test'
+  ...
+# Subtest: plano JSON ou payload adulterado nao e admissao autentica
+ok 243 - plano JSON ou payload adulterado nao e admissao autentica
+  ---
+  duration_ms: 0.9363
+  type: 'test'
+  ...
+# Subtest: duplicacao concluida confere canal atual sem reiniciar ou trocar tickets
+ok 244 - duplicacao concluida confere canal atual sem reiniciar ou trocar tickets
+  ---
+  duration_ms: 3.058
+  type: 'test'
+  ...
+# Subtest: preflight rejeita aceite legado ausente
+ok 245 - preflight rejeita aceite legado ausente
+  ---
+  duration_ms: 0.5906
+  type: 'test'
+  ...
+# Subtest: preflight rejeita risco nao aceito
+ok 246 - preflight rejeita risco nao aceito
+  ---
+  duration_ms: 0.4931
+  type: 'test'
+  ...
+# Subtest: preflight rejeita historico falsamente comprovado
+ok 247 - preflight rejeita historico falsamente comprovado
+  ---
+  duration_ms: 0.5046
+  type: 'test'
+  ...
+# Subtest: preflight rejeita IPC anterior inventado
+ok 248 - preflight rejeita IPC anterior inventado
+  ---
+  duration_ms: 0.531
+  type: 'test'
+  ...
+# Subtest: preflight rejeita sem entrada retomavel
+ok 249 - preflight rejeita sem entrada retomavel
+  ---
+  duration_ms: 0.6411
+  type: 'test'
+  ...
+# Subtest: preflight rejeita candidato desconhecido
+ok 250 - preflight rejeita candidato desconhecido
+  ---
+  duration_ms: 0.5507
+  type: 'test'
+  ...
+# Subtest: preflight rejeita candidato reutiliza PID antigo
+ok 251 - preflight rejeita candidato reutiliza PID antigo
+  ---
+  duration_ms: 0.6607
+  type: 'test'
+  ...
+# Subtest: preflight rejeita relatorio adulterado
+ok 252 - preflight rejeita relatorio adulterado
+  ---
+  duration_ms: 0.5349
+  type: 'test'
+  ...
+# Subtest: preflight rejeita checkpoint adulterado
+ok 253 - preflight rejeita checkpoint adulterado
+  ---
+  duration_ms: 0.5265
+  type: 'test'
+  ...
+# Subtest: preflight rejeita sem backup integro
+ok 254 - preflight rejeita sem backup integro
+  ---
+  duration_ms: 0.5361
+  type: 'test'
+  ...
+# Subtest: preflight rejeita dado alterado com mesma contagem
+ok 255 - preflight rejeita dado alterado com mesma contagem
+  ---
+  duration_ms: 0.74
+  type: 'test'
+  ...
+# Subtest: preflight rejeita adicional modificado
+ok 256 - preflight rejeita adicional modificado
+  ---
+  duration_ms: 0.9148
+  type: 'test'
+  ...
+# Subtest: preflight rejeita TLS invalido
+ok 257 - preflight rejeita TLS invalido
+  ---
+  duration_ms: 0.6397
+  type: 'test'
+  ...
+# Subtest: preflight rejeita escritor desconhecido
+ok 258 - preflight rejeita escritor desconhecido
+  ---
+  duration_ms: 0.6009
+  type: 'test'
+  ...
+# Subtest: preflight rejeita cliente MySQL
+ok 259 - preflight rejeita cliente MySQL
+  ---
+  duration_ms: 0.568
+  type: 'test'
+  ...
+# Subtest: preflight rejeita job ativo
+ok 260 - preflight rejeita job ativo
+  ---
+  duration_ms: 0.5514
+  type: 'test'
+  ...
+# Subtest: preflight rejeita sessao REST ativa
+ok 261 - preflight rejeita sessao REST ativa
+  ---
+  duration_ms: 0.5893
+  type: 'test'
+  ...
+# Subtest: preflight rejeita inventario expirado
+ok 262 - preflight rejeita inventario expirado
+  ---
+  duration_ms: 0.5991
+  type: 'test'
+  ...
+# Subtest: preflight rejeita backend declarado errado
+ok 263 - preflight rejeita backend declarado errado
+  ---
+  duration_ms: 0.6017
+  type: 'test'
+  ...
+# Subtest: T1 ja registrada ou fase divergente impede substituicao
+ok 264 - T1 ja registrada ou fase divergente impede substituicao
+  ---
+  duration_ms: 0.9449
+  type: 'test'
+  ...
+# Subtest: concorrencia usa trava compartilhada e segundo candidato nao age
+ok 265 - concorrencia usa trava compartilhada e segundo candidato nao age
+  ---
+  duration_ms: 2.9774
+  type: 'test'
+  ...
+# Subtest: falha em parada antiga conserva fase e bloqueia replay automatico
+ok 266 - falha em parada antiga conserva fase e bloqueia replay automatico
+  ---
+  duration_ms: 1.896
+  type: 'test'
+  ...
+# Subtest: falha em read apos parada conserva fase e bloqueia replay automatico
+ok 267 - falha em read apos parada conserva fase e bloqueia replay automatico
+  ---
+  duration_ms: 1.852
+  type: 'test'
+  ...
+# Subtest: falha em inicio candidato conserva fase e bloqueia replay automatico
+ok 268 - falha em inicio candidato conserva fase e bloqueia replay automatico
+  ---
+  duration_ms: 2.3977
+  type: 'test'
+  ...
+# Subtest: falha em boot conserva fase e bloqueia replay automatico
+ok 269 - falha em boot conserva fase e bloqueia replay automatico
+  ---
+  duration_ms: 2.633
+  type: 'test'
+  ...
+# Subtest: falha em vinculacao conserva fase e bloqueia replay automatico
+ok 270 - falha em vinculacao conserva fase e bloqueia replay automatico
+  ---
+  duration_ms: 2.8354
+  type: 'test'
+  ...
+# Subtest: falha em continuidade conserva fase e bloqueia replay automatico
+ok 271 - falha em continuidade conserva fase e bloqueia replay automatico
+  ---
+  duration_ms: 2.8661
+  type: 'test'
+  ...
+# Subtest: interrupcao da entrada nao rearma autoridade apos leitura
+ok 272 - interrupcao da entrada nao rearma autoridade apos leitura
+  ---
+  duration_ms: 3.223
+  type: 'test'
+  ...
+# Subtest: porta desconhecida e preservada sem vinculo concorrente
+ok 273 - porta desconhecida e preservada sem vinculo concorrente
+  ---
+  duration_ms: 2.8713
+  type: 'test'
+  ...
+# Subtest: retomada explicita apos falha usa epoch novo e nao repete parada antiga
+ok 274 - retomada explicita apos falha usa epoch novo e nao repete parada antiga
+  ---
+  duration_ms: 5.1813
+  type: 'test'
+  ...
+# Subtest: retomada nao adota candidato anterior ainda ativo
+ok 275 - retomada nao adota candidato anterior ainda ativo
+  ---
+  duration_ms: 0.7075
+  type: 'test'
+  ...
+# Subtest: interrupcao abrupta exige ausencia comprovada e nova geracao sem reiniciar migracao
+ok 276 - interrupcao abrupta exige ausencia comprovada e nova geracao sem reiniciar migracao
+  ---
+  duration_ms: 5.4302
+  type: 'test'
+  ...
+# Subtest: porta configurada incorreta e identidade temporal invalida bloqueiam antes da parada
+ok 277 - porta configurada incorreta e identidade temporal invalida bloqueiam antes da parada
+  ---
+  duration_ms: 1.1074
+  type: 'test'
+  ...
+# Subtest: ticket expirado e inutilizado sem criar novo backend
+ok 278 - ticket expirado e inutilizado sem criar novo backend
+  ---
+  duration_ms: 2.514
+  type: 'test'
+  ...
+# Subtest: autoridade antiga ou fabricada nao consegue controlar o substituto
+ok 279 - autoridade antiga ou fabricada nao consegue controlar o substituto
+  ---
+  duration_ms: 3.0299
+  type: 'test'
+  ...
+# Subtest: revogacao sela o HTTP e mantem bloqueio de persistencia
+ok 280 - revogacao sela o HTTP e mantem bloqueio de persistencia
+  ---
+  duration_ms: 4.3062
+  type: 'test'
+  ...
+# Subtest: T1 simulada registra todos IDs preserva adicionais e limpa por dependencia
+ok 281 - T1 simulada registra todos IDs preserva adicionais e limpa por dependencia
+  ---
+  duration_ms: 6.5073
+  type: 'test'
+  ...
+# Subtest: T1 sem autorizacao nao grava diario nem chama transporte
+ok 282 - T1 sem autorizacao nao grava diario nem chama transporte
+  ---
+  duration_ms: 0.9315
+  type: 'test'
+  ...
+# Subtest: T1 preserva incrementos das duas sequencias sem resetar ou editar checkpoint
+ok 283 - T1 preserva incrementos das duas sequencias sem resetar ou editar checkpoint
+  ---
+  duration_ms: 5.5411
+  type: 'test'
+  ...
+# Subtest: fixture ou plano adulterado bloqueia antes de escrever
+ok 284 - fixture ou plano adulterado bloqueia antes de escrever
+  ---
+  duration_ms: 0.927
+  type: 'test'
+  ...
+# Subtest: timeout depois do INSERT nao repete nem inicia limpeza automatica
+ok 285 - timeout depois do INSERT nao repete nem inicia limpeza automatica
+  ---
+  duration_ms: 2.1612
+  type: 'test'
+  ...
+# Subtest: resposta com ID preexistente nunca autoriza limpeza desse ID
+ok 286 - resposta com ID preexistente nunca autoriza limpeza desse ID
+  ---
+  duration_ms: 2.3179
+  type: 'test'
+  ...
+# Subtest: mudanca de adicional interrompe sem DELETE ou compensacao
+ok 287 - mudanca de adicional interrompe sem DELETE ou compensacao
+  ---
+  duration_ms: 2.504
+  type: 'test'
+  ...
+# Subtest: perda de controle antes da segunda escrita para sem apagar o evento
+ok 288 - perda de controle antes da segunda escrita para sem apagar o evento
+  ---
+  duration_ms: 2.5706
+  type: 'test'
+  ...
+# Subtest: custo estrangeiro ou vinculo inesperado impede limpeza
+ok 289 - custo estrangeiro ou vinculo inesperado impede limpeza
+  ---
+  duration_ms: 3.5199
+  type: 'test'
+  ...
+# Subtest: T1 concluida nao pode ser repetida automaticamente
+ok 290 - T1 concluida nao pode ser repetida automaticamente
+  ---
+  duration_ms: 4.9324
+  type: 'test'
+  ...
+# Subtest: limpeza incompleta impede gate de liberacao
+ok 291 - limpeza incompleta impede gate de liberacao
+  ---
+  duration_ms: 5.7429
+  type: 'test'
+  ...
+# Subtest: diario adulterado nao e suficiente para liberar
+ok 292 - diario adulterado nao e suficiente para liberar
+  ---
+  duration_ms: 5.7418
+  type: 'test'
+  ...
+# Subtest: falha RPC com 500 interrompe sem repetir ou apagar dados
+ok 293 - falha RPC com 500 interrompe sem repetir ou apagar dados
+  ---
+  duration_ms: 3.3041
+  type: 'test'
+  ...
+# Subtest: liberacao selada simulada usa gate completo sem abrir leitura publica
+ok 294 - liberacao selada simulada usa gate completo sem abrir leitura publica
+  ---
+  duration_ms: 7.4801
+  type: 'test'
+  ...
+# Subtest: gate selado sem T1 nao envia liberar-escritas nem enfraquece manutencao
+ok 295 - gate selado sem T1 nao envia liberar-escritas nem enfraquece manutencao
+  ---
+  duration_ms: 1.4248
+  type: 'test'
+  ...
+# Subtest: revogacao do controlador durante drenagem impede liberar
+ok 296 - revogacao do controlador durante drenagem impede liberar
+  ---
+  duration_ms: 5.5888
+  type: 'test'
+  ...
+1..296
+# tests 296
+# suites 0
+# pass 296
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 6669.5464

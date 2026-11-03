@@ -1,0 +1,11 @@
+APROVADO: supervisor pos T1 conhecido
+APROVADO: controlador depois da saida do filho
+APROVADO: ponte conhecida depois da admissao
+APROVADO: fence JS reprovado
+APROVADO: estado alterado apos fence
+APROVADO: PID reutilizado
+APROVADO: fase incorreta
+APROVADO: sem congelamento
+APROVADO: estado UTF8 preserva hash com acentos
+APROVADO: legado sem T1 conserva fence anterior
+TESTES_MOCK_POWERSHELL: 10

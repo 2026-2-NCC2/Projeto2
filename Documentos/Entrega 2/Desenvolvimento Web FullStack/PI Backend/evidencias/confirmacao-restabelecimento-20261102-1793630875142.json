@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 2,
+  "status": "RESTABELECIMENTO_REAL_CONFIRMADO",
+  "operationalReport": "restabelecimento-pos-reinicio-b8f5d9da-8fb8-4564-97a1-356d13add41d.json",
+  "tests": {
+    "passed": 74,
+    "failed": 0,
+    "newScenarios": 32,
+    "affectedRegressions": 42
+  },
+  "mysqlPid": 4492,
+  "controllerPid": 5696,
+  "supervisorPid": 9804,
+  "nativeIdentity": {
+    "controlador": {
+      "pid": 5696,
+      "parentPid": 29448,
+      "criadoEm": "2026-11-02T14:43:18.5528490Z",
+      "entradaConhecida": true
+    },
+    "backend": {
+      "pid": 9804,
+      "parentPid": 5696,
+      "criadoEm": "2026-11-02T14:44:07.8603570Z",
+      "entradaConhecida": true,
+      "portaExclusivaLocal": true
+    },
+    "ipcConsultado": false
+  },
+  "localInventory": {
+    "processes": [
+      {
+        "pid": 26220,
+        "name": "node.exe",
+        "category": "CODEX_MCP"
+      },
+      {
+        "pid": 29440,
+        "name": "node.exe",
+        "category": "CODEX_MCP"
+      },
+      {
+        "pid": 27880,
+        "name": "node_repl.exe",
+        "category": "CODEX_MCP"
+      },
+      {
+        "pid": 18940,
+        "name": "node_repl.exe",
+        "category": "CODEX_MCP"
+      },
+      {
+        "pid": 4492,
+        "name": "mysqld.exe",
+        "category": "MYSQL_LOCAL"
+      },
+      {
+        "pid": 5696,
+        "name": "node.exe",
+        "category": "BACKEND_POSSIVEL"
+      },
+      {
+        "pid": 9804,
+        "name": "node.exe",
+        "category": "BACKEND_POSSIVEL"
+      }
+    ],
+    "listeners": [
+      {
+        "port": 3001,
+        "pid": 9804
+      }
+    ],
+    "mysqlClients": [],
+    "tasks": []
+  },
+  "finalChecks": {
+    "phase": "INICIADA",
+    "frozen": true,
+    "sealed": true,
+    "mode": "RESTABELECIMENTO_POS_REINICIO",
+    "stage": "ATIVO",
+    "controllerPid": 5696,
+    "supervisorPid": 9804,
+    "controllerTicketInvalidated": true,
+    "supervisorTicketInvalidated": true,
+    "consumedUniqueTickets": 2,
+    "t1Recorded": false,
+    "newSmokeApproved": false,
+    "httpStatus": 503,
+    "envUnchanged": true,
+    "checkpointUnchanged": true,
+    "existingBackupHashesVerified": true,
+    "gate": "GATE_RESTABELECIMENTO_APROVADO",
+    "currentDataComparison": {
+      "hashes": {
+        "mysql": "2aa2ee825c85538b01638712d9c3caf7a74fbcfcad8093809c10fbd16fad57d0",
+        "supabase": "c1a31bf5df8944eb33c5fa5c6a5c2b7870a36d5f5a53b6385021219b4370e595",
+        "catalogos": "f2e09f8ba183b735e0bc4888345d7112f7bb16ac62dc3daf8ea1b13ba80bf615"
+      },
+      "counts": {
+        "usuarios": {
+          "mysql": 9,
+          "supabase": 10
+        },
+        "eventos": {
+          "mysql": 5,
+          "supabase": 6
+        },
+        "custos_evento": {
+          "mysql": 3,
+          "supabase": 5
+        },
+        "cotacoes": {
+          "mysql": 3,
+          "supabase": 4
+        },
+        "itens_cotacao": {
+          "mysql": 13,
+          "supabase": 15
+        },
+        "propostas": {
+          "mysql": 2,
+          "supabase": 3
+        },
+        "inscricoes": {
+          "mysql": 2,
+          "supabase": 3
+        },
+        "solicitacoes_acesso": {
+          "mysql": 5,
+          "supabase": 6
+        }
+      },
+      "additionalIds": {
+        "usuarios": [
+          10
+        ],
+        "eventos": [
+          12
+        ],
+        "custos_evento": [
+          7,
+          8
+        ],
+        "cotacoes": [
+          6
+        ],
+        "itens_cotacao": [
+          22,
+          23
+        ],
+        "propostas": [
+          3
+        ],
+        "inscricoes": [
+          3
+        ],
+        "solicitacoes_acesso": [
+          6
+        ]
+      },
+      "mysqlRows": 42,
+      "supabaseRows": 52
+    },
+    "lockPresent": false
+  },
+  "owningControllerStdinStatus": {
+    "pedido": "79a22a36-51c0-47a1-87d1-b1204ac01d85",
+    "ok": true,
+    "controllerPid": 5696,
+    "supervisorPid": 9804,
+    "nonce": "9d43683c-cfe3-4f75-812b-94049dd6e164",
+    "verificadoEm": 1793630719618
+  },
+  "receiptNotice": "Registro de observacao; JSON nao substitui o recibo IPC privado em memoria.",
+  "historicalAbsenceOfWritesProven": false,
+  "historicalGapExplicitlyAcknowledged": true,
+  "handoffBetweenControllersExecuted": false,
+  "t1Executed": false,
+  "maintenanceReleased": false,
+  "smokeExecuted": false,
+  "finalT1GateApproved": false,
+  "rollbackExecuted": false,
+  "commitsCreated": false,
+  "nextStep": "SMOKE_ISOLADO_E_GATE_FINAL_NO_CONTROLADOR_ATUAL; SUBSTITUICAO_INICIAL_NAO_DEVE_SER_REINVOCADA_COM_CONTROLE_EXISTENTE"
+}

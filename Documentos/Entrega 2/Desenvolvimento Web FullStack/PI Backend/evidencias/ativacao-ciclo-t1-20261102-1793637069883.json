@@ -1,0 +1,218 @@
+{
+  "schemaVersion": 2,
+  "status": "CONTROLADOR_ATUALIZADO_ATIVO_VALIDACOES_APROVADAS",
+  "finishedUtc": "2026-11-02T16:31:09.883Z",
+  "controllerPid": 25144,
+  "supervisorPid": 15788,
+  "mysqlPid": 4492,
+  "oldControllerPid": 5696,
+  "oldSupervisorPid": 9804,
+  "oldPidsAbsenceConfirmed": true,
+  "controlledStop": {
+    "method": "SIGINT_DA_SESSAO_TTY_IDENTIFICADA",
+    "eofProbeUnsupported": true,
+    "phasePreserved": "INICIADA",
+    "temporaryListenerGapObserved": true,
+    "normalTrafficReleased": false
+  },
+  "maintenanceBridgePid": 10256,
+  "patchSha256": "a21a1efe5bb95a13b7f5576d5554e9b45e28f66ed6a14674e9206e74e8b90d86",
+  "patchApplied": true,
+  "exactAfterHashesConfirmed": true,
+  "productionFiles": 4,
+  "testFiles": 3,
+  "sealedReadmission": {
+    "status": "PATCH_E_ADMISSAO_CONFIRMADOS",
+    "controllerPid": 25144,
+    "supervisorPid": 15788,
+    "epoch": 2,
+    "consumedTickets": 4,
+    "previousTicketsStillInvalid": true,
+    "newTicketsConsumed": true,
+    "protectedTransitionPreserved": true,
+    "envJwtUnchanged": true,
+    "checkpointUnchanged": true,
+    "httpStatus": 503,
+    "t1Recorded": false,
+    "dataHashes": {
+      "mysql": "2aa2ee825c85538b01638712d9c3caf7a74fbcfcad8093809c10fbd16fad57d0",
+      "supabase": "c1a31bf5df8944eb33c5fa5c6a5c2b7870a36d5f5a53b6385021219b4370e595",
+      "catalogos": "f2e09f8ba183b735e0bc4888345d7112f7bb16ac62dc3daf8ea1b13ba80bf615"
+    },
+    "postStopHashes": {
+      "mysql": "2aa2ee825c85538b01638712d9c3caf7a74fbcfcad8093809c10fbd16fad57d0",
+      "supabase": "c1a31bf5df8944eb33c5fa5c6a5c2b7870a36d5f5a53b6385021219b4370e595",
+      "catalogos": "f2e09f8ba183b735e0bc4888345d7112f7bb16ac62dc3daf8ea1b13ba80bf615"
+    }
+  },
+  "currentIpcStatus": {
+    "pedido": "d806d53d-3603-45bf-a217-f029ae640196",
+    "ok": true,
+    "controllerPid": 25144,
+    "supervisorPid": 15788,
+    "nonce": "b386ec64-5871-40d9-94f3-298d50587e55",
+    "verificadoEm": 1793636866131
+  },
+  "receiptNotice": "Relato de observacao. JSON nao substitui capacidade privada em memoria.",
+  "operationalSmoke": {
+    "httpRequests": 26,
+    "profiles": 4,
+    "failures": 0,
+    "reportFile": "smoke-pos-substituicao-9984f904-b36b-4d54-a1f3-0ff8250db82c.json",
+    "sha256": "5286f4c993eda67539e5081a236a8cea3f27cb73fcf0223b81a21cfeac8a863d",
+    "mysqlModulesLoaded": false
+  },
+  "firstEmission": {
+    "pedido": "c019f548-2db7-4541-8661-0758a8ded499",
+    "ok": true,
+    "run": "cd747f25-2772-40c6-aeea-ca7ecd6b6e87",
+    "checkpointId": "349d6df4-7c15-4960-b739-dfd91fd53c8d",
+    "emitidoEm": 1793636591378,
+    "expiraEm": 1793636619309
+  },
+  "firstExpiryObservedUtc": "2026-11-02T16:23:56.200Z",
+  "secondEmission": {
+    "pedido": "0c58b807-96c0-4657-bca1-3b2bbbe4fb64",
+    "ok": true,
+    "run": "ae88ea2e-f8ec-47c6-bc24-f897d0bd2137",
+    "checkpointId": "349d6df4-7c15-4960-b739-dfd91fd53c8d",
+    "emitidoEm": 1793636664811,
+    "expiraEm": 1793636692728,
+    "runAnteriorRevogado": "cd747f25-2772-40c6-aeea-ca7ecd6b6e87"
+  },
+  "emissionGatesApproved": true,
+  "expiredPlanWasReissuedAsNewPlan": true,
+  "oldPlanReferenceNegativeTest": {
+    "pedido": "098ed12c-402b-456e-a634-16f859497b82",
+    "runAnterior": "cd747f25-2772-40c6-aeea-ca7ecd6b6e87",
+    "expectedRejection": true,
+    "observed": {
+      "ok": false,
+      "code": "CONTROLE_OPERACAO_RECUSADA"
+    }
+  },
+  "firstLifetimeMs": 27931,
+  "secondLifetimeMs": 27917,
+  "maximumTtlMs": 30000,
+  "finalChecks": {
+    "capturedUtc": "2026-11-02T16:27:35.045Z",
+    "controllerPid": 25144,
+    "supervisorPid": 15788,
+    "phase": "INICIADA",
+    "stage": "ATIVO",
+    "epoch": 2,
+    "frozen": true,
+    "sealed": true,
+    "httpStatus": 503,
+    "patchFilesMatch": true,
+    "codeManifestMatches": true,
+    "envJwtUnchanged": true,
+    "checkpointUnchanged": true,
+    "protectedTransitionUnchanged": true,
+    "backupsHashesVerified": true,
+    "t1Recorded": false,
+    "t1JournalsCreated": false,
+    "lockPresent": false,
+    "smokeFile": "smoke-pos-substituicao-9984f904-b36b-4d54-a1f3-0ff8250db82c.json",
+    "smokeSha256": "5286f4c993eda67539e5081a236a8cea3f27cb73fcf0223b81a21cfeac8a863d",
+    "smokeProfiles": 4,
+    "smokeRequests": 26,
+    "mysqlModulesLoaded": false,
+    "referenceComparison": {
+      "hashes": {
+        "mysql": "2aa2ee825c85538b01638712d9c3caf7a74fbcfcad8093809c10fbd16fad57d0",
+        "supabase": "c1a31bf5df8944eb33c5fa5c6a5c2b7870a36d5f5a53b6385021219b4370e595",
+        "catalogos": "f2e09f8ba183b735e0bc4888345d7112f7bb16ac62dc3daf8ea1b13ba80bf615"
+      },
+      "counts": {
+        "usuarios": {
+          "mysql": 9,
+          "supabase": 10
+        },
+        "eventos": {
+          "mysql": 5,
+          "supabase": 6
+        },
+        "custos_evento": {
+          "mysql": 3,
+          "supabase": 5
+        },
+        "cotacoes": {
+          "mysql": 3,
+          "supabase": 4
+        },
+        "itens_cotacao": {
+          "mysql": 13,
+          "supabase": 15
+        },
+        "propostas": {
+          "mysql": 2,
+          "supabase": 3
+        },
+        "inscricoes": {
+          "mysql": 2,
+          "supabase": 3
+        },
+        "solicitacoes_acesso": {
+          "mysql": 5,
+          "supabase": 6
+        }
+      },
+      "additionalIds": {
+        "usuarios": [
+          10
+        ],
+        "eventos": [
+          12
+        ],
+        "custos_evento": [
+          7,
+          8
+        ],
+        "cotacoes": [
+          6
+        ],
+        "itens_cotacao": [
+          22,
+          23
+        ],
+        "propostas": [
+          3
+        ],
+        "inscricoes": [
+          3
+        ],
+        "solicitacoes_acesso": [
+          6
+        ]
+      },
+      "mysqlRows": 42,
+      "supabaseRows": 52
+    },
+    "currentEquivalenceConfirmedByPassedEmissionGates": true,
+    "preflightDataHashes": {
+      "mysql": "2aa2ee825c85538b01638712d9c3caf7a74fbcfcad8093809c10fbd16fad57d0",
+      "supabase": "c1a31bf5df8944eb33c5fa5c6a5c2b7870a36d5f5a53b6385021219b4370e595",
+      "catalogos": "f2e09f8ba183b735e0bc4888345d7112f7bb16ac62dc3daf8ea1b13ba80bf615"
+    }
+  },
+  "unitTests": {
+    "previouslyApproved": 96,
+    "repeated": false
+  },
+  "historicalAbsenceOfWritesProven": false,
+  "historicalGapAcknowledged": true,
+  "readyToAuthorizeControlledT1": true,
+  "testPlansMustNotBeExecuted": true,
+  "mustIssueFreshPlanAfterT1Authorization": true,
+  "t1RealExecuted": false,
+  "t1JournalCreated": false,
+  "dataWrites": false,
+  "maintenanceReleased": false,
+  "jwtChanged": false,
+  "backupsGenerated": false,
+  "checkpointChanged": false,
+  "deltaOrchestratorExecuted": false,
+  "rollbackExecuted": false,
+  "commitsCreated": false
+}

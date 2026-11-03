@@ -1,0 +1,256 @@
+{
+  "startedUtc": "2026-11-02T14:43:18.607Z",
+  "controllerPid": 5696,
+  "status": "RESTABELECIMENTO_SELADO_GATE_APROVADO",
+  "handoffEntreControladoresExecutado": false,
+  "maintenanceReleased": false,
+  "t1Executed": false,
+  "dataWrites": false,
+  "jwtRotated": false,
+  "checkpointChanged": false,
+  "backupsGenerated": false,
+  "rollbackExecuted": false,
+  "commitsCreated": false,
+  "historicalAbsenceOfWritesProven": false,
+  "stage": "GATE_RESTABELECIMENTO",
+  "finishedUtc": "2026-11-02T14:44:31.272Z",
+  "supervisorPid": 9804,
+  "httpStatus": 503,
+  "gate": {
+    "status": "GATE_RESTABELECIMENTO_APROVADO",
+    "schemaVersion": 2,
+    "controllerPid": 5696,
+    "supervisorPid": 9804,
+    "comparison": {
+      "hashes": {
+        "mysql": "2aa2ee825c85538b01638712d9c3caf7a74fbcfcad8093809c10fbd16fad57d0",
+        "supabase": "c1a31bf5df8944eb33c5fa5c6a5c2b7870a36d5f5a53b6385021219b4370e595",
+        "catalogos": "f2e09f8ba183b735e0bc4888345d7112f7bb16ac62dc3daf8ea1b13ba80bf615"
+      },
+      "counts": {
+        "usuarios": {
+          "mysql": 9,
+          "supabase": 10
+        },
+        "eventos": {
+          "mysql": 5,
+          "supabase": 6
+        },
+        "custos_evento": {
+          "mysql": 3,
+          "supabase": 5
+        },
+        "cotacoes": {
+          "mysql": 3,
+          "supabase": 4
+        },
+        "itens_cotacao": {
+          "mysql": 13,
+          "supabase": 15
+        },
+        "propostas": {
+          "mysql": 2,
+          "supabase": 3
+        },
+        "inscricoes": {
+          "mysql": 2,
+          "supabase": 3
+        },
+        "solicitacoes_acesso": {
+          "mysql": 5,
+          "supabase": 6
+        }
+      },
+      "additionalIds": {
+        "usuarios": [
+          10
+        ],
+        "eventos": [
+          12
+        ],
+        "custos_evento": [
+          7,
+          8
+        ],
+        "cotacoes": [
+          6
+        ],
+        "itens_cotacao": [
+          22,
+          23
+        ],
+        "propostas": [
+          3
+        ],
+        "inscricoes": [
+          3
+        ],
+        "solicitacoes_acesso": [
+          6
+        ]
+      },
+      "mysqlRows": 42,
+      "supabaseRows": 52
+    },
+    "httpStatus": 503,
+    "continuityIpcConfirmed": true,
+    "exclusiveAuthorityConfirmed": true,
+    "ticketsConsumedAndInvalidated": true,
+    "historicalAbsenceOfWritesProven": false,
+    "finalT1GateApproved": false,
+    "newSmokeRequired": true
+  },
+  "phase": "INICIADA",
+  "checkpointId": "349d6df4-7c15-4960-b739-dfd91fd53c8d",
+  "checkpointSha256": "4ca6ae29e558bd34b89971ce6fefa4e39286c9f10a4c6df15a24b8727bd2462c",
+  "checkpointUnchanged": true,
+  "environmentUnchanged": true,
+  "backupsIntegrityVerified": true,
+  "oldStateSha256": "64619d453d1612ed97aa60afc7fb33c726e36d461428b5eeff02f27e74f7c68e",
+  "newStateSha256": "70369889b2713c1b0ed273aa33001daf8be3ee8457601997987faa9ae21be6af",
+  "controllerIdentity": {
+    "pid": 5696,
+    "parentPid": 29448,
+    "criadoEm": "2026-11-02T14:43:18.5528490Z",
+    "entradaConhecida": true
+  },
+  "supervisorIdentity": {
+    "pid": 9804,
+    "parentPid": 5696,
+    "criadoEm": "2026-11-02T14:44:07.8603570Z",
+    "entradaConhecida": true,
+    "portaExclusivaLocal": true
+  },
+  "provaReinicio": {
+    "todosAusentes": true,
+    "presentes": [],
+    "pidsConsultados": [
+      29120,
+      30276
+    ],
+    "lastBootUtc": "2026-11-02T14:18:01.5000000Z",
+    "capturedUtc": "2026-11-02T14:44:15.4975085Z"
+  },
+  "writersBefore": {
+    "local": {
+      "capturedUtc": "2026-11-02T14:44:18.101Z",
+      "knownBackend": {
+        "pid": 9804,
+        "parentPid": 5696,
+        "criadoEm": "2026-11-02T14:44:07.8603570Z",
+        "entradaConhecida": true,
+        "portaExclusivaLocal": true
+      },
+      "unknownProcessCount": 0,
+      "tasks": 0,
+      "mysqlClientPids": [],
+      "httpStatus": 503
+    },
+    "database": {
+      "capturedUtc": "2026-11-02T14:44:18.101Z",
+      "mysql": {
+        "otherClients": 0,
+        "otherTransactions": 0,
+        "enabledJobs": 0,
+        "scheduler": "OFF"
+      },
+      "supabase": {
+        "sessions": [
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "authenticator",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          }
+        ],
+        "activeCron": 0,
+        "httpQueue": 0,
+        "tlsVerified": true
+      }
+    }
+  },
+  "writersAfter": {
+    "database": {
+      "capturedUtc": "2026-11-02T14:44:24.583Z",
+      "mysql": {
+        "otherClients": 0,
+        "otherTransactions": 0,
+        "enabledJobs": 0,
+        "scheduler": "OFF"
+      },
+      "supabase": {
+        "sessions": [
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "authenticator",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          }
+        ],
+        "activeCron": 0,
+        "httpQueue": 0,
+        "tlsVerified": true
+      }
+    },
+    "local": {
+      "capturedUtc": "2026-11-02T14:44:29.384Z",
+      "knownBackend": {
+        "pid": 9804,
+        "parentPid": 5696,
+        "criadoEm": "2026-11-02T14:44:07.8603570Z",
+        "entradaConhecida": true,
+        "portaExclusivaLocal": true
+      },
+      "unknownProcessCount": 0,
+      "tasks": 0,
+      "mysqlClientPids": [],
+      "httpStatus": 503
+    }
+  },
+  "aceiteRiscoResidual": {
+    "legadoSemIpc": true,
+    "riscoResidualAceito": true,
+    "historicoNaoComprovado": true,
+    "referencia": "Autorizacao_usuario_20261102_restabelecimento_selado_lacuna_historica_previamente_aceita"
+  },
+  "finalT1GateApproved": false,
+  "smokeExecuted": false
+}

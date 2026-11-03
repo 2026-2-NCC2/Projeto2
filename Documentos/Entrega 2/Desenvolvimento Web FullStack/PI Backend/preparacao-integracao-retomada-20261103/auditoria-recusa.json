@@ -1,0 +1,49 @@
+{
+  "checkedUtc": "2026-11-03T03:59:47.571Z",
+  "scope": "ARTEFATOS_REAIS_SOMENTE_LEITURA_SEM_BANCOS",
+  "observations": [
+    {
+      "file": "observacao-origem-271609d6-eb6b-4f11-8407-1847bc62cd4b.json",
+      "sha256": "03e1180d185f5ce97009afa4d1b82838ec8ff7ec0f67566a64849939b2504e58",
+      "verifiedAt": 1793676472828,
+      "controllerPid": 25144,
+      "supervisorPid": 15788,
+      "ok": true,
+      "lastWriteUtc": "2026-11-03T03:27:56.789Z"
+    },
+    {
+      "file": "observacao-origem-208277c3-6fe9-4fa8-8595-918990a3a2e4.json",
+      "sha256": "d6803a5bba0184a26aa12ff21b25ac47edc67618bee683453402ac9c18a6a5b7",
+      "verifiedAt": 1793676522872,
+      "controllerPid": 25144,
+      "supervisorPid": 15788,
+      "ok": true,
+      "lastWriteUtc": "2026-11-03T03:28:47.662Z"
+    }
+  ],
+  "observationIntervalMs": 50044,
+  "statusTtlMs": 30000,
+  "destinationMatchesConfirmedReceipt": true,
+  "previousReport": {
+    "file": "smoke-pos-substituicao-26e5cc54-80b3-4feb-924f-13ffe0ac38a8.json",
+    "sha256": "bc95ac884a837bf6a51dd72588bb774c587c9e3a790fa6ca67526946b494afae",
+    "status": "RECUPERACAO_E_SMOKE_ISOLADO_APROVADOS",
+    "startupProvider": "supabase",
+    "mysqlModulesLoaded": false,
+    "maintenanceReleased": false
+  },
+  "localErrorLogFilesFound": 0,
+  "historicalAdmissionCauseConfirmed": false,
+  "historicalAdmissionCause": null,
+  "expiryProvenAsInternalCause": false,
+  "recordedExternalFailure": "LASTEXITCODE_UNDEFINED_AFTER_IN_PROCESS_POWERSHELL_SCRIPT",
+  "recordedExitCode": 1,
+  "preserved": {
+    "state": true,
+    "jwtEnvironment": true,
+    "checkpoint": true,
+    "journal": true
+  },
+  "newAdmissionExecuted": false,
+  "newStatusPublished": false
+}

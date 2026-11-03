@@ -1,0 +1,207 @@
+{
+  "schemaVersion": 1,
+  "activeSourceUntouched": true,
+  "noEnvFilesCopied": true,
+  "files": [
+    {
+      "file": "config/autoridade-selada.cjs",
+      "sha256": "495c0058376172de4cf0a50b8958e8c196e22474579dba3820fa2b63c26c3116"
+    },
+    {
+      "file": "config/banco.cjs",
+      "sha256": "5f0cf2b1c62b7bd6b9c37aa22358e556a1360fba879dab90f49c412f12dca69b"
+    },
+    {
+      "file": "config/comandos-controlador.cjs",
+      "sha256": "cc0741343b5cfcb3863def71f84864ea90710a00858375819dccc22e131beedf"
+    },
+    {
+      "file": "config/congelamento-escritas.cjs",
+      "sha256": "2b267cc87835cc41626c2688ee1b611884f960169a1401c2934131341a8e4d31"
+    },
+    {
+      "file": "config/continuidade-controlador.cjs",
+      "sha256": "cdd9e84743b1ea95c13c4f82c85a2eddc21eb014c089302d939505959eed1969"
+    },
+    {
+      "file": "config/escopo-t1.cjs",
+      "sha256": "4b2f30c943e74610acbb0193910c672733f112da0d6c6a1c5ea734a8c0f62484"
+    },
+    {
+      "file": "config/estado-supervisor.cjs",
+      "sha256": "8479613b33c1e78be633f78b4f658e627f57d1fea47badc2a4250424c5aa334d"
+    },
+    {
+      "file": "config/gate-final-selado.cjs",
+      "sha256": "f9770457a4c3e3274ffba0dca9d87b1a29e820fa432198d2da10837a7f12158d"
+    },
+    {
+      "file": "config/ipc-supervisor.cjs",
+      "sha256": "4f57819724c781164874583be641ca2eb7e62503427e3d2ed8cc55a2e7ac47f6"
+    },
+    {
+      "file": "config/startup-controlado.cjs",
+      "sha256": "32450a47465d4d28db505f82f937f85abbc91863cc7247e0c2e67934f8cf4f18"
+    },
+    {
+      "file": "config/supervisor-cutover.cjs",
+      "sha256": "95a30165d17fffce1f78cdff8247a035fef0b1cbd8a2311ce89ecf4c265805bb"
+    },
+    {
+      "file": "config/transicao-controlada.cjs",
+      "sha256": "0c3cb93a887f7648e8781ca5b9eef2d1d49fcc52c52dd69dc0bde18b6da1a399"
+    },
+    {
+      "file": "db-postgres.js",
+      "sha256": "7b186eb416163b6bb3b73f6f207703484d9f56cdd979360d3cca1b9e697f061d"
+    },
+    {
+      "file": "db-supabase.cjs",
+      "sha256": "139399436963ebe5754dccc017eb1facdb71a79beaa9490dca5ebe87e1cbc3b6"
+    },
+    {
+      "file": "db.js",
+      "sha256": "e0cdf6fbddf545f054b11eb77682fb7c8edfee42aac19dafa3cf8546c8eadc13"
+    },
+    {
+      "file": "homologacao-escrita.cjs",
+      "sha256": "8e2c864e2183a0276c23bb05b8dbaf346e16e3fd05037d479f0f356e0ebfa7e7"
+    },
+    {
+      "file": "homologacao.cjs",
+      "sha256": "b91cbcdc4035bf229df987d124aed907b413770e1c803a5cfb6b0d92003b6600"
+    },
+    {
+      "file": "isolamento.cjs",
+      "sha256": "21351aec8cffc17a57a117cc84addadb6d632328dfc896b09fcad6391012e1db"
+    },
+    {
+      "file": "repositories/index.cjs",
+      "sha256": "bbfbed7d745cc8225a7e3f6b62162f9a05fa43d5814df7f7da22c1da7abea747"
+    },
+    {
+      "file": "repositories/mysql/cotacoes.cjs",
+      "sha256": "09249f4e88d77cad119d4820617a3ca1b841b63d03261945c4fdb4d06f8b62f1"
+    },
+    {
+      "file": "repositories/mysql/custos.cjs",
+      "sha256": "a078cd0dc5c54105de0f7437d3d7c9ee8aa7dcdaed23022b79083908b18a402e"
+    },
+    {
+      "file": "repositories/mysql/solicitacoes-acesso.cjs",
+      "sha256": "a82b870de023b83864ead7a9c0790514f0f92358ced02a3a1aa27559cc7cf98b"
+    },
+    {
+      "file": "repositories/supabase/cotacoes-publicacao.cjs",
+      "sha256": "b4548299ba308e3b879528c42159020bb8cf7519fbb60b32b7d529d2ffe3642e"
+    },
+    {
+      "file": "repositories/supabase/custos-transacao.cjs",
+      "sha256": "4b4bc6f0d3e07187dfc0c6e1c356f0193a04772667f4e802742e0becae7c1326"
+    },
+    {
+      "file": "repositories/supabase/solicitacoes-acesso-decisao.cjs",
+      "sha256": "8248f0da8c80efff187aea10960f3ffac1978e72fbae1174f75b0795c8b4a9af"
+    },
+    {
+      "file": "repositories/supabase/suporte-leitura.cjs",
+      "sha256": "5448d651c767622c43e05ba1644e2793d8438b6b634b6db25d6c8b1e3fe7ab68"
+    },
+    {
+      "file": "repositories/supabase/validacao-custos.cjs",
+      "sha256": "1e70e7e1e0122ca54e31cb2f08de6a6ec59ae8c56f616eb2ae382b1f508de5c2"
+    },
+    {
+      "file": "scripts/backup-mysql-isolado.cjs",
+      "sha256": "b1ce19fafde5470ffaa185b673fc87c399906d5a27ee0ae4cd6a84bed520dfe1"
+    },
+    {
+      "file": "scripts/backup-postgres-isolado.cjs",
+      "sha256": "18b86469e2178a8c240cfc0c09156640a4d5eb32b740d87c913c45b752045767"
+    },
+    {
+      "file": "scripts/catalogo-backup.cjs",
+      "sha256": "2251c0490366b38479886550aba188dc036d62a5b6d1eaa5179005cabd9e9210"
+    },
+    {
+      "file": "scripts/catalogo-t1.cjs",
+      "sha256": "e0c153d0a3c9e80c3b9222760f8e4098ca99a5fc96d0714969d4a0c0bab46044"
+    },
+    {
+      "file": "scripts/delta-cutover.cjs",
+      "sha256": "74d3842039ab26b6841206dbc5d3ca4c9237230b571047a10dcbf30e542ee341"
+    },
+    {
+      "file": "scripts/gate-reconciliacao-recuperacao.cjs",
+      "sha256": "7584e4e51e458492cdb0809b1807766bfae4d46b118d93b1577a4dfefcd936ac"
+    },
+    {
+      "file": "scripts/helper-powershell.cjs",
+      "sha256": "9bbb37a91c61a6f58e7c564d3d002adfe8baf9eb298dd3ce1ad2f482c7993fc4"
+    },
+    {
+      "file": "scripts/jornal-t1.cjs",
+      "sha256": "eb5e0d81cfbaf3eca1494e7babf299b534f9a5a1ab40de233cc538fa709157b7"
+    },
+    {
+      "file": "scripts/limpeza-t1-transacional.cjs",
+      "sha256": "bff09197d5fae0c3843eddcb45a217eefbff028b48ff2fe87acfec956325b460"
+    },
+    {
+      "file": "scripts/operacoes-controlador-selado.cjs",
+      "sha256": "9f0a117ede8f748e55f026cd53122ea22509126f8d64ed1775308b582b7fdc6e"
+    },
+    {
+      "file": "scripts/reconciliar-cutover-leitura.cjs",
+      "sha256": "a648c916360c633623025aeb38c8c85691618e6d1c3185bef6e8e34b3241ce22"
+    },
+    {
+      "file": "scripts/t1-controlada.cjs",
+      "sha256": "46a86a1d95ccbaa3ae1e13acd30b78c150217c2615b9153d8fb70377f07ff201"
+    },
+    {
+      "file": "server.js",
+      "sha256": "a935671e9e58d85ec0ddd719a3ad92e1210616a6b4a0f8e8220b9b09b6c4f53e"
+    },
+    {
+      "file": "services/cotacoes.cjs",
+      "sha256": "15ed3c2286374c2bd4643f10280cc1ce1165bb883f05b4b7f395764fb13d6f59"
+    },
+    {
+      "file": "services/custos.cjs",
+      "sha256": "f6063e6e96dfe42aa260f22945e311e6fe1104913e80189467cad8a7353f1c5f"
+    },
+    {
+      "file": "services/solicitacoes-acesso.cjs",
+      "sha256": "f7581dc8834442cb89c1a951045bb45588afbfea9081064564626555a83ddf37"
+    },
+    {
+      "file": "services/suporte-transacoes.cjs",
+      "sha256": "6325d14452f080205ebc484f1826e609b6e81e0272f45745f5daf227526ea9ce"
+    },
+    {
+      "file": "services/validacao-publicacao.cjs",
+      "sha256": "fa5fba7b369043afbd3b788d087f1c73cb735c64fe9d4b1f055bc7516bb47902"
+    },
+    {
+      "file": "tests/continuidade-comandos.test.cjs",
+      "sha256": "252844411a84fba0a1e166ab64384d41cf14627f4cbf4894ca6765850857fff4"
+    },
+    {
+      "file": "tests/gate-final-selado.test.cjs",
+      "sha256": "b75a8a3356a80881cd4218a2bc19d2a0d56df00b163b24ea9daaacef43c7fb19"
+    },
+    {
+      "file": "tests/helpers/gate-final-selado.cjs",
+      "sha256": "d2719f23c21beb34f4c431fc36370ebc02d111b3e889585a412e88c06866aa35"
+    },
+    {
+      "file": "tests/operacoes-pos-substituicao.test.cjs",
+      "sha256": "3eac1c8cca988ae42c17e177988b4427e7e2109acb09e762d5961cc5dbca46a9"
+    },
+    {
+      "file": "tests/t1-controlada.test.cjs",
+      "sha256": "6bd8afa374ec445aea88b642391b1e779c105b37a43b986fbf41ddbaa2ac12c1"
+    }
+  ]
+}

@@ -1,0 +1,202 @@
+{
+  "status": "PRECHECK_INTEGRACAO_APROVADO",
+  "checkedUtc": "2026-11-03T04:11:02.237Z",
+  "controllerPid": 25144,
+  "supervisorPid": 15788,
+  "httpStatus": 503,
+  "comparison": {
+    "hashes": {
+      "mysql": "2aa2ee825c85538b01638712d9c3caf7a74fbcfcad8093809c10fbd16fad57d0",
+      "supabase": "c1a31bf5df8944eb33c5fa5c6a5c2b7870a36d5f5a53b6385021219b4370e595",
+      "catalogos": "f2e09f8ba183b735e0bc4888345d7112f7bb16ac62dc3daf8ea1b13ba80bf615"
+    },
+    "counts": {
+      "usuarios": {
+        "mysql": 9,
+        "supabase": 10
+      },
+      "eventos": {
+        "mysql": 5,
+        "supabase": 6
+      },
+      "custos_evento": {
+        "mysql": 3,
+        "supabase": 5
+      },
+      "cotacoes": {
+        "mysql": 3,
+        "supabase": 4
+      },
+      "itens_cotacao": {
+        "mysql": 13,
+        "supabase": 15
+      },
+      "propostas": {
+        "mysql": 2,
+        "supabase": 3
+      },
+      "inscricoes": {
+        "mysql": 2,
+        "supabase": 3
+      },
+      "solicitacoes_acesso": {
+        "mysql": 5,
+        "supabase": 6
+      }
+    },
+    "additionalIds": {
+      "usuarios": [
+        10
+      ],
+      "eventos": [
+        12
+      ],
+      "custos_evento": [
+        7,
+        8
+      ],
+      "cotacoes": [
+        6
+      ],
+      "itens_cotacao": [
+        22,
+        23
+      ],
+      "propostas": [
+        3
+      ],
+      "inscricoes": [
+        3
+      ],
+      "solicitacoes_acesso": [
+        6
+      ]
+    },
+    "mysqlRows": 42,
+    "supabaseRows": 52
+  },
+  "writersBefore": {
+    "local": {
+      "capturedUtc": "2026-11-03T04:10:48.510Z",
+      "knownBackend": {
+        "pid": 15788,
+        "parentPid": 25144,
+        "criadoEm": "2026-11-02T16:18:29.8454050Z",
+        "entradaConhecida": true,
+        "boot": "b8446152-40b6-47cd-8f9c-193658b9377d",
+        "portaExclusivaLocal": true
+      },
+      "unknownProcessCount": 0,
+      "tasks": 0,
+      "mysqlClientPids": [],
+      "httpStatus": 503
+    },
+    "database": {
+      "capturedUtc": "2026-11-03T04:10:48.511Z",
+      "mysql": {
+        "otherClients": 0,
+        "otherTransactions": 0,
+        "enabledJobs": 0,
+        "scheduler": "OFF"
+      },
+      "supabase": {
+        "sessions": [
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "authenticator",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          }
+        ],
+        "activeCron": 0,
+        "httpQueue": 0,
+        "tlsVerified": true
+      }
+    }
+  },
+  "writersAfter": {
+    "database": {
+      "capturedUtc": "2026-11-03T04:10:57.631Z",
+      "mysql": {
+        "otherClients": 0,
+        "otherTransactions": 0,
+        "enabledJobs": 0,
+        "scheduler": "OFF"
+      },
+      "supabase": {
+        "sessions": [
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "authenticator",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          }
+        ],
+        "activeCron": 0,
+        "httpQueue": 0,
+        "tlsVerified": true
+      }
+    },
+    "local": {
+      "capturedUtc": "2026-11-03T04:11:02.214Z",
+      "knownBackend": {
+        "pid": 15788,
+        "parentPid": 25144,
+        "criadoEm": "2026-11-02T16:18:29.8454050Z",
+        "entradaConhecida": true,
+        "boot": "b8446152-40b6-47cd-8f9c-193658b9377d",
+        "portaExclusivaLocal": true
+      },
+      "unknownProcessCount": 0,
+      "tasks": 0,
+      "mysqlClientPids": [],
+      "httpStatus": 503
+    }
+  },
+  "backupsIntegrityVerified": true,
+  "checkpointUnchanged": true,
+  "environmentUnchanged": true,
+  "stateUnchanged": true,
+  "t1CompleteAndClean": true,
+  "historicalAbsenceOfWritesProven": false,
+  "historicalGapAcknowledged": true,
+  "dataWrites": false
+}

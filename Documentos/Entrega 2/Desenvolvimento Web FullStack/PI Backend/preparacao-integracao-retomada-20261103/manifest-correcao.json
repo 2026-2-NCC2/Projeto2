@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "file": "status-atomico.ps1",
+      "sha256": "ce4777b786b5c66458c81ba20ae960495982a1615c9d5b71e7b695dac65844b7"
+    },
+    {
+      "file": "publicar-status.ps1",
+      "sha256": "b038ba1b8abb70650fa985119cf9a2c97b85484e211be45a4521718ef4c5a08b"
+    },
+    {
+      "file": "processo-verificado.ps1",
+      "sha256": "f96192b50f9e2ee5dac72e989a2c9411d0f9b10c0a5f1f7876f936aee5201867"
+    },
+    {
+      "file": "continuidade-observacao.cjs",
+      "sha256": "d93578ac4a7fca132f17b4ac2129cd4166afc3c029b16b207adf370d99d812a5"
+    },
+    {
+      "file": "snapshot-retomada.cjs",
+      "sha256": "6e476d76ac0d14f32ef6f1ade1724f02a01dbd4ac583a2933bd97b36c49f649d"
+    },
+    {
+      "file": "origem-operacional.json",
+      "sha256": "0fdb4228dde7bb62478a266c9edaef3d21466f8524c52e846cfe1ba41e06f3da"
+    },
+    {
+      "file": "sequencia-segura.ps1",
+      "sha256": "06aa208ea40e6e613722276f4c5d70e180fe8b01a125bf8d6d0c1edf0368d18c"
+    },
+    {
+      "file": "retomar-operacional.ps1",
+      "sha256": "ca42f22e5063280af8aceab01278531442e5a55b8c90f7f00023126e94d9b9b6"
+    },
+    {
+      "file": "publicar-verificado.ps1",
+      "sha256": "946af91408847d1c9d023a66e11e575cb06e68ff736d73321ea708d533a471e4"
+    },
+    {
+      "file": "candidato/substituir-controlador-selado.cjs",
+      "sha256": "9a69ecd0bb42678911909192f8c1e054dcdec56e8cea73d147259166fbb389db"
+    },
+    {
+      "file": "manifest-alteracoes.json",
+      "sha256": "79dbdba60a38ef83fa9013ec429cc3f916eda0ef3b7b32d8ccee2ae3ab648179"
+    },
+    {
+      "file": "plano-implantacao.json",
+      "sha256": "fdd4738cacdb78f6fbff7805474954b151edf482a0e672199640aa6e18236d3c"
+    }
+  ]
+}

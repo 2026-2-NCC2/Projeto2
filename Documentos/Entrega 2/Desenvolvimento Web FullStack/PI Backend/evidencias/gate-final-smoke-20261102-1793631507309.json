@@ -1,0 +1,266 @@
+{
+  "schemaVersion": 2,
+  "status": "GATE_APROVADO_NA_AVALIACAO_T1_BLOQUEADA_POR_PLANO_EXPIRADO",
+  "finishedUtc": "2026-11-02T14:58:27.309Z",
+  "controllerPid": 5696,
+  "supervisorPid": 9804,
+  "mysqlPid": 4492,
+  "smokeReport": "smoke-pos-substituicao-92bc0812-66bd-4f57-b68f-60e6f2b6bc34.json",
+  "smokeSha256": "da89dbc833545f6e570963fe82a7c40bcc1ead65a19da23e1d0ccc6fba71423f",
+  "profilesApproved": 4,
+  "httpRequests": 26,
+  "smokeFailures": 0,
+  "gateCommandReply": {
+    "pedido": "2aba4235-3dc6-435a-b83b-b32e058de33e",
+    "ok": true,
+    "run": "d1f109dd-2369-4358-a8e1-7279d84d44da",
+    "checkpointId": "349d6df4-7c15-4960-b739-dfd91fd53c8d"
+  },
+  "gateApprovedAtEvaluation": true,
+  "gateExecutedInOwningController": true,
+  "gateUsedAuthenticInMemoryIpcReceipt": true,
+  "gateCollectedFreshReadOnlyEightDomainComparison": true,
+  "comparisonRequiredAndPassed": {
+    "hashes": {
+      "mysql": "2aa2ee825c85538b01638712d9c3caf7a74fbcfcad8093809c10fbd16fad57d0",
+      "supabase": "c1a31bf5df8944eb33c5fa5c6a5c2b7870a36d5f5a53b6385021219b4370e595",
+      "catalogos": "f2e09f8ba183b735e0bc4888345d7112f7bb16ac62dc3daf8ea1b13ba80bf615"
+    },
+    "counts": {
+      "usuarios": {
+        "mysql": 9,
+        "supabase": 10
+      },
+      "eventos": {
+        "mysql": 5,
+        "supabase": 6
+      },
+      "custos_evento": {
+        "mysql": 3,
+        "supabase": 5
+      },
+      "cotacoes": {
+        "mysql": 3,
+        "supabase": 4
+      },
+      "itens_cotacao": {
+        "mysql": 13,
+        "supabase": 15
+      },
+      "propostas": {
+        "mysql": 2,
+        "supabase": 3
+      },
+      "inscricoes": {
+        "mysql": 2,
+        "supabase": 3
+      },
+      "solicitacoes_acesso": {
+        "mysql": 5,
+        "supabase": 6
+      }
+    },
+    "additionalIds": {
+      "usuarios": [
+        10
+      ],
+      "eventos": [
+        12
+      ],
+      "custos_evento": [
+        7,
+        8
+      ],
+      "cotacoes": [
+        6
+      ],
+      "itens_cotacao": [
+        22,
+        23
+      ],
+      "propostas": [
+        3
+      ],
+      "inscricoes": [
+        3
+      ],
+      "solicitacoes_acesso": [
+        6
+      ]
+    },
+    "mysqlRows": 42,
+    "supabaseRows": 52
+  },
+  "readOnlyPreflight": {
+    "status": "PRE_SMOKE_APROVADO",
+    "capturedUtc": "2026-11-02T14:52:54.956Z",
+    "controllerPid": 5696,
+    "supervisorPid": 9804,
+    "httpStatus": 503,
+    "codeManifestMatches": true,
+    "envSha256": "e0811afbcbda6e5304e1f079477d795c766438e1ce7339fec3bfecb986f56cfa",
+    "checkpointSha256": "4ca6ae29e558bd34b89971ce6fefa4e39286c9f10a4c6df15a24b8727bd2462c",
+    "protectedStateSha256": "02980ae000c6358446f84034194eb14a33c8a2c5f663560ebf6d561ca4c0ba6f",
+    "existingBackupHashesVerified": true,
+    "writers": {
+      "capturedUtc": "2026-11-02T14:52:52.340Z",
+      "mysql": {
+        "otherClients": 0,
+        "otherTransactions": 0,
+        "enabledJobs": 0,
+        "scheduler": "OFF"
+      },
+      "supabase": {
+        "sessions": [
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "authenticator",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          }
+        ],
+        "activeCron": 0,
+        "httpQueue": 0,
+        "tlsVerified": true
+      }
+    }
+  },
+  "finalPreservationChecks": {
+    "capturedUtc": "2026-11-02T14:55:59.018Z",
+    "phase": "INICIADA",
+    "frozen": true,
+    "sealed": true,
+    "controllerPid": 5696,
+    "supervisorPid": 9804,
+    "t1Recorded": false,
+    "smokeApproved": true,
+    "smokeFile": "smoke-pos-substituicao-92bc0812-66bd-4f57-b68f-60e6f2b6bc34.json",
+    "smokeSha256": "da89dbc833545f6e570963fe82a7c40bcc1ead65a19da23e1d0ccc6fba71423f",
+    "profiles": 4,
+    "requests": 26,
+    "codeManifestMatches": true,
+    "envUnchanged": true,
+    "checkpointUnchanged": true,
+    "protectedStateUnchanged": true,
+    "existingBackupHashesVerified": true,
+    "ticketSlotsInvalidated": true,
+    "consumedTickets": 2,
+    "lockPresent": false,
+    "expectedCheckpointComparison": {
+      "hashes": {
+        "mysql": "2aa2ee825c85538b01638712d9c3caf7a74fbcfcad8093809c10fbd16fad57d0",
+        "supabase": "c1a31bf5df8944eb33c5fa5c6a5c2b7870a36d5f5a53b6385021219b4370e595",
+        "catalogos": "f2e09f8ba183b735e0bc4888345d7112f7bb16ac62dc3daf8ea1b13ba80bf615"
+      },
+      "counts": {
+        "usuarios": {
+          "mysql": 9,
+          "supabase": 10
+        },
+        "eventos": {
+          "mysql": 5,
+          "supabase": 6
+        },
+        "custos_evento": {
+          "mysql": 3,
+          "supabase": 5
+        },
+        "cotacoes": {
+          "mysql": 3,
+          "supabase": 4
+        },
+        "itens_cotacao": {
+          "mysql": 13,
+          "supabase": 15
+        },
+        "propostas": {
+          "mysql": 2,
+          "supabase": 3
+        },
+        "inscricoes": {
+          "mysql": 2,
+          "supabase": 3
+        },
+        "solicitacoes_acesso": {
+          "mysql": 5,
+          "supabase": 6
+        }
+      },
+      "additionalIds": {
+        "usuarios": [
+          10
+        ],
+        "eventos": [
+          12
+        ],
+        "custos_evento": [
+          7,
+          8
+        ],
+        "cotacoes": [
+          6
+        ],
+        "itens_cotacao": [
+          22,
+          23
+        ],
+        "propostas": [
+          3
+        ],
+        "inscricoes": [
+          3
+        ],
+        "solicitacoes_acesso": [
+          6
+        ]
+      },
+      "mysqlRows": 42,
+      "supabaseRows": 52
+    },
+    "httpStatus": 503
+  },
+  "readyToExecuteT1": false,
+  "readyToAuthorizeT1WithoutFurtherPreparation": false,
+  "blocker": {
+    "code": "PLANO_T1_EXPIRADO_SEM_COMANDO_DE_RENOVACAO",
+    "ttlMs": 30000,
+    "gateReplyObservedBeforeUtc": "2026-11-02T14:55:59.018Z",
+    "expirationConfirmedAtUtc": "2026-11-02T14:57:03.000Z",
+    "cachedPlanRenewalRejectedBySourceGuard": true,
+    "executionChecksExpiredCachedGateBeforeRevalidation": true,
+    "executionFailureProvoked": false
+  },
+  "newHandoffExecuted": false,
+  "t1Executed": false,
+  "t1JournalCreated": false,
+  "dataWrites": false,
+  "maintenanceReleased": false,
+  "jwtRotated": false,
+  "checkpointChanged": false,
+  "backupsGenerated": false,
+  "deltaOrchestratorExecuted": false,
+  "rollbackExecuted": false,
+  "commitsCreated": false,
+  "historicalAbsenceOfWritesProven": false,
+  "historicalGapAcknowledged": true,
+  "receiptNotice": "Este arquivo relata a avaliacao; nao substitui recibo privado nem renova plano expirado."
+}

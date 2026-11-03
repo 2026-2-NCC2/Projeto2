@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 2,
+  "status": "T1_E_LIMPEZA_APROVADAS",
+  "finishedUtc": "2026-11-02T17:34:26.374Z",
+  "plan": {
+    "pedido": "3e07d669-115f-48e8-8016-a490b71ea600",
+    "ok": true,
+    "run": "00fd0398-74a4-4bd7-a763-bdac24b78237",
+    "checkpointId": "349d6df4-7c15-4960-b739-dfd91fd53c8d",
+    "emitidoEm": 1793639522017,
+    "expiraEm": 1793639550000
+  },
+  "executionCommandSentUtc": "2026-11-02T17:12:10.554Z",
+  "executionCommandSentOnce": true,
+  "executionReply": {
+    "pedido": "a5c6cb32-95f3-40be-ac6f-2509a44ca352",
+    "ok": true,
+    "run": "00fd0398-74a4-4bd7-a763-bdac24b78237",
+    "etapa": "CONCLUIDA",
+    "createdEventIds": [
+      16
+    ],
+    "createdCostIds": [
+      13
+    ],
+    "cleanupVerified": true,
+    "unknownResult": false
+  },
+  "postCleanupReadOnlyAudit": {
+    "status": "AUDITORIA_POS_T1_APROVADA",
+    "capturedUtc": "2026-11-02T17:19:43.168Z",
+    "run": "00fd0398-74a4-4bd7-a763-bdac24b78237",
+    "eventIds": [
+      16
+    ],
+    "costIds": [
+      13
+    ],
+    "operations": [
+      {
+        "method": "POST",
+        "route": "/eventos",
+        "status": 201
+      },
+      {
+        "method": "PUT",
+        "route": "/eventos/16/custos",
+        "status": 200
+      },
+      {
+        "method": "SQL",
+        "route": "LIMPEZA_IDS",
+        "status": 200
+      }
+    ],
+    "verificationCount": 3,
+    "cleanupVerified": true,
+    "cleanupSerializable": true,
+    "residualRows": 0,
+    "unknownResult": false,
+    "retryCount": 0,
+    "comparison": {
+      "hashes": {
+        "mysql": "2aa2ee825c85538b01638712d9c3caf7a74fbcfcad8093809c10fbd16fad57d0",
+        "supabase": "c1a31bf5df8944eb33c5fa5c6a5c2b7870a36d5f5a53b6385021219b4370e595",
+        "catalogos": "f2e09f8ba183b735e0bc4888345d7112f7bb16ac62dc3daf8ea1b13ba80bf615"
+      },
+      "counts": {
+        "usuarios": {
+          "mysql": 9,
+          "supabase": 10
+        },
+        "eventos": {
+          "mysql": 5,
+          "supabase": 6
+        },
+        "custos_evento": {
+          "mysql": 3,
+          "supabase": 5
+        },
+        "cotacoes": {
+          "mysql": 3,
+          "supabase": 4
+        },
+        "itens_cotacao": {
+          "mysql": 13,
+          "supabase": 15
+        },
+        "propostas": {
+          "mysql": 2,
+          "supabase": 3
+        },
+        "inscricoes": {
+          "mysql": 2,
+          "supabase": 3
+        },
+        "solicitacoes_acesso": {
+          "mysql": 5,
+          "supabase": 6
+        }
+      },
+      "additionalIds": {
+        "usuarios": [
+          10
+        ],
+        "eventos": [
+          12
+        ],
+        "custos_evento": [
+          7,
+          8
+        ],
+        "cotacoes": [
+          6
+        ],
+        "itens_cotacao": [
+          22,
+          23
+        ],
+        "propostas": [
+          3
+        ],
+        "inscricoes": [
+          3
+        ],
+        "solicitacoes_acesso": [
+          6
+        ]
+      },
+      "mysqlRows": 42,
+      "supabaseRows": 52
+    },
+    "catalogsEqualExceptSanctionedSequences": true,
+    "sequencesReset": false,
+    "stateJournalHashMatches": true,
+    "envJwtUnchanged": true,
+    "checkpointUnchanged": true,
+    "backupHashesVerified": true,
+    "codeManifestMatches": true,
+    "httpStatus": 503,
+    "phase": "INICIADA",
+    "controlStage": "ATIVO",
+    "controllerPid": 25144,
+    "supervisorPid": 15788,
+    "lockPresent": false,
+    "writersBefore": {
+      "capturedUtc": "2026-11-02T17:19:31.986Z",
+      "mysql": {
+        "otherClients": 0,
+        "otherTransactions": 0,
+        "enabledJobs": 0,
+        "scheduler": "OFF"
+      },
+      "supabase": {
+        "sessions": [
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "authenticator",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "authenticator",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          }
+        ],
+        "activeCron": 0,
+        "httpQueue": 0,
+        "tlsVerified": true
+      }
+    },
+    "writersAfter": {
+      "capturedUtc": "2026-11-02T17:19:40.877Z",
+      "mysql": {
+        "otherClients": 0,
+        "otherTransactions": 0,
+        "enabledJobs": 0,
+        "scheduler": "OFF"
+      },
+      "supabase": {
+        "sessions": [
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "supabase_admin",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "authenticator",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "authenticator",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          },
+          {
+            "usename": "pgbouncer",
+            "state": "idle",
+            "transaction_open": false
+          }
+        ],
+        "activeCron": 0,
+        "httpQueue": 0,
+        "tlsVerified": true
+      }
+    },
+    "smokeFile": "smoke-pos-substituicao-26e5cc54-80b3-4feb-924f-13ffe0ac38a8.json",
+    "smokeSha256": "bc95ac884a837bf6a51dd72588bb774c587c9e3a790fa6ca67526946b494afae",
+    "smokeStartedUtc": "2026-11-02T17:10:44.913Z",
+    "smokeAgeMs": 538255,
+    "smokeValidUntilUtc": "2026-11-02T17:25:44.913Z"
+  },
+  "createdRecords": {
+    "eventos": [
+      16
+    ],
+    "custos_evento": [
+      13
+    ]
+  },
+  "removedRecords": {
+    "eventos": [
+      16
+    ],
+    "custos_evento": [
+      13
+    ]
+  },
+  "remainingRecordsFromThisT1": 0,
+  "preexistingAdditionalRecordsPreserved": 10,
+  "existingDataUnchanged": true,
+  "cleanupCommitted": true,
+  "cleanupSerializable": true,
+  "cleanupLimitedToRegisteredIds": true,
+  "automaticWriteRetries": 0,
+  "automaticMigrationRollback": false,
+  "maintenanceReleased": false,
+  "httpStatus": 503,
+  "jwtChanged": false,
+  "checkpointChanged": false,
+  "backupsChanged": false,
+  "commitsCreated": false,
+  "historicalAbsenceOfWritesProven": false,
+  "historicalGapAcknowledged": true,
+  "releaseReadiness": {
+    "dataIntegrityPassed": true,
+    "cleanupPassed": true,
+    "journalIntegrityPassed": true,
+    "operationalWriterControlPassed": true,
+    "currentControllerIpcConfirmed": true,
+    "maintenanceKept": true,
+    "technicalChecksObservedPassed": true,
+    "formalReleaseGateExecuted": false,
+    "reason": "O comando disponivel combina gate de liberacao com retirada de manutencao; nao foi invocado sem autorizacao.",
+    "explicitReleaseAuthorizationRequired": true,
+    "freshGateMustPassImmediatelyBeforeRelease": true,
+    "smokeValidUntilUtc": "2026-11-02T17:25:44.913Z"
+  }
+}

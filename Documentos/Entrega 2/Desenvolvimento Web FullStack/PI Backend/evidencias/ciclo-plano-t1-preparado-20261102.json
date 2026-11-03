@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "status": "CICLO_PLANO_T1_CORRIGIDO_E_TESTADO_EM_ISOLAMENTO",
+  "activeCodeApplied": false,
+  "operationalActivationExecuted": false,
+  "readyForOperationalActivationAuthorization": true,
+  "readyForRealT1": false,
+  "tests": {
+    "passed": 96,
+    "failed": 0,
+    "newScenarios": 32,
+    "affectedRegressions": 64
+  },
+  "syntax": {
+    "javascriptFiles": 7,
+    "errors": 0
+  },
+  "ttlMs": 30000,
+  "oldPlansReactivated": false,
+  "oldPlanDeadlineExtended": false,
+  "newGateAndNonceRequired": true,
+  "singleActivePlanPerOwner": true,
+  "consumptionBeforeFirstAwait": true,
+  "dryRunPatchCheckPassed": true,
+  "livePreservation": {
+    "stateUnchanged": true,
+    "envJwtUnchanged": true,
+    "checkpointUnchanged": true,
+    "activeCodeManifestMatches": true,
+    "backupHashesVerified": true,
+    "phase": "INICIADA",
+    "controlStage": "ATIVO",
+    "controllerPid": 5696,
+    "supervisorPid": 9804,
+    "t1Recorded": false,
+    "httpStatus": 503
+  },
+  "realDatabaseConnectionsExecuted": false,
+  "t1Executed": false,
+  "maintenanceReleased": false,
+  "jwtChanged": false,
+  "checkpointChanged": false,
+  "backupsChanged": false,
+  "rollbackExecuted": false,
+  "commitsCreated": false
+}

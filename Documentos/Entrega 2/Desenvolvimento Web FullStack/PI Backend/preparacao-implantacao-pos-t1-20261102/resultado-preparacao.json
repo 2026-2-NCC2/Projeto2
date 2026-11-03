@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "packageSha256": "f1bb2c679d5b040187ccdad6cecbb469cf82c897ed23fb7e985821aa83c00943",
+  "patchSha256": "aec96b064c03873b9204e75e27250b428162a92acd53e983012ff3533a311269",
+  "tests": {
+    "nodePassed": 296,
+    "powershellMockPassed": 10,
+    "totalPassed": 306,
+    "failures": 0,
+    "skipped": 0
+  },
+  "operationalDeploymentPrepared": true,
+  "realDeploymentExecuted": false,
+  "maintenanceReleased": false,
+  "dataWrites": false,
+  "historicalAbsenceOfWritesProven": false,
+  "remainingRisks": [
+    "Intervalo controlado sem IPC/listener durante troca exclusiva de sockets; nunca trafego normal.",
+    "Status antigo deve ser observado pelo operador no canal privado original; arquivo nao e capacidade de admissao.",
+    "Perda inesperada antes do fence ou falha apos o fence exige interrupcao e analise; sem retomada automatica.",
+    "Evidencias atuais de dados/escritores e smoke devem ser recolhidas operacionalmente."
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "checkedUtc": "2026-11-03T03:49:44.671Z",
+  "tests": {
+    "node": 39,
+    "powershell": 16,
+    "total": 55,
+    "failures": 0,
+    "skipped": 0
+  },
+  "preserved": {
+    "environment": true,
+    "state": true,
+    "journal": true,
+    "checkpoint": true,
+    "applied27": true,
+    "fullManifest": true
+  },
+  "historicalRefusalCauseConfirmed": false,
+  "realAdmissionExecuted": false,
+  "realStatusPublished": false,
+  "databaseConnections": false,
+  "dataWrites": false,
+  "readyForOperationalAdmission": false
+}

@@ -1,0 +1,217 @@
+{
+  "startedUtc": "2026-11-02T14:53:35.332Z",
+  "controllerPid": 5696,
+  "status": "RECUPERACAO_E_SMOKE_ISOLADO_APROVADOS",
+  "maintenanceReleased": false,
+  "dataWrites": false,
+  "jwtRotated": false,
+  "backupsGenerated": false,
+  "checkpointCreated": false,
+  "deltaOrchestratorExecuted": false,
+  "rollbackExecuted": false,
+  "historicalAbsenceOfWritesProven": false,
+  "stage": "smoke_isolado_sem_abrir_http",
+  "aceiteRiscoResidual": {
+    "criterio": "EQUIVALENCIA_ATUAL",
+    "reconheceLacunaHistorica": true,
+    "aceitaRiscoResidual": true,
+    "aceitaControleOperacionalSemLockGlobal": true,
+    "referenciaAutorizacao": "Usuario autorizou explicitamente recuperacao controlada e smoke final em 01/11/2026, aceitando o risco residual da lacuna historica nao comprovada; esclareceu manter HTTP 503 integral e preparar smoke isolado. Sem liberacao normal.",
+    "aceitoEm": "2026-11-01T19:38:56.066Z",
+    "evidenciaSha256": "62dd593f83c31cd69c9c6195a0d2e6876c994d63e35a2ea41b7bc871773da2a9",
+    "checkpointId": "349d6df4-7c15-4960-b739-dfd91fd53c8d",
+    "checkpointSha256": "4ca6ae29e558bd34b89971ce6fefa4e39286c9f10a4c6df15a24b8727bd2462c",
+    "janelaId": "b61595d0-b264-4237-a230-4e08be12af2b",
+    "configuracaoHash": "c5e27747dc3346a2a288c1ed71303f9b6813011e03720d6641bfe96872520aa8"
+  },
+  "evidenceFile": "C:\\Users\\Lucas\\Documents\\GitHub\\Projeto2\\Documentos\\Entrega 2\\Desenvolvimento Web FullStack\\PI Backend\\evidencias\\reconciliacao-formal-leitura-06934441-8467-4354-b4c3-0d540945ca7e.json",
+  "gateApproved": true,
+  "previousSupervisorPid": 31664,
+  "previousControllerPid": 34428,
+  "previousControllerStopped": 34428,
+  "recoveryResult": {
+    "status": "PRONTA_SMOKE",
+    "reutilizada": false
+  },
+  "recoveryExecuted": true,
+  "smokeResult": {
+    "status": "SMOKE_ISOLADO_APROVADO",
+    "result": {
+      "status": "SMOKE_ISOLADO_LEITURA_APROVADO",
+      "http": [
+        {
+          "method": "GET",
+          "route": "/perfil",
+          "status": 401
+        },
+        {
+          "method": "GET",
+          "route": "/perfil",
+          "status": 401
+        },
+        {
+          "method": "GET",
+          "route": "/perfil",
+          "status": 401
+        },
+        {
+          "method": "POST",
+          "route": "/login",
+          "status": 200,
+          "perfil": "admin"
+        },
+        {
+          "method": "GET",
+          "route": "/perfil",
+          "status": 200,
+          "perfil": "admin"
+        },
+        {
+          "method": "GET",
+          "route": "/admin/eventos",
+          "status": 200,
+          "perfil": "admin"
+        },
+        {
+          "method": "GET",
+          "route": "/usuarios",
+          "status": 200,
+          "perfil": "admin"
+        },
+        {
+          "method": "POST",
+          "route": "/login",
+          "status": 200,
+          "perfil": "participante"
+        },
+        {
+          "method": "GET",
+          "route": "/perfil",
+          "status": 200,
+          "perfil": "participante"
+        },
+        {
+          "method": "GET",
+          "route": "/participante/eventos",
+          "status": 200,
+          "perfil": "participante"
+        },
+        {
+          "method": "GET",
+          "route": "/usuarios",
+          "status": 403,
+          "perfil": "participante"
+        },
+        {
+          "method": "POST",
+          "route": "/login",
+          "status": 200,
+          "perfil": "organizador"
+        },
+        {
+          "method": "GET",
+          "route": "/perfil",
+          "status": 200,
+          "perfil": "organizador"
+        },
+        {
+          "method": "GET",
+          "route": "/cotacoes",
+          "status": 200,
+          "perfil": "organizador"
+        },
+        {
+          "method": "GET",
+          "route": "/usuarios",
+          "status": 403,
+          "perfil": "organizador"
+        },
+        {
+          "method": "POST",
+          "route": "/login",
+          "status": 200,
+          "perfil": "fornecedor"
+        },
+        {
+          "method": "GET",
+          "route": "/perfil",
+          "status": 200,
+          "perfil": "fornecedor"
+        },
+        {
+          "method": "GET",
+          "route": "/fornecedor/cotacoes",
+          "status": 200,
+          "perfil": "fornecedor"
+        },
+        {
+          "method": "GET",
+          "route": "/usuarios",
+          "status": 403,
+          "perfil": "fornecedor"
+        },
+        {
+          "method": "GET",
+          "route": "/fornecedor/cotacoes",
+          "status": 403,
+          "perfil": "admin"
+        },
+        {
+          "method": "POST",
+          "route": "/eventos",
+          "status": 503
+        },
+        {
+          "method": "PUT",
+          "route": "/eventos/1/custos",
+          "status": 503
+        },
+        {
+          "method": "POST",
+          "route": "/fornecedor/propostas",
+          "status": 503
+        },
+        {
+          "method": "POST",
+          "route": "/participante/inscricoes",
+          "status": 503
+        },
+        {
+          "method": "PATCH",
+          "route": "/eventos/1",
+          "status": 503
+        },
+        {
+          "method": "DELETE",
+          "route": "/eventos/1",
+          "status": 503
+        }
+      ],
+      "perfisAprovados": 4,
+      "jwtAntigosRecusados": true,
+      "contratoPerfilValidado": true,
+      "permissoesAprovadas": true,
+      "escritasBloqueadas": true,
+      "dataWrites": false,
+      "maintenanceReleased": false,
+      "mysqlModulesLoaded": false
+    }
+  },
+  "supervisorPid": 9804,
+  "phase": "INICIADA",
+  "httpStatus": 503,
+  "additional10RowsPreserved": true,
+  "checkpointUnchanged": true,
+  "environmentUnchanged": true,
+  "backupsIntegrityVerified": true,
+  "startupProvider": "supabase",
+  "mysqlModulesLoaded": false,
+  "currentOperationalWriterControlConfirmed": true,
+  "finishedUtc": "2026-11-02T14:54:20.376Z",
+  "normalOperationReleased": false,
+  "gateFinalApproved": false,
+  "handoffGatesApproved": true,
+  "handoffId": "ebc49d39-b27c-4f75-bf5e-b398635821e3",
+  "recoveryExecutedInThisHandoff": false,
+  "checkpointChanged": false
+}

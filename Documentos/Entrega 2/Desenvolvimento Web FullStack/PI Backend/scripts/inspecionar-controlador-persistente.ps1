@@ -3,13 +3,15 @@ $ErrorActionPreference='Stop'
 $entry=Join-Path $PSScriptRoot 'controlador-recuperacao-smoke-selado.cjs'
 $backendEntry=Join-Path $PSScriptRoot 'iniciar-instancia-planejada.cjs'
 $nextEntry=Join-Path $PSScriptRoot 'substituir-controlador-selado.cjs'
+$restartEntry=Join-Path $PSScriptRoot 'restabelecer-controlador-apos-reinicio.cjs'
 $nextBackend=Join-Path $PSScriptRoot 'iniciar-supervisor-substituido.cjs'
 $p=Get-CimInstance Win32_Process -Filter "ProcessId=$PidAlvo"
 $child=Get-CimInstance Win32_Process -Filter "ProcessId=$PidBackend"
 $isNew=$false
-if($null -ne $p -and $p.CommandLine.Contains($nextEntry)){
+if($null -ne $p -and ($p.CommandLine.Contains($nextEntry) -or $p.CommandLine.Contains($restartEntry))){
   $e=Get-Content -LiteralPath (Join-Path $env:USERPROFILE 'BackupsTrocaTicket/SupervisorCutover/estado.json') -Raw|ConvertFrom-Json
   $isNew=$e.controleSelado.controlador.pid -eq $PidAlvo -and $e.controleSelado.supervisor.pid -eq $PidBackend -and $e.controleSelado.etapa -in @('VINCULANDO','ATIVO') -and $null -eq $e.controleSelado.ticketControlador -and $null -eq $e.controleSelado.ticketSupervisor
+  if($p.CommandLine.Contains($restartEntry)){$isNew=$isNew -and $e.controleSelado.modo -eq 'RESTABELECIMENTO_POS_REINICIO'}
 }
 if($null -eq $p -or $null -eq $child -or $p.Name -ne 'node.exe' -or $child.Name -ne 'node.exe' -or (!$p.CommandLine.Contains($entry) -and !$isNew) -or (!$child.CommandLine.Contains($backendEntry) -and !($isNew -and $child.CommandLine.Contains($nextBackend))) -or $child.ParentProcessId -ne $PidAlvo){throw 'CONTROLE_IDENTIDADE_RECUSADA'}
 $listeners=@(Get-NetTCPConnection -LocalPort 3001 -State Listen -ErrorAction Stop)

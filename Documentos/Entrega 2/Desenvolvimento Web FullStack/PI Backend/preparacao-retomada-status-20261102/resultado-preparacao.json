@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "correctionManifestSha256": "43ba0c318f92caee38d3ec38b41ff33057ec10525052935960324fde85074a33",
+  "cause": {
+    "powershellVersion": "5.1.26100.9711",
+    "psNullCoercedToEmptyString": true,
+    "originalReplaceError": "System.ArgumentException",
+    "clrNullStringReplacementSucceeded": true,
+    "orchestrationIgnoredNonzeroExitCode": true
+  },
+  "tests": {
+    "atomicityAndSequence": 43,
+    "entryWithFakes": 8,
+    "snapshotClassification": 21,
+    "total": 72,
+    "failures": 0,
+    "skipped": 0
+  },
+  "operationalResumePrepared": true,
+  "realDeploymentExecuted": false,
+  "realAdmissionExecuted": false,
+  "realStatusPublicationExecuted": false,
+  "dataWrites": false,
+  "maintenanceReleased": false,
+  "original27FilesModified": false,
+  "historicalAbsenceOfWritesProven": false,
+  "preserved": {
+    "all27HashesMatch": true,
+    "oldPackageUnchanged": true,
+    "privateStateUnchanged": true,
+    "environmentUnchanged": true,
+    "correctionSourceHashesMatch": true,
+    "journalUnchanged": true,
+    "checkpointUnchanged": true
+  },
+  "readOnlyRealEntryVerified": true,
+  "verifiedUtc": "2026-11-03T03:17:45.186Z",
+  "observedControllerPid": 25144,
+  "observedSupervisorPid": 15788,
+  "partialState": "APLICADO_AGUARDANDO_ADMISSAO",
+  "patchReapplyRequired": false,
+  "structuralChecks": {
+    "manifestVerified": true,
+    "incorrectManifestHashRejected": true,
+    "powershellSyntaxPassed": true,
+    "nodeSyntaxPassed": true
+  }
+}

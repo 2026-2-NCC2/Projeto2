@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "packageSha256": "f1bb2c679d5b040187ccdad6cecbb469cf82c897ed23fb7e985821aa83c00943",
+  "expectedStateSha256": "083542b81235f5b68e6e98c140cef38abee5a1c4a63117f61283eb7865535d45",
+  "environmentSha256": "e0811afbcbda6e5304e1f079477d795c766438e1ce7339fec3bfecb986f56cfa",
+  "checkpointSha256": "4ca6ae29e558bd34b89971ce6fefa4e39286c9f10a4c6df15a24b8727bd2462c",
+  "journalSha256": "0c8d38c0ff4f05334f433b5d581b4d97f05bb901f751ed0f6058bff3fd8212b1"
+}
