@@ -20,8 +20,17 @@ function projetarPerfil(data, id) {
 // configuracao/isolamento; importar este modulo nao inicializa cliente algum.
 // Rotas, autenticacao e selecao do provedor permanecem inalteradas.
 function criarRepositorioUsuarios(
-  cliente = require("../../db-supabase.cjs").criarClienteSupabase()
+  cliente = require("../../db-supabase.cjs").criarClienteSupabase(),
+  { contasTeste = false } = {}
 ) {
+  async function conferirEncerramento(id) {
+    if (!contasTeste) return;
+    const {data,error}=await cliente.schema('public').from('contas_teste_imagens')
+      .select('estado').eq('usuario_id',id).maybeSingle();
+    if(error)throw error; // Flag só pode ser ativada após preparar a tabela.
+    if(data && data.estado!=='ativa')return false;
+    return true;
+  }
   return {
     ...require("./perfil-profissional.cjs").criarRepositorioProfissional(cliente),
     async criar({ nome, email, senhaHash, perfil }) {
@@ -73,6 +82,7 @@ function criarRepositorioUsuarios(
           code: "SUPABASE_USUARIO_RESPONSE",
         });
       }
+      if(await conferirEncerramento(data.id)===false)return undefined;
       return Object.fromEntries(camposLogin.map(campo => [campo, data[campo]]));
     },
 
@@ -113,6 +123,7 @@ function criarRepositorioUsuarios(
           code: "SUPABASE_USUARIO_RESPONSE",
         });
       }
+      if(await conferirEncerramento(data.id)===false)return undefined;
       return Object.fromEntries(camposAutenticacao.map(campo => [campo, data[campo]]));
     },
 

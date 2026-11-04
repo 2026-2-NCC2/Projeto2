@@ -15,7 +15,8 @@ function load(file, name, env = {}) {
     .replaceAll('export function ', 'function ').replaceAll('export async function ', 'async function ')
   const result = transformSync(file, source, { jsx: { runtime: 'classic', pragma: 'jsx', pragmaFrag: 'Fragment' } })
   assert.equal(result.errors.length, 0)
-  return vm.runInNewContext(result.code + '\n' + name, { jsx, Fragment: 'fragment', URL, Icone: 'svg', AbortController,
+  class URLTeste extends URL { static createObjectURL(){return 'blob:previa-local'} static revokeObjectURL(){} }
+  return vm.runInNewContext(result.code + '\n' + name, { jsx, Fragment: 'fragment', URL:URLTeste, Icone: 'svg', AbortController, useFocoModal:()=>({current:null}),
     apiUrl: x => x, sessionStorage: { getItem: () => 'token-a' }, ...env })
 }
 const arquivo = { size: 20, type: 'image/png' }
@@ -116,7 +117,7 @@ test('imagens reutilizam PerfilPessoal nos quatro perfis e CSS não mascara over
   for(const width of [1920,1366,768,390,360])assert.ok((width<=700 ? regras[1] : regras[0]).toString().includes('minmax(0, 1fr)'))
 })
 
-test('cabeçalho dos quatro perfis usa identidade real sem controles de upload ou chamadas',()=>{
+test('cabeçalho dos quatro perfis usa identidade real e mantém imagens bloqueadas',()=>{
   const cabecalho=load('components/perfil/ImagensPerfil.jsx','ImagensPerfil',{
     acessarImagem(){throw Error('API bloqueada não pode ser consultada')},
   })
@@ -125,7 +126,49 @@ test('cabeçalho dos quatro perfis usa identidade real sem controles de upload o
     assert.match(text(view),new RegExp(rotulo));assert.match(text(view),/Identidade de teste/);assert.match(text(view),/teste@example.invalid/)
     assert.match(text(view),/Indicador real/);assert.doesNotMatch(text(view),/homologação|Storage|Limpeza física/)
     assert.equal(nodes(view).filter(n=>['input','button','img'].includes(n.type)).length,0)
-    assert.ok(nodes(view).some(n=>n.props.className==='perfilCapaVisual'))
-    assert.ok(nodes(view).some(n=>n.props.className==='perfilFotoVisual'))
+    const imagens=nodes(view).filter(n=>typeof n.type==='function')
+    assert.equal(imagens.length,2)
+    assert.ok(imagens.every(n=>n.props.habilitado===false && n.props.integrado===true))
+    assert.deepEqual(imagens.map(n=>n.props.tipo),['capa','foto'])
   }
+})
+
+test('editor integrado mostra prévia local, aguarda confirmação e permite cancelar',async()=>{
+  const calls=[],r=runtime(async p=>{calls.push(p);return null})
+  r.render({habilitado:true,integrado:true});await tick()
+  const input=nodes(r.render()).find(n=>n.type==='input')
+  input.props.onChange({target:{files:[arquivo]}});r.render()
+  const v=r.render();assert.ok(nodes(v).some(n=>n.props.role==='dialog'))
+  assert.ok(nodes(v).some(n=>n.type==='img' && n.props.src==='blob:previa-local'))
+  assert.equal(calls.length,1)
+  button(v,'Cancelar').props.onClick();r.render();assert.ok(!nodes(r.render()).some(n=>n.props.role==='dialog'))
+  assert.equal(calls.length,1);r.unmount()
+})
+
+test('editor integrado salva/substitui e remove via Express sem repetir escrita',async()=>{
+  const calls=[];let atual=null,resolver
+  const r=runtime(async p=>{calls.push(p);if(p.metodo==='PUT')return new Promise(resolve=>{resolver=()=>{atual=imagem;resolve({mensagem:'Imagem atualizada.'})}});if(p.metodo==='DELETE'){atual=null;return{mensagem:'Imagem removida.'}}return atual})
+  r.render({habilitado:true,integrado:true});await tick()
+  assert.ok(button(r.render(),'Adicionar foto'))
+  nodes(r.render()).find(n=>n.type==='input').props.onChange({target:{files:[arquivo]}});r.render()
+  const salvar=button(r.render(),'Salvar imagem').props.onClick
+  const pendente=salvar();await salvar();assert.equal(calls.filter(p=>p.metodo==='PUT').length,1)
+  resolver();await pendente;r.render();await tick();assert.ok(button(r.render(),'Alterar foto'))
+  await button(r.render(),'Remover foto').props.onClick();r.render();await tick()
+  assert.equal(calls.filter(p=>p.metodo==='DELETE').length,1);assert.ok(button(r.render(),'Adicionar foto'));r.unmount()
+})
+
+test('editor integrado bloqueado não oferece envio ou seleção efetiva',()=>{
+  const r=runtime(()=>{throw Error('Não acessar API')});const v=r.render({integrado:true})
+  assert.ok(button(v,'Adicionar foto').props.disabled)
+  assert.ok(nodes(v).find(n=>n.type==='input').props.disabled)
+  assert.equal(button(v,'Salvar imagem'),undefined);assert.equal(button(v,'Remover foto'),undefined);r.unmount()
+})
+
+test('503 na consulta inicial mantém edição bloqueada mesmo com montagem candidata habilitada',async()=>{
+  const calls=[],r=runtime(async p=>{calls.push(p);throw Error('Imagens indisponíveis')})
+  r.render({integrado:true,habilitado:true});await tick();const v=r.render()
+  assert.ok(button(v,'Adicionar foto').props.disabled);assert.ok(nodes(v).find(n=>n.type==='input').props.disabled)
+  nodes(v).find(n=>n.type==='input').props.onChange({target:{files:[arquivo]}})
+  assert.ok(!nodes(r.render()).some(n=>n.props.role==='dialog'));assert.equal(calls.length,1);r.unmount()
 })

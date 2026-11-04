@@ -539,6 +539,27 @@ textarea:focus {
 .perfilApresentacaoIndicadores { grid-column: 1 / -1; min-width: 0; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--cor-borda); }
 .perfilApresentacaoIndicadores .perfilResumoNumeros { gap: 12px 24px; }
 .perfilApresentacaoIndicadores .perfilResumoNumeros > div { min-width: 0; border: 0; padding: 0; overflow-wrap: anywhere; }
+.perfilMidiaControle { position: relative; }
+.perfilMidiaAtual { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+.perfilMidiaEscolher { position: absolute; right: 14px; bottom: 14px; display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 8px 12px; border: 1px solid #fff; border-radius: 8px; background: #28204bcc; color: #fff; cursor: pointer; opacity: 0; }
+.perfilFotoVisual .perfilMidiaEscolher { inset: 0; border: 0; border-radius: inherit; flex-direction: column; padding: 6px; font-size: 11px; }
+.perfilMidiaControle:hover > .perfilMidiaEscolher:not(:disabled), .perfilMidiaEscolher:focus-visible { opacity: 1; }
+.perfilMidiaEscolher:focus-visible, .perfilMidiaRemover:focus-visible { outline: 3px solid var(--cor-primaria); outline-offset: 3px; }
+.perfilMidiaRemover { position: absolute; bottom: 14px; right: 170px; min-height: 44px; padding: 8px 12px; border: 1px solid var(--cor-borda); border-radius: 8px; background: #fff; color: var(--cor-primaria); font-size: 12px; cursor: pointer; }
+.perfilFotoVisual .perfilMidiaRemover { bottom: -30px; right: 0; width: 100%; min-height: 28px; padding: 4px; font-size: 10px; }
+.perfilMidiaFeedback { position: absolute; top: 100%; left: 0; width: min(280px, 80vw); padding: 12px; margin: 4px 0; background: #fff; color: var(--cor-texto-padrao); border: 1px solid var(--cor-borda); border-radius: 8px; z-index: 5; overflow-wrap: anywhere; font-size: 13px; }
+.perfilMidiaFundo { position: fixed; inset: 0; z-index: 2000; display: grid; place-items: center; padding: 16px; background: #15102499; }
+.perfilMidiaEditor { width: min(100%, 560px); max-height: calc(100dvh - 32px); min-width: 0; overflow-y: auto; overscroll-behavior: contain; background: #fff; color: var(--cor-texto-padrao); padding: 24px; border-radius: 14px; box-shadow: var(--sombra-cartao); }
+.perfilMidiaEditor h2 { margin-top: 0; font-size: 20px; }
+.perfilMidiaEditor p { font-size: 13px; line-height: 1.6; }
+.perfilMidiaPrevia { display: block; width: 100%; max-height: 320px; object-fit: contain; background: var(--cor-fundo-suave); }
+.perfilMidiaPrevia-foto { width: min(100%, 240px); aspect-ratio: 1; border-radius: 50%; object-fit: cover; margin: auto; }
+@media (hover: none), (max-width: 700px) {
+  .perfilMidiaEscolher:not(:disabled) { opacity: 1; }
+  .perfilCapaVisual .perfilMidiaRemover { right: 14px; top: 14px; bottom: auto; }
+  .perfilMidiaEditor { padding: 18px; }
+  .perfilMidiaEditor .perfilAcoes > button { flex: 1 1 140px; min-height: 44px; }
+}
 @media (max-width: 700px) {
   .perfilApresentacaoCorpo { grid-template-columns: 80px minmax(0, 1fr); gap: 12px; padding: 0 16px 20px; }
   .perfilFotoVisual { width: 80px; height: 80px; margin-top: -30px; border-width: 4px; }

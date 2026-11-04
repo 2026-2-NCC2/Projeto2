@@ -5,6 +5,7 @@ const desenhos = {
   custos: 'M4 20h16M7 16v-5m5 5V4m5 12V8',
   documento: 'M6 3h9l4 4v14H6V3Zm8 0v5h5M9 12h7m-7 4h7',
   perfil: 'M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM4 21v-2a8 8 0 0 1 16 0v2',
+  camera: 'M8 5 10 2h4l2 3h5v16H3V5h5Zm8 8a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z',
   sair: 'M9 4H4v16h5m6-13 5 5-5 5m-7-5h12',
   busca: 'M16 10a6 6 0 1 1-12 0 6 6 0 0 1 12 0Zm-2 4 6 6',
   inicio: 'm3 10 9-7 9 7M5 9v12h14V9M9 21v-7h6v7',

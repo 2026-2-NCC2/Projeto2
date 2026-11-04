@@ -105,7 +105,10 @@ test('página diferencia carregamento/erro, permite repetir e mostra identidade 
   findButton(r.render({}), 'Tentar novamente').props.onClick(); assert.equal(repeats, 1)
   estado = { perfil: identity, erro: '' }
   const view = r.render({ contexto: 'Participante' })
-  assert.match(text(view), /Pessoa/); assert.match(text(view), /pessoa@example.invalid/)
+  const cabecalho=nodes(view).find(n=>n.props.perfil===identity && n.type==='section')
+  assert.ok(cabecalho)
+  assert.equal(cabecalho.props.perfil.nome,'Pessoa')
+  assert.equal(cabecalho.props.perfil.email,'pessoa@example.invalid')
 })
 
 function eventBus() {

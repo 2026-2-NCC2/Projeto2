@@ -3,7 +3,7 @@ const test = require('node:test'), assert = require('node:assert/strict');
 const express = require('express'), jwt = require('jsonwebtoken');
 const { criarRouterImagens } = require('../imagens/http.cjs');
 const segredo = 'segredo-sintetico-http-imagens-exclusivo-dos-testes';
-async function fixture(t, servico, agora) {
+async function fixture(t, servico, agora, montagem = false) {
   const app = express();
   const autenticar = (req, res, next) => {
     try {
@@ -11,7 +11,8 @@ async function fixture(t, servico, agora) {
       req.usuario = { id: p.id, perfil: ['participante','organizador','fornecedor','admin'][p.id-7] }; next();
     } catch { res.status(401).json({ erro: 'Sessão inválida.' }); }
   };
-  app.use('/perfil/imagens', criarRouterImagens({ autenticar, servico, agora }));
+  if (montagem) require('../imagens/rotas.cjs').instalarRotasImagens(app,autenticar,{servico});
+  else app.use('/perfil/imagens', criarRouterImagens({ autenticar, servico, agora }));
   const server = app.listen(0, '127.0.0.1'); await new Promise(resolve => server.once('listening', resolve));
   t.after(() => new Promise(resolve => { server.closeAllConnections(); server.close(resolve); }));
   const base = `http://127.0.0.1:${server.address().port}/perfil/imagens/`;
@@ -36,6 +37,13 @@ test('router preparado: JWT e propriedade nos quatro perfis; query de outro dono
   }
   assert.equal(chamadas.length,12); assert.ok(chamadas.every(([id])=>[7,8,9,10].includes(id)));
   assert.equal((await r(7,'__proto__')).status,400);
+});
+
+test('montagem explícita conecta serviço existente; dependência inválida nunca libera rotas',async t=>{
+  const {instalarRotasImagens}=require('../imagens/rotas.cjs');
+  let montagens=0;assert.throws(()=>instalarRotasImagens({use(){montagens++}},()=>{},{servico:{}}),/inválida/);assert.equal(montagens,0);
+  const calls=[],r=await fixture(t,{consultar:async u=>{calls.push(u.id);return null},substituir:async()=>({}),remover:async()=>{}},undefined,true);
+  assert.equal((await r(null)).status,401);assert.equal((await r(7)).status,200);assert.deepEqual(calls,[7]);
 });
 test('limites HTTP: MIME, compressão, bytes, frequência e resposta sem cache', async t => {
   let chamadas = 0, tempo = 0;

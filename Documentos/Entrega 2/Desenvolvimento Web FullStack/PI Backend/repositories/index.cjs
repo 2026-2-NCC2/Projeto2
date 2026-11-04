@@ -19,7 +19,8 @@ function prepararRepositorios() {
   // fallback, conexao transacional REST ficticia ou mudanca de assinaturas.
   const repositorios = {
     provider,
-    usuarios: require(`./${provider}/usuarios.cjs`).criarRepositorioUsuarios(conexao),
+    usuarios: require(`./${provider}/usuarios.cjs`).criarRepositorioUsuarios(conexao,
+      { contasTeste: provider === 'supabase' && process.env.CONTAS_TESTE_IMAGENS_ATIVO === 'true' }),
     eventos: require(`./${provider}/eventos.cjs`).criarRepositorioEventos(conexao),
     custos: require(`./${provider}/custos.cjs`).criarRepositorioCustos(conexao),
     cotacoes: require(`./${provider}/cotacoes.cjs`).criarRepositorioCotacoes(conexao),

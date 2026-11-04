@@ -4,6 +4,104 @@ Infraestrutura de produção informada pelo usuário em 04/11/2026: duas tabelas
 RLS forçado, grants revisados, buckets privados e ausência de políticas Storage.
 Não houve consulta remota nesta implementação. **Não reaplicar o SQL incremental.**
 
+## Resolução TLS e preflight PostgreSQL — 04/11/2026
+
+O diagnóstico confirmou Node com --use-system-ca ativo, sem TLS desabilitado.
+O pooler apresentou Supabase Intermediate 2021 CA → Supabase Root 2021 CA; a
+raiz não constava das CAs confiáveis locais do Node/Windows. Não era falha por
+ausência da flag. A conexão de diagnóstico usou verify_return_error e validação
+de hostname, sem autenticação nem adoção da cadeia recebida como confiável.
+
+A CA pública foi obtida por HTTPS validado da origem apontada no código oficial
+do Dashboard, conferida e salva em PI Backend/certificados. Sua procedência e
+fingerprint estão em certificados/README.md. Configurado exclusivamente o caminho
+PGSSLROOTCERT no .env privado; credenciais e demais variáveis preservadas. Nenhuma
+alteração no Windows global nem na configuração remota de segurança.
+
+Executado somente --somente-postgres: TLS autorizado, SET ROLE service_role,
+RLS e FORCE RLS, CRUD mínimo, bloqueio anon/authenticated, ausência de extras/
+grant options, ausência de políticas Storage, FK/índices e integridade das
+referências aprovados; diário vazio. Transação READ ONLY finalizada com ROLLBACK.
+REST e buckets não foram consultados novamente. O preflight PostgreSQL foi
+aprovado. A ativação das rotas e o teste real descartável continuam pendentes
+de autorização; nenhum upload, exclusão ou migração foi executado.
+
+## Primeira tentativa de preflight — histórico, TLS posteriormente resolvido
+
+Executado com autorização via scripts/preflight-imagens-producao.cjs
+--somente-leitura. O script usa exclusivamente GET com origem fixa, identidade
+sb-project-ref e timeout, e prepara transação PG READ ONLY encerrada por ROLLBACK.
+Não importa o servidor, não ativa rotas e não registra credenciais/identidades.
+
+Resultado: REST confirmou o projeto e a disponibilidade das duas tabelas/colunas
+consultadas sem retornar registros (limit=0). Storage confirmou os dois buckets
+privados, MIME image/webp e limites de 5/10 MiB. A conexão PostgreSQL foi recusada
+com SELF_SIGNED_CERT_IN_CHAIN, antes de iniciar a transação ou consultar tabelas.
+PGSSLROOTCERT não está configurado. A compatibilidade de host/usuário com o ref
+foi validada localmente, mas a autenticação, SET ROLE, RLS, privilégios efetivos,
+políticas Storage e integridade via PG continuam sem comprovação nesta execução.
+O resultado global é reprovado; nenhuma rota ou interface foi habilitada.
+
+Próximo passo: obter a CA correta por fonte confiável para a conexão PostgreSQL,
+configurar seu arquivo local em PGSSLROOTCERT e repetir o mesmo preflight.
+Não usar rejectUnauthorized=false, sslmode inseguro ou
+NODE_TLS_REJECT_UNAUTHORIZED=0. A causa da cadeia não confiável precisa ser
+resolvida; não confiar automaticamente em certificado apresentado pela conexão.
+
+Depois de aprovado o preflight completo, ainda exigir autorização explícita para
+montar o serviço no servidor, realizar o teste mínimo com conta descartável e
+escrever/remover exclusivamente seus objetos/linhas de imagens. A ativação da
+interface será posterior a essa validação. Não se exige nova migração ou bucket.
+
+## Editor integrado de foto e capa — preparado, não ativado
+
+O cabeçalho reutiliza ImagemPerfil em modo integrado para foto e capa. A montagem
+principal continua com habilitado=false: nenhum GET, PUT ou DELETE de imagens é
+executado. O candidato habilitado oferece câmera/Adicionar/Alterar por hover,
+foco de teclado e toque (controle sempre visível em dispositivos sem hover).
+Clique abre seletor; arquivo validado gera URL blob somente local e abre prévia
+com foco contido, Escape/Cancelar e retorno ao acionador. Salvar envia binário
+ao Express; remover pede confirmação. URLs blob são revogadas ao descartar ou
+desmontar; URLs assinadas existentes continuam somente em memória. Não há crop
+nem upload implícito ao selecionar. Erro na consulta inicial mantém a edição
+bloqueada, mesmo no candidato habilitado. Não há repetição automática de escrita.
+
+instalarRotasImagens aceita opcionalmente a integração existente como terceiro
+argumento, depois de o chamador validar destino e permissões. Sem argumento,
+preserva 503. Dependência incompleta é recusada antes de montar rotas.
+server.js e o inicializador isolado continuam sem esse argumento. Nenhuma flag
+foi criada para liberar uploads sem validação. Não foi alterado o backend de
+dados pessoais/profissionais nem o JWT.
+
+### O que ainda exige autorização em produção
+
+A inspeção local confirmou somente que SUPABASE_URL aponta ao projeto esperado
+e que PGHOST/PGUSER identificam o mesmo ref, com os campos PG necessários
+preenchidos. Isso não comprova conectividade, chave, permissões ou políticas
+atuais. Nenhum segredo foi registrado e nenhuma conexão foi aberta.
+
+Para ativar em produção, autorizar separadamente:
+
+1. Preflight remoto somente leitura no projeto PI Backend: confirmar identidade
+   REST/Storage, TLS e vínculo PG, SET ROLE service_role, privilégios nas tabelas
+   de imagens e SELECT/UPDATE usuarios para locks, RLS forçado, limites/MIME dos
+   buckets privados e ausência de acesso indevido por anon/authenticated. Não
+   modificar schemas, políticas, buckets, credenciais ou registros.
+2. Montagem do serviço já existente (pool PG explícito, cliente Storage dedicado
+   e supervisor quando aplicável) e substituição das rotas 503 somente para
+   imagens. Montar antes de parsers gerais, com os limites HTTP já preparados.
+3. Teste real mínimo com conta exclusivamente descartável autorizada e arquivos
+   sintéticos: criar reserva/objeto/slot, assinar leitura, substituir, remover
+   e limpar somente os caminhos gerados nesse teste. Essas operações escrevem
+   nas tabelas de imagens e no Storage de produção; não estão autorizadas por
+   esta preparação. Não usar contas reais nem excluir usuários existentes.
+4. Após aprovação, habilitar o componente do cabeçalho, definir a execução da
+   limpeza existente (primeiro dry-run), validar visual/teclado e manter bloqueio
+   se o preflight falhar. Nenhuma nova migração/bucket é prevista pela UI.
+
+Até essa autorização e validação, a persistência privada está implementada e
+testada com dependências simuladas, mas não comprovada com uploads reais.
+
 ## Estado e módulos
 
 - `server.js` continua instalando somente `imagens/rotas.cjs`: JWT obrigatório,
@@ -33,9 +131,14 @@ Não houve consulta remota nesta implementação. **Não reaplicar o SQL increme
   executarPersistencia, sem alterar seu mecanismo ou estado. Fornecer o
   supervisor real na futura montagem. Nenhum módulo carrega .env ou conecta
   sozinho. Nada foi adicionado à fábrica normal de persistência nesta etapa.
-- React: ImagensPerfil, compartilhado por PerfilPessoal nos quatro perfis.
-  Foto/capa, validação local, envio binário ao Express, substituição, remoção e
-  feedback. Instâncias normais permanecem desabilitadas e não consultam imagens.
+- React: ImagensPerfil agora apresenta o cabeçalho compartilhado dos quatro
+  perfis: capa horizontal decorativa roxa, avatar circular sobreposto e nome/email
+  reais. Não exibe cartões de upload nem linguagem técnica de homologação.
+  Não consulta imagens enquanto as rotas permanecerem bloqueadas. O componente
+  candidato ImagemPerfil foi preservado: validação, envio binário ao Express,
+  substituição, remoção e feedback continuam disponíveis apenas para integração
+  futura autorizada. A edição pessoal, comercial e de redes sociais permanece
+  nos componentes e contratos existentes, com permissões inalteradas.
   O componente ImagemPerfil aceita habilitado=true somente na montagem isolada
   dos testes/homologação futura. Não há flag VITE_ de ativação em produção.
   URLs apenas em memória, renovação por GET em 110 segundos, referrer-policy
@@ -62,6 +165,33 @@ desvinculação confirmada, não promete exclusão física instantânea. URL já
 emitida pode funcionar até expirar. Não apagar histórico ou usuários com RESTRICT.
 
 ## Pré-requisitos e ativação segura futura
+
+### Bloqueios concretos após a reorganização visual
+
+- Código: server.js e o inicializador isolado continuam montando as rotas 503;
+  prepararIntegracaoImagens não está ligado ao servidor normal. Falta uma
+  montagem autorizada do router candidato com o pool e cliente Storage validados,
+  o supervisor existente quando aplicável, e a conexão da UI de imagens ao novo
+  cabeçalho. Não basta mudar uma variável de ambiente. Não há upload ativo.
+- Configuração: o ambiente separado exige IMAGENS_HOMOLOG_* completos, contas
+  autorizadas e JWT próprio. Validar que PG, REST e Storage pertencem ao mesmo
+  projeto; TLS, query_timeout, limites e SET ROLE precisam funcionar. A existência
+  dessas configurações não foi confirmada com conexões nesta revisão.
+- Banco: o responsável já confirmou tabelas, RLS forçado e CRUD service_role em
+  produção. Não há nova migração exigida pela alteração visual. Falta validar no
+  destino dos testes o schema e as permissões de transação, inclusive locks em
+  usuarios. Não reaplicar a migração de produção.
+- Storage: os dois buckets privados de produção foram confirmados anteriormente.
+  Falta verificar o destino separado autorizado, seus limites/MIME, acesso
+  privilegiado e negativa anon/authenticated. Não criar buckets automaticamente.
+- Limpeza: o serviço durável já existe, mas não está agendado; definir sua execução
+  explícita, primeiro dry-run, e validar leases/quarentena antes de ativar imagens.
+- Testes: faltam testes reais autorizados no destino separado de upload,
+  substituição, remoção, concorrência, falhas e limpeza, além de inspeção visual
+  e teclado. Testes locais não comprovam funcionamento remoto do Storage.
+
+Os passos abaixo continuam necessários; nenhum foi executado por esta alteração
+de frontend. A capa decorativa e o ícone padrão não representam imagens enviadas.
 
 1. Manter produção bloqueada. Confirmar os resultados manuais de infraestrutura
    e aprovar ambiente de homologação com dados sintéticos. Não usar produção

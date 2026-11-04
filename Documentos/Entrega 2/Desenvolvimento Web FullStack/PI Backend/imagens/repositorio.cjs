@@ -4,7 +4,7 @@ const perfis = ['participante', 'organizador', 'fornecedor', 'admin'];
 
 // Pool PostgreSQL explícito, validado pelo inicializador de homologação.
 // Sem .env, criação de pool, SQL estrutural, RPC ou fallback MySQL.
-function criarRepositorioImagens(pool) {
+function criarRepositorioImagens(pool, { verificarAberta } = {}) {
   async function transacao(id, executar) {
     let cliente, descartar = false;
     try {
@@ -47,6 +47,7 @@ function criarRepositorioImagens(pool) {
       conferirReferencia({ id: ref.usuario_id, perfil: 'participante' }, ref.tipo, ref);
       if (ref.operacao + '.webp' !== ref.caminho.split('/')[1]) throw falha(400, 'Operação inválida.');
       return transacao(ref.usuario_id, async c => {
+        if (verificarAberta) await verificarAberta(c, ref.usuario_id);
         // Reserva vencida jamais pode ser confirmada; preserva tombstone.
         await c.query(`UPDATE public.perfil_imagens_objetos SET estado='limpeza',
           limpeza_apos=now()+interval '24 hours', atualizado_em=now(), lease_ate=NULL
@@ -63,6 +64,7 @@ function criarRepositorioImagens(pool) {
     async confirmar(id, tipo, operacao) {
       validar(id, tipo);
       return transacao(id, async c => {
+        if (verificarAberta) await verificarAberta(c, id);
         const r = await c.query(`SELECT *,reserva_ate>clock_timestamp() AS vigente FROM public.perfil_imagens_objetos
           WHERE operacao=$1 AND usuario_id=$2 AND tipo=$3 FOR UPDATE`, [operacao, id, tipo]);
         const nova = r.rows[0], atual = await slot(c, id, tipo);
@@ -81,6 +83,7 @@ function criarRepositorioImagens(pool) {
     async desvincular(id, tipo) {
       validar(id, tipo);
       return transacao(id, async c => {
+        if (verificarAberta) await verificarAberta(c, id);
         await c.query('DELETE FROM public.perfil_imagens WHERE usuario_id=$1 AND tipo=$2', [id, tipo]);
         await c.query(`UPDATE public.perfil_imagens_objetos SET estado='limpeza',limpeza_apos=now()+interval '24 hours',
           atualizado_em=now(),lease_ate=NULL WHERE usuario_id=$1 AND tipo=$2 AND estado IN ('reservado','atual')`, [id, tipo]);
