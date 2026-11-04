@@ -613,6 +613,7 @@ async function autenticar(req, res, next) {
 
 // Infraestrutura de imagens deliberadamente bloqueada nesta primeira etapa.
 require("./imagens/rotas.cjs").instalarRotasImagens(app, autenticar);
+require('./portfolio.cjs').instalarPortfolio(app, { autenticar, permitirPerfis, repo: repositorios.portfolio, limitarFrequencia });
 
 // Rota protegida
 app.get("/perfil", autenticar, async (req, res) => {

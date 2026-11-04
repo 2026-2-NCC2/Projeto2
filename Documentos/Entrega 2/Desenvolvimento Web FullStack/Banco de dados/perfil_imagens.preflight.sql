@@ -33,4 +33,19 @@ FROM information_schema.table_privileges
 WHERE table_schema = 'public' AND table_name IN ('perfil_imagens', 'perfil_imagens_objetos');
 SELECT defaclrole::regrole AS papel, defaclnamespace::regnamespace AS esquema,
        defaclobjtype, defaclacl FROM pg_default_acl;
+-- FORCE RLS não bloqueia BYPASSRLS; confirmar o atributo efetivo do papel.
+SELECT rolname, rolsuper, rolbypassrls, rolinherit FROM pg_roles
+WHERE rolname IN ('service_role', 'anon', 'authenticated');
+SELECT membro.rolname AS membro, concedido.rolname AS papel_herdado
+FROM pg_auth_members m
+JOIN pg_roles membro ON membro.oid = m.member
+JOIN pg_roles concedido ON concedido.oid = m.roleid;
+-- has_table_privilege considera privilégios efetivos, inclusive herança.
+SELECT r.rolname, c.oid::regclass AS tabela,
+       has_table_privilege(r.oid, c.oid, 'SELECT') AS leitura,
+       has_table_privilege(r.oid, c.oid, 'INSERT, UPDATE, DELETE') AS escrita,
+       has_table_privilege(r.oid, c.oid, 'TRUNCATE, REFERENCES, TRIGGER') AS outros
+FROM pg_roles r CROSS JOIN pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+WHERE r.rolname IN ('service_role', 'anon', 'authenticated')
+  AND n.nspname = 'public' AND c.relname IN ('perfil_imagens', 'perfil_imagens_objetos');
 COMMIT;

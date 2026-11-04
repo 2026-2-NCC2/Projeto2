@@ -176,6 +176,7 @@ function iniciarSimulado({ env = {}, modo = "principal", dotenv = {} } = {}) {
     express: Object.assign(() => app, { json: () => () => {} }), bcryptjs: {}, jsonwebtoken: {}, cors: () => () => {},
     "./config/banco.cjs": require("../config/banco.cjs"),
     "./perfil.cjs": require("../perfil.cjs"),
+    "./portfolio.cjs": require("../portfolio.cjs"),
     "./imagens/rotas.cjs": require("../imagens/rotas.cjs"),
     "./config/startup-controlado.cjs": { validarEntrada: (e, m) => require('../config/startup-controlado.cjs').validarEntrada(e, m,
       { estado: { ler: () => ({ versao: 1, congelado: false, selado: false, instancias: [] }) } }) },
@@ -264,7 +265,7 @@ test("isolado usa so adaptador validado, sem dotenv, pool principal ou importaca
   assert.equal(a.estado.dotenv, 0);
   assert.deepEqual(a.estado.pools, []);
   assert.deepEqual(a.estado.escutas, []);
-  assert.equal(a.estado.rotas.length, 35);
+  assert.equal(a.estado.rotas.length, 41);
   for (const metodo of ["get", "put", "delete"]) {
     assert.ok(a.estado.rotas.includes(`${metodo} /perfil/imagens/:tipo`));
   }

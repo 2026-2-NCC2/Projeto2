@@ -15,6 +15,10 @@ BEGIN
       OR to_regclass('public.perfil_imagens_objetos') IS NOT NULL THEN
     RAISE EXCEPTION 'Estruturas de imagens já existem. Comparar definição antes de prosseguir.';
   END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles
+      WHERE rolname = 'service_role' AND (rolbypassrls OR rolsuper)) THEN
+    RAISE EXCEPTION 'service_role sem BYPASSRLS. Revisar permissões; não remover FORCE RLS.';
+  END IF;
 END $$;
 
 -- Diário durável dos caminhos gerados pelo servidor, inclusive antes do upload.
@@ -39,7 +43,7 @@ CREATE TABLE public.perfil_imagens_objetos (
   tentativas integer NOT NULL DEFAULT 0 CHECK (tentativas >= 0),
   ultimo_erro_codigo text CHECK (length(ultimo_erro_codigo) <= 64),
   UNIQUE (bucket, caminho),
-  UNIQUE (operacao, usuario_id, tipo),
+  UNIQUE (operacao, usuario_id, tipo, estado),
   CHECK ((tipo = 'foto' AND bucket = 'perfil-fotos'
             AND tamanho BETWEEN 1 AND 5242880 AND largura BETWEEN 1 AND 512 AND altura BETWEEN 1 AND 512)
       OR (tipo = 'capa' AND bucket = 'perfil-capas'
@@ -51,6 +55,8 @@ CREATE TABLE public.perfil_imagens_objetos (
 );
 -- Serializa reservas por slot; as futuras transações também devem bloquear a
 -- linha de usuarios FOR UPDATE, inclusive quando ainda não houver referência.
+-- Índices parciais são imediatos: na confirmação, rebaixar o atual antigo para
+-- limpeza ANTES de promover a reserva; trocar o slot na mesma transação.
 CREATE UNIQUE INDEX perfil_imagens_reserva_unica
   ON public.perfil_imagens_objetos(usuario_id, tipo) WHERE estado = 'reservado';
 CREATE UNIQUE INDEX perfil_imagens_atual_unica
@@ -64,11 +70,17 @@ CREATE TABLE public.perfil_imagens (
   usuario_id integer NOT NULL REFERENCES public.usuarios(id) ON DELETE RESTRICT,
   tipo text NOT NULL CHECK (tipo IN ('foto', 'capa')),
   objeto_id uuid NOT NULL,
+  estado_objeto text GENERATED ALWAYS AS ('atual'::text) STORED NOT NULL,
   atualizado_em timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (usuario_id, tipo),
-  FOREIGN KEY (objeto_id, usuario_id, tipo)
-    REFERENCES public.perfil_imagens_objetos(operacao, usuario_id, tipo) ON DELETE RESTRICT
+  CONSTRAINT perfil_imagens_objeto_atual_fk
+    FOREIGN KEY (objeto_id, usuario_id, tipo, estado_objeto)
+    REFERENCES public.perfil_imagens_objetos(operacao, usuario_id, tipo, estado)
+    ON DELETE RESTRICT ON UPDATE NO ACTION DEFERRABLE INITIALLY DEFERRED
 );
+-- A FK verifica o estado FINAL no commit. Durante a troca, o antigo pode sair
+-- de atual antes de o slot apontar para o novo; ao final só atual é aceito.
+-- Não usar SET CONSTRAINTS ALL IMMEDIATE no meio dessa sequência.
 
 -- JWT próprio do Express não equivale a auth.uid(). Sem políticas de acesso
 -- direto pelo navegador. Apenas o backend privilegiado acessará estas tabelas.
@@ -76,8 +88,46 @@ ALTER TABLE public.perfil_imagens ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.perfil_imagens FORCE ROW LEVEL SECURITY;
 ALTER TABLE public.perfil_imagens_objetos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.perfil_imagens_objetos FORCE ROW LEVEL SECURITY;
-REVOKE ALL ON TABLE public.perfil_imagens, public.perfil_imagens_objetos FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON TABLE public.perfil_imagens, public.perfil_imagens_objetos FROM PUBLIC, anon, authenticated, service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.perfil_imagens, public.perfil_imagens_objetos TO service_role;
--- Revisar grants herdados/default no preflight; nenhum grant existente é alterado.
+-- REVOKE direto não remove privilégios herdados. Falhar fechado se defaults
+-- concederem acesso a terceiros ou se anon/authenticated herdarem privilégios.
+DO $$
+DECLARE alvo regclass; papel text; privilegios text; extras text;
+        versao integer := current_setting('server_version_num')::integer;
+BEGIN
+  -- Lista completa das versões revisadas; ACL padrão não é catálogo de
+  -- privilégios possíveis. Versão futura exige revisão, sem aprovação parcial.
+  IF versao < 150000 OR versao >= 190000 THEN
+    RAISE EXCEPTION 'Versão PostgreSQL não revisada para privilégios de tabela.';
+  END IF;
+  extras := 'TRUNCATE, REFERENCES, TRIGGER';
+  IF versao >= 170000 THEN
+    extras := extras || ', MAINTAIN';
+  END IF;
+  privilegios := 'SELECT, INSERT, UPDATE, DELETE, ' || extras;
+  FOREACH alvo IN ARRAY ARRAY['public.perfil_imagens'::regclass, 'public.perfil_imagens_objetos'::regclass] LOOP
+    IF EXISTS (SELECT 1 FROM pg_class c
+        CROSS JOIN LATERAL aclexplode(c.relacl) a
+        WHERE c.oid = alvo AND a.grantee NOT IN (c.relowner,
+          (SELECT oid FROM pg_roles WHERE rolname = 'service_role'))
+          -- Superusuários administrativos já têm acesso independentemente da
+          -- ACL. Não confiar apenas no nome supabase_admin nem em BYPASSRLS.
+          AND NOT EXISTS (SELECT 1 FROM pg_roles r WHERE r.oid = a.grantee AND r.rolsuper)) THEN
+      RAISE EXCEPTION 'Grant inesperado nas tabelas novas. Revisar privilégios padrão.';
+    END IF;
+    FOREACH papel IN ARRAY ARRAY['anon', 'authenticated'] LOOP
+      IF has_table_privilege(papel, alvo, privilegios) THEN
+        RAISE EXCEPTION 'Privilégio efetivo inesperado para anon/authenticated. Revisar herança.';
+      END IF;
+    END LOOP;
+    IF (extras IS NOT NULL AND has_table_privilege('service_role', alvo, extras))
+        OR has_table_privilege('service_role', alvo,
+          'SELECT WITH GRANT OPTION, INSERT WITH GRANT OPTION, UPDATE WITH GRANT OPTION, DELETE WITH GRANT OPTION') THEN
+      RAISE EXCEPTION 'service_role com privilégio extra ou grant option. Revisar herança e ACL.';
+    END IF;
+  END LOOP;
+END $$;
+-- Não altera DEFAULT PRIVILEGES nem grants de tabelas preexistentes.
 NOTIFY pgrst, 'reload schema';
 COMMIT;

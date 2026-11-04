@@ -1,6 +1,7 @@
 import { PerfilPessoal } from '../../components/perfil/PerfilPessoal.jsx'
 import { Icone } from '../../components/ui/Icone.jsx'
 import { useState, useEffect } from 'react'
+import { MidiaEvento } from '../../components/eventos/MidiaEvento.jsx'
 import { apiUrl } from '../../services/api.js'
 
 export function PortalParticipante({ setPagina, aoSair }) {
@@ -434,6 +435,7 @@ const aoInscreverEvento = async (evento) => {
     </span>
 
     <div className="eventoDetalhesTitulo"><div className="eventoIdentidade" aria-hidden="true"><Icone nome="eventos" tamanho={30} /></div><h2>{eventoSelecionado.nome}</h2></div>
+    <MidiaEvento eventoId={eventoSelecionado.id} />
 
     <p>
       <strong>Data:</strong>{' '}

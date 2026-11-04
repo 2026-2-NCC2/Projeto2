@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { Icone } from '../ui/Icone.jsx'
 import { usePerfil } from '../../hooks/usePerfil.js'
 import { salvarPerfil } from '../../services/perfil.js'
 import { PerfilProfissional } from './PerfilProfissional.jsx'
+import { ImagensPerfil } from './ImagensPerfil.jsx'
+import { ConsultaPortfolios } from '../portfolio/Portfolio.jsx'
 
 const editarCampos = perfil => ({ nome: perfil.nome, telefone: perfil.telefone || '', biografia: perfil.biografia || '' })
 
@@ -64,8 +65,9 @@ export function PerfilPessoal({ contexto = 'Minha conta', children, indicadores 
     {erro && <div role="alert"><p>{erro}</p><button type="button" className="secundario" onClick={recarregar}>Tentar novamente</button></div>}
     {!perfil && !erro && <p role="status">Carregando perfil...</p>}
     {perfil && <>
-      <section className="perfilResumo"><div className="perfilAvatar" aria-hidden="true"><Icone nome="perfil" tamanho={30} /></div><div className="perfilIdentidade"><h2>{perfil.nome}</h2><p>{perfil.email}</p></div>{indicadores}</section>
+      <ImagensPerfil key={`imagens:${token}:${perfil.id}`} perfil={perfil} indicadores={indicadores} />
       <div className="perfilGrade perfilGradePessoal"><FormularioPerfil key={`${token}:${perfil.id}`} perfil={perfil} token={token} /><PerfilProfissional key={`profissional:${token}:${perfil.id}`} token={token} id={perfil.id} /></div>
+      <ConsultaPortfolios key={`portfolios:${token}:${perfil.id}`} />
     </>}
     {children}
   </div>

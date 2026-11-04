@@ -1,5 +1,6 @@
 import { Icone } from '../../components/ui/Icone.jsx'
 import { useState, useMemo, useEffect } from 'react'
+import { ConsultaPortfolios } from '../../components/portfolio/Portfolio.jsx'
 import { apiUrl } from '../../services/api.js'
 import { formatarMoeda } from '../../utils/formatarMoeda.js'
 
@@ -226,6 +227,7 @@ const aoPublicarCotacao = async () => {
               style={{ marginTop: '16px' }}
             >
               <h3>{proposta.fornecedor_nome}</h3>
+              {proposta.fornecedor_id && <ConsultaPortfolios fornecedorId={Number(proposta.fornecedor_id)} />}
 
               <p>
                 <strong>Evento:</strong> {proposta.evento_nome}

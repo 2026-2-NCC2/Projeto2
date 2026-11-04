@@ -12,7 +12,7 @@ function load(file, name, env) {
   const source = readFileSync(new URL('../src/' + file, import.meta.url), 'utf8').replace(/^import .*\r?\n/gm, '').replaceAll('export function ', 'function ')
   const result = transformSync(file, source, { jsx: { runtime: 'classic', pragma: 'jsx', pragmaFrag: 'Fragment' } })
   assert.equal(result.errors.length, 0)
-  return vm.runInNewContext(result.code + '\n' + name, { jsx, Fragment: 'fragment', Icone: 'svg', ...env })
+  return vm.runInNewContext(result.code + '\n' + name, { jsx, MidiaEvento: 'section', Fragment: 'fragment', Icone: 'svg', ...env })
 }
 function runtime(file, name, fetch) {
   const states = [], effects = [], cleanups = []
@@ -21,7 +21,7 @@ function runtime(file, name, fetch) {
     useState(initial) { const i = cursor++; if (!(i in states)) states[i] = typeof initial === 'function' ? initial() : initial; return [states[i], value => { states[i] = typeof value === 'function' ? value(states[i]) : value }] },
     useEffect(effect, deps) { const i = effectCursor++; if (!effects[i] || deps.some((v, j) => v !== effects[i][j])) { cleanups[i]?.(); effects[i] = deps; cleanups[i] = effect() } },
     apiUrl: x => 'http://localhost:3001' + x, sessionStorage: { getItem: () => token }, fetch, AbortController,
-    console: { error() {} }, IdentidadeConta: () => null, formatarMoeda: x => String(x), alert() {},
+    console: { error() {} }, IdentidadeConta: () => null, PortfolioFornecedor: () => null, formatarMoeda: x => String(x), alert() {},
   }
   const fn = load(file, name, env)
   return {
@@ -74,13 +74,13 @@ test('recarregar elaboração sem cotação não renderiza formulário e retorna
   assert.ok(nodes(view).some(n => n.type === 'input' && n.props['aria-label'] === 'Buscar oportunidades'))
   assert.equal(nodes(view).filter(n => n.type === 'form').length, 0)
 })
-test('menu unifica propostas e bloqueia contratos/catalogo; URL antiga preservada', async () => {
+test('menu unifica propostas e bloqueia contratos; portfolio preserva URL antiga', async () => {
   const r = fornecedor(async () => ok([])); r.page('fornecedor-cotacoes'); r.render(); await tick()
   const view = r.render(), buttons = nodes(view).filter(n => n.type === 'button')
   assert.equal(buttons.filter(n => text(n).includes('Propostas enviadas')).length, 1)
   assert.equal(buttons.filter(n => text(n).includes('Minhas cota')).length, 0)
   const disabled = buttons.filter(n => n.props.disabled)
-  assert.equal(disabled.length, 2); disabled.forEach(n => assert.equal(n.props.onClick, undefined))
+  assert.equal(disabled.length, 1); disabled.forEach(n => assert.equal(n.props.onClick, undefined))
   assert.ok(nodes(view).some(n => n.type === 'h2' && text(n) === 'Hist\u00f3rico de propostas'))
 })
 test('erro de propostas aparece, tentativa manual reconsulta e filtro Aprovada funciona', async () => {

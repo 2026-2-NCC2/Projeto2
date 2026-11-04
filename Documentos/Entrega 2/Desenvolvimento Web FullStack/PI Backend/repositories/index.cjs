@@ -28,6 +28,10 @@ function prepararRepositorios() {
     solicitacoesAcesso: require(`./${provider}/solicitacoes-acesso.cjs`)
       .criarRepositorioSolicitacoesAcesso(conexao),
   };
+  // Usa o cliente já selecionado; não cria conexão extra nem recorre ao MySQL.
+  if(provider==='supabase' && process.env.PORTFOLIO_FORNECEDOR_ATIVO==='true') {
+    repositorios.portfolio=require('./supabase/portfolio.cjs').criarRepositorioPortfolio(conexao);
+  }
   return { provider, conexao, repositorios };
 }
 

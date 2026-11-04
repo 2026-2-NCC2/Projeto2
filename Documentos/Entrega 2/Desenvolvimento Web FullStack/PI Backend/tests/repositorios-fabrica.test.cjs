@@ -44,6 +44,13 @@ function carregar(env = {}, opcoes = {}) {
         return adapter;
       } };
     }
+    if (name === './supabase/portfolio.cjs') {
+      assert.equal(provider, 'supabase');
+      return { criarRepositorioPortfolio(received) {
+        assert.equal(received, adapter);
+        return require('../repositories/supabase/portfolio.cjs').criarRepositorioPortfolio(received);
+      } };
+    }
     const dominio = dominios.find(([, arquivo]) => name === `./${provider}/${arquivo}.cjs`);
     assert.ok(dominio, `Importacao inesperada: ${name}`);
     if (opcoes.falhaRepositorio) throw opcoes.falhaRepositorio;
@@ -63,6 +70,18 @@ function carregar(env = {}, opcoes = {}) {
 test("importacao e inerte: nao le ambiente nem importa dependencias", () => {
   const a = carregar(new Proxy({}, { get() { throw Error("Leitura antecipada do ambiente"); } }));
   assert.deepEqual(a.imports, []); assert.equal(a.clientes(), 0); assert.equal(a.construidos.length, 0);
+});
+
+test('portfólio textual aceita somente flag true em Supabase e reutiliza cliente único', () => {
+  for (const flag of [undefined, 'false', 'TRUE', 'true']) {
+    const a=carregar({...supabase(),PORTFOLIO_FORNECEDOR_ATIVO:flag}), bundle=a.criar();
+    assert.equal(a.clientes(),1);
+    assert.equal(typeof bundle.portfolio?.criar,flag==='true'?'function':'undefined');
+    assert.equal(a.imports.includes('./supabase/portfolio.cjs'),flag==='true');
+  }
+  const mysql=carregar({DB_PROVIDER:'mysql',PORTFOLIO_FORNECEDOR_ATIVO:'true'});
+  assert.equal(mysql.criar().portfolio,undefined);
+  assert.equal(mysql.imports.includes('./supabase/portfolio.cjs'),false);
 });
 
 for (const provider of [undefined, "mysql"]) {

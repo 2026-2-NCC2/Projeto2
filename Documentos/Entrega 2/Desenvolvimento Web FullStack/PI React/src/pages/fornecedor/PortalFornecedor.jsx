@@ -1,5 +1,7 @@
 import { Icone } from '../../components/ui/Icone.jsx'
 import { IdentidadeConta } from '../../components/layout/IdentidadeConta.jsx'
+import { MidiaEvento } from '../../components/eventos/MidiaEvento.jsx'
+import { PortfolioFornecedor } from '../../components/portfolio/Portfolio.jsx'
 import { useState, useEffect } from 'react'
 import { apiUrl } from '../../services/api.js'
 import { formatarMoeda } from '../../utils/formatarMoeda.js'
@@ -36,6 +38,7 @@ export function PortalFornecedor({pagina,setPagina,aoSair,PerfilFornecedor}) {
 
      const oportunidadesFormatadas = lista.map((cotacao) => ({
        id: cotacao.id,
+       eventoId: cotacao.evento_id,
        nome: cotacao.evento_nome,
        categoria: cotacao.itens
           .map((item) => item.categoria)
@@ -122,7 +125,7 @@ setOportunidades(oportunidadesFormatadas)
  const [detalhes,setDetalhes]=useState('')
  const [filtro,setFiltro]=useState('Todas')
  const navegar=(destino)=>setPagina('fornecedor-'+destino)
- const titulo={mural:'Mural de oportunidades',cotacoes:'Propostas enviadas',proposta:'Elaborar proposta comercial',enviadas:'Propostas enviadas',contratos:'Contratos ativos',catalogo:'Catálogo e rider',desempenho:'Desempenho',perfil:'Perfil do fornecedor'}[pagina.replace('fornecedor-','')] || 'Portal do Fornecedor'
+ const titulo={mural:'Mural de oportunidades',cotacoes:'Propostas enviadas',proposta:'Elaborar proposta comercial',enviadas:'Propostas enviadas',contratos:'Contratos ativos',catalogo:'Portfólio profissional',desempenho:'Desempenho',perfil:'Perfil do fornecedor'}[pagina.replace('fornecedor-','')] || 'Portal do Fornecedor'
  const enviar = async (e) => {
   e.preventDefault()
 
@@ -182,7 +185,7 @@ setOportunidades(oportunidadesFormatadas)
     .toLowerCase()
     .includes(busca.toLowerCase())
 )
- const menu=[['mural','Mural de oportunidades'],['enviadas','Propostas enviadas'],['contratos','Contratos ativos',true],['catalogo','Catálogo e rider',true],['desempenho','Desempenho'],['perfil','Perfil fornecedor']]
+ const menu=[['mural','Mural de oportunidades'],['enviadas','Propostas enviadas'],['contratos','Contratos ativos',true],['catalogo','Portfólio profissional'],['desempenho','Desempenho'],['perfil','Perfil fornecedor']]
  return <div className="portalFornecedor">
   <div className="fornTopo"><div className="logo"><Icone nome="ticket" /> <span>TrocaTicket</span><small>PORTAL FORNECEDOR</small></div><span className="fornSelo">Portal do fornecedor</span><span className="fornEmpresa"><IdentidadeConta /></span></div>
   <div className="fornCorpo"><aside className="fornMenu"><button className="novo" onClick={()=>navegar('mural')}><Icone nome="busca" /> Buscar cotações</button><nav>{menu.map(([id,label,indisponivel])=><button key={id} disabled={indisponivel} title={indisponivel ? 'Funcionalidade indisponível' : undefined} className={(pagina==='fornecedor-'+id || (id==='enviadas' && pagina==='fornecedor-cotacoes'))?'ativo':''} onClick={indisponivel ? undefined : ()=>navegar(id)}><Icone nome={({ mural: 'eventos', enviadas: 'documento', contratos: 'documento', catalogo: 'documento', desempenho: 'custos', perfil: 'perfil' })[id]} />{label}{indisponivel && <small> (indisponível)</small>}</button>)}</nav><button className="fornSair" onClick={aoSair}><Icone nome="sair" /> Sair</button></aside>
@@ -204,11 +207,12 @@ setOportunidades(oportunidadesFormatadas)
   !erroOportunidades &&
   abertas.length === 0 && (
     <p>Nenhuma cotação disponível no momento.</p>
-  )}{abertas.map(o=><article className="fornCartao" key={o.id}><div className="fornLinha"><span className="tag">#{o.id} · {o.categoria}</span><small>Prazo: {o.prazo.split('-').reverse().join('/')}</small></div><h3>{o.nome}</h3><p>Organizador: {o.organizador}</p><p>Local: {o.local} · {o.publico} participantes</p><p>{o.descricao}</p><button className="principal" onClick={()=>{setSelecionada(o);setValor('');setCondicoes('');setDetalhes('');navegar('proposta')}}>Elaborar proposta →</button></article>)}</div></>}
+  )}{abertas.map(o=><article className="fornCartao" key={o.id}><div className="fornLinha"><span className="tag">#{o.id} · {o.categoria}</span><small>Prazo: {o.prazo.split('-').reverse().join('/')}</small></div><h3>{o.nome}</h3><p>Organizador: {o.organizador}</p><p>Local: {o.local} · {o.publico} participantes</p><p>{o.descricao}</p><MidiaEvento eventoId={o.eventoId} /><button className="principal" onClick={()=>{setSelecionada(o);setValor('');setCondicoes('');setDetalhes('');navegar('proposta')}}>Elaborar proposta →</button></article>)}</div></>}
   {pagina==='fornecedor-proposta' && selecionada && <><button className="voltar" onClick={()=>navegar('mural')}>← Voltar para oportunidades</button><div className="fornHero"><h2>{selecionada.nome}</h2><p>{selecionada.categoria} · {selecionada.organizador} · {selecionada.publico} participantes</p></div><form className="fornCartao fornForm" onSubmit={enviar}><h2>Parâmetros financeiros e condições</h2><label>Valor global da proposta (R$) *</label><input type="number" min="0.01" step="0.01" value={valor} onChange={e=>setValor(e.target.value)} required/><label>Condições de pagamento *</label><input placeholder="Ex.: 50% na assinatura e 50% após desmontagem" value={condicoes} onChange={e=>setCondicoes(e.target.value)} required/><label>Detalhamento técnico e rider *</label><textarea rows="5" placeholder="Ex.: Sistema de PA, equipe de operação e montagem inclusos." value={detalhes} onChange={e=>setDetalhes(e.target.value)} required/><label className="fornCheck"><input type="checkbox" required/> Confirmo a disponibilidade e aceito os requisitos da cotação.</label><div className="acoes"><button className="secundario" type="button" onClick={()=>navegar('mural')}>Cancelar</button><button className="principal" type="submit">Enviar proposta ao organizador →</button></div></form></>}
   {(pagina==='fornecedor-enviadas'||pagina==='fornecedor-cotacoes') && <><div className="fornIndicadores"><div><small>PROPOSTAS ENVIADAS</small><strong>{carregandoPropostas || erroPropostas ? '—' : propostas.length}</strong></div><div><small>EM AVALIAÇÃO</small><strong>{carregandoPropostas || erroPropostas ? '—' : propostas.filter(p=>p.status==='Em avaliação').length}</strong></div><div><small>VOLUME PROPOSTO</small><strong>{carregandoPropostas || erroPropostas ? '—' : formatarMoeda(propostas.reduce((s,p)=>s+p.valor,0))}</strong></div></div><div className="fornFiltros">{['Todas','Em avaliação','Aprovada','Recusada'].map(f=><button key={f} className={filtro===f?'selecionado':''} onClick={()=>setFiltro(f)}>{f}</button>)}</div><div className="fornCartao"><h2>Histórico de propostas</h2><div className="fornTabela" role="region" aria-label="Histórico de propostas" tabIndex={0}><div className="fornTabelaCab"><span>Evento</span><span>Categoria</span><span>Valor</span><span>Status</span></div>{!carregandoPropostas && !erroPropostas && propostas.filter(p=>filtro==='Todas'||p.status===filtro).map(p=><div className="fornTabelaLinha" key={p.id}><strong>{p.evento}</strong><span>{p.categoria}</span><strong>{formatarMoeda(p.valor)}</strong><span className="tag">{p.status}</span></div>)}</div></div></>}
-  {['fornecedor-contratos','fornecedor-catalogo'].includes(pagina) && <div className="fornCartao"><p role="status">Funcionalidade indisponível.</p></div>}
+  {pagina==='fornecedor-contratos' && <div className="fornCartao"><p role="status">Funcionalidade indisponível.</p></div>}
   {pagina==='fornecedor-desempenho' && <div className="fornIndicadores"><div><small>PROPOSTAS ENVIADAS</small><strong>{carregandoPropostas || erroPropostas ? '—' : propostas.length}</strong></div><div><small>APROVADAS</small><strong>{carregandoPropostas || erroPropostas ? '—' : propostas.filter(p=>p.status==='Aprovada').length}</strong></div><div><small>VOLUME PROPOSTO</small><strong>{carregandoPropostas || erroPropostas ? '—' : formatarMoeda(propostas.reduce((s,p)=>s+p.valor,0))}</strong></div></div>}
+  {pagina==='fornecedor-catalogo' && <PortfolioFornecedor />}
   {pagina==='fornecedor-perfil' && <PerfilFornecedor propostas={propostas} />}
   </main></div></div>
 }

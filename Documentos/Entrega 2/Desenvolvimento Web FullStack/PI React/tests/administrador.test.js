@@ -17,7 +17,7 @@ function runtime(fetch, confirmed = true) {
   const states = [], effects = []
   let cursor = 0, effectCursor = 0
   const env = {
-    jsx, Fragment: 'fragment', Icone: 'svg', fetch, apiUrl: x => x,
+    jsx, MidiaEvento: 'section', Fragment: 'fragment', Icone: 'svg', fetch, apiUrl: x => x,
     sessionStorage: { getItem: () => 'token-teste' },
     useState(initial) { const i = cursor++; if (!(i in states)) states[i] = initial; return [states[i], value => { states[i] = typeof value === 'function' ? value(states[i]) : value }] },
     useEffect(fn, deps) { const i = effectCursor++; if (!effects[i] || deps.some((d, j) => d !== effects[i][j])) { effects[i] = deps; fn() } },

@@ -31,6 +31,13 @@ function carregar(lerCertificado = () => { throw Error("Arquivo privado"); }) {
 
 const ambiente = () => ({ PGHOST: "postgres.example.invalid", PGDATABASE: "exemplo", PGUSER: "exemplo", PGPASSWORD: "ficticia" });
 
+test('query_timeout explícito não altera padrão de consumidores existentes', () => {
+  const mod=carregar();
+  assert.equal(mod.criarPoolPostgres(ambiente()).config.query_timeout,undefined);
+  assert.equal(mod.criarPoolPostgres(ambiente(),{queryTimeoutMs:10000}).config.query_timeout,10000);
+  for(const queryTimeoutMs of [0,-1,30001,'10000',NaN])assert.throws(()=>mod.criarPoolPostgres(ambiente(),{queryTimeoutMs}),{code:'POSTGRES_CONFIG'});
+});
+
 test("importacao nao cria pool; criacao e inerte e exige TLS com verificacao", () => {
   const mod = carregar();
   assert.equal(mod.pools.length, 0);

@@ -17,7 +17,10 @@ function inteiro(env, nome, padrao, limite = Number.MAX_SAFE_INTEGER) {
 
 // Criar o pool nao abre conexoes. Somente query()/connect() fazem acesso ao banco.
 // O chamador carrega seu ambiente explicitamente; este modulo nao le .env.
-function criarPoolPostgres(env = process.env) {
+function criarPoolPostgres(env = process.env, { queryTimeoutMs } = {}) {
+  if (queryTimeoutMs !== undefined && (!Number.isSafeInteger(queryTimeoutMs) || queryTimeoutMs < 1 || queryTimeoutMs > 30000)) {
+    throw erroConfiguracao('queryTimeoutMs deve estar entre 1 e 30000.');
+  }
   for (const nome of ["PGHOST", "PGDATABASE", "PGUSER", "PGPASSWORD"]) {
     if (typeof env[nome] !== "string" || !env[nome].trim()) {
       throw erroConfiguracao(`${nome} deve ser definido para usar PostgreSQL.`);
@@ -43,6 +46,7 @@ function criarPoolPostgres(env = process.env) {
     max: inteiro(env, "PGPOOL_MAX", 10),
     connectionTimeoutMillis: inteiro(env, "PGCONNECT_TIMEOUT_MS", 10000),
     idleTimeoutMillis: inteiro(env, "PGIDLE_TIMEOUT_MS", 30000),
+    ...(queryTimeoutMs === undefined ? {} : { query_timeout: queryTimeoutMs }),
     ssl,
   });
 

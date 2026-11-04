@@ -2,9 +2,8 @@
 const { contexto, novoArquivo, conferirReferencia, falha } = require("./politica.cjs");
 const { processarImagem } = require("./processar.cjs");
 
-// Protocolo preparado para testes locais. O repositório transacional descrito
-// na proposta NÃO está conectado/implementado nesta fase. Não usar CRUD REST
-// independente para simular as transações desses contratos.
+// Recebe repositório PostgreSQL transacional e Storage exclusivos do servidor.
+// O servidor principal mantém as rotas bloqueadas nesta entrega.
 function criarServicoImagens({ repositorio, storage, processar = processarImagem }) {
   return Object.freeze({
     async consultar(usuario, tipo) {
@@ -52,10 +51,12 @@ async function limparUmaImagem({ repositorio, storage }) {
     const usuario = { id: tarefa.usuario_id, perfil: "participante" };
     conferirReferencia(usuario, tarefa.tipo, tarefa);
     await storage.remover(usuario, tarefa.tipo, tarefa);
-    await repositorio.concluirLimpeza(tarefa.operacao);
+    await repositorio.concluirLimpeza(tarefa.operacao, tarefa.lease);
     return true;
   } catch {
-    await repositorio.adiarLimpeza(tarefa.operacao);
+    // Se o lease mudou ou o banco ficou indisponível, não sobrescrever a
+    // reivindicação nova. O lease expirado continua recuperável.
+    try { await repositorio.adiarLimpeza(tarefa.operacao, tarefa.lease); } catch { /* recuperar no próximo ciclo */ }
     throw falha(503, "Limpeza de imagem pendente de nova tentativa.");
   }
 }

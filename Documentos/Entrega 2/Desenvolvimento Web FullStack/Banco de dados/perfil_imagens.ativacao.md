@@ -1,5 +1,11 @@
 # Fotos de perfil e capas — proposta e ativação manual
 
+Atualização 04/11/2026: infraestrutura criada manualmente, conforme confirmação
+do usuário. Integração transacional, HTTP candidato e interface foram preparados,
+mas produção permanece bloqueada. A sequência atual está em
+[perfil_imagens.integracao.md](perfil_imagens.integracao.md). Não reaplicar o SQL.
+As seções abaixo preservam o histórico da preparação inicial.
+
 Status desta entrega: infraestrutura local, sem uploads ativos. Nenhum script SQL foi executado, bucket criado, arquivo enviado ou registro remoto alterado. Não houve leitura/alteração de credenciais. O React e sua identidade visual permanecem como estão.
 
 ## Integração verificada no código
@@ -41,7 +47,15 @@ O bucket recebe apenas a saída reprocessada em WebP. A entrada do Express aceit
 - `perfil_imagens`: até dois slots por usuário (`foto` e `capa`), apontando para um objeto do diário. Sem linha significa ausência de imagem; sem backfill.
 - `perfil_imagens_objetos`: UUID, proprietário, tipo, bucket, caminho, MIME final, bytes, dimensões, estado, prazos e tentativas. Também registra a intenção antes do upload, para recuperar quedas do processo e respostas incertas. Não guarda binários, Base64, URLs ou credenciais.
 
-A FK composta impede que um slot aponte para objeto de outro usuário/tipo. Os CHECKs restringem nomes e metadados. Não há cascade: excluir uma conta com imagens exigirá limpar referências e objetos primeiro, para preservar o inventário. A migração é transacional e aborta se houver estruturas homônimas; não é uma migração de conversão nem deve ser reaplicada cegamente. `atualizado_em` deverá ser atualizado explicitamente nas transações futuras.
+A FK composta impede que um slot aponte para objeto de outro usuário/tipo ou fora de `atual`. A coluna gerada `estado_objeto` é sempre `atual`; a FK é diferida até o commit, permitindo a troca transacional sem aceitar referência inválida ao final. Os CHECKs restringem nomes e metadados. Não há cascade: excluir uma conta com imagens exigirá limpar referências e objetos primeiro, para preservar o inventário. Mesmo objetos `removido` continuam bloqueando a exclusão de usuário pelo diário; uma futura exclusão de conta exige procedimento específico de retenção/anonimização, não um DELETE improvisado. A migração é transacional e aborta se houver estruturas homônimas; não é uma migração de conversão nem deve ser reaplicada cegamente. `atualizado_em` deverá ser atualizado explicitamente nas transações futuras.
+
+Os índices parciais de `reservado` e `atual` são imediatos, não diferíveis. Na confirmação: bloquear `usuarios` e o slot/diário; marcar o antigo `limpeza` com prazo; promover a reserva para `atual`; atualizar/inserir o slot; confirmar a transação. Promover antes de rebaixar provoca conflito, inclusive dentro da mesma transação. A FK diferida garante que rebaixar sem trocar/desvincular o slot também falhe no commit. Não antecipar `SET CONSTRAINTS ALL IMMEDIATE` durante a troca.
+
+`FORCE ROW LEVEL SECURITY` é mantido. O backend usa somente a chave secreta de servidor, sem JWT do usuário no cliente Supabase. O script exige `service_role` com `BYPASSRLS` (ou superusuário); a confirmação do papel real de produção continua sendo manual. Revoga privilégios diretos nas tabelas novas, inclusive os padrões de `service_role`, e concede somente seu CRUD. Aborta e reverte se defaults criarem grants para terceiros ou se `anon`/`authenticated` conservarem privilégios efetivos por herança. Não corrige heranças, configurações globais ou privilégios padrão automaticamente. O preflight mostra atributos dos papéis, memberships e privilégios efetivos; revisar os resultados antes de aplicar.
+
+A verificação de ACL permite o proprietário, `service_role` e grants a papéis realmente superusuários (que já possuem acesso independentemente do grant). O nome `supabase_admin`, sozinho, não autoriza exceção. Para `service_role`, também verifica ausência de privilégios extras efetivos e de CRUD `WITH GRANT OPTION`, inclusive por herança. A lista de privilégios é explícita por versão: PostgreSQL 15/16 verifica sete privilégios e 17/18 inclui também `MAINTAIN`. `acldefault` não é usado como catálogo de privilégios possíveis. Versões fora desse intervalo abortam para revisão, sem verificação parcial. Defaults de `supabase_admin` não se aplicam automaticamente às tabelas criadas por `postgres`: valem os defaults do papel criador, globais e do schema. Nenhum default global é alterado.
+
+O teste local simula defaults amplos de ambos os criadores, globais e em `public`, incluindo grant options; executa a migração com `postgres` proprietário e sem SUPERUSER; aceita o grant administrativo de um superusuário e verifica rollback para grants extras, herança e nome administrativo sem SUPERUSER. É uma equivalência das classes de permissões informadas, não uma reprodução das 48 entradas remotas não fornecidas integralmente.
 
 As tabelas, sozinhas, não garantem todas as transições entre diário e referência. Nesta etapa **não há repositório de produção nem RPCs transacionais de imagens**. Antes de ativar, implementar e revisar os contratos abaixo via RPC restrita a `service_role` ou conexão PostgreSQL transacional validada. Não simular transação com chamadas REST separadas.
 
@@ -100,6 +114,8 @@ Todas as mutações devem bloquear a linha de `usuarios` com `FOR UPDATE`, depoi
 
 O serviço local expressa esse protocolo, mas os mocks não provam atomicidade PostgreSQL. Testes de transações, locks e RLS em homologação descartável são pré-requisitos de ativação, incluindo PUT/PUT, PUT/DELETE, DELETE/PUT, queda antes/depois do upload e timeout após commit.
 
+Os CHECKs e a FK não implementam o grafo de transições do diário: impedir, por exemplo, a reativação de um tombstone `removido` continua sendo obrigação das futuras transações restritas. Reserva vencida não desaparece do índice único: precisa ser cancelada/reconciliada antes de nova reserva. O worker deve atualizar leases/estados atomicamente, sem reutilizar caminhos. O schema pode ser preparado vazio após preflight aprovado; uploads permanecem bloqueados até esses contratos estarem implementados e homologados.
+
 ## Substituição, remoção e arquivos órfãos
 
 Sequência: validar → reservar intenção → upload em caminho novo → confirmar troca e fila de limpeza em transação → limpar antigo assincronamente. Se o upload falhar ou perder a resposta, manter intenção e imagem antiga. Se o commit perder a resposta, consultar operação/slot: o arquivo novo pode estar em uso; nunca removê-lo por compensação imediata. O usuário deve consultar o perfil antes de repetir.
@@ -123,6 +139,15 @@ O worker não está agendado nem conectado nesta entrega. A futura rotina de inv
 Reversão operacional: restaurar o bloqueio 503 e interromper worker/novos uploads. Preservar tabelas, diário, buckets e objetos para reconciliação; não executar DROP nem apagar objetos automaticamente. URLs emitidas anteriormente podem valer até o TTL. Não rotacionar credenciais como parte desta funcionalidade.
 
 ## Validação local desta entrega
+
+Revisão adicional do SQL: teste opt-in `PI Backend/tests/perfil-imagens-sql.test.cjs`, com PostgreSQL 17 descartável em Docker, sem rede, portas publicadas, `.env` ou dados reais. Usa a imagem local `postgres:17` (`--pull=never`) e remove somente o contêiner exclusivo criado pelo teste. Valida FK de estado, substituição na ordem correta, índices únicos e concorrência de reservas, privilégios herdados/default, FORCE RLS, UUIDs, limites, RESTRICT e rollback. Não comprova configuração remota nem substitui os testes futuros das RPCs/Storage.
+
+```powershell
+# Em PI Backend; não carrega .env nem consulta Supabase.
+$env:TROCATICKET_SQL_ISOLADO='1'
+node --test --test-isolation=none tests/perfil-imagens-sql.test.cjs tests/perfil-imagens.test.cjs
+Remove-Item Env:TROCATICKET_SQL_ISOLADO
+```
 
 Comando executado em `PI Backend`:
 

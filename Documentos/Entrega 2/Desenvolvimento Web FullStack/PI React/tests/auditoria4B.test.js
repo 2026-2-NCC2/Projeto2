@@ -14,7 +14,7 @@ function runtime(file, name, extra = {}) {
   const cells = [], pending = []
   let cursor = 0
   const env = {
-    jsx, Fragment: 'fragment', Icone: 'svg', console: { error() {} }, useMemo: fn => fn(),
+    jsx, MidiaEvento: 'section', Fragment: 'fragment', Icone: 'svg', console: { error() {} }, useMemo: fn => fn(),
     sessionStorage: { getItem: () => 'token' }, apiUrl: p => p,
     useState(initial) {
       const i = cursor++

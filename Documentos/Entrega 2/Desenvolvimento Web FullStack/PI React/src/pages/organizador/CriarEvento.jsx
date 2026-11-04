@@ -1,3 +1,5 @@
+import { MidiaEvento } from '../../components/eventos/MidiaEvento.jsx'
+
 export function CriarEvento({
   evento,
   setEvento,
@@ -106,6 +108,7 @@ export function CriarEvento({
           </button>
         </div>
       </form>
+      <MidiaEvento eventoId={evento.id} editar />
     </div>
   )
 }

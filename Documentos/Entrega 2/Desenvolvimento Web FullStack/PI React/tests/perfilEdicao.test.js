@@ -16,7 +16,7 @@ function load(file, name, env) {
     .replace(/^import .*\r?\n/gm, '').replaceAll('export function ', 'function ').replaceAll('export async function ', 'async function ')
   const result = transformSync(file, source, { jsx: { runtime: 'classic', pragma: 'jsx', pragmaFrag: 'Fragment' } })
   assert.equal(result.errors.length, 0)
-  return vm.runInNewContext(result.code + '\n' + name, { jsx, Fragment: 'fragment', Icone: 'svg', PerfilProfissional: 'section', ...env })
+  return vm.runInNewContext(result.code + '\n' + name, { jsx, Fragment: 'fragment', Icone: 'svg', PerfilProfissional: 'section', ConsultaPortfolios: 'section', ImagensPerfil: 'section', ...env })
 }
 function runtime(file, name, env = {}) {
   const cells = [], pending = []

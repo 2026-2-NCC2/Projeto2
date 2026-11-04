@@ -21,7 +21,7 @@ export function useFocoModal(selecionado, setSelecionado) {
       if (evento.key !== 'Tab') return
 
       const itens = Array.from(modal.querySelectorAll(
-        'button, a[href], input, select, textarea, [tabindex], [contenteditable="true"]',
+        'button, a[href], input, select, textarea, summary, [tabindex], [contenteditable="true"]',
       )).filter(item => item.tabIndex >= 0 && !item.matches(':disabled') &&
         !item.closest('[hidden], [inert]') && item.getClientRects().length > 0)
       const primeiro = itens[0]

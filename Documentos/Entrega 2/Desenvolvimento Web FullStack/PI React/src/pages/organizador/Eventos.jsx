@@ -1,4 +1,5 @@
 import { Icone } from '../../components/ui/Icone.jsx'
+import { MidiaEvento } from '../../components/eventos/MidiaEvento.jsx'
 import { useState, useMemo } from 'react'
 
 export function Eventos({eventos, carregando = false, erro = '', aoTentarNovamente, setPagina, aoSelecionarEvento, aoCriarNovoEvento, aoExcluirEvento, aoPublicarEvento}) {
@@ -88,6 +89,7 @@ export function Eventos({eventos, carregando = false, erro = '', aoTentarNovamen
                 <p className="eventoMetadados">
                   <span><Icone nome="eventos" tamanho={16} /> {evento.data}</span><span><Icone nome="local" tamanho={16} /> {evento.local?.trim() || 'Local não cadastrado'}</span>
                 </p>
+                <MidiaEvento eventoId={evento.id} editar />
               </div>
               <div className="numero">
                 <small>PREVISTOS</small>

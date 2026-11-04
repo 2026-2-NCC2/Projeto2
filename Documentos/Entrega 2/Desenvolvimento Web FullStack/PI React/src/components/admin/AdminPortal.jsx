@@ -1,6 +1,7 @@
 import { PerfilPessoal } from '../perfil/PerfilPessoal.jsx'
 import { Icone } from '../ui/Icone.jsx'
 import { IdentidadeConta } from '../layout/IdentidadeConta.jsx'
+import { MidiaEvento } from '../eventos/MidiaEvento.jsx'
 import { apiUrl } from '../../services/api.js'
 import { useEffect, useState } from 'react';
 import { NavegacaoRecolhivel } from '../layout/NavegacaoRecolhivel.jsx'
@@ -468,6 +469,7 @@ export function AdminPortal({ aoSair }) {
     <h3>Detalhes do Evento</h3>
 
     <p><strong>Nome:</strong> {eventoSelecionado.nome}</p>
+    <MidiaEvento eventoId={eventoSelecionado.id} />
     <p>
   <strong>Data:</strong>{' '}
   {eventoSelecionado.data
