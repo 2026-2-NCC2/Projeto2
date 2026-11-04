@@ -1,8 +1,9 @@
 import { PerfilPessoal } from '../../components/perfil/PerfilPessoal.jsx'
 import { Icone } from '../../components/ui/Icone.jsx'
 import { useState, useEffect } from 'react'
-import { MidiaEvento } from '../../components/eventos/MidiaEvento.jsx'
+import { MidiaEvento, CapaEvento } from '../../components/eventos/MidiaEvento.jsx'
 import { apiUrl } from '../../services/api.js'
+import { capacidadesEventos } from '../../services/eventos.js'
 
 export function PortalParticipante({ setPagina, aoSair }) {
   const [eventosDisponiveis, setEventosDisponiveis] = useState([])
@@ -12,6 +13,15 @@ export function PortalParticipante({ setPagina, aoSair }) {
   const [tentativaIngressos, setTentativaIngressos] = useState(0)
   const [abaParticipante, setAbaParticipante] = useState('inicio')
   const [busca, setBusca] = useState('')
+  const [inscricoesDisponiveis,setInscricoesDisponiveis]=useState(false)
+  useEffect(()=>{
+    let ativo=true
+    capacidadesEventos(sessionStorage.getItem('token')).then(async r=>{
+      if(!r.ok)throw new Error('Indisponível')
+      const c=await r.json();if(ativo)setInscricoesDisponiveis(c.inscrever===true)
+    }).catch(()=>{if(ativo)setInscricoesDisponiveis(false)})
+    return()=>{ativo=false}
+  },[])
   const idsEventosInscritos = new Set(
   meusIngressos.map((ingresso) => Number(ingresso.evento_id))
   )
@@ -103,7 +113,7 @@ export function PortalParticipante({ setPagina, aoSair }) {
 const [inscrevendoEventoId, setInscrevendoEventoId] = useState(null)
 
 const aoInscreverEvento = async (evento) => {
-  if (carregandoIngressos || erroIngressos || inscrevendoEventoId !== null || idsEventosInscritos.has(Number(evento.id))) return
+  if (!inscricoesDisponiveis || carregandoIngressos || erroIngressos || inscrevendoEventoId !== null || idsEventosInscritos.has(Number(evento.id))) return
   const confirmado = window.confirm(
     `Deseja se inscrever no evento "${evento.nome}"?`
   )
@@ -179,6 +189,7 @@ const aoInscreverEvento = async (evento) => {
   })
 
   const avisoInscricoes = <>
+    {!inscricoesDisponiveis && <p role="status">Novas inscrições estão temporariamente indisponíveis. Suas inscrições existentes foram preservadas.</p>}
     {carregandoIngressos && <p role="status">Consultando suas inscrições. Aguarde para se inscrever.</p>}
     {erroIngressos && <div role="alert"><p>{erroIngressos}</p><button type="button" onClick={() => {
       setCarregandoIngressos(true)
@@ -205,7 +216,7 @@ const aoInscreverEvento = async (evento) => {
         !erroEventos &&
         eventosFiltrados.map((evento) => (
           <article className="fornCartao eventoCartao" key={evento.id}>
-            <div className="eventoIdentidade" aria-hidden="true"><Icone nome="eventos" tamanho={26} /></div>
+            <CapaEvento eventoId={evento.id}/>
             <span className="tag">
               {evento.categoria || 'Evento'}
             </span>
@@ -257,7 +268,7 @@ const aoInscreverEvento = async (evento) => {
             <button
   type="button"
   disabled={
-    carregandoIngressos || Boolean(erroIngressos) ||
+    !inscricoesDisponiveis || carregandoIngressos || Boolean(erroIngressos) ||
     idsEventosInscritos.has(Number(evento.id)) ||
     inscrevendoEventoId !== null
   }
@@ -474,7 +485,7 @@ const aoInscreverEvento = async (evento) => {
     <button
   type="button"
   disabled={
-    carregandoIngressos || Boolean(erroIngressos) ||
+    !inscricoesDisponiveis || carregandoIngressos || Boolean(erroIngressos) ||
     idsEventosInscritos.has(Number(eventoSelecionado.id)) ||
     inscrevendoEventoId !== null
   }
@@ -522,6 +533,7 @@ const aoInscreverEvento = async (evento) => {
           <p>Local: {ingresso.evento_local}</p>
 
           <p>Inscrição nº {ingresso.id}</p>
+          {ingresso.evento_status && <p>Estado do evento: <strong>{ingresso.evento_status}</strong></p>}
 
           <p>
             Status: <strong>{ingresso.status}</strong>

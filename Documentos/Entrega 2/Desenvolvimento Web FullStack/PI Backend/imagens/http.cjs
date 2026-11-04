@@ -2,10 +2,10 @@
 const { contexto, falha } = require('./politica.cjs');
 // Router preparado para montagem explícita em homologação. A exportação de
 // rotas.cjs usada pelo servidor normal continua bloqueada, sem flag de .env.
-function criarRouterImagens({ autenticar, servico, agora = Date.now }) {
+function criarRouterImagens({ autenticar, servico, agora = Date.now, receber = require('./http-binario.cjs').criarRecebedorImagens() }) {
   const express = require('express');
   const router = express.Router();
-  const limites = new Map(); let ativos = 0;
+  const limites = new Map();
   router.use((req, res, next) => { res.setHeader('Cache-Control', 'no-store'); next(); });
   router.use(autenticar);
   router.use('/:tipo', (req, res, next) => {
@@ -30,27 +30,7 @@ function criarRouterImagens({ autenticar, servico, agora = Date.now }) {
     } catch (erro) { next(erro); }
   });
   router.put('/:tipo', (req, res, next) => {
-    const mime = (req.headers['content-type'] || '').split(';')[0].trim().toLowerCase();
-    if (!['application/octet-stream', 'image/jpeg', 'image/png', 'image/webp'].includes(mime) ||
-        (req.headers['content-encoding'] && req.headers['content-encoding'] !== 'identity')) return next(falha(415, 'Envie uma imagem binária JPEG, PNG ou WebP, sem compressão HTTP.'));
-    if (ativos >= 2) return next(falha(429, 'Processamento ocupado. Tente novamente mais tarde.'));
-    ativos++;
-    // Inclui recepção do corpo, codec, Storage e commit. Não libera a vaga
-    // apenas por desconexão HTTP enquanto a operação ainda pode estar ativa.
-    let terminou = false, processando = false;
-    const liberar = () => { if (!terminou) { terminou = true; ativos--; } };
-    const timeout = setTimeout(() => req.destroy(), 15000);
-    req.once('aborted', () => { clearTimeout(timeout); if (!processando) liberar(); });
-    express.raw({ type: () => true, limit: req.politicaImagem.bytes, inflate: false })(req, res, async erro => {
-      clearTimeout(timeout);
-      if (erro) { liberar(); return next(erro); }
-      try {
-        if (req.aborted) return;
-        processando = true;
-        const resultado = await servico.substituir(req.usuario, req.params.tipo, req.body);
-        if (!res.destroyed) res.status(200).json({ mensagem: 'Imagem atualizada.', ...resultado });
-      } catch (erro) { next(erro); } finally { liberar(); }
-    });
+    return receber(req,res,next,{bytes:req.politicaImagem.bytes,acao:entrada=>servico.substituir(req.usuario,req.params.tipo,entrada)});
   });
   router.get('/:tipo', async (req, res, next) => {
     try { res.json({ imagem: await servico.consultar(req.usuario, req.params.tipo) }); } catch (erro) { next(erro); }

@@ -25,17 +25,22 @@ const {
   solicitacoesAcesso: solicitacoesAcessoRepository,
 } = repositorios;
 const { ErroServico } = require("./services/suporte-transacoes.cjs");
+const { validarEvento } = require('./services/eventos.cjs');
 const { validarAlteracoesPerfil, respostaPerfil, validarProfissional } = require("./perfil.cjs");
 
 // Somente erros sanitizados pelos servicos podem fornecer texto/status publico.
 function responderErroServico(res, erro, mensagem) {
   const conhecido = erro instanceof ErroServico &&
-    [400, 401, 403, 404, 409, 500].includes(erro.respostaStatus);
+    [400, 401, 403, 404, 409, 500, 503].includes(erro.respostaStatus);
   return res.status(conhecido ? erro.respostaStatus : 500)
     .json({ erro: conhecido ? erro.message : mensagem });
 }
 
 const app = express();
+const encerramentoGracioso = require('./config/encerramento-gracioso.cjs').criarEncerramentoGracioso({
+  obterRuntime: () => runtimeImagens, supervisor,
+});
+app.use(encerramentoGracioso.middleware);
 // Inativo por padrao; estado congelado privado prevalece inclusive em reinicios.
 if (supervisor) supervisor.instalar(app);
 
@@ -43,6 +48,26 @@ app.use(cors({
   origin: "http://localhost:5173"
 }));
 
+// Antes do parser JSON: o router de imagens recebe apenas o corpo binário.
+// A integração só fica disponível após o preflight e a montagem das guardas.
+let runtimeImagens, routerImagens, preparandoImagens;
+const receberImagem = require('./imagens/http-binario.cjs').criarRecebedorImagens();
+require('./eventos-imagens-http.cjs').instalarImagensEvento(app,{
+  autenticar,receber:receberImagem,obterIntegracao:()=>runtimeImagens?.eventos,
+});
+app.locals.prepararImagens = () => preparandoImagens ||= (async () => {
+  runtimeImagens = await require('./imagens/inicializacao.cjs').prepararImagens({env:process.env,supervisor});
+  routerImagens = require('./imagens/http.cjs').criarRouterImagens({autenticar,servico:runtimeImagens.integracao.servico,receber:receberImagem});
+  return runtimeImagens;
+})();
+app.locals.imagensDisponiveis = () => Boolean(routerImagens);
+app.use('/perfil/imagens', (req,res,next) => {
+  if(routerImagens)return routerImagens(req,res,next);
+  return autenticar(req,res,()=>{
+    res.setHeader('Cache-Control','no-store');
+    res.status(503).json({erro:'As imagens de perfil e capa ainda não estão disponíveis.'});
+  });
+});
 app.use(express.json());
 
 // Janelas por IP, independentes por rota e locais a este processo.
@@ -175,6 +200,7 @@ app.post("/participante/inscricoes", autenticar, permitirPerfis("participante"),
       });
 
     } catch (erro) {
+      if(erro instanceof ErroServico)return responderErroServico(res,erro,'Não foi possível confirmar a inscrição.');
       if (erro.code === "ER_DUP_ENTRY") {
         return res.status(409).json({
           erro: "Você já está inscrito neste evento."
@@ -611,8 +637,6 @@ async function autenticar(req, res, next) {
   }
 }
 
-// Infraestrutura de imagens deliberadamente bloqueada nesta primeira etapa.
-require("./imagens/rotas.cjs").instalarRotasImagens(app, autenticar);
 require('./portfolio.cjs').instalarPortfolio(app, { autenticar, permitirPerfis, repo: repositorios.portfolio, limitarFrequencia });
 
 // Rota protegida
@@ -626,7 +650,7 @@ app.get("/perfil", autenticar, async (req, res) => {
       });
     }
 
-    return res.status(200).json(respostaPerfil(usuario));
+    return res.status(200).json({...respostaPerfil(usuario),...(app.locals.imagensDisponiveis()?{imagens_disponiveis:true}:{})});
 
   } catch (erro) {
     console.error("Falha em GET /perfil.");
@@ -649,7 +673,7 @@ app.patch("/perfil", autenticar, async (req, res) => {
   try {
     const usuario = await usuariosRepository.atualizarPerfil(req.usuario.id, dados);
     if (!usuario) return res.status(404).json({ erro: "Usuário não encontrado." });
-    return res.status(200).json(respostaPerfil(usuario));
+    return res.status(200).json({...respostaPerfil(usuario),...(app.locals.imagensDisponiveis()?{imagens_disponiveis:true}:{})});
   } catch (erro) {
     if (erro?.code === "PERFIL_MIGRACAO_PENDENTE") {
       return res.status(503).json({ erro: "A edição de perfil aguarda atualização do banco de dados." });
@@ -712,6 +736,19 @@ function permitirPerfis(...perfisPermitidos) {
 
 const eventos = [];
 
+app.get('/eventos/capacidades',autenticar,async(req,res)=>{
+  res.setHeader('Cache-Control','no-store');
+  try{return res.json(typeof eventosRepository.capacidades==='function'?await eventosRepository.capacidades():{criar:false,editar:false,publicar:false,inscrever:false,cancelar:false,encerrar:false,excluir:false});}
+  catch{return res.status(503).json({erro:'Não foi possível verificar as operações disponíveis.'});}
+});
+for(const acao of ['cancelar','encerrar'])app.patch(`/eventos/:id/${acao}`,autenticar,permitirPerfis('organizador'),async(req,res)=>{
+  try{
+    if(typeof eventosRepository.mudarEstado!=='function')return res.status(503).json({erro:'Operação indisponível neste ambiente.'});
+    const evento=await eventosRepository.mudarEstado(Number(req.params.id),req.usuario.id,{acao,estado_esperado:req.body?.estado_esperado,versao:req.body?.versao});
+    return res.json({mensagem:acao==='cancelar'?'Evento cancelado. Histórico preservado.':'Evento encerrado. Histórico preservado.',evento});
+  }catch(e){return responderErroServico(res,e,'Não foi possível confirmar a alteração do evento.');}
+});
+
 // Cadastrar novo evento
 app.post("/eventos", autenticar, permitirPerfis("organizador"),async (req, res) => {
   try {
@@ -743,18 +780,20 @@ app.post("/eventos", autenticar, permitirPerfis("organizador"),async (req, res) 
       });
     }
 
-    const nomeFinal = nome.trim();
-    const localFinal = local.trim();
-    const categoriaFinal = categoria || "Corporativo";
-    const descricaoFinal = descricao || "";
+    const normalizado=validarEvento({nome,data,horario,local,categoria:categoria||'Corporativo',publico,descricao:descricao||''});
+    const nomeFinal = normalizado.nome;
+    const localFinal = normalizado.local;
+    const categoriaFinal = normalizado.categoria;
+    const descricaoFinal = normalizado.descricao;
     const status = "Em planejamento";
     const usuarioId = req.usuario.id;
 
     // Salvar evento no MySQL
-    const eventoId = await eventosRepository.criar({
+    const criado = await eventosRepository.criar({
       nome: nomeFinal, data, horario, local: localFinal, categoria: categoriaFinal,
-      publico, descricao: descricaoFinal, status, usuarioId
+      publico, descricao: descricaoFinal, status, usuarioId, chaveIdempotencia:req.headers?.['idempotency-key']
     });
+    const eventoId=typeof criado==='object'?criado.id:criado;
 
     const novoEvento = {
       id: eventoId,
@@ -771,10 +810,11 @@ app.post("/eventos", autenticar, permitirPerfis("organizador"),async (req, res) 
 
     return res.status(201).json({
       mensagem: "Evento cadastrado com sucesso!",
-      evento: novoEvento
+      evento: typeof criado==='object'?criado:novoEvento
     });
 
   } catch (erro) {
+    if(erro instanceof ErroServico)return responderErroServico(res,erro,'Erro ao cadastrar evento.');
     console.error("Falha em POST /eventos.");
 
     return res.status(500).json({
@@ -793,7 +833,7 @@ app.patch("/eventos/:id/publicar", autenticar, permitirPerfis("organizador"), as
         });
       }
 
-      const affectedRows = await eventosRepository.publicar(eventoId, req.usuario.id);
+      const affectedRows = await eventosRepository.publicar(eventoId, req.usuario.id, req.body?.versao);
 
       if (affectedRows === 0) {
         return res.status(404).json({
@@ -807,6 +847,7 @@ app.patch("/eventos/:id/publicar", autenticar, permitirPerfis("organizador"), as
       });
 
     } catch (erro) {
+      if(erro instanceof ErroServico)return responderErroServico(res,erro,'Erro ao publicar evento.');
       console.error("Erro ao publicar evento:");
 
       return res.status(500).json({
@@ -921,10 +962,8 @@ app.put("/eventos/:id", autenticar, permitirPerfis("organizador"), async (req, r
       });
     }
 
-    const affectedRows = await eventosRepository.atualizar(id, req.usuario.id, {
-      nome: nome.trim(), data, horario, local: local.trim(),
-      categoria: categoria || "Corporativo", publico, descricao: descricao || ""
-    });
+    const normalizado=validarEvento({nome,data,horario,local,categoria:categoria||'Corporativo',publico,descricao:descricao||''});
+    const affectedRows = await eventosRepository.atualizar(id, req.usuario.id, normalizado,req.body?.versao);
 
     if (affectedRows === 0) {
       return res.status(404).json({
@@ -937,6 +976,7 @@ app.put("/eventos/:id", autenticar, permitirPerfis("organizador"), async (req, r
     });
 
   } catch (erro) {
+    if(erro instanceof ErroServico)return responderErroServico(res,erro,'Erro ao atualizar evento.');
     console.error("Falha em PUT /eventos/:id.");
 
     return res.status(500).json({
@@ -972,6 +1012,7 @@ app.delete("/eventos/:id", autenticar, permitirPerfis("organizador"), async (req
     });
 
   } catch (erro) {
+    if(erro instanceof ErroServico)return responderErroServico(res,erro,'Não foi possível confirmar a operação.');
     if (erro?.code === "23503") {
       console.error("Exclusao de evento bloqueada por vinculos existentes (23503).");
       return res.status(409).json({
@@ -1086,9 +1127,23 @@ app.use((erro, req, res, next) => {
 const PORT = process.env.PORT || 3001
 
 if (require.main === module && modoExecucao() === "principal") {
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`)
-})
+  (async()=>{
+    const ativacao=require('./config/ativacao-imagens.json');
+    if(ativacao.versao!==1||typeof ativacao.ativo!=='boolean'||ativacao.projeto!=='gnwybroqfvwosiqzsfla')throw Error('IMAGENS_ATIVACAO_INVALIDA');
+    if(ativacao.ativo){
+      if(!/^evidencias\/imagens-descartaveis-[0-9a-f-]{36}\.json$/.test(ativacao.evidencia||''))throw Error('IMAGENS_EVIDENCIA_INVALIDA');
+      const evidencia=require('./'+ativacao.evidencia);
+      if(evidencia.aprovado!==true||evidencia.projeto!==ativacao.projeto)throw Error('IMAGENS_TESTES_PENDENTES');
+      const runtime=await app.locals.prepararImagens();await runtime.iniciarLimpeza();
+      console.log('Fotos e capas ativadas com guardas e limpeza em quarentena.');
+    }
+    const servidor=app.listen(PORT,()=>console.log(`Servidor rodando na porta ${PORT}`));
+    const fechar=()=>{void encerramentoGracioso.encerrar(servidor).then(
+      ()=>process.exit(0),
+      ()=>console.error('Encerramento pendente: processo preservado para diagnóstico; não executar migração.'),
+    );};
+    process.on('SIGTERM',fechar);process.on('SIGINT',fechar);
+  })().catch(async()=>{console.error('Inicialização recusada. Verifique o preflight de imagens.');await runtimeImagens?.fechar();process.exitCode=1;});
 }
 
 module.exports = app;

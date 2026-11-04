@@ -1,4 +1,9 @@
-# Capa e galeria de eventos — preparação bloqueada
+# Histórico do candidato de capa e galeria — anterior à Etapa 2
+
+**Documento histórico.** A implementação e a verificação de infraestrutura foram
+atualizadas em `eventos_imagens.etapa2.md`, que contém o estado atual e o roteiro
+de ativação. As pendências e descrições abaixo registram o candidato anterior;
+não são instruções de ativação da versão atual. Uploads continuam bloqueados.
 
 ## Situação atual
 

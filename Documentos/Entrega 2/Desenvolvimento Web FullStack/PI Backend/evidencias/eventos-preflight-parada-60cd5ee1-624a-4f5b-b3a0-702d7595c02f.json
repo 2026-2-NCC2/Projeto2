@@ -1,0 +1,154 @@
+{
+  "projeto": "gnwybroqfvwosiqzsfla",
+  "coletadoEm": "2026-11-04T20:19:52.860Z",
+  "somenteLeitura": true,
+  "tlsVerificado": true,
+  "transacao": "REPEATABLE READ READ ONLY; ROLLBACK",
+  "sqlSha256": "2045f1ff55c43372d78458db1c5cc8c8c4e48974185da8163b82267d859032b0",
+  "parada": {
+    "pid": 32076,
+    "metodo": "CTRL_C em console isolado",
+    "forcado": false,
+    "saidaConfirmadaEm": "2026-11-04T20:18:43.3049150Z",
+    "portaLivreESemReinicioAte": "2026-11-04T20:19:20.6362985Z"
+  },
+  "aprovado": true,
+  "checagens": {
+    "postgres": true,
+    "versaoRevisada": true,
+    "seisEventos": true,
+    "estadosEsperados": true,
+    "semObjetosNovos": true,
+    "sequencias": true,
+    "chavesValidadas": true,
+    "segurancaEsperada": true,
+    "semMetadadosNovos": true
+  },
+  "verificacao": {
+    "estados": [
+      {
+        "status": "Ativo",
+        "quantidade": 4
+      },
+      {
+        "status": "Em planejamento",
+        "quantidade": 2
+      }
+    ],
+    "funcoes": [],
+    "contexto": {
+      "banco": "postgres",
+      "versao": "170011",
+      "usuario": "postgres"
+    },
+    "triggers": [],
+    "sequencias": [
+      {
+        "tabela": "eventos",
+        "sequencia": "public.eventos_id_seq",
+        "service_role_usage": true
+      },
+      {
+        "tabela": "inscricoes",
+        "sequencia": "public.inscricoes_id_seq",
+        "service_role_usage": true
+      }
+    ],
+    "integridade": {
+      "eventos": {
+        "md5": "9aabdd7c6fb88f5f5ee7b8eb93ce425c",
+        "quantidade": 6
+      },
+      "cotacoes": {
+        "md5": "203f202d576b14836568c7479ea0520e",
+        "quantidade": 6
+      },
+      "propostas": {
+        "md5": "3d8c5ad4845aa93a8804a4153515bbe3",
+        "quantidade": 6
+      },
+      "inscricoes": {
+        "md5": "9c91bc2d70c1bd89e668c7cee5a4c796",
+        "quantidade": 5
+      },
+      "custos_evento": {
+        "md5": "822ceff85987cd77b9c1ef891216d96d",
+        "quantidade": 2
+      },
+      "itens_cotacao": {
+        "md5": "ba11711acc4770291f205a216e5f8a3d",
+        "quantidade": 17
+      }
+    },
+    "colunas_gestao": [],
+    "restricao_estados": [],
+    "seguranca_tabelas": [
+      {
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+        "rls": true,
+        "tabela": "eventos",
+        "force_rls": false,
+        "politicas": 0
+      },
+      {
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+        "rls": true,
+        "tabela": "inscricoes",
+        "force_rls": false,
+        "politicas": 0
+      }
+    ],
+    "chaves_estrangeiras": [
+      {
+        "nome": "fk_cotacao_evento",
+        "tabela": "cotacoes",
+        "validada": true,
+        "definicao": "FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE CASCADE"
+      },
+      {
+        "nome": "fk_custos_evento_evento",
+        "tabela": "custos_evento",
+        "validada": true,
+        "definicao": "FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE CASCADE"
+      },
+      {
+        "nome": "fk_evento_usuario",
+        "tabela": "eventos",
+        "validada": true,
+        "definicao": "FOREIGN KEY (usuario_id) REFERENCES usuarios(id)"
+      },
+      {
+        "nome": "fk_inscricao_evento",
+        "tabela": "inscricoes",
+        "validada": true,
+        "definicao": "FOREIGN KEY (evento_id) REFERENCES eventos(id)"
+      },
+      {
+        "nome": "fk_inscricao_usuario",
+        "tabela": "inscricoes",
+        "validada": true,
+        "definicao": "FOREIGN KEY (usuario_id) REFERENCES usuarios(id)"
+      },
+      {
+        "nome": "fk_item_cotacao",
+        "tabela": "itens_cotacao",
+        "validada": true,
+        "definicao": "FOREIGN KEY (cotacao_id) REFERENCES cotacoes(id) ON DELETE CASCADE"
+      },
+      {
+        "nome": "fk_propostas_cotacao",
+        "tabela": "propostas",
+        "validada": true,
+        "definicao": "FOREIGN KEY (cotacao_id) REFERENCES cotacoes(id)"
+      },
+      {
+        "nome": "fk_propostas_fornecedor",
+        "tabela": "propostas",
+        "validada": true,
+        "definicao": "FOREIGN KEY (fornecedor_id) REFERENCES usuarios(id)"
+      }
+    ],
+    "indice_idempotencia": [],
+    "legados_com_metadados_iniciais": 0
+  }
+}

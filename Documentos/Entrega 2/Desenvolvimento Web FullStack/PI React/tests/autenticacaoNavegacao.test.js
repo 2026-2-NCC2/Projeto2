@@ -133,11 +133,11 @@ function appRuntime(dados, fetch) {
     useNavegacao() {}, useSessao: () => ({ aoSair() {} }),
     useRascunhosCustos: () => ({ rascunhos: {}, formularioCustosPendenteRef: { current: false } }),
     useCustosPersistidos: () => ({}), usePublicacaoCotacao: () => ({}),
-    Layout: 'Layout', AdminPortal: 'AdminPortal', PortalFornecedor: 'PortalFornecedor',
+    Layout: 'Layout', ProvedorImagensEvento: 'provedor', capacidadesEventos:async()=>response(200,{criar:true,editar:true,inscrever:true}), AdminPortal: 'AdminPortal', PortalFornecedor: 'PortalFornecedor',
     PortalParticipante: 'PortalParticipante', Login: 'Login', Cadastro: 'Cadastro', Eventos: 'Eventos',
   })
   const app = load('App.jsx', 'App', r.env)
-  return { ...r, renderApp: () => r.render(app) }
+  return { ...r, renderApp: () => {const view=r.render(app);return view.type==='provedor'?view.children[0]:view} }
 }
 
 test('App com painel salvo e sem token exibe somente login após carregar', async () => {

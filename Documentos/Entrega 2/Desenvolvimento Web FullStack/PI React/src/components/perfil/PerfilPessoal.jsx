@@ -65,7 +65,7 @@ export function PerfilPessoal({ contexto = 'Minha conta', children, indicadores 
     {erro && <div role="alert"><p>{erro}</p><button type="button" className="secundario" onClick={recarregar}>Tentar novamente</button></div>}
     {!perfil && !erro && <p role="status">Carregando perfil...</p>}
     {perfil && <>
-      <ImagensPerfil key={`imagens:${token}:${perfil.id}`} perfil={perfil} indicadores={indicadores} />
+      <ImagensPerfil key={`imagens:${token}:${perfil.id}`} perfil={perfil} indicadores={indicadores} habilitado={perfil.imagens_disponiveis === true} />
       <div className="perfilGrade perfilGradePessoal"><FormularioPerfil key={`${token}:${perfil.id}`} perfil={perfil} token={token} /><PerfilProfissional key={`profissional:${token}:${perfil.id}`} token={token} id={perfil.id} /></div>
       <ConsultaPortfolios key={`portfolios:${token}:${perfil.id}`} />
     </>}

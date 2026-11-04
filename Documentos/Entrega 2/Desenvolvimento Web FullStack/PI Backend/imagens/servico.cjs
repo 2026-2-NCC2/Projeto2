@@ -43,14 +43,19 @@ function criarServicoImagens({ repositorio, storage, processar = processarImagem
 }
 
 async function limparUmaImagem({ repositorio, storage }) {
+  return limparObjeto({repositorio,remover:async tarefa=>{
+    const usuario={id:tarefa.usuario_id,perfil:'participante'};
+    conferirReferencia(usuario,tarefa.tipo,tarefa);
+    await storage.remover(usuario,tarefa.tipo,tarefa);
+  }});
+}
+async function limparObjeto({repositorio,remover}) {
   // Deve revalidar ausência de referência e tornar o caminho irrecuperável
   // para novas confirmações ANTES de liberar o lock da transação.
   const tarefa = await repositorio.reivindicarLimpeza();
   if (!tarefa) return false;
   try {
-    const usuario = { id: tarefa.usuario_id, perfil: "participante" };
-    conferirReferencia(usuario, tarefa.tipo, tarefa);
-    await storage.remover(usuario, tarefa.tipo, tarefa);
+    await remover(tarefa);
     await repositorio.concluirLimpeza(tarefa.operacao, tarefa.lease);
     return true;
   } catch {
@@ -60,4 +65,4 @@ async function limparUmaImagem({ repositorio, storage }) {
     throw falha(503, "Limpeza de imagem pendente de nova tentativa.");
   }
 }
-module.exports = { criarServicoImagens, limparUmaImagem };
+module.exports = { criarServicoImagens, limparUmaImagem, limparObjeto };

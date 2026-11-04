@@ -3,10 +3,16 @@
 // Leituras e criacao de inscricoes. Nenhuma rota passa a
 // usar Supabase nesta etapa; fabrica existente e importada apenas se necessario.
 function criarRepositorioInscricoes(
-  cliente = require("../../db-supabase.cjs").criarClienteSupabase()
+  cliente = require("../../db-supabase.cjs").criarClienteSupabase(),{gestaoSegura=false}={}
 ) {
   return {
     async criar(usuarioId, eventoId) {
+      if(gestaoSegura){
+        const {data,error}=await require('../../services/eventos.cjs').consultarRpc(cliente,'inscrever_evento_v1',{p_usuario:usuarioId,p_evento:eventoId});
+        if(error)require('../../services/eventos.cjs').erroRpc(error);
+        if(!Number.isSafeInteger(data)||data<=0)require('../../services/eventos.cjs').erroRpc({});
+        return data;
+      }
       // Evento ativo e duplicidade previa continuam no handler, sem transacao
       // nova. O UNIQUE do banco resolve a corrida entre verificacao e INSERT.
       // Status/data usam os defaults do banco, como no MySQL.
@@ -81,7 +87,7 @@ function criarRepositorioInscricoes(
       // Sem filtros de status e sem desempate novo: MySQL ordena somente pela
       // data de inscricao. Empates podem tornar a paginacao instavel.
       return listarPaginas(() => cliente.schema("public").from("inscricoes")
-        .select("id, evento_id, status, data_inscricao, evento:eventos!inner(nome, data, horario, local, categoria)", { count: "exact" })
+        .select(`id, evento_id, status, data_inscricao, evento:eventos!inner(nome, data, horario, local, categoria${gestaoSegura?', status':''})`, { count: "exact" })
         .eq("usuario_id", usuarioId)
         .order("data_inscricao", { ascending: false }), item => {
         const evento = item.evento;
@@ -95,6 +101,7 @@ function criarRepositorioInscricoes(
           data_inscricao: instante(item.data_inscricao, code), evento_nome: evento.nome,
           evento_data: dataLocal(evento.data, code), evento_horario: evento.horario,
           evento_local: evento.local, evento_categoria: evento.categoria,
+          ...(gestaoSegura?{evento_status:evento.status}:{}),
         };
       }, code);
     },

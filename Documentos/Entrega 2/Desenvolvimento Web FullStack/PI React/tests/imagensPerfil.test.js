@@ -37,6 +37,17 @@ function runtime(acessarImagem) {
     unmount() { cleanups.forEach(c=>c?.()) } }
 }
 const button = (view,label) => nodes(view).find(n=>n.type==='button' && text(n).includes(label))
+test('os quatro perfis habilitam imagens somente com capacidade confirmada pelo backend',()=>{
+  const ImagensPerfil=()=>null
+  for(const papel of ['participante','organizador','fornecedor','admin'])for(const capacidade of [undefined,false,true]){
+    const pagina=load('components/perfil/PerfilPessoal.jsx','PerfilPessoal',{
+      usePerfil:()=>({perfil:{id:7,nome:'Fixture',email:'fixture@example.invalid',perfil:papel,imagens_disponiveis:capacidade},erro:'',recarregar(){}}),
+      ImagensPerfil,PerfilProfissional:()=>null,ConsultaPortfolios:()=>null,
+    })
+    const componente=nodes(pagina({})).find(n=>n.type===ImagensPerfil)
+    assert.equal(componente.props.habilitado,capacidade===true)
+  }
+})
 test('produção mantém foto/capa bloqueadas, sem consultar API', () => {
   let calls=0;const r=runtime(()=>{calls++})
   for(const tipo of ['foto','capa']) {

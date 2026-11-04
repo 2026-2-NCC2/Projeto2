@@ -15,7 +15,7 @@ function renderizador(file, name, props, extra = {}) {
   const result = transformSync(file, source, { jsx: { runtime: 'classic', pragma: 'jsx' } })
   assert.equal(result.errors.length, 0)
   const fn = vm.runInNewContext(result.code + '\n' + name, {
-    jsx, MidiaEvento: 'section', Icone: 'svg', useMemo: fn => fn(),
+    jsx, MidiaEvento: 'section', CapaEvento: 'capa', Icone: 'svg', useMemo: fn => fn(),
     useState(initial) {
       const i = cursor++
       if (!(i in states)) states[i] = initial

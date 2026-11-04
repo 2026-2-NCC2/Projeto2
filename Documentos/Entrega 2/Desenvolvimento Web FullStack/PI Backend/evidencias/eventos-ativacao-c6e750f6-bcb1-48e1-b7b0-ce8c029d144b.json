@@ -1,0 +1,380 @@
+{
+  "projeto": "gnwybroqfvwosiqzsfla",
+  "coletadoEm": "2026-11-04T20:37:06.067Z",
+  "somenteLeitura": true,
+  "tlsVerificado": true,
+  "aprovado": true,
+  "checks": {
+    "integridadePreservado": true,
+    "estadosPreservado": true,
+    "chaves_estrangeirasPreservado": true,
+    "seguranca_tabelasPreservado": true,
+    "seisLegados": true,
+    "seisColunas": true,
+    "cincoFuncoesRestritas": true,
+    "doisTriggers": true,
+    "restricaoValidada": true,
+    "indiceValido": true,
+    "sequencias": true,
+    "capacidadesVersao1": true,
+    "semLimpezaVencidaOuLease": true,
+    "semClientesAtivos": true
+  },
+  "versaoGestao": 1,
+  "imagens": [
+    {
+      "estado": "limpeza",
+      "quantidade": 5,
+      "limpeza_vencida": 0,
+      "lease_vigente": 0
+    }
+  ],
+  "verificacao": {
+    "estados": [
+      {
+        "status": "Ativo",
+        "quantidade": 4
+      },
+      {
+        "status": "Em planejamento",
+        "quantidade": 2
+      }
+    ],
+    "funcoes": [
+      {
+        "anon": false,
+        "funcao": "eventos_capacidades_v1()",
+        "configuracao": [
+          "search_path=pg_catalog"
+        ],
+        "service_role": true,
+        "authenticated": false,
+        "security_definer": false,
+        "service_role_grant_option": false
+      },
+      {
+        "anon": false,
+        "funcao": "eventos_guardar_v1()",
+        "configuracao": [
+          "search_path=pg_catalog"
+        ],
+        "service_role": true,
+        "authenticated": false,
+        "security_definer": false,
+        "service_role_grant_option": false
+      },
+      {
+        "anon": false,
+        "funcao": "gerir_evento_v1(text,integer,integer,jsonb,integer,uuid)",
+        "configuracao": [
+          "search_path=pg_catalog"
+        ],
+        "service_role": true,
+        "authenticated": false,
+        "security_definer": false,
+        "service_role_grant_option": false
+      },
+      {
+        "anon": false,
+        "funcao": "inscrever_evento_v1(integer,integer)",
+        "configuracao": [
+          "search_path=pg_catalog"
+        ],
+        "service_role": true,
+        "authenticated": false,
+        "security_definer": false,
+        "service_role_grant_option": false
+      },
+      {
+        "anon": false,
+        "funcao": "inscricoes_guardar_evento_v1()",
+        "configuracao": [
+          "search_path=pg_catalog"
+        ],
+        "service_role": true,
+        "authenticated": false,
+        "security_definer": false,
+        "service_role_grant_option": false
+      }
+    ],
+    "contexto": {
+      "banco": "postgres",
+      "versao": "170011",
+      "usuario": "postgres"
+    },
+    "triggers": [
+      {
+        "nome": "eventos_guardar_v1",
+        "tabela": "eventos",
+        "definicao": "CREATE TRIGGER eventos_guardar_v1 BEFORE UPDATE ON public.eventos FOR EACH ROW EXECUTE FUNCTION eventos_guardar_v1()",
+        "habilitado": "O"
+      },
+      {
+        "nome": "inscricoes_guardar_evento_v1",
+        "tabela": "inscricoes",
+        "definicao": "CREATE TRIGGER inscricoes_guardar_evento_v1 BEFORE INSERT ON public.inscricoes FOR EACH ROW EXECUTE FUNCTION inscricoes_guardar_evento_v1()",
+        "habilitado": "O"
+      }
+    ],
+    "sequencias": [
+      {
+        "tabela": "eventos",
+        "sequencia": "public.eventos_id_seq",
+        "service_role_usage": true
+      },
+      {
+        "tabela": "inscricoes",
+        "sequencia": "public.inscricoes_id_seq",
+        "service_role_usage": true
+      }
+    ],
+    "integridade": {
+      "eventos": {
+        "md5": "9aabdd7c6fb88f5f5ee7b8eb93ce425c",
+        "quantidade": 6
+      },
+      "cotacoes": {
+        "md5": "203f202d576b14836568c7479ea0520e",
+        "quantidade": 6
+      },
+      "propostas": {
+        "md5": "3d8c5ad4845aa93a8804a4153515bbe3",
+        "quantidade": 6
+      },
+      "inscricoes": {
+        "md5": "9c91bc2d70c1bd89e668c7cee5a4c796",
+        "quantidade": 5
+      },
+      "custos_evento": {
+        "md5": "822ceff85987cd77b9c1ef891216d96d",
+        "quantidade": 2
+      },
+      "itens_cotacao": {
+        "md5": "ba11711acc4770291f205a216e5f8a3d",
+        "quantidade": 17
+      }
+    },
+    "colunas_gestao": [
+      {
+        "nula": "NO",
+        "tipo": "integer",
+        "coluna": "versao",
+        "padrao": "1"
+      },
+      {
+        "nula": "YES",
+        "tipo": "uuid",
+        "coluna": "criacao_chave",
+        "padrao": null
+      },
+      {
+        "nula": "YES",
+        "tipo": "jsonb",
+        "coluna": "criacao_payload",
+        "padrao": null
+      },
+      {
+        "nula": "YES",
+        "tipo": "timestamp with time zone",
+        "coluna": "publicado_em",
+        "padrao": null
+      },
+      {
+        "nula": "YES",
+        "tipo": "timestamp with time zone",
+        "coluna": "cancelado_em",
+        "padrao": null
+      },
+      {
+        "nula": "YES",
+        "tipo": "timestamp with time zone",
+        "coluna": "encerrado_em",
+        "padrao": null
+      }
+    ],
+    "restricao_estados": [
+      {
+        "nome": "eventos_ciclo_v1",
+        "validada": true,
+        "definicao": "CHECK (((status IS NOT NULL) AND (((status)::text COLLATE \"C\") = ANY ((ARRAY['Em planejamento'::character varying, 'Ativo'::character varying, 'Cancelado'::character varying, 'Encerrado'::character varying])::text[]))))"
+      }
+    ],
+    "seguranca_tabelas": [
+      {
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+        "rls": true,
+        "tabela": "eventos",
+        "force_rls": false,
+        "politicas": 0
+      },
+      {
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+        "rls": true,
+        "tabela": "inscricoes",
+        "force_rls": false,
+        "politicas": 0
+      }
+    ],
+    "chaves_estrangeiras": [
+      {
+        "nome": "fk_cotacao_evento",
+        "tabela": "cotacoes",
+        "validada": true,
+        "definicao": "FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE CASCADE"
+      },
+      {
+        "nome": "fk_custos_evento_evento",
+        "tabela": "custos_evento",
+        "validada": true,
+        "definicao": "FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE CASCADE"
+      },
+      {
+        "nome": "fk_evento_usuario",
+        "tabela": "eventos",
+        "validada": true,
+        "definicao": "FOREIGN KEY (usuario_id) REFERENCES usuarios(id)"
+      },
+      {
+        "nome": "fk_inscricao_evento",
+        "tabela": "inscricoes",
+        "validada": true,
+        "definicao": "FOREIGN KEY (evento_id) REFERENCES eventos(id)"
+      },
+      {
+        "nome": "fk_inscricao_usuario",
+        "tabela": "inscricoes",
+        "validada": true,
+        "definicao": "FOREIGN KEY (usuario_id) REFERENCES usuarios(id)"
+      },
+      {
+        "nome": "fk_item_cotacao",
+        "tabela": "itens_cotacao",
+        "validada": true,
+        "definicao": "FOREIGN KEY (cotacao_id) REFERENCES cotacoes(id) ON DELETE CASCADE"
+      },
+      {
+        "nome": "fk_propostas_cotacao",
+        "tabela": "propostas",
+        "validada": true,
+        "definicao": "FOREIGN KEY (cotacao_id) REFERENCES cotacoes(id)"
+      },
+      {
+        "nome": "fk_propostas_fornecedor",
+        "tabela": "propostas",
+        "validada": true,
+        "definicao": "FOREIGN KEY (fornecedor_id) REFERENCES usuarios(id)"
+      }
+    ],
+    "indice_idempotencia": [
+      {
+        "unico": true,
+        "pronto": true,
+        "valido": true,
+        "definicao": "CREATE UNIQUE INDEX eventos_criacao_unica_v1 ON public.eventos USING btree (usuario_id, criacao_chave) WHERE (criacao_chave IS NOT NULL)"
+      }
+    ],
+    "legados_com_metadados_iniciais": 6
+  },
+  "backend": {
+    "pid": 31196,
+    "porta": 3001,
+    "capacidades": {
+      "criar": true,
+      "editar": true,
+      "publicar": true,
+      "inscrever": true,
+      "controleVersao": true,
+      "cancelar": true,
+      "encerrar": true,
+      "excluir": false
+    },
+    "provasHTTP": [
+      {
+        "teste": "sem token",
+        "status": 401
+      },
+      {
+        "teste": "token invalido",
+        "status": 401
+      },
+      {
+        "teste": "capacidades autenticadas",
+        "status": 200
+      },
+      {
+        "teste": "listagem por proprietario",
+        "status": 200
+      },
+      {
+        "teste": "leitura do evento proprio",
+        "status": 200
+      },
+      {
+        "teste": "isolamento de outro organizador",
+        "status": 404
+      },
+      {
+        "teste": "organizador sem acesso administrativo",
+        "status": 403
+      },
+      {
+        "teste": "participante sem acesso administrativo",
+        "status": 403
+      },
+      {
+        "teste": "rota de participante exige perfil",
+        "status": 403
+      },
+      {
+        "teste": "administrador consulta seis eventos",
+        "status": 200
+      },
+      {
+        "teste": "catalogo participante",
+        "status": 200
+      },
+      {
+        "teste": "usuario inexistente",
+        "status": 401
+      }
+    ],
+    "metodosRemotosUsados": [
+      "GET"
+    ],
+    "tokens": "curtos, somente em memoria, nao registrados; perfis atuais existentes",
+    "frontendViteCompativel": true,
+    "validadoEm": "2026-11-04T20:39:45.207Z",
+    "consoleAcessivel": true,
+    "consoleVisivel": true,
+    "consoleIsolado": true
+  },
+  "verificacaoFinal": {
+    "preservado": true,
+    "diarioImagensPreservado": true,
+    "aposCicloAutomatico": true,
+    "coletadoEm": "2026-11-04T20:43:37.353Z"
+  },
+  "testesLocais": {
+    "backend": {
+      "aprovados": 36,
+      "ignorados": 1,
+      "observacao": "SQL Docker nao repetido nesta ativacao"
+    },
+    "frontend": {
+      "aprovados": 8
+    },
+    "lint": true,
+    "build": true
+  },
+  "limpezaObservacao": {
+    "schema": "extensions",
+    "ciclosAntes": 107,
+    "coletadoEm": "2026-11-04T20:41:34.153Z",
+    "ciclosDepois": 108,
+    "cicloAutomaticoObservado": true,
+    "confirmadoEm": "2026-11-04T20:42:20.650Z",
+    "nenhumaLimpezaManualDisparada": true
+  },
+  "ativacaoConcluida": true,
+  "concluidoEm": "2026-11-04T20:43:37.353Z"
+}

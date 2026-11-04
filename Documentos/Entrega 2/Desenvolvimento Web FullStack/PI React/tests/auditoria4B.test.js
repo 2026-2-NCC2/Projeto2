@@ -14,8 +14,8 @@ function runtime(file, name, extra = {}) {
   const cells = [], pending = []
   let cursor = 0
   const env = {
-    jsx, MidiaEvento: 'section', Fragment: 'fragment', Icone: 'svg', console: { error() {} }, useMemo: fn => fn(),
-    sessionStorage: { getItem: () => 'token' }, apiUrl: p => p,
+    jsx, MidiaEvento: 'section', CapaEvento: 'capa', ProvedorImagensEvento: 'provedor', Fragment: 'fragment', Icone: 'svg', console: { error() {} }, useMemo: fn => fn(),
+    sessionStorage: { getItem: () => 'token' }, apiUrl: p => p, capacidadesEventos:async()=>ok({criar:true,editar:true,publicar:true,inscrever:true}),
     useState(initial) {
       const i = cursor++
       if (!(i in cells)) cells[i] = typeof initial === 'function' ? initial() : initial

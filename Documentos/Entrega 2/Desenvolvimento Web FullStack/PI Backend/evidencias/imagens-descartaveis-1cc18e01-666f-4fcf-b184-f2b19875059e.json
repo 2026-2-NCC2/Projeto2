@@ -1,0 +1,53 @@
+{
+  "run": "1cc18e01-666f-4fcf-b184-f2b19875059e",
+  "projeto": "gnwybroqfvwosiqzsfla",
+  "inicio": "2026-11-04T18:30:52.283Z",
+  "preflight": {
+    "aprovado": true,
+    "somenteLeitura": true,
+    "uploadsHabilitados": false,
+    "destinosCompativeis": true,
+    "restProjetoETabelas": true,
+    "bucketsPrivadosELimites": true,
+    "tlsVerificado": true,
+    "rlsEPermissoes": true,
+    "contasTesteProtegidas": true,
+    "semPoliticasStorage": true,
+    "integridadeReferencias": true,
+    "diarioVazio": true
+  },
+  "contas": [
+    {
+      "registro": "d1806f96-dc94-4f80-a59b-6e146c70dc6d",
+      "id": 21
+    },
+    {
+      "registro": "ac128974-bc2c-461e-aeb1-effdd3dcbc8b",
+      "id": 22
+    }
+  ],
+  "testes": [
+    "duas contas por cadastro normal, identidade confirmada e login",
+    "foto: upload, WebP sem EXIF, substituição, remoção lógica, URL assinada, privacidade e isolamento",
+    "capa: upload, WebP sem EXIF, substituição, remoção lógica, URL assinada, privacidade e isolamento",
+    "encerramento bloqueia login/JWT e novas alterações; quarentena impede purge e limpeza antecipada"
+  ],
+  "aprovado": true,
+  "estadoFinal": [
+    {
+      "usuario_id": 21,
+      "estado": "encerrando",
+      "atividades": 0,
+      "incerta": false,
+      "quarentena": true
+    },
+    {
+      "usuario_id": 22,
+      "estado": "encerrando",
+      "atividades": 0,
+      "incerta": false,
+      "quarentena": true
+    }
+  ],
+  "fim": "2026-11-04T18:32:59.676Z"
+}

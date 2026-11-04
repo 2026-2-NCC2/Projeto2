@@ -6,6 +6,7 @@ const ref={operacao:op,evento_origem:13,posicao:0,bucket:'eventos-imagens',camin
 function fixture(modo='ok') {
   const calls=[],imagens=[];
   const repo={listar:async(usuario,id)=>{calls.push('autorizar');if(usuario.id!==7||id!==13)throw Object.assign(Error('Evento não encontrado'),{status:404});return imagens;},
+    autorizarEdicao:async(usuario,id)=>{calls.push('autorizar');if(usuario.id!==7||id!==13)throw Object.assign(Error('Evento não encontrado'),{status:404});},
     reservar:async()=>calls.push('reservar'),confirmar:async()=>{calls.push('confirmar');if(modo==='commit-incerto')throw Error();},remover:async()=>calls.push('remover')};
   const storage={enviar:async()=>{calls.push('enviar');if(modo==='upload-incerto')throw Error();},assinar:async()=>({url:'https://sintetico.invalid',expira_em_segundos:120})};
   const processar=async(usuario,tipo)=>{calls.push('processar');assert.equal(tipo,'capa');return{dados:Buffer.alloc(20),mime:'image/webp',tamanho:20,largura:32,altura:24};};
@@ -38,7 +39,7 @@ test('Storage é privado, sem upsert, origem/caminho de assinatura conferidos',a
 function repoFixture({perfil='organizador',dono=true,permitido=true}={}) {
   const calls=[];const pool={connect:async()=>({release(){},query:async(sql,params)=>{
     calls.push({sql,params});if(sql.startsWith('SELECT perfil'))return{rows:[{perfil}]};
-    if(sql.startsWith('SELECT id FROM public.eventos'))return{rows:dono?[{id:13}]:[]};
+    if(sql.startsWith('SELECT id,status FROM public.eventos'))return{rows:dono?[{id:13,status:'Ativo'}]:[]};
     if(sql.startsWith('SELECT e.id'))return{rows:permitido?[{id:13}]:[]};
     if(sql.startsWith('SELECT * FROM public.eventos_imagens'))return{rows:[]};
     return{rows:[]};}})};
@@ -47,20 +48,21 @@ function repoFixture({perfil='organizador',dono=true,permitido=true}={}) {
 test('repositório revalida propriedade em transação para reserva e remoção',async()=>{
   for(const acao of ['reservar','remover']) {
     const f=repoFixture({dono:false});await assert.rejects(acao==='reservar'?f.repo.reservar(u,13,0,{...ref,mime:'image/webp',tamanho:20,largura:32,altura:24}):f.repo.remover(u,13,0),{status:404});
-    assert.ok(f.calls.some(c=>c.sql==='SELECT id FROM public.eventos WHERE id=$1 AND usuario_id=$2 FOR UPDATE'&&c.params[1]===7));
+    assert.ok(f.calls.some(c=>c.sql==='SELECT id,status FROM public.eventos WHERE id=$1 AND usuario_id=$2 FOR UPDATE'&&c.params[1]===7));
     assert.ok(!f.calls.some(c=>/^(UPDATE|INSERT)/.test(c.sql)));assert.equal(f.calls.at(-1).sql,'ROLLBACK');
   }
 });
 test('consulta mantém regras por perfil; nenhuma assinatura sem autorização',async()=>{
   for(const perfil of ['organizador','participante','fornecedor','admin']) {
     const f=repoFixture({perfil,permitido:false});await assert.rejects(f.repo.listar({...u,perfil},13),{status:404});
-    const filtro=f.calls.find(c=>c.sql.startsWith('SELECT e.id'));assert.ok(filtro.sql.includes("e.status='Ativo'"));assert.ok(filtro.sql.includes("q.status='Aberta'"));assert.equal(filtro.params[2],perfil);
+    const filtro=f.calls.find(c=>c.sql.startsWith('SELECT e.id'));assert.ok(filtro.sql.includes('e.status COLLATE "C"'));assert.ok(filtro.sql.includes('clock_timestamp()'));assert.ok(filtro.sql.includes('public.inscricoes'));assert.ok(filtro.sql.includes('public.propostas'));assert.equal(filtro.params[2],perfil);
     assert.ok(!f.calls.some(c=>c.sql.startsWith('SELECT * FROM public.eventos_imagens')));
   }
 });
-test('importar o candidato não cria clientes, rotas ou pools',()=>{
+test('servidor monta router bloqueado antes do parser; ativação permanece desligada',()=>{
   const fs=require('node:fs'),path=require('node:path');const servidor=fs.readFileSync(path.join(__dirname,'../server.js'),'utf8');
-  assert.ok(!servidor.includes("require(\"./eventos-imagens"));assert.ok(!servidor.includes("require('./eventos-imagens"));
+  assert.ok(servidor.indexOf("require('./eventos-imagens-http.cjs')")<servidor.indexOf('app.use(express.json())'));
+  assert.equal(require('../config/ativacao-eventos-imagens.json').ativo,false);
 });
 
 test('candidato de eventos em PostgreSQL descartável', {skip:process.env.TROCATICKET_SQL_ISOLADO!=='1',timeout:60000}, async t=>{
@@ -75,13 +77,34 @@ test('candidato de eventos em PostgreSQL descartável', {skip:process.env.TROCAT
   await pool.query(`CREATE ROLE service_role BYPASSRLS;CREATE ROLE anon;CREATE ROLE authenticated;
     CREATE TABLE usuarios(id integer PRIMARY KEY,perfil text NOT NULL);
     INSERT INTO usuarios VALUES(7,'organizador'),(8,'organizador'),(9,'participante'),(10,'fornecedor'),(11,'admin');
-    CREATE TABLE eventos(id integer PRIMARY KEY,usuario_id integer NOT NULL REFERENCES usuarios(id),status text);
-    INSERT INTO eventos VALUES(13,7,'Ativo'),(14,8,'Em planejamento');
+    CREATE TABLE contas_teste_imagens(usuario_id integer,estado text);
+    CREATE TABLE eventos(id integer PRIMARY KEY,usuario_id integer NOT NULL REFERENCES usuarios(id),status text,data date DEFAULT '2030-01-01',horario time DEFAULT '10:00');
+    INSERT INTO eventos(id,usuario_id,status) VALUES(13,7,'Ativo'),(14,8,'Em planejamento');
     CREATE TABLE cotacoes(id integer PRIMARY KEY,evento_id integer REFERENCES eventos(id) ON DELETE CASCADE,status text,prazo date);
     INSERT INTO cotacoes VALUES(21,13,'Aberta',CURRENT_DATE+1);
-    GRANT SELECT,UPDATE ON usuarios,eventos TO service_role;GRANT SELECT ON cotacoes TO service_role;`);
+    CREATE TABLE propostas(id integer PRIMARY KEY,cotacao_id integer REFERENCES cotacoes(id),fornecedor_id integer REFERENCES usuarios(id));
+    CREATE TABLE inscricoes(usuario_id integer REFERENCES usuarios(id),evento_id integer REFERENCES eventos(id) ON DELETE CASCADE);
+    GRANT SELECT,UPDATE ON usuarios,eventos,contas_teste_imagens TO service_role;GRANT SELECT ON cotacoes,propostas,inscricoes TO service_role;`);
   // Exclusivamente fixture local. O arquivo não é executado contra Supabase.
   await pool.query(fs.readFileSync(path.join(__dirname,'../../Banco de dados/eventos_imagens.preparacao.sql'),'utf8'));
+  await t.test('preflight de leitura reconhece o schema candidato e recusa bucket público',async()=>{
+    await pool.query(`CREATE SCHEMA storage;CREATE TABLE storage.buckets(id text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
+      INSERT INTO storage.buckets VALUES('eventos-imagens',false,10485760,ARRAY['image/webp']);
+      CREATE FUNCTION eventos_capacidades_v1() RETURNS integer LANGUAGE sql STABLE AS 'SELECT 1';`);
+    const module={exports:{}},ref='gnwybroqfvwosiqzsfla';
+    require('node:vm').runInNewContext(fs.readFileSync(path.join(__dirname,'../scripts/preflight-eventos-imagens.cjs'),'utf8'),{module,AbortSignal,
+      fetch:async()=>({ok:true,headers:{get:()=>ref},arrayBuffer:async()=>new ArrayBuffer(0)}),
+      require(nome){
+        if(nome==='./preflight-imagens-producao.cjs')return{configurar:()=>({c:{url:'https://'+ref+'.supabase.co',secretKey:'sintetica'},pg:{}})};
+        if(nome==='../db-postgres.js')return{criarPoolPostgres:()=>({async connect(){const c=await pool.connect();return{connection:{stream:{authorized:true}},query:(...a)=>c.query(...a),release:()=>c.release()}},async end(){}})};
+        if(nome==='../eventos-imagens.cjs')return require('../eventos-imagens.cjs');
+        throw Error('Dependência inesperada');
+      }});
+    let resultado=await module.exports.executar({});assert.equal(resultado.pronto,true,JSON.stringify(resultado.checks));
+    await pool.query('UPDATE storage.buckets SET public=true');
+    resultado=await module.exports.executar({});assert.equal(resultado.pronto,false);assert.equal(resultado.checks.bucket,false);
+    await pool.query('UPDATE storage.buckets SET public=false');
+  });
   const repo=criarRepositorioImagensEvento(pool);
   const nova=()=>{const operacao=randomUUID();return{operacao,evento_origem:13,bucket:'eventos-imagens',caminho:`13/${operacao}.webp`,mime:'image/webp',tamanho:20,largura:32,altura:24};};
   await t.test('leitura por perfil usa evento próprio, status e cotação disponíveis',async()=>{
@@ -118,11 +141,57 @@ test('candidato de eventos em PostgreSQL descartável', {skip:process.env.TROCAT
     const ref=nova();await repo.reservar(u,13,4,ref);await repo.remover(u,13,4);await repo.remover(u,13,4);
     await assert.rejects(repo.confirmar(u,13,4,ref.operacao),{status:409});
   });
+  await t.test('limite é uma capa e oito imagens atuais, imposto também pelo banco',async()=>{
+    for(let posicao=0;posicao<=8;posicao++)await repo.remover(u,13,posicao);
+    const processar=async()=>({dados:Buffer.alloc(20),mime:'image/webp',tamanho:20,largura:32,altura:24});
+    const servico=criarServicoImagensEvento({repositorio:repo,storage:{enviar:async()=>{}},processar});
+    for(let posicao=0;posicao<=8;posicao++)await servico.substituir(u,13,posicao,Buffer.alloc(1));
+    assert.equal((await repo.listar(u,13)).length,9);
+    await assert.rejects(pool.query("UPDATE eventos_imagens SET posicao=9 WHERE estado='atual' AND posicao=8"),{code:'23514'});
+    await assert.rejects(servico.substituir(u,13,9,Buffer.alloc(1)),{status:400});
+  });
+  await t.test('terminais bloqueiam mutações; inscritos e proponentes mantêm leitura histórica',async()=>{
+    await pool.query("UPDATE eventos SET status='Cancelado' WHERE id=13");
+    await assert.rejects(repo.autorizarEdicao(u,13),{status:409});
+    await assert.rejects(repo.reservar(u,13,5,nova()),{status:409});
+    await assert.rejects(repo.remover(u,13,0),{status:409});
+    await assert.rejects(repo.listar({id:9,perfil:'participante'},13),{status:404});
+    await pool.query('INSERT INTO inscricoes VALUES(9,13);INSERT INTO propostas VALUES(1,21,10)');
+    assert.ok((await repo.listar({id:9,perfil:'participante'},13)).length);
+    assert.ok((await repo.listar({id:10,perfil:'fornecedor'},13)).length);
+    await pool.query("UPDATE eventos SET status='Encerrado' WHERE id=13");
+    await assert.rejects(repo.confirmar(u,13,0,op),{status:409});
+    await pool.query("UPDATE eventos SET status='Ativo' WHERE id=13");
+  });
+  await t.test('conta encerrando é recusada na mesma transação; permissões preservam diário',async()=>{
+    await pool.query("INSERT INTO contas_teste_imagens VALUES(7,'encerrando')");
+    await assert.rejects(repo.reservar(u,13,5,nova()),{status:403});
+    await pool.query('DELETE FROM contas_teste_imagens');
+    const c=await pool.connect();try{await c.query('BEGIN');await c.query('SET LOCAL ROLE service_role');await assert.rejects(c.query('DELETE FROM eventos_imagens WHERE false'),{code:'42501'});}finally{await c.query('ROLLBACK');c.release();}
+    for(const role of ['anon','authenticated']){const c=await pool.connect();try{await c.query('BEGIN');await c.query('SET LOCAL ROLE '+role);await assert.rejects(c.query('SELECT * FROM eventos_imagens'),{code:'42501'});}finally{await c.query('ROLLBACK');c.release();}}
+  });
   await t.test('exclusão do evento preserva diário e caminho para futura limpeza',async()=>{
+    await pool.query('DELETE FROM propostas');
     await pool.query('DELETE FROM eventos WHERE id=13');
     const r=await pool.query('SELECT evento_id,evento_origem FROM eventos_imagens');
     assert.ok(r.rows.length>0);assert.ok(r.rows.every(r=>r.evento_id===null&&r.evento_origem===13));
     await assert.rejects(repo.listar({id:11,perfil:'admin'},13),{status:404});
     assert.equal((await pool.query('SELECT count(*)::integer AS n FROM usuarios')).rows[0].n,5);
+  });
+  await t.test('órfãos são agendados sem remoção precoce; lease impede confirmação e worker antigo',async()=>{
+    assert.equal(await repo.reivindicarLimpeza(),null);
+    const q=await pool.query("SELECT count(*)::integer AS n FROM eventos_imagens WHERE estado='limpeza' AND limpeza_apos>now()+interval '23 hours'");
+    assert.ok(q.rows[0].n>0);
+    await pool.query("UPDATE eventos_imagens SET limpeza_apos=now()-interval '1 second' WHERE estado='limpeza'");
+    const tarefa=await repo.reivindicarLimpeza();assert.equal(tarefa.estado,'limpando');assert.equal(tarefa.evento_id,null);
+    assert.ok(tarefa.lease);await assert.rejects(repo.concluirLimpeza(tarefa.operacao,'2000-01-01T00:00:00Z'));
+    await repo.concluirLimpeza(tarefa.operacao,tarefa.lease);
+    const r=(await pool.query('SELECT * FROM eventos_imagens WHERE operacao=$1',[tarefa.operacao])).rows[0];
+    assert.equal(r.estado,'removido');assert.equal(r.lease_ate,null);assert.ok(r.limpeza_apos>new Date(Date.now()+23*3600000));
+  });
+  await t.test('reaplicação recusa tabela existente e faz rollback sem alterar o diário',async()=>{
+    const antes=(await pool.query('SELECT count(*)::integer AS n FROM eventos_imagens')).rows[0].n;
+    const c=await pool.connect();try{await assert.rejects(c.query(fs.readFileSync(path.join(__dirname,'../../Banco de dados/eventos_imagens.preparacao.sql'),'utf8')),{code:'42P07'});}finally{await c.query('ROLLBACK');c.release();}
+    assert.equal((await pool.query('SELECT count(*)::integer AS n FROM eventos_imagens')).rows[0].n,antes);
   });
 });

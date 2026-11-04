@@ -33,7 +33,7 @@ test('criar: IDs malformados geram resultado incerto sem afirmar rollback ou rep
 function handler(repo){
   const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');const source=fs.readFileSync(path.join(__dirname,'../server.js'),'utf8');
   const slice=source.slice(source.indexOf('app.post("/eventos",'),source.indexOf('app.patch("/eventos/:id/publicar",'));let action;
-  vm.runInNewContext(slice,{app:{post(route,...args){assert.equal(route,'/eventos');action=args.at(-1);}},autenticar(){},permitirPerfis:()=>()=>{},eventosRepository:repo,console:{error(){}}});return action;
+  vm.runInNewContext(slice,{app:{post(route,...args){assert.equal(route,'/eventos');action=args.at(-1);}},autenticar(){},permitirPerfis:()=>()=>{},...require('./helpers/eventos-contexto.cjs'),eventosRepository:repo,console:{error(){}}});return action;
 }
 const body=()=>({nome:' Evento ficticio ',data:'2030-01-01',horario:'10:00',local:' Local ',publico:20,usuario_id:999,status:'Ativo'});
 const response=()=>({status(n){this.code=n;return this;},json(data){this.body=JSON.parse(JSON.stringify(data));return this;}});

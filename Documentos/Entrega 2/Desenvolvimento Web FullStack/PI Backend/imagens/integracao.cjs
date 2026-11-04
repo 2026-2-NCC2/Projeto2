@@ -4,20 +4,20 @@ const { criarStorageImagens } = require('./storage.cjs');
 const { criarServicoImagens, limparUmaImagem } = require('./servico.cjs');
 
 // Construção explícita com dependências já validadas. Inerte ao importar.
-// O chamador de homologação confere mesmo projeto no PG e Storage, permissões
-// de SET ROLE e schema. Não é conectado ao server.js nesta etapa.
+// O inicializador confere mesmo projeto no PG e Storage, permissões de SET ROLE
+// e schema antes de conectar esta integração ao servidor.
 function prepararIntegracaoImagens({ pool, clienteStorage, origemStorage, supervisor, contasTeste }) {
-  if (contasTeste !== undefined && (!contasTeste || typeof contasTeste.verificarAberta !== 'function' || typeof contasTeste.executarOperacao !== 'function')) throw Error('Proteção de contas de teste inválida.');
+  if (!contasTeste || typeof contasTeste.verificarAberta !== 'function' || typeof contasTeste.executarOperacao !== 'function') throw Error('Proteção de contas de teste obrigatória.');
   const origem = new URL(origemStorage);
   if (origem.protocol !== 'https:' || origem.origin !== origemStorage || origem.username || origem.password) throw Error('Origem Storage inválida.');
-  const repositorio = criarRepositorioImagens(pool, { verificarAberta: contasTeste?.verificarAberta });
+  const repositorio = criarRepositorioImagens(pool, { verificarAberta: contasTeste.verificarAberta });
   const storage = criarStorageImagens(clienteStorage, { origem: origemStorage });
   const servico = criarServicoImagens({ repositorio, storage });
   const acompanhar = (acao, escrita) => supervisor ? supervisor.executarPersistencia(acao, escrita) : acao();
   let limpando = false;
   return Object.freeze({
     servico: Object.freeze(Object.fromEntries(Object.entries(servico).map(([nome, acao]) =>
-      [nome, (...args) => acompanhar(() => contasTeste && nome !== 'consultar'
+      [nome, (...args) => acompanhar(() => nome !== 'consultar'
         ? contasTeste.executarOperacao(args[0].id, () => acao(...args)) : acao(...args), nome !== 'consultar')]))),
     async limpar({ executar = false, limite = 10 } = {}) {
       if (!Number.isInteger(limite) || limite < 1 || limite > 100) throw Error('Limite de limpeza inválido.');

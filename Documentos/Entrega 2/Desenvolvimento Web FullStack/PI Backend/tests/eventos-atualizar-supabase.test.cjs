@@ -33,7 +33,7 @@ function harness(repo){
   const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');const source=fs.readFileSync(path.join(__dirname,'../server.js'),'utf8');
   const start=source.indexOf('function permitirPerfis('),guard=source.slice(start,source.indexOf('const eventos = []',start));
   const route=source.slice(source.indexOf('app.put("/eventos/:id",'),source.indexOf('app.delete("/eventos/:id",'));let action,authorize;
-  vm.runInNewContext(guard+'\n'+route,{app:{put(name,...args){assert.equal(name,'/eventos/:id');authorize=args[1];action=args.at(-1);}},autenticar(){},eventosRepository:repo,console:{error(){}}});
+  vm.runInNewContext(guard+'\n'+route,{app:{put(name,...args){assert.equal(name,'/eventos/:id');authorize=args[1];action=args.at(-1);}},autenticar(){},...require('./helpers/eventos-contexto.cjs'),eventosRepository:repo,console:{error(){}}});
   return async(req)=>{const res={status(n){this.code=n;return this;},json(body){this.body=JSON.parse(JSON.stringify(body));return this;}};let allowed=false;authorize(req,res,()=>{allowed=true;});if(allowed)await action(req,res);return res;};
 }
 const request=()=>({params:{id:'13'},usuario:{id:7,perfil:'organizador'},body:{nome:' Evento ',data:'2030-01-01',horario:'10:00',local:' Local ',publico:20,status:'Ativo',usuario_id:999}});

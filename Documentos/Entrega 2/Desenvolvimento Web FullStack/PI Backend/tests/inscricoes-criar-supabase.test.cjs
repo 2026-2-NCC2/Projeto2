@@ -67,7 +67,7 @@ function harness(repo) {
   vm.runInNewContext(guard + "\n" + route, {
     app: { post(name, ...args) { assert.equal(name, "/participante/inscricoes");
       authorize = args[1]; action = args.at(-1); } },
-    autenticar() {}, inscricoesRepository: repo, console: { error() {} },
+    autenticar() {}, ...require('./helpers/eventos-contexto.cjs'),inscricoesRepository: repo, console: { error() {} },
   });
   return async req => {
     const res = { status(n) { this.code = n; return this; },

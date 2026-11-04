@@ -31,8 +31,27 @@ function converterData(valor) {
 // rotas ainda. Reutiliza a fabrica existente; importar o modulo e inerte.
 // Injetar o cliente permite testes sem SDK, credenciais ou consultas reais.
 function criarRepositorioEventos(
-  cliente = require("../../db-supabase.cjs").criarClienteSupabase()
+  cliente = require("../../db-supabase.cjs").criarClienteSupabase(), {gestaoSegura=false}={}
 ) {
+  const {validarEvento,inicioFuturo,erroRpc,consultarRpc}=require('../../services/eventos.cjs');
+  const {falha}=require('../../services/suporte-transacoes.cjs');
+  async function capacidades(){
+    const {data,error}=await consultarRpc(cliente,'eventos_capacidades_v1',{});
+    if(error&&!['PGRST202','42883'].includes(error.code))erroRpc(error);
+    if(!error&&data!==1)throw falha(503,'Versão da gestão de eventos não reconhecida.');
+    const pronto=!error&&data===1;
+    return {criar:pronto,editar:pronto,publicar:pronto,inscrever:pronto,controleVersao:pronto,cancelar:true,encerrar:true,excluir:false};
+  }
+  async function gerir(acao,id,usuarioId,dados={},versao=null,chave=null){
+    if(!(await capacidades()).controleVersao)throw falha(503,'Gestão segura aguarda migração autorizada.');
+    const {data,error}=await consultarRpc(cliente,'gerir_evento_v1',{
+      p_acao:acao,p_usuario:usuarioId,p_evento:id,p_dados:dados,p_versao:versao,p_chave:chave,
+    });
+    if(error)erroRpc(error);
+    if(!data||!Number.isSafeInteger(data.id)||(id!==null&&data.id!==id)||data.usuario_id!==usuarioId||!Number.isSafeInteger(data.versao))throw falha(503,'Resultado da operação não confirmado.',true);
+    return data;
+  }
+  async function camposLeitura(){return gestaoSegura&&(await capacidades()).controleVersao?[...campos,'versao']:campos;}
   // O contrato MySQL retorna a lista inteira. O limite de linhas do PostgREST
   // nao pode truncar silenciosamente esse retorno. Cada pagina exige contagem
   // exata; respostas incompletas/inconsistentes falham, sem retry ou fallback.
@@ -74,7 +93,25 @@ function criarRepositorioEventos(
   }
 
   return {
-    async publicar(id, usuarioId) {
+    capacidades,
+    async mudarEstado(id,usuarioId,{acao,estado_esperado,versao}={}){
+      if(!Number.isSafeInteger(id)||id<=0||!['cancelar','encerrar'].includes(acao))throw falha(400,'Operação inválida.');
+      if((await capacidades()).controleVersao)return gerir(acao,id,usuarioId,{},versao);
+      // Compatível com o schema atual. Não apaga filhos e não depende de colunas novas.
+      const {data:antes,error}=await cliente.schema('public').from('eventos').select(campos.join(',')).eq('id',id).eq('usuario_id',usuarioId).maybeSingle();
+      if(error)erroRpc(error);if(!antes)throw falha(404,'Evento não encontrado.');
+      if(antes.status!==estado_esperado||!(acao==='cancelar'?['Em planejamento','Ativo']:['Ativo']).includes(antes.status)||
+        (acao==='encerrar'&&inicioFuturo(antes.data,antes.horario)))throw falha(409,'Transição indisponível. Consulte o evento novamente.');
+      let q=cliente.schema('public').from('eventos').update({status:acao==='cancelar'?'Cancelado':'Encerrado'}).eq('id',id).eq('usuario_id',usuarioId);
+      // Compare-and-swap do snapshot inteiro; uma edição concorrente não é ignorada.
+      for(const campo of campos.filter(c=>!['id','usuario_id'].includes(c)))q=antes[campo]===null?q.is(campo,null):q.eq(campo,antes[campo]);
+      const r=await q.select(campos.join(',')).retry(false);if(r.error)erroRpc(r.error);
+      if(!Array.isArray(r.data)||r.data.length!==1)throw falha(409,'Evento alterado por outra operação. Consulte novamente.');
+      if(r.data[0].id!==id||r.data[0].usuario_id!==usuarioId||r.data[0].status!==(acao==='cancelar'?'Cancelado':'Encerrado'))throw falha(503,'Transição não confirmada. Consulte o evento.',true);
+      return r.data[0];
+    },
+    async publicar(id, usuarioId, versao) {
+      if(gestaoSegura){await gerir('publicar',id,usuarioId,{},versao);return 1;}
       // Mesmo UPDATE atomico do MySQL: propriedade e estado conferidos na escrita.
       // Nao confundir com publicar_cotacao, que possui outro contrato/transacao.
       const { data: linhas, error } = await cliente.schema("public")
@@ -98,6 +135,7 @@ function criarRepositorioEventos(
     },
 
     async excluir(id, usuarioId) {
+      if(gestaoSegura)throw falha(409,'Exclusão física indisponível. Cancele ou encerre o evento para preservar seu histórico.');
       // Uma unica exclusao condicional. FKs/cascatas pertencem ao banco;
       // nao remover dependencias manualmente nem ocultar falhas de integridade.
       const { data: linhas, error } = await cliente.schema("public")
@@ -119,7 +157,9 @@ function criarRepositorioEventos(
       return linhas.length;
     },
 
-    async criar({ nome, data, horario, local, categoria, publico, descricao, status, usuarioId }) {
+    async criar({ nome, data, horario, local, categoria, publico, descricao, status, usuarioId, chaveIdempotencia }) {
+      // A resposta atômica preserva também o estado atual em um replay de criação.
+      if(gestaoSegura)return gerir('criar',null,usuarioId,validarEvento({nome,data,horario,local,categoria,publico,descricao}),null,chaveIdempotencia);
       // Validacoes/defaults e identidade do organizador continuam no handler.
       // Nao aceitar usuario_id extra do corpo como substituto de usuarioId.
       const { data: criado, error } = await cliente.schema("public")
@@ -139,7 +179,8 @@ function criarRepositorioEventos(
       return criado.id;
     },
 
-    async atualizar(id, usuarioId, { nome, data, horario, local, categoria, publico, descricao }) {
+    async atualizar(id, usuarioId, { nome, data, horario, local, categoria, publico, descricao }, versao) {
+      if(gestaoSegura){await gerir('editar',id,usuarioId,validarEvento({nome,data,horario,local,categoria,publico,descricao}),versao);return 1;}
       // Mesmo UPDATE condicional por id E proprietario, sem leitura previa.
       // Status e usuario_id nao sao editaveis; validacoes/perfil ficam no handler.
       const { data: linhas, error } = await cliente.schema("public")
@@ -163,6 +204,7 @@ function criarRepositorioEventos(
     },
 
     async listarPorUsuario(usuarioId) {
+      const campos=await camposLeitura();
       return listarTodas(() => cliente.schema("public").from("eventos")
         .select(campos.join(", "), { count: "exact" })
         .eq("usuario_id", usuarioId)
@@ -170,6 +212,7 @@ function criarRepositorioEventos(
     },
 
     async listarAdministrativo() {
+      const campos=await camposLeitura();
       return listarTodas(() => cliente.schema("public").from("eventos")
         .select(`${campos.join(", ")}, organizador:usuarios!inner(nome)`, { count: "exact" })
         .order("id", { ascending: false }), campos, true);
@@ -177,14 +220,16 @@ function criarRepositorioEventos(
 
     async listarAtivosParaParticipante() {
       const camposParticipante = campos.filter(campo => campo !== "usuario_id");
-      return listarTodas(() => cliente.schema("public").from("eventos")
+      const lista=await listarTodas(() => cliente.schema("public").from("eventos")
         .select(camposParticipante.join(", "), { count: "exact" })
         .eq("status", "Ativo")
         .order("data", { ascending: true })
         .order("id", { ascending: true }), camposParticipante);
+      return gestaoSegura?lista.filter(e=>inicioFuturo(e.data,e.horario)):lista;
     },
 
     async buscarPorIdDoUsuario(id, usuarioId) {
+      const campos=await camposLeitura();
       const { data, error } = await cliente.schema("public")
         .from("eventos")
         .select(campos.join(", "))

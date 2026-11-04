@@ -10,7 +10,7 @@ function configurar(env){
   return {c,pg:{PGHOST:env.PGHOST,PGUSER:env.PGUSER,PGPASSWORD:env.PGPASSWORD,PGDATABASE:env.PGDATABASE,PGPORT:'5432',
     PGPOOL_MAX:'2',PGCONNECT_TIMEOUT_MS:'5000',PGIDLE_TIMEOUT_MS:'10000',...(env.PGSSLROOTCERT?{PGSSLROOTCERT:env.PGSSLROOTCERT}:{})}};
 }
-async function executar(env,{somentePostgres=false}={}){
+async function executar(env,{somentePostgres=false,exigirDiarioVazio=true,validarContasTeste=false}={}){
   const resultado={aprovado:false,somenteLeitura:true,uploadsHabilitados:false};
   if(somentePostgres)resultado.escopo='postgresql';
   let etapa='CONFIG',pool,conexao;
@@ -64,6 +64,21 @@ async function executar(env,{somentePostgres=false}={}){
       exigir(t?.rls&&t.forcado&&t.crud&&!t.publico&&!t.extras);
     }
     resultado.rlsEPermissoes=true;
+    if(validarContasTeste){
+      etapa='PG_CONTAS_TESTE';
+      const t=(await conexao.query(`SELECT c.relrowsecurity AS rls,c.relforcerowsecurity AS forcado,
+        has_table_privilege('service_role',c.oid,'SELECT') AND has_table_privilege('service_role',c.oid,'INSERT') AND
+        has_table_privilege('service_role',c.oid,'UPDATE') AS permitido,
+        has_table_privilege('service_role',c.oid,$1) AS proibido,
+        has_table_privilege('anon',c.oid,$2) OR has_table_privilege('authenticated',c.oid,$2) AS publico,
+        (SELECT count(*) FROM pg_policy WHERE polrelid=c.oid)=0 AS sem_politicas
+        FROM pg_class c WHERE c.oid='public.contas_teste_imagens'::regclass`,[
+          'DELETE,'+extras+',SELECT WITH GRANT OPTION,INSERT WITH GRANT OPTION,UPDATE WITH GRANT OPTION',
+          'SELECT,INSERT,UPDATE,DELETE,'+extras])).rows[0];
+      exigir(t?.rls&&t.forcado&&t.permitido&&!t.proibido&&!t.publico&&t.sem_politicas);
+      exigir((await conexao.query("SELECT has_schema_privilege(current_user,'storage','USAGE') AND has_table_privilege(current_user,'storage.objects','SELECT') AS ok")).rows[0]?.ok);
+      resultado.contasTesteProtegidas=true;
+    }
     etapa='PG_STORAGE_POLITICAS';
     exigir((await conexao.query("SELECT count(*)::integer AS total FROM pg_policies WHERE schemaname='storage' AND tablename IN ('objects','buckets')")).rows[0].total===0);
     resultado.semPoliticasStorage=true;
@@ -74,7 +89,7 @@ async function executar(env,{somentePostgres=false}={}){
       ON o.operacao=p.objeto_id AND o.usuario_id=p.usuario_id AND o.tipo=p.tipo WHERE o.operacao IS NULL OR o.estado<>'atual') AS inconsistente`)).rows[0].inconsistente);
     resultado.integridadeReferencias=true;
     resultado.diarioVazio=(await conexao.query('SELECT count(*)::integer AS total FROM public.perfil_imagens_objetos')).rows[0].total===0;
-    exigir(resultado.diarioVazio);
+    if(exigirDiarioVazio)exigir(resultado.diarioVazio);
     resultado.aprovado=true;
   }catch(e){resultado.bloqueio=etapa;resultado.codigo=/^[A-Z][A-Z0-9_]{1,63}$/.test(e.code||'')?e.code:'VERIFICACAO_RECUSADA';}
   finally{

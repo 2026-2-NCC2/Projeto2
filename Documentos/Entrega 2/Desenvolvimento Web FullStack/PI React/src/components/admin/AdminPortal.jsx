@@ -1,7 +1,7 @@
 import { PerfilPessoal } from '../perfil/PerfilPessoal.jsx'
 import { Icone } from '../ui/Icone.jsx'
 import { IdentidadeConta } from '../layout/IdentidadeConta.jsx'
-import { MidiaEvento } from '../eventos/MidiaEvento.jsx'
+import { MidiaEvento, CapaEvento } from '../eventos/MidiaEvento.jsx'
 import { apiUrl } from '../../services/api.js'
 import { useEffect, useState } from 'react';
 import { NavegacaoRecolhivel } from '../layout/NavegacaoRecolhivel.jsx'
@@ -429,7 +429,7 @@ export function AdminPortal({ aoSair }) {
   })
   .map((evento) => (
     <tr key={evento.id}>
-    <td>{evento.nome}</td>
+    <td><CapaEvento eventoId={evento.id}/>{evento.nome}</td>
     <td>{evento.local}</td>
     <td>{evento.status}</td>
     <td>{evento.organizador_nome || `#${evento.usuario_id}`}</td>

@@ -10,7 +10,7 @@ import { Login } from './pages/auth/Login.jsx'
 import { Cadastro } from './pages/auth/Cadastro.jsx'
 import { Cotacao } from './pages/organizador/Cotacao.jsx'
 import { Ticket } from './pages/organizador/Ticket.jsx'
-import { listarEventos, publicarEvento, excluirEvento, salvarEvento } from './services/eventos.js'
+import { listarEventos, publicarEvento, salvarEvento, consultarEvento, capacidadesEventos, mudarEstadoEvento } from './services/eventos.js'
 import { Custos } from './pages/organizador/Custos.jsx'
 import { PerfilOrganizador } from './pages/organizador/Perfil.jsx'
 import { CriarEvento } from './pages/organizador/CriarEvento.jsx'
@@ -24,6 +24,7 @@ import { useCustosPersistidos } from './hooks/useCustosPersistidos.js'
 import { usePublicacaoCotacao } from './hooks/usePublicacaoCotacao.js'
 import './App.css'
 import { AdminPortal } from './components/admin/AdminPortal'
+import { ProvedorImagensEvento } from './components/eventos/ProvedorImagensEvento.jsx'
 
 
 
@@ -57,6 +58,20 @@ function App() {
   const [carregandoEventos, setCarregandoEventos] = useState(true)
   const [erroEventos, setErroEventos] = useState('')
   const [tentativaEventos, setTentativaEventos] = useState(0)
+  const [capacidades, setCapacidades] = useState({})
+  const [salvandoEvento, setSalvandoEvento] = useState(false)
+  const envioEventoRef = useRef(false)
+  const chavesCriacaoRef = useRef(new Map())
+  const perfilSessao = autenticacao.sessao?.perfil
+  useEffect(() => {
+    if(perfilSessao!=='organizador')return
+    let ativo=true
+    capacidadesEventos(sessionStorage.getItem('token')).then(async r=>{
+      if(!r.ok)throw new Error('Operações indisponíveis')
+      const dados=await r.json();if(ativo)setCapacidades(dados)
+    }).catch(()=>{if(ativo)setCapacidades({})})
+    return()=>{ativo=false}
+  },[perfilSessao,tentativaEventos])
   useNavegacao(pagina)
   
   useEffect(() => {
@@ -118,6 +133,34 @@ function App() {
   const custos = rascunhosCustos[chaveEvento]?.itens || []
   const rascunhoCustosAtual = rascunhosCustos[chaveEvento]
   const [eventoEmEdicao, setEventoEmEdicao] = useState(dadosNovoEvento)
+  async function persistirDadosEvento(dados){
+    if(envioEventoRef.current)throw new Error('Aguarde a operação em andamento.')
+    if(!(eventoEmEdicao.id?capacidades.editar:capacidades.criar))throw new Error('Salvamento temporariamente indisponível.')
+    envioEventoRef.current=true;setSalvandoEvento(true)
+    const chave=selecaoEventoRef.current.chave,token=sessionStorage.getItem('token')
+    const payload={...dados,versao:eventoEmEdicao.versao}
+    let criacao=chavesCriacaoRef.current.get(chave)
+    try{
+      if(!eventoEmEdicao.id){
+        const texto=JSON.stringify(dados)
+        if(criacao&&criacao.payload!==texto)throw new Error('Existe um cadastro ainda não reconciliado. Consulte Meus Eventos antes de alterar os dados.')
+        if(!criacao){criacao={chave:crypto.randomUUID(),payload:texto};chavesCriacaoRef.current.set(chave,criacao)}
+      }
+      const resposta=await salvarEvento(eventoEmEdicao.id,payload,token,criacao?.chave)
+      const body=await resposta.json()
+      if(!resposta.ok){
+        if(resposta.status===400)chavesCriacaoRef.current.delete(chave)
+        return {ok:false,status:resposta.status,json:async()=>body}
+      }
+      const id=eventoEmEdicao.id||body.evento?.id||body.id
+      const consulta=await consultarEvento(id,token)
+      if(!consulta.ok)throw new Error('Salvamento enviado. Consulte Meus Eventos para confirmar o resultado antes de repetir.')
+      const salvo=await consulta.json()
+      const evento={...salvo,data:salvo.data.slice(0,10),horario:salvo.horario.slice(0,5),categoria:salvo.categoria||'Corporativo',descricao:salvo.descricao||''}
+      if(selecaoEventoRef.current.chave===chave&&sessionStorage.getItem('token')===token)setEventoEmEdicao(evento)
+      return {ok:true,status:resposta.status,json:async()=>({...body,evento})}
+    }finally{envioEventoRef.current=false;setSalvandoEvento(false)}
+  }
   const persistenciaCustos = useCustosPersistidos({
     pagina, chaveEvento, rascunhos: rascunhosCustos, setRascunhos: setRascunhosCustos,
     geracaoSessao: geracaoSessaoCustos, geracaoSessaoRef: geracaoSessaoCustosRef,
@@ -177,6 +220,7 @@ function App() {
     setRascunhosCustos({})
     setFormularioCustosPendente(false)
     setEventos([])
+    chavesCriacaoRef.current.clear()
     trocaEventoPendenteRef.current = null
     contadorNovoEventoRef.current += 1
     atualizarSelecao(dadosNovoEvento(), `novo:${contadorNovoEventoRef.current}`)
@@ -313,6 +357,8 @@ const aoSelecionarEvento = (eventoClicado) => {
 
   trocaEventoPendenteRef.current = { tipo: 'selecionar', evento: {
     id,
+    status:eventoClicado.status,
+    versao:eventoClicado.versao,
     nome: eventoClicado.nome,
     data: dataFormatada,
     horario: eventoClicado.horario?.substring(0, 5) || '',
@@ -324,12 +370,14 @@ const aoSelecionarEvento = (eventoClicado) => {
 }
   
 const aoPublicarEvento = async (evento) => {
+  if(envioEventoRef.current)return
   const confirmado = window.confirm(
     `Deseja publicar o evento "${evento.nome}"?`
   )
 
   if (!confirmado) return
 
+  envioEventoRef.current=true
   try {
     const token = sessionStorage.getItem('token')
 
@@ -339,7 +387,8 @@ const aoPublicarEvento = async (evento) => {
       return
     }
 
-    const resposta = await publicarEvento(evento.id, token)
+    if(!capacidades.publicar)return alert('Publicação temporariamente indisponível.')
+    const resposta = await publicarEvento(evento.id, token,evento.versao)
 
     const dados = await resposta.json()
 
@@ -348,71 +397,26 @@ const aoPublicarEvento = async (evento) => {
       return
     }
 
-    setEventos((anteriores) =>
-      anteriores.map((item) =>
-        item.id === evento.id
-          ? { ...item, status: 'Ativo' }
-          : item
-      )
-    )
+    setTentativaEventos(n=>n+1)
 
     alert('Evento publicado com sucesso!')
   } catch (erro) {
     console.error('Erro ao publicar evento:', erro)
     alert('Não foi possível conectar ao servidor.')
-  }
+  }finally{envioEventoRef.current=false}
 }
-const aoExcluirEvento = async (evento) => {
-  const chaveExcluida = `evento:${evento.id}`
-  const avisoRascunho = rascunhoCustosTemAlteracoes(rascunhosCustos[chaveExcluida])
-    ? '\nOs custos em memória deste evento também serão descartados.'
-    : ''
-  const confirmado = window.confirm(
-    `Tem certeza que deseja excluir o evento "${evento.nome}"?${avisoRascunho}`
-  )
-
-  if (!confirmado) return
-
-  try {
-    const token = sessionStorage.getItem('token')
-
-    if (!token) {
-      alert('Sua sessão expirou. Faça login novamente.')
-      setPagina('login')
-      return
-    }
-
-    const resposta = await excluirEvento(evento.id, token)
-
-    if (resposta.status === 409) {
-      alert('Este evento possui inscrições ou propostas vinculadas e não pode ser excluído.')
-      return
-    }
-
-    if (!resposta.ok) {
-      const dados = await resposta.json()
-      alert(dados.erro || 'Erro ao excluir evento.')
-      return
-    }
-
-    setEventos((anteriores) =>
-      anteriores.filter((item) => item.id !== evento.id)
-    )
-
-    removerRascunho(chaveExcluida)
-
-    if (selecaoEventoRef.current.chave === chaveExcluida) {
-      contadorNovoEventoRef.current += 1
-      atualizarSelecao(dadosNovoEvento(), `novo:${contadorNovoEventoRef.current}`)
-    }
-
-    alert('Evento excluído com sucesso!')
-  } catch (erro) {
-    console.error('Erro ao excluir evento:', erro)
-    alert('Não foi possível conectar ao servidor.')
-  }
+const aoMudarEstadoEvento = async (evento,acao) => {
+  if(!window.confirm(acao==='cancelar'?'Cancelar este evento? Custos, propostas e inscrições serão preservados.':'Encerrar este evento? O histórico será preservado e novas inscrições não serão aceitas.'))return
+  if(envioEventoRef.current)return
+  envioEventoRef.current=true
+  try{
+    const resposta=await mudarEstadoEvento(evento,acao,sessionStorage.getItem('token'))
+    const dados=await resposta.json()
+    if(!resposta.ok)throw new Error(dados.erro||'Não foi possível confirmar a operação.')
+    setTentativaEventos(n=>n+1)
+    alert(dados.mensagem)
+  }catch(e){alert(e.message)}finally{envioEventoRef.current=false}
 }
-
   const aoFinalizarESalvar = async () => {
   if (!custos.length) {
     alert('Cadastre os custos do evento antes de finalizar o planejamento financeiro.')
@@ -434,7 +438,7 @@ const aoExcluirEvento = async (evento) => {
     
 const editando = Boolean(eventoEmEdicao.id)
 
-const resposta = await salvarEvento(eventoEmEdicao.id, {
+const resposta = await persistirDadosEvento({
         nome: eventoEmEdicao.nome,
         data: eventoEmEdicao.data,
         horario: eventoEmEdicao.horario,
@@ -442,7 +446,7 @@ const resposta = await salvarEvento(eventoEmEdicao.id, {
         categoria: eventoEmEdicao.categoria,
         publico: Number(eventoEmEdicao.publico),
         descricao: eventoEmEdicao.descricao || ''
-      }, token)
+      })
 
     const dados = await resposta.json()
 
@@ -490,16 +494,17 @@ alert(
 
   } catch (erro) {
     console.error('Erro ao salvar evento:', erro)
-    alert('Não foi possível conectar ao servidor.')
+    alert(erro.message || 'Resultado não confirmado. Consulte Meus Eventos antes de repetir.')
   }
 }
 
+  const comImagens=conteudo=><ProvedorImagensEvento key={autenticacao.sessao?.token||''} token={autenticacao.sessao?.token}>{conteudo}</ProvedorImagensEvento>
   if (autenticacao.verificando) return <p role="status">Validando sessão...</p>
   if (pagina === 'admin') {
-    return <AdminPortal aoSair={aoSair} />
+    return comImagens(<AdminPortal aoSair={aoSair} />)
   }
   if (pagina.startsWith('fornecedor-')) {
-    return <PortalFornecedor pagina={pagina} setPagina={setPagina} aoSair={aoSair} PerfilFornecedor={PerfilFornecedor} />
+    return comImagens(<PortalFornecedor pagina={pagina} setPagina={setPagina} aoSair={aoSair} PerfilFornecedor={PerfilFornecedor} />)
   }
   if (pagina === 'login') {
     return <Login setPagina={setPagina} aoAutenticarSessao={aoAutenticar} erroSessao={autenticacao.erro} />
@@ -508,12 +513,12 @@ alert(
   return <Cadastro setPagina={setPagina} />
   }
   if (pagina === 'participante') {
-  return <PortalParticipante setPagina={setPagina} aoSair={aoSair} />
+  return comImagens(<PortalParticipante setPagina={setPagina} aoSair={aoSair} />)
   }
   if (pagina === 'solicitar-acesso') {
   return <SolicitarAcesso setPagina={setPagina} />
   }
-  return (
+  return comImagens(
     <Layout
       pagina={pagina}
       setPagina={setPagina}
@@ -543,8 +548,9 @@ alert(
           setPagina={setPagina}
           aoSelecionarEvento={aoSelecionarEvento}
           aoCriarNovoEvento={aoCriarNovoEvento}
-          aoExcluirEvento={aoExcluirEvento}
+          aoMudarEstado={aoMudarEstadoEvento}
           aoPublicarEvento={aoPublicarEvento}
+          capacidades={capacidades}
         />
       )}
       {pagina === 'criar' && (
@@ -552,6 +558,8 @@ alert(
           evento={eventoEmEdicao}
           setEvento={setEventoEmEdicao}
           setPagina={setPagina}
+          salvando={salvandoEvento}
+          podeSalvar={Boolean(eventoEmEdicao.id?capacidades.editar:capacidades.criar)&&!['Cancelado','Encerrado'].includes(eventoEmEdicao.status)}
           
 aoAvancarParaCustos={async () => {
   const versaoAoSalvar = selecaoEventoRef.current.versao
@@ -568,7 +576,8 @@ aoAvancarParaCustos={async () => {
 
     const eventoExistente = Boolean(eventoEmEdicao.id)
 
-    const resposta = await salvarEvento(eventoEmEdicao.id, eventoEmEdicao, token)
+    const resposta = await persistirDadosEvento({nome:eventoEmEdicao.nome,data:eventoEmEdicao.data,horario:eventoEmEdicao.horario,
+      local:eventoEmEdicao.local,categoria:eventoEmEdicao.categoria,publico:Number(eventoEmEdicao.publico),descricao:eventoEmEdicao.descricao||''})
 
     const dados = await resposta.json()
 
@@ -596,7 +605,7 @@ aoAvancarParaCustos={async () => {
     if (paginaAtualRef.current === paginaAoSalvar) setPagina('custos')
   } catch (erro) {
     console.error('Erro ao salvar evento:', erro)
-    alert('Não foi possível conectar ao servidor.')
+    alert(erro.message || 'Resultado não confirmado. Consulte Meus Eventos antes de repetir.')
   }
 }}
 

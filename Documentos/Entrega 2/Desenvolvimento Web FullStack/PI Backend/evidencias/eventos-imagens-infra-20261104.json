@@ -1,0 +1,34 @@
+{
+  "projeto": "gnwybroqfvwosiqzsfla",
+  "somenteLeitura": true,
+  "tlsVerificado": true,
+  "coletadoEm": "2026-11-04T21:28:34.501Z",
+  "pronto": false,
+  "checks": {
+    "versaoRevisada": true,
+    "roles": true,
+    "tabela": false,
+    "colunas": false,
+    "indices": false,
+    "restricoes": false,
+    "contrato": false,
+    "bucket": false,
+    "permissoes": false,
+    "dependencias": true,
+    "gestaoV1": true
+  },
+  "catalogo": {
+    "tabelaExiste": false,
+    "bucket": null,
+    "colunas": [],
+    "indices": [],
+    "restricoes": []
+  },
+  "sqlSha256": "ca33f0f2cf52314e5c5535e603819dd659b429f415e2bdfff7976a3daf56d0ba",
+  "testesLocais": {
+    "fluxoSQL": 31,
+    "react": 272,
+    "lint": true,
+    "build": true
+  }
+}

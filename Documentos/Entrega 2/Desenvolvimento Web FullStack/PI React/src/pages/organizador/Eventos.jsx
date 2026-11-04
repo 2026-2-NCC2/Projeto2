@@ -1,8 +1,8 @@
 import { Icone } from '../../components/ui/Icone.jsx'
-import { MidiaEvento } from '../../components/eventos/MidiaEvento.jsx'
+import { MidiaEvento, CapaEvento } from '../../components/eventos/MidiaEvento.jsx'
 import { useState, useMemo } from 'react'
 
-export function Eventos({eventos, carregando = false, erro = '', aoTentarNovamente, setPagina, aoSelecionarEvento, aoCriarNovoEvento, aoExcluirEvento, aoPublicarEvento}) {
+export function Eventos({eventos, carregando = false, erro = '', aoTentarNovamente, setPagina, aoSelecionarEvento, aoCriarNovoEvento, aoMudarEstado, aoPublicarEvento, capacidades = {}}) {
   const [termoBusca, setTermoBusca] = useState('')
   const [filtroStatus, setFiltroStatus] = useState('Todos')
   const eventosFiltrados = useMemo(() => {
@@ -38,6 +38,7 @@ export function Eventos({eventos, carregando = false, erro = '', aoTentarNovamen
         </div>
         <button
           className="principal pequeno"
+          disabled={!capacidades.criar}
           onClick={() => {
             aoCriarNovoEvento()
             setPagina('criar')
@@ -46,6 +47,8 @@ export function Eventos({eventos, carregando = false, erro = '', aoTentarNovamen
           <Icone nome="adicionar" /> Novo evento
         </button>
       </div>
+      {!capacidades.criar && <p role="status">Novos cadastros, edições e publicações estão temporariamente indisponíveis. O histórico continua disponível para consulta.</p>}
+      <p>Eventos publicados permitem somente ajustes na descrição. Cancelar ou encerrar preserva custos, cotações, propostas e inscrições.</p>
       {!carregando && !erro && <div className="filtros">
         <input
           aria-label="Filtrar eventos por nome"
@@ -71,6 +74,7 @@ export function Eventos({eventos, carregando = false, erro = '', aoTentarNovamen
         >
           Em planejamento ({totalPlanejamento})
         </button>
+        {['Cancelado','Encerrado'].map(status=><button key={status} className={filtroStatus===status?'ativo':''} onClick={()=>setFiltroStatus(status)}>{status} ({eventos.filter(e=>e.status===status).length})</button>)}
       </div>}
       <div className="listaEventos">
         {carregando ? <p role="status">Carregando eventos...</p> : erro ? (
@@ -82,14 +86,14 @@ export function Eventos({eventos, carregando = false, erro = '', aoTentarNovamen
         ) : (
           eventosFiltrados.map((evento) => (
             <div className="evento" key={evento.id}>
-              <div className="eventoIdentidade" aria-hidden="true"><Icone nome="eventos" tamanho={26} /></div>
+              <CapaEvento eventoId={evento.id}/>
               <div className="eventoInfo">
                 <h2>{evento.nome}</h2>
-                <span className={evento.status === 'Ativo' ? 'status' : 'status statusPlanejamento'}>{evento.status}</span>
+                <span className={`status ${({'Em planejamento':'statusPlanejamento',Cancelado:'statusCancelado',Encerrado:'statusEncerrado'})[evento.status]||''}`}>{evento.status}</span>
                 <p className="eventoMetadados">
                   <span><Icone nome="eventos" tamanho={16} /> {evento.data}</span><span><Icone nome="local" tamanho={16} /> {evento.local?.trim() || 'Local não cadastrado'}</span>
                 </p>
-                <MidiaEvento eventoId={evento.id} editar />
+                <MidiaEvento eventoId={evento.id} estado={evento.status} editar />
               </div>
               <div className="numero">
                 <small>PREVISTOS</small>
@@ -103,18 +107,14 @@ export function Eventos({eventos, carregando = false, erro = '', aoTentarNovamen
                 <small>TICKET SUGERIDO</small>
                 <strong>{evento.ticket ?? 'Não informado'}</strong>
               </div>
-              <button
-                type="button"
-                onClick={() => aoExcluirEvento(evento)}
-                className="secundario acaoExcluir"
-              >
-                Excluir
-              </button>
+              {['Em planejamento','Ativo'].includes(evento.status) && <button type="button" className="secundario" disabled={!capacidades.cancelar} onClick={()=>aoMudarEstado(evento,'cancelar')}>Cancelar evento</button>}
+              {evento.status==='Ativo' && <button type="button" className="secundario" disabled={!capacidades.encerrar} title="Disponível após o horário de início" onClick={()=>aoMudarEstado(evento,'encerrar')}>Encerrar evento</button>}
               {evento.status === 'Em planejamento' && (
                 <button
                   type="button"
                   onClick={() => aoPublicarEvento(evento)}
                   className="secundario acaoPublicar"
+                  disabled={!capacidades.publicar}
                 >
                   Publicar
                 </button>

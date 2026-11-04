@@ -12,7 +12,7 @@ function load(file, name, env) {
   const source = readFileSync(new URL('../src/' + file, import.meta.url), 'utf8').replace(/^import .*\r?\n/gm, '').replaceAll('export function ', 'function ')
   const result = transformSync(file, source, { jsx: { runtime: 'classic', pragma: 'jsx', pragmaFrag: 'Fragment' } })
   assert.equal(result.errors.length, 0)
-  return vm.runInNewContext(result.code + '\n' + name, { jsx, MidiaEvento: 'section', Fragment: 'fragment', Icone: 'svg', ...env })
+  return vm.runInNewContext(result.code + '\n' + name, { jsx, MidiaEvento: 'section', CapaEvento: 'capa', Fragment: 'fragment', Icone: 'svg', ...env })
 }
 function runtime(file, name, fetch) {
   const states = [], effects = [], cleanups = []

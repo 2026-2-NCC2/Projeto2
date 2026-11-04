@@ -7,6 +7,16 @@ const { iniciar } = require("./helpers/http-autenticacao.cjs");
 const { validarAlteracoesPerfil } = require("../perfil.cjs");
 const { criarRepositorioUsuarios } = require("../repositories/supabase/usuarios.cjs");
 
+test('perfil anuncia imagens somente quando a integração está pronta, inclusive após editar',async t=>{
+  const a=await iniciar(t,'supabase');
+  assert.equal((await a.request('GET','/perfil',undefined,a.token())).body.imagens_disponiveis,undefined);
+  a.app.locals.imagensDisponiveis=()=>true;
+  for(const id of [7,8,9,10]){
+    assert.equal((await a.request('GET','/perfil',undefined,a.token(id))).body.imagens_disponiveis,true);
+    assert.equal((await a.request('PATCH','/perfil',{nome:'Nome sintético'},a.token(id))).body.imagens_disponiveis,true);
+  }
+});
+
 for (const [id, tipo] of [[7, "organizador"], [8, "fornecedor"], [9, "participante"], [10, "administrador"]]) {
   test(`PATCH perfil ${tipo}: persiste somente o titular e GET reflete sem novo login`, async t => {
     const a = await iniciar(t, "supabase");

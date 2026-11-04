@@ -2,7 +2,7 @@
 const {AsyncLocalStorage}=require('node:async_hooks'),{randomUUID}=require('node:crypto');
 const {criarBarreiraDeEscritas}=require('./congelamento-escritas.cjs');
 const {criarEstadoPrivado}=require('./estado-supervisor.cjs');
-const leituras=new Set(['listar','listarPorUsuario','listarAdministrativo','listarPorOrganizador','listarPorFornecedor','listarAtivosParaParticipante','listarDisponiveisParaFornecedor','listarItens','listarPorEvento','buscarPorIdDoUsuario','buscarEventoDoUsuario','buscarEventoAtivo','buscarPorUsuarioEEvento','buscarCotacaoDisponivel','buscarPendentesPorUsuario','buscarIdPorEmail','buscarParaLogin','buscarParaAutenticacao','buscarPerfil']);
+const leituras=new Set(['capacidades','listar','listarPorUsuario','listarAdministrativo','listarPorOrganizador','listarPorFornecedor','listarAtivosParaParticipante','listarDisponiveisParaFornecedor','listarItens','listarPorEvento','buscarPorIdDoUsuario','buscarEventoDoUsuario','buscarEventoAtivo','buscarPorUsuarioEEvento','buscarCotacaoDisponivel','buscarPendentesPorUsuario','buscarIdPorEmail','buscarParaLogin','buscarParaAutenticacao','buscarPerfil']);
 function criarSupervisor({estado=criarEstadoPrivado(),instancia=require('./startup-controlado.cjs').obterInstanciaPlanejada()||randomUUID(),pid=process.pid,agora=Date.now}={}){
   const contexto=new AsyncLocalStorage(),barreira=criarBarreiraDeEscritas(),requisicoes=new Set(),esperas=new Set(),smokePrivado=new WeakSet(),t1Privado=new WeakMap(),t1Ativos=new Set(),t1Tentados=new Set();
   let selado=false,operacoes=0,incertos=0,reinicio=false,instalado=false;

@@ -28,7 +28,7 @@ function harness(repo){
   const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');const source=fs.readFileSync(path.join(__dirname,'../server.js'),'utf8');
   const i=source.indexOf('function permitirPerfis('),guard=source.slice(i,source.indexOf('const eventos = []',i));
   const route=source.slice(source.indexOf('app.delete("/eventos/:id",'),source.indexOf('if (!process.env.JWT_SECRET'));let action,authorize;
-  vm.runInNewContext(guard+'\n'+route,{app:{delete(name,...args){assert.equal(name,'/eventos/:id');authorize=args[1];action=args.at(-1);}},autenticar(){},eventosRepository:repo,console:{error(){}}});
+  vm.runInNewContext(guard+'\n'+route,{app:{delete(name,...args){assert.equal(name,'/eventos/:id');authorize=args[1];action=args.at(-1);}},autenticar(){},...require('./helpers/eventos-contexto.cjs'),eventosRepository:repo,console:{error(){}}});
   return async req=>{const res={status(n){this.code=n;return this;},json(body){this.body=JSON.parse(JSON.stringify(body));return this;}};let allowed=false;authorize(req,res,()=>{allowed=true;});if(allowed)await action(req,res);return res;};
 }
 const request=()=>({params:{id:'13'},usuario:{id:7,perfil:'organizador'},body:{usuario_id:999}});

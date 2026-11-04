@@ -1,0 +1,280 @@
+{
+  "projeto": "gnwybroqfvwosiqzsfla",
+  "somenteLeitura": true,
+  "coletadoEm": "2026-11-04T19:19:14.048Z",
+  "tlsVerificado": true,
+  "comparacao": {
+    "camposBasePresentes": true,
+    "colunasAdicionais": [],
+    "estadosCompativeis": true
+  },
+  "colunas": [
+    {
+      "table_name": "eventos",
+      "column_name": "id",
+      "data_type": "integer",
+      "character_maximum_length": null,
+      "is_nullable": "NO",
+      "column_default": null,
+      "is_identity": "YES",
+      "identity_generation": "BY DEFAULT"
+    },
+    {
+      "table_name": "eventos",
+      "column_name": "nome",
+      "data_type": "character varying",
+      "character_maximum_length": 100,
+      "is_nullable": "NO",
+      "column_default": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "eventos",
+      "column_name": "data",
+      "data_type": "date",
+      "character_maximum_length": null,
+      "is_nullable": "NO",
+      "column_default": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "eventos",
+      "column_name": "horario",
+      "data_type": "time without time zone",
+      "character_maximum_length": null,
+      "is_nullable": "NO",
+      "column_default": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "eventos",
+      "column_name": "local",
+      "data_type": "character varying",
+      "character_maximum_length": 200,
+      "is_nullable": "NO",
+      "column_default": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "eventos",
+      "column_name": "categoria",
+      "data_type": "character varying",
+      "character_maximum_length": 100,
+      "is_nullable": "YES",
+      "column_default": "'Corporativo'::character varying",
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "eventos",
+      "column_name": "publico",
+      "data_type": "integer",
+      "character_maximum_length": null,
+      "is_nullable": "NO",
+      "column_default": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "eventos",
+      "column_name": "descricao",
+      "data_type": "text",
+      "character_maximum_length": null,
+      "is_nullable": "YES",
+      "column_default": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "eventos",
+      "column_name": "status",
+      "data_type": "character varying",
+      "character_maximum_length": 50,
+      "is_nullable": "YES",
+      "column_default": "'Em planejamento'::character varying",
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "eventos",
+      "column_name": "usuario_id",
+      "data_type": "integer",
+      "character_maximum_length": null,
+      "is_nullable": "NO",
+      "column_default": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "inscricoes",
+      "column_name": "id",
+      "data_type": "integer",
+      "character_maximum_length": null,
+      "is_nullable": "NO",
+      "column_default": null,
+      "is_identity": "YES",
+      "identity_generation": "BY DEFAULT"
+    },
+    {
+      "table_name": "inscricoes",
+      "column_name": "usuario_id",
+      "data_type": "integer",
+      "character_maximum_length": null,
+      "is_nullable": "NO",
+      "column_default": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "inscricoes",
+      "column_name": "evento_id",
+      "data_type": "integer",
+      "character_maximum_length": null,
+      "is_nullable": "NO",
+      "column_default": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "inscricoes",
+      "column_name": "data_inscricao",
+      "data_type": "timestamp with time zone",
+      "character_maximum_length": null,
+      "is_nullable": "NO",
+      "column_default": "CURRENT_TIMESTAMP",
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "inscricoes",
+      "column_name": "status",
+      "data_type": "character varying",
+      "character_maximum_length": 30,
+      "is_nullable": "NO",
+      "column_default": "'Confirmada'::character varying",
+      "is_identity": "NO",
+      "identity_generation": null
+    }
+  ],
+  "restricoes": [
+    {
+      "tabela": "cotacoes",
+      "conname": "fk_cotacao_evento",
+      "contype": "f",
+      "convalidated": true,
+      "definicao": "FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE CASCADE"
+    },
+    {
+      "tabela": "custos_evento",
+      "conname": "fk_custos_evento_evento",
+      "contype": "f",
+      "convalidated": true,
+      "definicao": "FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE CASCADE"
+    },
+    {
+      "tabela": "eventos",
+      "conname": "eventos_pkey",
+      "contype": "p",
+      "convalidated": true,
+      "definicao": "PRIMARY KEY (id)"
+    },
+    {
+      "tabela": "eventos",
+      "conname": "fk_evento_usuario",
+      "contype": "f",
+      "convalidated": true,
+      "definicao": "FOREIGN KEY (usuario_id) REFERENCES usuarios(id)"
+    },
+    {
+      "tabela": "inscricoes",
+      "conname": "fk_inscricao_evento",
+      "contype": "f",
+      "convalidated": true,
+      "definicao": "FOREIGN KEY (evento_id) REFERENCES eventos(id)"
+    },
+    {
+      "tabela": "inscricoes",
+      "conname": "fk_inscricao_usuario",
+      "contype": "f",
+      "convalidated": true,
+      "definicao": "FOREIGN KEY (usuario_id) REFERENCES usuarios(id)"
+    },
+    {
+      "tabela": "inscricoes",
+      "conname": "inscricoes_pkey",
+      "contype": "p",
+      "convalidated": true,
+      "definicao": "PRIMARY KEY (id)"
+    },
+    {
+      "tabela": "inscricoes",
+      "conname": "uq_inscricao_usuario_evento",
+      "contype": "u",
+      "convalidated": true,
+      "definicao": "UNIQUE (usuario_id, evento_id)"
+    }
+  ],
+  "indices": [
+    {
+      "tablename": "eventos",
+      "indexname": "eventos_pkey",
+      "indexdef": "CREATE UNIQUE INDEX eventos_pkey ON public.eventos USING btree (id)"
+    },
+    {
+      "tablename": "eventos",
+      "indexname": "fk_evento_usuario",
+      "indexdef": "CREATE INDEX fk_evento_usuario ON public.eventos USING btree (usuario_id)"
+    },
+    {
+      "tablename": "inscricoes",
+      "indexname": "fk_inscricao_evento",
+      "indexdef": "CREATE INDEX fk_inscricao_evento ON public.inscricoes USING btree (evento_id)"
+    },
+    {
+      "tablename": "inscricoes",
+      "indexname": "inscricoes_pkey",
+      "indexdef": "CREATE UNIQUE INDEX inscricoes_pkey ON public.inscricoes USING btree (id)"
+    },
+    {
+      "tablename": "inscricoes",
+      "indexname": "uq_inscricao_usuario_evento",
+      "indexdef": "CREATE UNIQUE INDEX uq_inscricao_usuario_evento ON public.inscricoes USING btree (usuario_id, evento_id)"
+    }
+  ],
+  "estados": [
+    {
+      "status": "Ativo",
+      "quantidade": 4
+    },
+    {
+      "status": "Em planejamento",
+      "quantidade": 2
+    }
+  ],
+  "seguranca": [
+    {
+      "relname": "eventos",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "leitura": true,
+      "inserir": true,
+      "atualizar": true,
+      "politicas": 0
+    },
+    {
+      "relname": "inscricoes",
+      "relrowsecurity": true,
+      "relforcerowsecurity": false,
+      "leitura": true,
+      "inserir": true,
+      "atualizar": true,
+      "politicas": 0
+    }
+  ],
+  "triggers": [],
+  "funcoes": []
+}

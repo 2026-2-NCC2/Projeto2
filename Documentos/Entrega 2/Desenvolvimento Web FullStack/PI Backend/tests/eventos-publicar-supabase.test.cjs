@@ -70,7 +70,7 @@ function harness(repo) {
     app: { patch(name, ...args) {
       assert.equal(name, "/eventos/:id/publicar");
       authorize = args[1]; action = args.at(-1);
-    } }, autenticar() {}, eventosRepository: repo, console: { error() {} },
+    } }, autenticar() {}, ...require('./helpers/eventos-contexto.cjs'),eventosRepository: repo, console: { error() {} },
   });
   return async req => {
     const res = { status(n) { this.code = n; return this; },

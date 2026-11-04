@@ -20,12 +20,12 @@ function prepararRepositorios() {
   const repositorios = {
     provider,
     usuarios: require(`./${provider}/usuarios.cjs`).criarRepositorioUsuarios(conexao,
-      { contasTeste: provider === 'supabase' && process.env.CONTAS_TESTE_IMAGENS_ATIVO === 'true' }),
-    eventos: require(`./${provider}/eventos.cjs`).criarRepositorioEventos(conexao),
+      { contasTeste: provider === 'supabase' }),
+    eventos: require(`./${provider}/eventos.cjs`).criarRepositorioEventos(conexao,{gestaoSegura:provider==='supabase'}),
     custos: require(`./${provider}/custos.cjs`).criarRepositorioCustos(conexao),
     cotacoes: require(`./${provider}/cotacoes.cjs`).criarRepositorioCotacoes(conexao),
     propostas: require(`./${provider}/propostas.cjs`).criarRepositorioPropostas(conexao),
-    inscricoes: require(`./${provider}/inscricoes.cjs`).criarRepositorioInscricoes(conexao),
+    inscricoes: require(`./${provider}/inscricoes.cjs`).criarRepositorioInscricoes(conexao,{gestaoSegura:provider==='supabase'}),
     solicitacoesAcesso: require(`./${provider}/solicitacoes-acesso.cjs`)
       .criarRepositorioSolicitacoesAcesso(conexao),
   };

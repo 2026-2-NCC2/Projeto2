@@ -23,7 +23,8 @@ CREATE TABLE public.contas_teste_imagens (
 ALTER TABLE public.contas_teste_imagens ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.contas_teste_imagens FORCE ROW LEVEL SECURITY;
 REVOKE ALL ON public.contas_teste_imagens FROM PUBLIC,anon,authenticated,service_role;
-GRANT SELECT,INSERT,UPDATE,DELETE ON public.contas_teste_imagens TO service_role;
+-- O fluxo preserva o registro/tombstone; não precisa apagá-lo.
+GRANT SELECT,INSERT,UPDATE ON public.contas_teste_imagens TO service_role;
 DO $$
 DECLARE extra text:='TRUNCATE,REFERENCES,TRIGGER'; v integer:=current_setting('server_version_num')::integer;
 BEGIN
@@ -33,7 +34,7 @@ BEGIN
     OR EXISTS(SELECT 1 FROM pg_roles WHERE rolname IN ('anon','authenticated') AND (rolsuper OR rolbypassrls))
     OR has_table_privilege('anon','public.contas_teste_imagens','SELECT,INSERT,UPDATE,DELETE,'||extra)
     OR has_table_privilege('authenticated','public.contas_teste_imagens','SELECT,INSERT,UPDATE,DELETE,'||extra)
-    OR has_table_privilege('service_role','public.contas_teste_imagens',extra)
+    OR has_table_privilege('service_role','public.contas_teste_imagens','DELETE,'||extra)
     OR has_table_privilege('service_role','public.contas_teste_imagens','SELECT WITH GRANT OPTION,INSERT WITH GRANT OPTION,UPDATE WITH GRANT OPTION,DELETE WITH GRANT OPTION')
     OR EXISTS(SELECT 1 FROM pg_class c CROSS JOIN LATERAL aclexplode(c.relacl) a
       WHERE c.oid='public.contas_teste_imagens'::regclass AND a.grantee NOT IN(c.relowner,(SELECT oid FROM pg_roles WHERE rolname='service_role'))

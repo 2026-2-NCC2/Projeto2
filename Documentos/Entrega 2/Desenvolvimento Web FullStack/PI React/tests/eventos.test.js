@@ -27,16 +27,16 @@ for (const [modo, env, base] of [
       const financeiro = { nome: 'Evento', publico: 500, descricao: '' }
       const copia = structuredClone(completo)
       assert.equal(await service.listarEventos('simulado'), response)
-      assert.equal(await service.publicarEvento(42, 'simulado'), response)
+      assert.equal(await service.publicarEvento(42, 'simulado',3), response)
       assert.equal(await service.excluirEvento(42, 'simulado'), response)
-      assert.equal(await service.salvarEvento(undefined, completo, 'simulado'), response)
+      assert.equal(await service.salvarEvento(undefined, completo, 'simulado','uuid-sintetico'), response)
       assert.equal(await service.salvarEvento(42, financeiro, 'simulado'), response)
       assert.deepEqual(completo, copia)
       assert.deepEqual(chamadas, [
         [`${base}/eventos`, { headers: { Authorization: 'Bearer simulado' } }],
-        [`${base}/eventos/42/publicar`, { method: 'PATCH', headers: { Authorization: 'Bearer simulado' } }],
+        [`${base}/eventos/42/publicar`, { method: 'PATCH', headers: { Authorization: 'Bearer simulado','Content-Type':'application/json' },body:JSON.stringify({versao:3}) }],
         [`${base}/eventos/42`, { method: 'DELETE', headers: { Authorization: 'Bearer simulado' } }],
-        [`${base}/eventos`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer simulado' }, body: JSON.stringify(completo) }],
+        [`${base}/eventos`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer simulado','Idempotency-Key':'uuid-sintetico' }, body: JSON.stringify(completo) }],
         [`${base}/eventos/42`, { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer simulado' }, body: JSON.stringify(financeiro) }],
       ])
     } finally { globalThis.fetch = original }
