@@ -19,9 +19,15 @@ function validarEvento(dados){
     !Number.isFinite(Date.parse(data))||new Date(data+'T00:00:00Z').toISOString().slice(0,10)!==data||
     typeof horario!=='string'||!/^([01]\d|2[0-3]):[0-5]\d$/.test(horario)||
     !Number.isSafeInteger(dados.publico)||dados.publico<1||dados.publico>2147483647)throw falha(400,'Informe data, horário e público válidos.');
-  return {nome:texto('nome',100),data,horario,local:texto('local',200),categoria:texto('categoria',100,'Corporativo'),publico:dados.publico,descricao:texto('descricao',10000,'',true)};
+  if(dados.capacidade_maxima!==undefined && dados.capacidade_maxima!==null &&
+    (!Number.isSafeInteger(dados.capacidade_maxima)||dados.capacidade_maxima<1||dados.capacidade_maxima>2147483647))
+    throw falha(400,'Capacidade máxima deve ser um inteiro entre 1 e 2147483647.');
+  return {...(dados.capacidade_maxima!==undefined?{capacidade_maxima:dados.capacidade_maxima}:{}),nome:texto('nome',100),data,horario,local:texto('local',200),categoria:texto('categoria',100,'Corporativo'),publico:dados.publico,descricao:texto('descricao',10000,'',true)};
 }
 function erroRpc(erro){
+  const mensagens={LT409:'Evento lotado. Não há vagas disponíveis.',DU409:'Você já está inscrito neste evento.',
+    IN409:'Evento indisponível para inscrição.',CP409:'Capacidade abaixo do total de inscritos confirmados.'};
+  if(mensagens[erro?.code])throw falha(409,mensagens[erro.code]);
   const status=({EV400:400,EV403:403,EV404:404,EV409:409,'23505':409,'22P02':400})[erro?.code];
   if(status)throw falha(status,({400:'Dados inválidos.',403:'Operação não autorizada.',404:'Evento não encontrado.',409:'O evento mudou ou a operação não é permitida. Consulte novamente.'})[status]);
   throw falha(503,'Gestão segura indisponível. Aguarde a preparação do banco e consulte o evento antes de repetir.',true);

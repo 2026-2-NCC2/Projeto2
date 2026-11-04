@@ -522,6 +522,7 @@ textarea:focus {
 .eventoMidia button:disabled { opacity: 0.6; cursor: not-allowed; }
 .eventoCapaLista { width: 112px; max-width: 100%; height: 76px; object-fit: cover; border-radius: 10px; flex-shrink: 0; }
 .eventoGaleria figure { margin: 0; min-width: 0; }
+.eventoImagemFalha { display: flex; align-items: center; min-width: 0; max-width: 100%; padding: 12px; border-radius: 8px; background: var(--cor-fundo-suave); overflow-wrap: anywhere; }
 .eventoGaleria figcaption { font-size: .85rem; }
 .eventoMidiaEditor { min-width: 0; border: 1px solid var(--cor-borda); border-radius: 8px; margin: 14px 0; padding: 12px; }
 .eventoMidiaEditor label { display: block; margin-bottom: 12px; }

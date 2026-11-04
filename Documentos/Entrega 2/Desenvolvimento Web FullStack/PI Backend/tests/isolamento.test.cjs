@@ -74,6 +74,8 @@ function moduloSimulado(nome, { env = {}, stubs = {}, principal = false, mainFil
   const logs = [];
   const carregar = id => {
     if (nome === "server.js") {
+      // Modulos puros do servidor; nao carregam .env, drivers ou preflight.
+      if (["./services/eventos.cjs", "./config/encerramento-gracioso.cjs", "./imagens/http-binario.cjs", "./eventos-imagens-http.cjs"].includes(id)) return require(path.join(raiz, id));
       const nova = require("./helpers/persistencia.cjs").dependencia(id, stubs["./db"] ?? {}, { modulos: stubs });
       if (nova) return nova;
     }
@@ -102,6 +104,7 @@ function appFake(opcoes = {}) {
   servidor.closeIdleConnections = () => { estado.idle++; };
   servidor.closeAllConnections = () => { estado.todas++; };
   const app = {
+    locals: {},
     listen(port, host) {
       estado.chamadas.push([port, host]);
       if (!opcoes.escutaPendente) queueMicrotask(() => {
@@ -505,12 +508,13 @@ test("db isolado nao carrega dotenv ou mysql2/promise e exige adaptador pronto",
 
 function carregarServidor(principal, modo) {
   const estado = { dotenv: 0, escutas: [], rotas: [] };
-  const app = { use() {}, listen: (...args) => { estado.escutas.push(args); } };
+  const app = { locals: {}, use() {}, listen: (...args) => { estado.escutas.push(args); } };
   for (const metodo of ["get", "post", "put", "patch", "delete"]) {
     app[metodo] = rota => estado.rotas.push([metodo, rota]);
   }
   const express = () => app;
   express.json = () => () => {};
+  express.Router = require("express").Router;
   const carregado = moduloSimulado("server.js", {
     principal, env: { JWT_SECRET: "segredo-simulado-de-mais-de-32-caracteres" },
     stubs: {
@@ -536,7 +540,8 @@ test("MySQL principal e recusado; isolado preserva rotas sem iniciar HTTP na imp
   assert.equal(isolado.modulo, isolado.app);
   assert.equal(isolado.estado.dotenv, 0);
   assert.equal(isolado.estado.escutas.length, 0);
-  assert.equal(isolado.estado.rotas.length, 35);
+  assert.equal(isolado.estado.rotas.length, 42);
+  assert.equal(isolado.app.locals.imagensDisponiveis(), false);
   assert.ok(isolado.estado.rotas.some(([metodo, rota]) => metodo === "put" && rota === "/eventos/:id/custos"));
 })
 
@@ -548,6 +553,7 @@ test("startup com server.js e db.js reais usa apenas o adaptador simulado e nunc
   for (const metodo of ["get", "post", "put", "patch", "delete"]) app[metodo] = () => {};
   const express = () => app;
   express.json = () => () => {};
+  express.Router = require("express").Router;
   fake.deps.carregarApp = () => {
     const db = moduloSimulado("db.js", { env: fake.processo.env, stubs: {
       "./isolamento.cjs": fake.iso, dotenv: { config: proibido },

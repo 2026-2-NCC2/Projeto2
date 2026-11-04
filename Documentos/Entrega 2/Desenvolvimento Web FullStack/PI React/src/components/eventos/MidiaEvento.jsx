@@ -8,11 +8,16 @@ export function CapaEvento({eventoId}) {
   const acesso=useContext(ContextoImagensEvento)
   return <Capa key={`${acesso.token}:${eventoId}`} eventoId={eventoId}/>
 }
+function ImagemEvento({url,alt,className,loading}) {
+  const [falhou,setFalhou]=useState(false)
+  return falhou?<span className="eventoImagemFalha" role="status">Imagem indisponível. Consulte as imagens novamente.</span>:
+    <img src={url} alt={alt} className={className} loading={loading} referrerPolicy="no-referrer" onError={()=>setFalhou(true)}/>
+}
 function Capa({eventoId}) {
-  const {imagens}=useImagensEvento(eventoId)
+  const {imagens,carregando,erro}=useImagensEvento(eventoId)
   const capa=imagens.find(i=>i.posicao===0)
-  return capa?<img className="eventoCapaLista" src={capa.url} alt="Capa do evento" referrerPolicy="no-referrer" loading="lazy"/>:
-    <div className="eventoIdentidade" aria-hidden="true"><Icone nome="eventos" tamanho={26}/></div>
+  return capa?<ImagemEvento key={capa.url} className="eventoCapaLista" url={capa.url} alt="Capa do evento" loading="lazy"/>:
+    <div className="eventoIdentidade" role="img" aria-label={carregando?'Carregando capa do evento':erro?'Capa indisponível':'Evento sem capa'}><Icone nome="eventos" tamanho={26}/></div>
 }
 export function MidiaEvento(props) {
   const acesso=useContext(ContextoImagensEvento)
@@ -37,17 +42,18 @@ function EditorMidia({eventoId,editar=false,estado,imagens:fornecidas}) {
   function selecionar(e) {
     const f=e.target.files?.[0];e.target.value=''
     if(!f)return
+    setArquivo(null);setPreview('');setRemocao(null)
     try{validarArquivoImagem('capa',f);setPreview('');setArquivo(f);setMensagem('');setRemocao(null)}catch(falha){setMensagem(falha.message)}
   }
   async function alterar(metodo,slot) {
-    if(!podeAlterar||trava.current||incerto||metodo==='PUT'&&!arquivo)return
+    if(!podeAlterar||acesso.carregando||trava.current||incerto||metodo==='PUT'&&!arquivo)return
     trava.current=true;setOcupado(true);setMensagem('')
     const controller=new AbortController();envio.current=controller
     try{
       await acessarImagensEvento({token:acesso.token,eventoId,metodo,posicao:slot,arquivo,signal:controller.signal,habilitado:true})
       if(!montado.current)return
       setArquivo(null);setPreview('');setRemocao(null)
-      setMensagem('Alteração confirmada. A imagem anterior permanece em quarentena por 24 horas.')
+      setMensagem(metodo==='DELETE'?'Imagem removida do evento.':'Imagem salva no evento.')
       acesso.invalidarEvento?.(eventoId)
       await acesso.recarregar()
     }catch(e){if(montado.current){setIncerto(true);setMensagem(e.message)}}
@@ -57,12 +63,14 @@ function EditorMidia({eventoId,editar=false,estado,imagens:fornecidas}) {
   const capa=validas.find(i=>i.posicao===0),galeria=validas.filter(i=>i.posicao>0).sort((a,b)=>a.posicao-b.posicao)
   return <details className="eventoMidia" open={editar||undefined}>
     <summary>Capa e galeria do evento</summary>
-    <div className="eventoMidiaCorpo">
+    <div className="eventoMidiaCorpo" aria-busy={ocupado||acesso.carregando||false}>
+      {acesso.carregando&&<p role="status">Carregando imagens...</p>}
+      {ocupado&&<p role="status">Salvando alteração da imagem...</p>}
       {erro&&<p role="alert">{erro}</p>}
-      {capa?<img className="eventoCapa" src={capa.url} alt="Capa do evento" referrerPolicy="no-referrer"/>:
+      {capa?<ImagemEvento key={capa.url} className="eventoCapa" url={capa.url} alt="Capa do evento"/>:
         <div className="eventoCapaVazia"><Icone nome="eventos"/><span>Sem capa disponível</span></div>}
       {galeria.length?<div className="eventoGaleria">{galeria.map(i=><figure key={i.posicao}>
-        <img src={i.url} alt={`Imagem ${i.posicao} da galeria do evento`} referrerPolicy="no-referrer" loading="lazy"/>
+        <ImagemEvento key={i.url} url={i.url} alt={`Imagem ${i.posicao} da galeria do evento`} loading="lazy"/>
         <figcaption>Imagem {i.posicao}</figcaption>
       </figure>)}</div>:<p>Nenhuma imagem disponível na galeria.</p>}
       {editar&&<>
@@ -79,18 +87,18 @@ function EditorMidia({eventoId,editar=false,estado,imagens:fornecidas}) {
           {arquivo&&preview&&<figure className="eventoPrevia"><img src={preview} alt="Prévia local da imagem selecionada"/>
             <figcaption>Confira antes de confirmar{validas.some(i=>i.posicao===posicao)?': a imagem desta posição será substituída.':'.'}</figcaption></figure>}
           <div className="acoes">
-            <button type="button" className="principal" disabled={!podeAlterar||!arquivo||!preview||incerto} onClick={()=>alterar('PUT',posicao)}>Confirmar envio</button>
+            <button type="button" className="principal" disabled={!podeAlterar||acesso.carregando||!arquivo||!preview||incerto} onClick={()=>alterar('PUT',posicao)}>Confirmar envio</button>
             {arquivo&&<button type="button" className="secundario" onClick={()=>{setArquivo(null);setPreview('')}}>Descartar prévia</button>}
-            <button type="button" className="secundario" disabled={!podeAlterar||incerto||!validas.some(i=>i.posicao===posicao)} onClick={()=>setRemocao(posicao)}>Remover imagem desta posição</button>
+            <button type="button" className="secundario" disabled={!podeAlterar||acesso.carregando||incerto||!validas.some(i=>i.posicao===posicao)} onClick={()=>setRemocao(posicao)}>Remover imagem desta posição</button>
           </div>
-          {remocao!==null&&<div role="group" aria-label="Confirmar remoção"><p>Remover {remocao===0?'a capa':`a imagem ${remocao}`} do evento? A limpeza física respeita a quarentena.</p>
-            <button type="button" disabled={!podeAlterar||incerto} onClick={()=>alterar('DELETE',remocao)}>Confirmar remoção</button>
+          {remocao!==null&&<div role="group" aria-label="Confirmar remoção"><p>Remover {remocao===0?'a capa':`a imagem ${remocao}`} do evento?</p>
+            <button type="button" disabled={!podeAlterar||acesso.carregando||incerto} onClick={()=>alterar('DELETE',remocao)}>Confirmar remoção</button>
             <button type="button" onClick={()=>setRemocao(null)}>Manter imagem</button>
           </div>}
         </fieldset>
       </>}
       {mensagem&&<p role="status">{mensagem}</p>}
-      {acesso.consultar&&<button type="button" className="secundario" disabled={ocupado} onClick={consultar}>Consultar imagens novamente</button>}
+      {acesso.consultar&&<button type="button" className="secundario" disabled={ocupado||acesso.carregando} onClick={consultar}>Consultar imagens novamente</button>}
     </div>
   </details>
 }

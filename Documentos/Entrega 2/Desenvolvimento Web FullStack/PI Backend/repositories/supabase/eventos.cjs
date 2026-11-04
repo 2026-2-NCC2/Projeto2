@@ -38,18 +38,38 @@ function criarRepositorioEventos(
   async function capacidades(){
     const {data,error}=await consultarRpc(cliente,'eventos_capacidades_v1',{});
     if(error&&!['PGRST202','42883'].includes(error.code))erroRpc(error);
-    if(!error&&data!==1)throw falha(503,'Versão da gestão de eventos não reconhecida.');
-    const pronto=!error&&data===1;
-    return {criar:pronto,editar:pronto,publicar:pronto,inscrever:pronto,controleVersao:pronto,cancelar:true,encerrar:true,excluir:false};
+    if(!error&&![1,3].includes(data))throw falha(503,'Versão da gestão de eventos não reconhecida.');
+    const pronto=!error&&[1,3].includes(data);
+    return {...(data===3?{controleCapacidade:true}:{}),criar:pronto,editar:pronto,publicar:pronto,inscrever:pronto,controleVersao:pronto,cancelar:true,encerrar:true,excluir:false};
   }
   async function gerir(acao,id,usuarioId,dados={},versao=null,chave=null){
-    if(!(await capacidades()).controleVersao)throw falha(503,'Gestão segura aguarda migração autorizada.');
+    const caps=await capacidades();
+    if(dados.capacidade_maxima!==undefined&&!caps.controleCapacidade)throw falha(503,'Controle de capacidade aguarda migração autorizada.');
+    if(!caps.controleVersao)throw falha(503,'Gestão segura aguarda migração autorizada.');
     const {data,error}=await consultarRpc(cliente,'gerir_evento_v1',{
       p_acao:acao,p_usuario:usuarioId,p_evento:id,p_dados:dados,p_versao:versao,p_chave:chave,
     });
     if(error)erroRpc(error);
     if(!data||!Number.isSafeInteger(data.id)||(id!==null&&data.id!==id)||data.usuario_id!==usuarioId||!Number.isSafeInteger(data.versao))throw falha(503,'Resultado da operação não confirmado.',true);
     return data;
+  }
+  async function comVagas(lista){
+    if(!gestaoSegura||!(await capacidades()).controleCapacidade||!lista.length)return lista;
+    const mapa=new Map();
+    for(let inicio=0;inicio<lista.length;inicio+=200){
+      const ids=lista.slice(inicio,inicio+200).map(e=>e.id);
+      const {data,error}=await consultarRpc(cliente,'eventos_vagas_v3',{p_eventos:ids});
+      if(error)erroRpc(error);
+      if(!Array.isArray(data)||data.length!==ids.length)throw respostaInvalida();
+      for(const v of data){
+        if(!ids.includes(v.id)||mapa.has(v.id)||!Number.isSafeInteger(v.inscritos_confirmados)||v.inscritos_confirmados<0||
+          (v.capacidade_maxima!==null&&(!Number.isSafeInteger(v.capacidade_maxima)||v.capacidade_maxima<1))||
+          v.vagas_restantes!==(v.capacidade_maxima===null?null:Math.max(0,v.capacidade_maxima-v.inscritos_confirmados))||
+          v.lotado!==(v.capacidade_maxima!==null&&v.inscritos_confirmados>=v.capacidade_maxima))throw respostaInvalida();
+        mapa.set(v.id,v);
+      }
+    }
+    return lista.map(e=>({...e,...mapa.get(e.id)}));
   }
   async function camposLeitura(){return gestaoSegura&&(await capacidades()).controleVersao?[...campos,'versao']:campos;}
   // O contrato MySQL retorna a lista inteira. O limite de linhas do PostgREST
@@ -89,7 +109,7 @@ function criarRepositorioEventos(
         resultado.push(item);
       }
     } while (resultado.length < total);
-    return resultado;
+    return comVagas(resultado);
   }
 
   return {
@@ -157,9 +177,9 @@ function criarRepositorioEventos(
       return linhas.length;
     },
 
-    async criar({ nome, data, horario, local, categoria, publico, descricao, status, usuarioId, chaveIdempotencia }) {
+    async criar({ nome, data, horario, local, categoria, publico, descricao, capacidade_maxima, status, usuarioId, chaveIdempotencia }) {
       // A resposta atômica preserva também o estado atual em um replay de criação.
-      if(gestaoSegura)return gerir('criar',null,usuarioId,validarEvento({nome,data,horario,local,categoria,publico,descricao}),null,chaveIdempotencia);
+      if(gestaoSegura)return gerir('criar',null,usuarioId,validarEvento({nome,data,horario,local,categoria,publico,descricao,capacidade_maxima}),null,chaveIdempotencia);
       // Validacoes/defaults e identidade do organizador continuam no handler.
       // Nao aceitar usuario_id extra do corpo como substituto de usuarioId.
       const { data: criado, error } = await cliente.schema("public")
@@ -179,8 +199,8 @@ function criarRepositorioEventos(
       return criado.id;
     },
 
-    async atualizar(id, usuarioId, { nome, data, horario, local, categoria, publico, descricao }, versao) {
-      if(gestaoSegura){await gerir('editar',id,usuarioId,validarEvento({nome,data,horario,local,categoria,publico,descricao}),versao);return 1;}
+    async atualizar(id, usuarioId, { nome, data, horario, local, categoria, publico, descricao, capacidade_maxima }, versao) {
+      if(gestaoSegura){await gerir('editar',id,usuarioId,validarEvento({nome,data,horario,local,categoria,publico,descricao,capacidade_maxima}),versao);return 1;}
       // Mesmo UPDATE condicional por id E proprietario, sem leitura previa.
       // Status e usuario_id nao sao editaveis; validacoes/perfil ficam no handler.
       const { data: linhas, error } = await cliente.schema("public")
@@ -246,8 +266,8 @@ function criarRepositorioEventos(
           data.id !== id || data.usuario_id !== usuarioId) {
         throw respostaInvalida();
       }
-      return Object.fromEntries(campos.map(campo => [campo,
-        campo === "data" ? converterData(data.data) : data[campo]]));
+      return (await comVagas([Object.fromEntries(campos.map(campo => [campo,
+        campo === "data" ? converterData(data.data) : data[campo]]))]))[0];
     },
   };
 }

@@ -9,7 +9,7 @@ const text=v=>v&&typeof v==='object'?(v.children||[]).map(text).join(' '):String
 function carregar(file,nome){
   const fonte=readFileSync(new URL('../src/'+file,import.meta.url),'utf8').replace(/^import .*\r?\n/gm,'').replace('export function ','function ')
   return vm.runInNewContext(transformSync(file,fonte,{jsx:{runtime:'classic',pragma:'jsx'}}).code+'\n'+nome,{
-    jsx,Icone:'svg',MidiaEvento:'midia',CapaEvento:'capa',useState:v=>[v,()=>{}],useMemo:fn=>fn(),
+    jsx,VagasEvento:'vagas',Icone:'svg',MidiaEvento:'midia',CapaEvento:'capa',useState:v=>[v,()=>{}],useMemo:fn=>fn(),
   })
 }
 test('listagem apresenta os quatro estados e substitui exclusão por cancelamento/encerramento',()=>{
@@ -44,7 +44,7 @@ test('salvamento mantém trava de envio e chave por rascunho; inscrição depend
   assert.match(app,/chavesCriacaoRef\.current\.get\(chave\)/)
   assert.match(app,/criacao\.payload!==texto/)
   const participante=readFileSync(new URL('../src/pages/participante/PortalParticipante.jsx',import.meta.url),'utf8')
-  assert.match(participante,/if \(!inscricoesDisponiveis/)
+  assert.match(participante,/if \(evento\.lotado \|\| !inscricoesDisponiveis/)
 })
 test('retorno legado com campos nulos permite uma segunda edição pelo formulário',async()=>{
   const fonte=readFileSync(new URL('../src/App.jsx',import.meta.url),'utf8')

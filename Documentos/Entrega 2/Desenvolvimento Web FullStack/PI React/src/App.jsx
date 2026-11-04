@@ -134,6 +134,7 @@ function App() {
   const rascunhoCustosAtual = rascunhosCustos[chaveEvento]
   const [eventoEmEdicao, setEventoEmEdicao] = useState(dadosNovoEvento)
   async function persistirDadosEvento(dados){
+    if(capacidades.controleCapacidade)dados={...dados,capacidade_maxima:eventoEmEdicao.capacidade_maxima ?? null}
     if(envioEventoRef.current)throw new Error('Aguarde a operação em andamento.')
     if(!(eventoEmEdicao.id?capacidades.editar:capacidades.criar))throw new Error('Salvamento temporariamente indisponível.')
     envioEventoRef.current=true;setSalvandoEvento(true)
@@ -365,6 +366,10 @@ const aoSelecionarEvento = (eventoClicado) => {
     local: eventoClicado.local || '',
     categoria: eventoClicado.categoria || '',
     publico: eventoClicado.publico ?? '',
+    capacidade_maxima:eventoClicado.capacidade_maxima ?? null,
+    inscritos_confirmados:eventoClicado.inscritos_confirmados,
+    vagas_restantes:eventoClicado.vagas_restantes,
+    lotado:eventoClicado.lotado,
     descricao: eventoClicado.descricao || '',
   } }
 }
@@ -555,6 +560,7 @@ alert(
       )}
       {pagina === 'criar' && (
         <CriarEvento
+          controleCapacidade={capacidades.controleCapacidade===true}
           evento={eventoEmEdicao}
           setEvento={setEventoEmEdicao}
           setPagina={setPagina}

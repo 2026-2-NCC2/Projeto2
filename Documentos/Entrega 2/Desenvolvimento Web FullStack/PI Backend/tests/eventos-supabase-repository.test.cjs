@@ -130,6 +130,8 @@ test("importacao inerte; fabrica reutiliza somente db-supabase existente", async
     eq() { return this; }, async maybeSingle() { return { data: null, error: null }; },
   }; } }; } }; } };
   const contexto = { module: { exports: {} }, require(nome) {
+    if(nome==="../../services/eventos.cjs")return require('../services/eventos.cjs');
+    if(nome==="../../services/suporte-transacoes.cjs")return require('../services/suporte-transacoes.cjs');
     chamadas.push(nome);
     assert.equal(nome, "../../db-supabase.cjs");
     return { criarClienteSupabase() { criacoes++; return sdk; } };
@@ -141,7 +143,7 @@ test("importacao inerte; fabrica reutiliza somente db-supabase existente", async
   assert.equal(criacoes, 1);
   assert.equal(await repo.buscarPorIdDoUsuario(13, 7), undefined);
   assert.deepEqual(chamadas, ["../../db-supabase.cjs"]);
-  const metodos = ["publicar", "excluir", "criar", "atualizar", "listarPorUsuario", "listarAdministrativo", "listarAtivosParaParticipante", "buscarPorIdDoUsuario"];
+  const metodos = ["capacidades", "mudarEstado", "publicar", "excluir", "criar", "atualizar", "listarPorUsuario", "listarAdministrativo", "listarAtivosParaParticipante", "buscarPorIdDoUsuario"];
   assert.deepEqual(Object.keys(cliente.repo), metodos);
   assert.deepEqual(Object.keys(repo), metodos);
 });

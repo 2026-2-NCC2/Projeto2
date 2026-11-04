@@ -170,11 +170,14 @@ function iniciarSimulado({ env = {}, modo = "principal", dotenv = {} } = {}) {
   env = { JWT_SECRET: "segredo-ficticio-exclusivo-dos-testes-de-provider-12345", ...env };
   const estado = { imports: [], dotenv: 0, pools: [], isolados: 0, escutas: [], rotas: [] };
   const pool = { getConnection() { throw Error("Consulta inesperada"); } }, isolado = { getConnection() { throw Error("Consulta inesperada"); } };
-  const app = { use() {}, listen(...args) { estado.escutas.push(args); } };
+  const app = { locals: {}, use(...args) { estado.middlewares.push(args); }, listen(...args) { estado.escutas.push(args); } };
+  estado.middlewares = [];
   for (const metodo of ["get", "post", "put", "patch", "delete"]) app[metodo] = rota => estado.rotas.push(`${metodo} ${rota}`);
   const dependencias = {
-    express: Object.assign(() => app, { json: () => () => {} }), bcryptjs: {}, jsonwebtoken: {}, cors: () => () => {},
+    express: Object.assign(() => app, { json: () => () => {}, Router: require("express").Router }), bcryptjs: {}, jsonwebtoken: {}, cors: () => () => {},
     "./config/banco.cjs": require("../config/banco.cjs"),
+    "./config/encerramento-gracioso.cjs": require("../config/encerramento-gracioso.cjs"),
+    "./imagens/http-binario.cjs": require("../imagens/http-binario.cjs"),
     "./perfil.cjs": require("../perfil.cjs"),
     "./portfolio.cjs": require("../portfolio.cjs"),
     "./imagens/rotas.cjs": require("../imagens/rotas.cjs"),
@@ -198,6 +201,8 @@ function iniciarSimulado({ env = {}, modo = "principal", dotenv = {} } = {}) {
       if (nome === "./config/supervisor-cutover.cjs") return { criarSupervisor: () => require("../config/supervisor-cutover.cjs").criarSupervisor({ estado: { ler: () => ({versao:1,congelado:false,selado:false,instancias:[]}), gravar() { throw Error("Escrita privada proibida no harness"); } } }) };
       if (nome === "./db") return carregar("db.js");
       if (nome === "./repositories/index.cjs") return carregar("repositories/index.cjs");
+      if (nome === "./eventos-imagens-http.cjs") return carregar("eventos-imagens-http.cjs");
+      if (arquivo === "eventos-imagens-http.cjs" && ["./imagens/politica.cjs", "./eventos-imagens.cjs"].includes(nome)) return require("../" + nome.slice(2));
       if (nome.startsWith("./services/")) return require("../" + nome.slice(2));
       assert.ok(Object.hasOwn(dependencias, nome), "Importacao proibida: " + nome);
       return dependencias[nome];
@@ -265,10 +270,11 @@ test("isolado usa so adaptador validado, sem dotenv, pool principal ou importaca
   assert.equal(a.estado.dotenv, 0);
   assert.deepEqual(a.estado.pools, []);
   assert.deepEqual(a.estado.escutas, []);
-  assert.equal(a.estado.rotas.length, 41);
-  for (const metodo of ["get", "put", "delete"]) {
-    assert.ok(a.estado.rotas.includes(`${metodo} /perfil/imagens/:tipo`));
-  }
+  assert.equal(a.estado.rotas.length, 42);
+  assert.ok(a.estado.rotas.includes("get /eventos/imagens/capacidades"));
+  assert.ok(a.estado.middlewares.some(([rota]) => rota === "/perfil/imagens"));
+  assert.equal(a.app.locals.imagensDisponiveis(), false);
+  assert.equal(typeof a.app.locals.prepararImagens, "function");
   assert.ok(!a.estado.imports.some(nome => /supabase|mysql2|dotenv/.test(nome)));
 });
 

@@ -23,7 +23,7 @@ export async function acessarImagensEvento({ token, eventoId, metodo = 'GET', po
   const r = await fetch(apiUrl(`/eventos/${eventoId}/imagens${metodo === 'GET' ? '' : '/' + posicao}`), {
     method: metodo, signal, headers: { Authorization: `Bearer ${token}`, ...(metodo === 'PUT' ? { 'Content-Type':'application/octet-stream' } : {}) },
     ...(metodo === 'PUT' ? { body: arquivo } : {}),
-  })
+  }).catch(()=>{throw new Error(metodo==='GET'?'Não foi possível consultar as imagens. Tente consultar novamente.':'Operação não confirmada. Consulte as imagens antes de repetir.')})
   if (!r.ok) {
     const mensagens={401:'Faça login novamente.',403:'Sem permissão para alterar estas imagens.',404:'Evento não encontrado ou sem permissão.',409:'Evento finalizado ou envio pendente. Consulte as imagens antes de repetir.',413:'O arquivo excede 10 MiB.',415:'Envie JPEG, PNG ou WebP.',422:'Imagem inválida ou animada.',429:'Muitas solicitações. Aguarde um minuto.',503:'Imagens indisponíveis ou operação não confirmada. Consulte antes de repetir.'}
     throw new Error(mensagens[r.status]||'Operação não confirmada. Consulte o evento antes de repetir.')

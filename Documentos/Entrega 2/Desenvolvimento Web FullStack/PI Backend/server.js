@@ -17,7 +17,7 @@ if (!homologacao && process.env.TROCATICKET_HOMOLOGACAO !== undefined) {
 const { validarInicializacaoBanco } = require("./config/banco.cjs");
 if (!homologacao) require("./config/startup-controlado.cjs").validarEntrada(process.env, modoExecucao());
 const { criarPersistencia } = require("./repositories/index.cjs");
-const { repositorios, servicos, supervisor } = criarPersistencia();
+const { repositorios, servicos, supervisor, provider:providerBanco } = criarPersistencia();
 const {
   usuarios: usuariosRepository, eventos: eventosRepository,
   custos: custosRepository, cotacoes: cotacoesRepository,
@@ -780,7 +780,8 @@ app.post("/eventos", autenticar, permitirPerfis("organizador"),async (req, res) 
       });
     }
 
-    const normalizado=validarEvento({nome,data,horario,local,categoria:categoria||'Corporativo',publico,descricao:descricao||''});
+    const normalizado=validarEvento({capacidade_maxima:req.body?.capacidade_maxima,nome,data,horario,local,categoria:categoria||'Corporativo',publico,descricao:descricao||''});
+    if(req.body?.capacidade_maxima!==undefined&&providerBanco!=='supabase')throw require('./services/suporte-transacoes.cjs').falha(503,'Controle de capacidade exige PostgreSQL preparado.');
     const nomeFinal = normalizado.nome;
     const localFinal = normalizado.local;
     const categoriaFinal = normalizado.categoria;
@@ -791,7 +792,7 @@ app.post("/eventos", autenticar, permitirPerfis("organizador"),async (req, res) 
     // Salvar evento no MySQL
     const criado = await eventosRepository.criar({
       nome: nomeFinal, data, horario, local: localFinal, categoria: categoriaFinal,
-      publico, descricao: descricaoFinal, status, usuarioId, chaveIdempotencia:req.headers?.['idempotency-key']
+      ...(normalizado.capacidade_maxima!==undefined?{capacidade_maxima:normalizado.capacidade_maxima}:{}),publico, descricao: descricaoFinal, status, usuarioId, chaveIdempotencia:req.headers?.['idempotency-key']
     });
     const eventoId=typeof criado==='object'?criado.id:criado;
 
@@ -962,7 +963,8 @@ app.put("/eventos/:id", autenticar, permitirPerfis("organizador"), async (req, r
       });
     }
 
-    const normalizado=validarEvento({nome,data,horario,local,categoria:categoria||'Corporativo',publico,descricao:descricao||''});
+    const normalizado=validarEvento({capacidade_maxima:req.body?.capacidade_maxima,nome,data,horario,local,categoria:categoria||'Corporativo',publico,descricao:descricao||''});
+    if(req.body?.capacidade_maxima!==undefined&&providerBanco!=='supabase')throw require('./services/suporte-transacoes.cjs').falha(503,'Controle de capacidade exige PostgreSQL preparado.');
     const affectedRows = await eventosRepository.atualizar(id, req.usuario.id, normalizado,req.body?.versao);
 
     if (affectedRows === 0) {

@@ -1,3 +1,4 @@
+import { VagasEvento } from '../../components/eventos/VagasEvento.jsx'
 import { PerfilPessoal } from '../../components/perfil/PerfilPessoal.jsx'
 import { Icone } from '../../components/ui/Icone.jsx'
 import { useState, useEffect } from 'react'
@@ -28,6 +29,7 @@ export function PortalParticipante({ setPagina, aoSair }) {
   const [eventoSelecionado, setEventoSelecionado] = useState(null)
   const [carregandoEventos, setCarregandoEventos] = useState(true)
   const [erroEventos, setErroEventos] = useState('')
+  const [revisaoVagas,setRevisaoVagas]=useState(0)
   
   useEffect(() => {
   let ativo = true
@@ -108,12 +110,12 @@ export function PortalParticipante({ setPagina, aoSair }) {
 
     carregarEventos()
     return () => { ativo = false }
-  }, [])
+  }, [revisaoVagas])
 
 const [inscrevendoEventoId, setInscrevendoEventoId] = useState(null)
 
 const aoInscreverEvento = async (evento) => {
-  if (!inscricoesDisponiveis || carregandoIngressos || erroIngressos || inscrevendoEventoId !== null || idsEventosInscritos.has(Number(evento.id))) return
+  if (evento.lotado || !inscricoesDisponiveis || carregandoIngressos || erroIngressos || inscrevendoEventoId !== null || idsEventosInscritos.has(Number(evento.id))) return
   const confirmado = window.confirm(
     `Deseja se inscrever no evento "${evento.nome}"?`
   )
@@ -160,6 +162,9 @@ const aoInscreverEvento = async (evento) => {
     console.error('Erro ao realizar inscrição:', erro)
     alert('Não foi possível conectar ao servidor.')
   } finally {
+    setRevisaoVagas(v=>v+1)
+    setEventoSelecionado(null)
+    setAbaParticipante(a=>a==='detalhes'?'eventos':a)
     setInscrevendoEventoId(null)
   }
 }
@@ -244,7 +249,7 @@ const aoInscreverEvento = async (evento) => {
             </p>
 
             <p>
-              <strong>Público:</strong>{' '}
+              <strong>Público estimado:</strong>{' '}
               {evento.publico || 'Não informado'}
             </p>
 
@@ -252,6 +257,7 @@ const aoInscreverEvento = async (evento) => {
               <strong>Status:</strong> {evento.status}
             </p>
 
+            <VagasEvento evento={evento} />
             {evento.descricao && <p>{evento.descricao}</p>}
             
             <button
@@ -269,7 +275,7 @@ const aoInscreverEvento = async (evento) => {
   type="button"
   disabled={
     !inscricoesDisponiveis || carregandoIngressos || Boolean(erroIngressos) ||
-    idsEventosInscritos.has(Number(evento.id)) ||
+    evento.lotado || idsEventosInscritos.has(Number(evento.id)) ||
     inscrevendoEventoId !== null
   }
   onClick={() => aoInscreverEvento(evento)}
@@ -279,7 +285,7 @@ const aoInscreverEvento = async (evento) => {
     ? 'Já inscrito'
     : inscrevendoEventoId === evento.id
       ? 'Realizando inscrição...'
-      : 'Inscrever-se'}
+      : evento.lotado ? 'Lotado' : 'Inscrever-se'}
 </button>
           </article>
         ))}
@@ -468,7 +474,7 @@ const aoInscreverEvento = async (evento) => {
     </p>
 
     <p>
-      <strong>Público:</strong>{' '}
+      <strong>Público estimado:</strong>{' '}
       {eventoSelecionado.publico || 'Não informado'}
     </p>
 
@@ -476,6 +482,7 @@ const aoInscreverEvento = async (evento) => {
       <strong>Status:</strong> {eventoSelecionado.status}
     </p>
 
+    <VagasEvento evento={eventoSelecionado} />
     {avisoInscricoes}
     <h3>Sobre o evento</h3>
 
@@ -486,7 +493,7 @@ const aoInscreverEvento = async (evento) => {
   type="button"
   disabled={
     !inscricoesDisponiveis || carregandoIngressos || Boolean(erroIngressos) ||
-    idsEventosInscritos.has(Number(eventoSelecionado.id)) ||
+    eventoSelecionado.lotado || idsEventosInscritos.has(Number(eventoSelecionado.id)) ||
     inscrevendoEventoId !== null
   }
   onClick={() => aoInscreverEvento(eventoSelecionado)}
@@ -496,7 +503,7 @@ const aoInscreverEvento = async (evento) => {
     ? 'Já inscrito'
     : inscrevendoEventoId === eventoSelecionado.id
       ? 'Realizando inscrição...'
-      : 'Inscrever-se'}
+      : eventoSelecionado.lotado ? 'Lotado' : 'Inscrever-se'}
 </button>
   </section>
 )}

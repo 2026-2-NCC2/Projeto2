@@ -52,7 +52,7 @@ async function executar(env) {
       AND has_table_privilege(current_user,'public.cotacoes','SELECT') AND has_table_privilege(current_user,'public.propostas','SELECT')
       AND has_table_privilege(current_user,'public.inscricoes','SELECT') AND has_table_privilege(current_user,'public.contas_teste_imagens','SELECT')
       AND has_table_privilege(current_user,'public.contas_teste_imagens','UPDATE') AS ok`)).rows[0].ok;
-    checks.gestaoV1=(await db.query('SELECT public.eventos_capacidades_v1() AS v')).rows[0].v===1;
+    checks.gestaoV1=[1,3].includes((await db.query('SELECT public.eventos_capacidades_v1() AS v')).rows[0].v);
     catalogo={tabelaExiste:Boolean(tabela),bucket:bucket||null,colunas,indices,restricoes};
   }finally{if(db){try{await db.query('ROLLBACK');}finally{db.release();}}await pool.end();}
   return {projeto:ref,somenteLeitura:true,tlsVerificado:true,coletadoEm:new Date().toISOString(),pronto:Object.values(checks).every(Boolean),checks,catalogo};

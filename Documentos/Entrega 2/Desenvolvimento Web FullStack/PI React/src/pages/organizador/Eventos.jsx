@@ -1,3 +1,4 @@
+import { VagasEvento } from '../../components/eventos/VagasEvento.jsx'
 import { Icone } from '../../components/ui/Icone.jsx'
 import { MidiaEvento, CapaEvento } from '../../components/eventos/MidiaEvento.jsx'
 import { useState, useMemo } from 'react'
@@ -97,7 +98,7 @@ export function Eventos({eventos, carregando = false, erro = '', aoTentarNovamen
               </div>
               <div className="numero">
                 <small>PREVISTOS</small>
-                <strong>{evento.publico ?? 'Público não cadastrado'}</strong>
+                <strong>{evento.publico ?? 'Público não cadastrado'}</strong><VagasEvento evento={evento} />
               </div>
               <div className="numero">
                 <small>COTAÇÃO</small>

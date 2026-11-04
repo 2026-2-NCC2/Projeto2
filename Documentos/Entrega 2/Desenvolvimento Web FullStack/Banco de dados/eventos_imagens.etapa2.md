@@ -145,3 +145,60 @@ que ainda esperava exclusão física, substituído por preservação nas transi�
 
 Não houve testes de escrita, uploads, exclusões, migrações, alterações de
 credenciais/políticas ou criação de eventos em produção, commit ou push.
+
+
+## Revisão local sem PostgreSQL — 04/11/2026
+
+Esta revisão não repetiu o preflight de produção descrito no início do documento.
+A rede atual bloqueia PostgreSQL; a ausência da tabela/bucket permanece uma
+pendência informada e documentada pelas evidências anteriores. Nenhuma conexão
+remota foi tentada nesta revisão. O backend principal não foi iniciado.
+
+A integração já existente foi preservada: criação/edição e listagem do
+organizador; capas nas listagens dos quatro perfis; galeria nos detalhes
+permitidos. A prévia continua disponível sem autorização de upload. Novo evento
+precisa ser salvo antes de receber arquivos. Substituição afeta somente a posição
+selecionada; remoção exige confirmação. Estados terminais continuam em consulta.
+
+Problemas corrigidos nesta revisão:
+
+- Consulta e alteração sem indicação de progresso: agora há mensagens de status,
+  aria-busy e bloqueio das ações de escrita durante a consulta.
+- Falha ao carregar a imagem: aviso legível substitui a imagem quebrada; nova
+  consulta renova as URLs e permite renderizar a imagem novamente.
+- Arquivo inválido após seleção válida: a seleção anterior e sua prévia são
+  descartadas, impedindo o envio acidental do arquivo antigo.
+- Resposta de consulta cancelada podia informar sucesso: agora retorna false.
+  Os dados também são vinculados ao evento e à sessão, impedindo exibição de
+  URLs anteriores durante a troca de contexto.
+- Falha de transporte mostrava mensagem nativa do navegador: a orientação agora
+  é em português e mantém a exigência de consulta após escrita não confirmada.
+
+Verificação desta revisão (não confundir com a execução histórica acima):
+
+- `PI React`: `node --test tests/imagensEvento.test.js tests/eventosGestao.test.js`:
+  20 testes aprovados, incluindo prévia, descarte/revogação, substituição,
+  remoção, carregamento, imagem quebrada, falha de transporte, escrita incerta,
+  renovação, cancelamento e troca de evento/sessão.
+- `PI Backend`: `node --test tests/eventos-imagens.test.cjs tests/eventos-imagens-http.test.cjs tests/eventos-imagens-inicializacao.test.cjs`:
+  14 aprovados; um teste de integração PostgreSQL descartável não executado,
+  pois depende de habilitação explícita. HTTP usa listener local e serviços
+  simulados; os testes de serviço/repositório/ativação usam mocks.
+- `npm.cmd run lint` e `npm.cmd run build` em `PI React`.
+- Layout renderizado em Chrome headless com o CSS e os componentes reais,
+  HTML estático e imagens sintéticas em memória, nas larguras 360, 390, 768,
+  1024 e 1440 px: sem transbordamento horizontal nos controles, imagens e
+  contêineres de criação, edição, listagem e detalhes. Essa verificação de layout
+  não substitui a homologação interativa da aplicação completa após ativação.
+
+O SQL incremental foi conferido com o repositório e com o preflight existente;
+não precisou de alteração nem foi executado. O roteiro de ativação acima continua
+válido. A configuração `config/ativacao-eventos-imagens.json` permanece com
+`ativo=false` e `evidencia=null`. Imagens de perfil e supervisor de limpeza não
+foram alterados. Não houve alteração de .env, credenciais, TLS, políticas,
+eventos/inscrições reais, migração, criação de bucket, commit ou push.
+
+**Situação:** implementação local concluída e preparada para homologação futura;
+ainda não liberada para ativação em produção. Faltam tabela e bucket privados,
+preflight no ambiente autorizado, homologação real com organizador/evento
+exclusivamente descartáveis e aprovação explícita da evidência/manifesto.

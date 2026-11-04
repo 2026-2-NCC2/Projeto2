@@ -9,7 +9,7 @@ function criarRepositorioInscricoes(
     async criar(usuarioId, eventoId) {
       if(gestaoSegura){
         const {data,error}=await require('../../services/eventos.cjs').consultarRpc(cliente,'inscrever_evento_v1',{p_usuario:usuarioId,p_evento:eventoId});
-        if(error)require('../../services/eventos.cjs').erroRpc(error);
+        if(error)require('../../services/eventos.cjs').erroRpc(error.code==='23505'?{code:'DU409'}:error);
         if(!Number.isSafeInteger(data)||data<=0)require('../../services/eventos.cjs').erroRpc({});
         return data;
       }

@@ -1,3 +1,4 @@
+import { VagasEvento } from '../../components/eventos/VagasEvento.jsx'
 import { MidiaEvento } from '../../components/eventos/MidiaEvento.jsx'
 
 export function CriarEvento({
@@ -6,6 +7,7 @@ export function CriarEvento({
   setPagina,
   aoAvancarParaCustos,
   podeSalvar = false,
+  controleCapacidade = false,
   salvando = false,
 }) {
   const publicado=evento.status==='Ativo'
@@ -25,7 +27,7 @@ export function CriarEvento({
       </button>
       <h1>{evento.id?'Dados do evento':'Criar evento'}</h1>
       {evento.status && <p>Estado: <strong>{evento.status}</strong></p>}
-      {publicado && <p role="status">O evento já foi publicado. Somente a descrição pode ser editada.</p>}
+      {publicado && <p role="status">O evento já foi publicado. A descrição e a capacidade podem ser editadas quando disponíveis.</p>}
       {!podeSalvar && <p role="status">Dados disponíveis para consulta. O salvamento está indisponível.</p>}
       <p>Comece pelos dados básicos para planejar o evento e as cotações.</p>
       <p>Datas e horários seguem o fuso de Brasília. Novas inscrições terminam no horário de início.</p>
@@ -95,6 +97,15 @@ export function CriarEvento({
             />
           </div>
         </div>
+        <VagasEvento evento={evento} />
+        {controleCapacidade && <>
+          <label htmlFor="capacidade-evento">Capacidade máxima de inscrições</label>
+          <input id="capacidade-evento" type="number" min="1" max="2147483647" step="1"
+            value={evento.capacidade_maxima ?? ''}
+            onChange={e=>aoAlterarCampo('capacidade_maxima',e.target.value===''?null:Number(e.target.value))} />
+          <p>Deixe vazio para manter sem limite configurado. Público previsto é uma estimativa independente.
+          A capacidade deve comportar todos os inscritos confirmados.</p>
+        </>}
         <label>Categoria do evento</label>
         <div className="categorias">
           {categorias.map((itemCategoria) => (
