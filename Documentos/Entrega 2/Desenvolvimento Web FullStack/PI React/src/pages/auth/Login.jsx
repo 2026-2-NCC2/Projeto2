@@ -1,7 +1,8 @@
+import { Icone } from '../../components/ui/Icone.jsx'
 import { useState } from 'react'
 import { apiUrl } from '../../services/api.js'
 
-export function Login({ setPagina }) {
+export function Login({ setPagina, aoAutenticarSessao, erroSessao }) {
   const [perfil, setPerfil] = useState('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
@@ -28,23 +29,7 @@ const aoAutenticar = async (eventoDisparado) => {
       return
     }
 
-    sessionStorage.setItem('token', dados.token)
-
-const perfilUsuario = dados.usuario.perfil
-
-sessionStorage.setItem('perfil', perfilUsuario)
-
-if (perfilUsuario === 'admin') {
-  setPagina('admin')
-} else if (perfilUsuario === 'fornecedor') {
-  setPagina('fornecedor-mural')
-} else if (perfilUsuario === 'organizador') {
-  setPagina('eventos')
-} else if (perfilUsuario === 'participante') {
-  setPagina('participante')
-} else {
-  alert('Perfil de usuário não reconhecido.')
-}
+    await aoAutenticarSessao(dados.token, dados.usuario?.perfil)
   } catch (erro) {
     console.error(erro)
     alert('Não foi possível conectar ao servidor.')
@@ -55,12 +40,13 @@ if (perfilUsuario === 'admin') {
     <div className="paginaLogin">
       <div className="cabecalhoLogin">
         <div className="logo">
-          ▣ <span>TrocaTicket</span>
+          <Icone nome="ticket" /> <span>TrocaTicket</span>
         </div>
-        <span>🔒 Ambiente Seguro</span>
+        <span className="acessoSeguro"><Icone nome="acesso" tamanho={16} /> Acesso à conta</span>
       </div>
       <main className="caixaLogin">
-        <div className="escolhaPerfil"><button type="button" className={perfil === 'organizador' ? 'selecionado' : ''} onClick={() => setPerfil('organizador')}>▦ Organizador</button><button type="button" className={perfil === 'fornecedor' ? 'selecionado' : ''} onClick={() => setPerfil('fornecedor')}>▣ Fornecedor</button></div>
+        {erroSessao && <p role="alert">{erroSessao}</p>}
+        <div className="escolhaPerfil"><button type="button" className={perfil === 'organizador' ? 'selecionado' : ''} onClick={() => setPerfil('organizador')}>Organizador</button><button type="button" className={perfil === 'fornecedor' ? 'selecionado' : ''} onClick={() => setPerfil('fornecedor')}>Fornecedor</button></div>
         <button
           type="button"
           className={`acessoAdmin ${perfil === 'admin' ? 'selecionado' : ''}`}
@@ -68,10 +54,10 @@ if (perfilUsuario === 'admin') {
         >
           Acesso administrativo
         </button>
-        <h1>Boas-vindas de volta!</h1>
+        <h1>Acessar sua conta</h1>
         <p>{perfil === 'fornecedor' ? 'Encontre oportunidades e envie propostas para eventos.' : 'Acesse seu painel de gestão e cotações de eventos corporativos.'}</p>
         <form onSubmit={aoAutenticar}>
-          <label>E-mail corporativo / Geral</label>
+          <label>E-mail</label>
           <input
             type="email"
             value={email}
@@ -81,9 +67,9 @@ if (perfilUsuario === 'admin') {
           />
           <div className="rotuloSenha">
             <label>Senha</label>
-            <a href="#recuperar" onClick={(eventoDisparado) => eventoDisparado.preventDefault()}>
+            <button type="button" disabled title="Funcionalidade indisponível">
               Esqueci minha senha
-            </a>
+            </button>
           </div>
           <input
             type="password"
@@ -93,19 +79,20 @@ if (perfilUsuario === 'admin') {
             required
           />
           <label className="lembrar">
-            <input type="checkbox" defaultChecked /> Lembrar deste dispositivo
+            <input type="checkbox" disabled /> Lembrar deste dispositivo
           </label>
           <button type="submit" className="principal">
-            ENTRAR →
+            Entrar
           </button>
         </form>
         <div className="divisor">ou continue com</div>
         <button
           type="button"
           className="botaoGoogle"
-          onClick={() => setPagina('eventos')}
+          disabled
+          title="Funcionalidade indisponível"
         >
-          🌐 Google Workspace / SSO
+          Google Workspace / SSO
         </button>
         <p className="cadastro">Ainda não tem uma conta?{' '}
           <button type="button"onClick={() => setPagina('cadastro')}>Criar conta</button>

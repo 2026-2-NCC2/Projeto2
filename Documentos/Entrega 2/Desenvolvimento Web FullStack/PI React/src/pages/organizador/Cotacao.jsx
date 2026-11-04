@@ -1,3 +1,4 @@
+import { Icone } from '../../components/ui/Icone.jsx'
 import { useState, useMemo, useEffect } from 'react'
 import { apiUrl } from '../../services/api.js'
 import { formatarMoeda } from '../../utils/formatarMoeda.js'
@@ -139,10 +140,10 @@ const aoPublicarCotacao = async () => {
       <p>Revise o resumo dos itens e configure o prazo para fornecedores.</p>
       <div className="gradeCotacao">
         <div className="cartaoFormulario">
-          <h2>▣ Resumo da Cotação & Evento</h2>
+          <h2><Icone nome="documento" /> Resumo da cotação e do evento</h2>
           <h3>{evento.nome}</h3>
           <p>
-            📅 {evento.data} às {evento.horario} • {evento.local}
+            {evento.data} às {evento.horario} • {evento.local}
           </p>
           <div style={{ marginTop: '20px' }}>
             {custos.map((itemCusto) => (
@@ -167,7 +168,7 @@ const aoPublicarCotacao = async () => {
           />
           <label>Modalidade da cotação</label>
           <div className="opcaoSelecionada">
-            ◉ Cotação Fechada
+            Cotação fechada
             <small>Melhor preço e condições comerciais com sigilo até abertura.</small>
           </div>
           <label>Observações para os fornecedores</label>
@@ -199,7 +200,7 @@ const aoPublicarCotacao = async () => {
         </div>
       </div>
             <section className="cartaoFormulario" style={{ marginTop: '24px' }}>
-        <h2>📩 Propostas recebidas</h2>
+        <h2><Icone nome="documento" /> Propostas recebidas</h2>
         <p>Propostas enviadas pelos fornecedores para este evento.</p>
 
         {carregandoPropostas && (

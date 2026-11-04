@@ -7,14 +7,27 @@ export function Ticket({
   setPagina,
   aoFinalizarESalvar,
 }) {
-  const [margemPercentual, setMargemPercentual] = useState(30)
+  const [margemPercentual, setMargemPercentual] = useState(0)
+  const [salvando, setSalvando] = useState(false)
   const custoTotal = useMemo(() => {
-    return custos.reduce((acumulador, itemCusto) => acumulador + itemCusto.valor, 0)
+    return custos.reduce((acumulador, itemCusto) => acumulador + Number(itemCusto.valor), 0)
   }, [custos])
-  const publico = evento.publico > 0 ? evento.publico : 600
+  const publico = Number(evento.publico)
+  const custosValidos = custos.length > 0 && custos.every(item =>
+    item.valor !== null && item.valor !== '' && Number.isFinite(Number(item.valor)) && Number(item.valor) >= 0)
+  const podeCalcular = Number.isFinite(publico) && publico > 0 && custosValidos && Number.isFinite(custoTotal)
   const ticketEquilibrio = custoTotal / publico
   const margemOperacional = custoTotal * (margemPercentual / 100)
   const ticketSugerido = (custoTotal + margemOperacional) / publico
+  if (!podeCalcular) return (
+    <section className="cartaoTicket">
+      <h1>Estimativa de ticket indisponível</h1>
+      <p>{!Number.isFinite(publico) || publico <= 0
+        ? 'Cadastre um público previsto válido para calcular o ticket.'
+        : 'Cadastre custos válidos para calcular o ticket.'}</p>
+      <button type="button" className="principal" onClick={() => setPagina(!Number.isFinite(publico) || publico <= 0 ? 'criar' : 'custos')}>Revisar dados do evento</button>
+    </section>
+  )
   return (
     <div>
       <button className="voltar" onClick={() => setPagina('cotacao')}>
@@ -24,10 +37,10 @@ export function Ticket({
         <div>
           <h1>TICKET ESTIMADO & VIABILIDADE</h1>
           <p>
-            Simulação de sustentabilidade financeira para <strong>{evento.nome}</strong>.
+            Simulação com os custos cadastrados para <strong>{evento.nome}</strong>.
           </p>
         </div>
-        <span className="status">● Cotações suficientes recebidas</span>
+
       </div>
       <div className="gradeTicket">
         <div className="cartaoTicket">
@@ -36,8 +49,8 @@ export function Ticket({
             R$ <strong>{ticketSugerido.toFixed(2).replace('.', ',')}</strong>
           </div>
           <p>
-            Preço recomendado por ingresso para cobrir custos e atingir{' '}
-            {margemPercentual}% de margem operacional.
+            Estimativa por ingresso para cobrir custos, com acréscimo de{' '}
+            {margemPercentual}% sobre os custos. A estimativa não confirma cotações ou propostas.
           </p>
           <hr style={{ margin: '20px 0', border: '0', borderTop: '1px solid #e2e4eb' }} />
           <div className="itemResumo">
@@ -53,14 +66,14 @@ export function Ticket({
             <b>{formatarMoeda(ticketEquilibrio)}</b>
           </div>
           <div className="itemResumo">
-            <span>Margem operacional ({margemPercentual}%)</span>
+            <span>Acréscimo sobre os custos ({margemPercentual}%)</span>
             <b>{formatarMoeda(margemOperacional)}</b>
           </div>
         </div>
         <div className="cartaoTicket">
           <h2>Simulação e Detalhamento</h2>
           <label style={{ display: 'block', margin: '15px 0 5px', fontWeight: 600 }}>
-            Ajustar margem de lucro operacional: {margemPercentual}%
+            Ajustar acréscimo sobre os custos: {margemPercentual}%
           </label>
           <input
             type="range"
@@ -71,29 +84,31 @@ export function Ticket({
             style={{ width: '100%', accentColor: '#3427b8' }}
           />
           <h3 style={{ marginTop: '25px', fontSize: '15px' }}>Composição dos custos</h3>
-          <div className="barraCusto">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
           <div style={{ marginTop: '15px' }}>
-            {custos.slice(0, 3).map((custo) => (
+            {custos.map((custo) => (
               <div className="itemResumo" key={custo.id}>
-                <span>{custo.categoria}</span>
-                <b>{formatarMoeda(custo.valor)}</b>
+                <span>{custo.categoria || 'Categoria não informada'}</span>
+                <b>{formatarMoeda(Number(custo.valor))}</b>
               </div>
             ))}
           </div>
+          <p>O ticket é uma simulação e não será salvo com os dados do evento.</p>
           <button
             type="button"
             className="principal"
             style={{ width: '100%', marginTop: '30px' }}
-            onClick={() => {
-              aoFinalizarESalvar(ticketSugerido)
-              setPagina('eventos')
+            disabled={salvando}
+            onClick={async () => {
+              if (salvando) return
+              setSalvando(true)
+              try {
+                await aoFinalizarESalvar()
+              } finally {
+                setSalvando(false)
+              }
             }}
           >
-            Finalizar planejamento e salvar evento →
+            {salvando ? 'Salvando evento...' : 'Salvar dados do evento →'}
           </button>
         </div>
       </div>

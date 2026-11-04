@@ -1,6 +1,7 @@
+import { Icone } from '../../components/ui/Icone.jsx'
 import { useState, useMemo } from 'react'
 
-export function Eventos({eventos, setPagina, aoSelecionarEvento, aoCriarNovoEvento, aoExcluirEvento, aoPublicarEvento}) {
+export function Eventos({eventos, carregando = false, erro = '', aoTentarNovamente, setPagina, aoSelecionarEvento, aoCriarNovoEvento, aoExcluirEvento, aoPublicarEvento}) {
   const [termoBusca, setTermoBusca] = useState('')
   const [filtroStatus, setFiltroStatus] = useState('Todos')
   const eventosFiltrados = useMemo(() => {
@@ -25,9 +26,9 @@ export function Eventos({eventos, setPagina, aoSelecionarEvento, aoCriarNovoEven
             TrocaTicket › Gestão Corporativa › Meus Eventos
           </p>
           <h1>
-            Meus eventos:{' '}
+            Meus eventos{' '}
             <small>
-              {eventos.length} eventos cadastrados ({totalAtivos} ativos)
+              {carregando || erro ? 'Consulta pendente' : `${eventos.length} eventos cadastrados (${totalAtivos} ativos)`}
             </small>
           </h1>
           <p>
@@ -41,12 +42,13 @@ export function Eventos({eventos, setPagina, aoSelecionarEvento, aoCriarNovoEven
             setPagina('criar')
           }}
         >
-          + Novo Evento
+          <Icone nome="adicionar" /> Novo evento
         </button>
       </div>
-      <div className="filtros">
+      {!carregando && !erro && <div className="filtros">
         <input
-          placeholder="🔍 Filtrar por nome do evento..."
+          aria-label="Filtrar eventos por nome"
+          placeholder="Filtrar por nome do evento..."
           value={termoBusca}
           onChange={(eventoDisparado) => setTermoBusca(eventoDisparado.target.value)}
         />
@@ -68,64 +70,52 @@ export function Eventos({eventos, setPagina, aoSelecionarEvento, aoCriarNovoEven
         >
           Em planejamento ({totalPlanejamento})
         </button>
-      </div>
+      </div>}
       <div className="listaEventos">
-        {eventosFiltrados.length === 0 ? (
+        {carregando ? <p role="status">Carregando eventos...</p> : erro ? (
+          <div role="alert"><p>{erro}</p><button type="button" onClick={aoTentarNovamente}>Tentar novamente</button></div>
+        ) : eventosFiltrados.length === 0 ? (
           <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
-            Nenhum evento encontrado para o filtro aplicado.
+            {eventos.length === 0 ? 'Você ainda não possui eventos cadastrados.' : 'Nenhum evento encontrado para o filtro aplicado.'}
           </div>
         ) : (
           eventosFiltrados.map((evento) => (
             <div className="evento" key={evento.id}>
-              <div className="barra"></div>
+              <div className="eventoIdentidade" aria-hidden="true"><Icone nome="eventos" tamanho={26} /></div>
               <div className="eventoInfo">
                 <h2>{evento.nome}</h2>
-                <span className="status">{evento.status}</span>
-                <p>
-                  ▣ {evento.data} &nbsp; ◉ {evento.local || 'São Paulo - SP'}
+                <span className={evento.status === 'Ativo' ? 'status' : 'status statusPlanejamento'}>{evento.status}</span>
+                <p className="eventoMetadados">
+                  <span><Icone nome="eventos" tamanho={16} /> {evento.data}</span><span><Icone nome="local" tamanho={16} /> {evento.local?.trim() || 'Local não cadastrado'}</span>
                 </p>
               </div>
               <div className="numero">
                 <small>PREVISTOS</small>
-                <strong>{evento.publico}</strong>
+                <strong>{evento.publico ?? 'Público não cadastrado'}</strong>
               </div>
               <div className="numero">
                 <small>COTAÇÃO</small>
-                <strong>{evento.cotacao}</strong>
+                <strong>{evento.cotacao ?? 'Não informada'}</strong>
               </div>
               <div className="numero">
                 <small>TICKET SUGERIDO</small>
-                <strong>{evento.ticket}</strong>
+                <strong>{evento.ticket ?? 'Não informado'}</strong>
               </div>
               <button
-              type="button"
-              onClick={() => aoExcluirEvento(evento)}
-              style={{
-              backgroundColor: '#dc3545',
-              color: 'white',
-             border: 'none',
-             borderRadius: '6px',
-              padding: '8px 12px',
-              cursor: 'pointer'
-              }}
-            >
-            Excluir
-            </button>
+                type="button"
+                onClick={() => aoExcluirEvento(evento)}
+                className="secundario acaoExcluir"
+              >
+                Excluir
+              </button>
               {evento.status === 'Em planejamento' && (
-              <button
-    type="button"
-    onClick={() => aoPublicarEvento(evento)}
-    style={{
-      backgroundColor: '#198754',
-      color: 'white',
-      border: 'none',
-      borderRadius: '6px',
-      padding: '8px 12px',
-      cursor: 'pointer'
-    }}
-  >
-    Publicar
-  </button>
+                <button
+                  type="button"
+                  onClick={() => aoPublicarEvento(evento)}
+                  className="secundario acaoPublicar"
+                >
+                  Publicar
+                </button>
               )}
               <button
                 className="seta"

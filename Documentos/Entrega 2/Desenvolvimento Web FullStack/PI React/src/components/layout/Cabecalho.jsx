@@ -1,9 +1,10 @@
+import { Icone } from '../ui/Icone.jsx'
 import { IdentidadeConta } from './IdentidadeConta.jsx'
 export function Cabecalho() {
   return (
     <header className="cabecalhoOrganizador">
       <div className="logo">
-        ▣ <span>TrocaTicket</span>
+        <Icone nome="ticket" /> <span>TrocaTicket</span>
       </div>
       <div className="empresa">Gestão Corporativa</div>
       <div className="usuario">

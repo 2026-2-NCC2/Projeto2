@@ -175,6 +175,10 @@ function iniciarSimulado({ env = {}, modo = "principal", dotenv = {} } = {}) {
   const dependencias = {
     express: Object.assign(() => app, { json: () => () => {} }), bcryptjs: {}, jsonwebtoken: {}, cors: () => () => {},
     "./config/banco.cjs": require("../config/banco.cjs"),
+    "./perfil.cjs": require("../perfil.cjs"),
+    "./imagens/rotas.cjs": require("../imagens/rotas.cjs"),
+    "./config/startup-controlado.cjs": { validarEntrada: (e, m) => require('../config/startup-controlado.cjs').validarEntrada(e, m,
+      { estado: { ler: () => ({ versao: 1, congelado: false, selado: false, instancias: [] }) } }) },
     "./isolamento.cjs": { modoExecucao: () => modo, obterBancoIsolado() { estado.isolados++; return isolado; } },
     dotenv: { config() { estado.dotenv++; for (const [k, v] of Object.entries(dotenv)) if (env[k] === undefined) env[k] = v; } },
     "mysql2/promise": { createPool(opcoes) { estado.pools.push(opcoes); return pool; } },
@@ -207,21 +211,17 @@ function iniciarSimulado({ env = {}, modo = "principal", dotenv = {} } = {}) {
   catch (erro) { return { estado, erro }; }
 }
 
-for (const DB_PROVIDER of [undefined, "mysql"]) test(`startup ${DB_PROVIDER ?? "padrao"}: sete repositorios MySQL e 29 rotas preservados`, () => {
+for (const DB_PROVIDER of [undefined, "mysql"]) test(`startup normal ${DB_PROVIDER ?? "padrao"}: MySQL recusado apos ativacao`, () => {
   const a = iniciarSimulado({ env: { DB_PROVIDER, DB_HOST: "host-ficticio", DB_PORT: "3306", DB_USER: "usuario-ficticio",
     DB_PASSWORD: "senha-ficticia", DB_NAME: "trocaticket" } });
-  assert.equal(a.erro, undefined);
-  assert.equal(a.estado.pools.length, 1);
-  assert.deepEqual(json(a.estado.pools[0]), { host: "host-ficticio", port: 3306, user: "usuario-ficticio",
-    password: "senha-ficticia", database: "trocaticket", waitForConnections: true, connectionLimit: 10 });
-  assert.equal(a.estado.rotas.length, 29);
-  assert.equal(a.estado.imports.filter(nome => nome.startsWith("./repositories/mysql/")).length, 7);
-  assert.equal(a.estado.escutas.length, 1);
-  assert.equal(a.estado.escutas[0][0], 3001);
+  assert.match(a.erro?.message, /STARTUP_MYSQL_APOS_ATIVACAO_RECUSADO/);
+  assert.equal(a.estado.pools.length, 0);
+  assert.equal(a.estado.rotas.length, 0);
+  assert.equal(a.estado.escutas.length, 0);
   assert.ok(!a.estado.imports.some(nome => /supabase/.test(nome)));
 });
 
-for (const [env, code] of [[{ DB_PROVIDER: "invalid" }, "DB_PROVIDER_INVALID"], [supabase(), "DB_PROVIDER_NOT_IMPLEMENTED"],
+for (const [env, code] of [[{ DB_PROVIDER: "invalid" }, "DB_PROVIDER_INVALID"], [supabase(), "ERR_ASSERTION"],
   [{ DB_PROVIDER: "supabase" }, "SUPABASE_CONFIG"]]) test(`startup recusa ${code} antes de pool, SDK, repositorios ou HTTP`, () => {
   const a = iniciarSimulado({ env });
   assert.equal(a.erro?.code, code);
@@ -234,26 +234,26 @@ for (const [env, code] of [[{ DB_PROVIDER: "invalid" }, "DB_PROVIDER_INVALID"], 
 
 test("selecao considera configuracao carregada por dotenv antes de criar o pool", () => {
   const a = iniciarSimulado({ dotenv: supabase() });
-  assert.equal(a.erro?.code, "DB_PROVIDER_NOT_IMPLEMENTED");
+  assert.match(a.erro?.message, /STARTUP_PROJETO_DIVERGENTE/);
   assert.deepEqual(a.estado.pools, []);
   assert.deepEqual(a.estado.escutas, []);
 });
 
-test("variaveis HOMOLOG_ no dotenv preservam startup MySQL e bloqueio Supabase normal", () => {
+test("variaveis HOMOLOG_ no dotenv nao aprovam MySQL nem outro projeto Supabase", () => {
   const dotenv = { HOMOLOG_SUPABASE_URL: "https://gnwybroqfvwosiqzsfla.supabase.co",
     HOMOLOG_SUPABASE_SECRET_KEY: "sb_secret_homologacao_ficticia", HOMOLOG_JWT_SECRET: "exclusivo_ficticio" };
   const mysql = iniciarSimulado({ dotenv });
-  assert.equal(mysql.erro, undefined); assert.equal(mysql.estado.pools.length, 1);
+  assert.match(mysql.erro?.message, /STARTUP_MYSQL_APOS_ATIVACAO_RECUSADO/); assert.equal(mysql.estado.pools.length, 0);
   assert.ok(!mysql.estado.imports.some(n => /supabase|homologacao/.test(n)));
   const bloqueado = iniciarSimulado({ dotenv: { ...dotenv, ...supabase() } });
-  assert.equal(bloqueado.erro?.code, "DB_PROVIDER_NOT_IMPLEMENTED");
+  assert.match(bloqueado.erro?.message, /STARTUP_PROJETO_DIVERGENTE/);
   assert.deepEqual(bloqueado.estado.pools, []); assert.deepEqual(bloqueado.estado.escutas, []);
 });
 
 test("provider explicito do processo prevalece sobre dotenv sem fallback entre bancos", () => {
   const a = iniciarSimulado({ env: { DB_PROVIDER: "mysql" }, dotenv: supabase() });
-  assert.equal(a.erro, undefined);
-  assert.equal(a.estado.pools.length, 1);
+  assert.match(a.erro?.message, /STARTUP_MYSQL_APOS_ATIVACAO_RECUSADO/);
+  assert.equal(a.estado.pools.length, 0);
   assert.ok(!a.estado.imports.some(nome => /supabase/.test(nome)));
 });
 
@@ -264,7 +264,10 @@ test("isolado usa so adaptador validado, sem dotenv, pool principal ou importaca
   assert.equal(a.estado.dotenv, 0);
   assert.deepEqual(a.estado.pools, []);
   assert.deepEqual(a.estado.escutas, []);
-  assert.equal(a.estado.rotas.length, 29);
+  assert.equal(a.estado.rotas.length, 35);
+  for (const metodo of ["get", "put", "delete"]) {
+    assert.ok(a.estado.rotas.includes(`${metodo} /perfil/imagens/:tipo`));
+  }
   assert.ok(!a.estado.imports.some(nome => /supabase|mysql2|dotenv/.test(nome)));
 });
 

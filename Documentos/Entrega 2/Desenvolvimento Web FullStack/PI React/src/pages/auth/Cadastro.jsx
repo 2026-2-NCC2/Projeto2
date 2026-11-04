@@ -1,3 +1,4 @@
+import { Icone } from '../../components/ui/Icone.jsx'
 import { useState } from 'react'
 import { apiUrl } from '../../services/api.js'
 
@@ -53,9 +54,9 @@ export function Cadastro({ setPagina }) {
     <div className="paginaLogin">
       <div className="cabecalhoLogin">
         <div className="logo">
-          ▣ <span>TrocaTicket</span>
+          <Icone nome="ticket" /> <span>TrocaTicket</span>
         </div>
-        <span>🔒 Ambiente Seguro</span>
+        <span className="acessoSeguro"><Icone nome="acesso" tamanho={16} /> Acesso à conta</span>
       </div>
 
       <main className="caixaLogin">
@@ -107,7 +108,7 @@ export function Cadastro({ setPagina }) {
             className="principal"
             disabled={cadastrando}
           >
-            {cadastrando ? 'Criando conta...' : 'CRIAR CONTA →'}
+            {cadastrando ? 'Criando conta...' : 'Criar conta'}
           </button>
         </form>
 

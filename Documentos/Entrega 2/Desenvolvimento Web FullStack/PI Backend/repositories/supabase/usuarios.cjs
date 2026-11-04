@@ -1,6 +1,20 @@
 "use strict";
 
 const campos = ["id", "nome", "email"];
+const camposPerfil = [...campos, "telefone", "biografia"];
+
+function faltaColunaPerfil(error) {
+  return ["42703", "PGRST204"].includes(error?.code);
+}
+
+function projetarPerfil(data, id) {
+  if (!data || typeof data !== "object" || Array.isArray(data) ||
+      camposPerfil.some(campo => !Object.hasOwn(data, campo)) || data.id !== id ||
+      ["telefone", "biografia"].some(campo => data[campo] !== null && typeof data[campo] !== "string")) {
+    throw Object.assign(new Error("Resposta invalida ao consultar perfil."), { code: "SUPABASE_USUARIO_RESPONSE" });
+  }
+  return { ...Object.fromEntries(camposPerfil.map(campo => [campo, data[campo]])), edicao_disponivel: true };
+}
 
 // Leituras e cadastro de usuarios. A fabrica existente continua responsavel pela
 // configuracao/isolamento; importar este modulo nao inicializa cliente algum.
@@ -9,6 +23,7 @@ function criarRepositorioUsuarios(
   cliente = require("../../db-supabase.cjs").criarClienteSupabase()
 ) {
   return {
+    ...require("./perfil-profissional.cjs").criarRepositorioProfissional(cliente),
     async criar({ nome, email, senhaHash, perfil }) {
       // Normalizacao, validacao e bcrypt continuam no handler existente.
       // Receber apenas o hash ja calculado, sem selecionar/devolver a senha.
@@ -102,14 +117,20 @@ function criarRepositorioUsuarios(
     },
 
     async buscarPerfil(id) {
-      const { data, error } = await cliente.schema("public")
+      let { data, error } = await cliente.schema("public")
         .from("usuarios")
-        .select(campos.join(", "))
+        .select(camposPerfil.join(", "))
         .eq("id", id)
         .maybeSingle();
 
-      // O handler existente decide o HTTP: ausencia e 404; falha e 500.
-      // Nao consultar senha/perfil, repetir a leitura ou recorrer ao MySQL.
+      if (!faltaColunaPerfil(error)) {
+        if (error) throw error;
+        return data === null ? undefined : projetarPerfil(data, id);
+      }
+      // Compatibilidade apenas com o schema anterior à migração, no mesmo banco.
+      // Não esconder falhas de rede/permissão ou trocar o provedor.
+      ({ data, error } = await cliente.schema("public").from("usuarios")
+        .select(campos.join(", ")).eq("id", id).maybeSingle());
       if (error) throw error;
       if (data === null) return undefined;
       if (!data || typeof data !== "object" || Array.isArray(data) ||
@@ -118,7 +139,26 @@ function criarRepositorioUsuarios(
           code: "SUPABASE_USUARIO_RESPONSE",
         });
       }
-      return Object.fromEntries(campos.map(campo => [campo, data[campo]]));
+      return { ...Object.fromEntries(campos.map(campo => [campo, data[campo]])),
+        telefone: null, biografia: null, edicao_disponivel: false };
+    },
+
+    async atualizarPerfil(id, dados) {
+      // Defesa adicional: nem o repositório aceita ID/permissões no payload.
+      if (!Number.isSafeInteger(id) || id <= 0 || !dados || !Object.keys(dados).length ||
+          Object.keys(dados).some(campo => !["nome", "telefone", "biografia"].includes(campo))) {
+        throw new Error("Alteração de perfil inválida.");
+      }
+      const permitidos = Object.fromEntries(["nome", "telefone", "biografia"]
+        .filter(campo => Object.hasOwn(dados, campo)).map(campo => [campo, dados[campo]]));
+      const { data, error } = await cliente.schema("public").from("usuarios")
+        .update(permitidos).eq("id", id).select(camposPerfil.join(", "))
+        .maybeSingle().retry(false);
+      if (faltaColunaPerfil(error)) {
+        throw Object.assign(new Error("Migração de perfil pendente."), { code: "PERFIL_MIGRACAO_PENDENTE" });
+      }
+      if (error) throw error;
+      return data === null ? undefined : projetarPerfil(data, id);
     },
 
     async listar() {

@@ -1,3 +1,5 @@
+import { PerfilPessoal } from '../perfil/PerfilPessoal.jsx'
+import { Icone } from '../ui/Icone.jsx'
 import { IdentidadeConta } from '../layout/IdentidadeConta.jsx'
 import { apiUrl } from '../../services/api.js'
 import { useEffect, useState } from 'react';
@@ -8,36 +10,36 @@ export function AdminTopo({ aoSair }) {
   return (
     <header className="adminTopo">
       <div className="adminMarca"><span>TT</span><strong>TrocaTicket</strong><small>Gestão Corporativa</small></div>
-      <div className="adminSeguro">Ambiente Seguro SSL 256-bit</div>
-      <label className="adminBusca"><span>⌕</span><input aria-label="Busca geral" placeholder="Buscar por CNPJ, Razão Social ou Protocolo" /></label>
-      <button className="adminIcone" aria-label="Notificações">●</button>
-      <button className="adminUsuario" aria-label="Sair da conta de administrador" onClick={aoSair}><span aria-hidden="true">◉</span><IdentidadeConta /></button>
+      <div className="adminSeguro">Administração</div>
+      <label className="adminBusca"><Icone nome="busca" tamanho={16} /><input aria-label="Busca geral indisponível" placeholder="Busca geral indisponível" disabled /></label>
+      <button className="adminIcone" aria-label="Notificações indisponíveis" title="Notificações indisponíveis" disabled>●</button>
+      <button className="adminUsuario" aria-label="Sair da conta de administrador" onClick={aoSair}><Icone nome="perfil" /><IdentidadeConta /></button>
     </header>
   )
 }
 
 export function AdminMenu({ secao, setSecao, aoSair }) {
   const itens = [
-    ['painel', '▦', 'Painel de evento', true],
-    ['eventos', '□', 'Eventos'],
-    ['usuarios', '♙', 'Usuários'],
-    ['cotacoes', '▣', 'Cotações'],
-    ['propostas', '◇', 'Propostas'],
-    ['contas', '▥', 'Fornecedores & Contas'],
-    ['relatorios', '▤', 'Relatórios', true],
+    ['painel', 'custos', 'Painel de evento', true],
+    ['eventos', 'eventos', 'Eventos'],
+    ['usuarios', 'perfil', 'Usuários'],
+    ['cotacoes', 'documento', 'Cotações'],
+    ['propostas', 'ticket', 'Propostas'],
+    ['contas', 'acesso', 'Solicitações de acesso'],
+    ['relatorios', 'documento', 'Relatórios', true],
   ]
   return (
     <aside className="adminMenu" aria-label="Navegação administrativa">
-      <button className="adminNovo">⊕ &nbsp; + Novo evento</button>
-      <nav aria-label="Seções administrativas">{itens.map(([id, icone, texto, indisponivel]) => <button key={id} disabled={indisponivel} title={indisponivel ? 'Funcionalidade em desenvolvimento' : undefined} aria-current={!indisponivel && secao === id ? 'page' : undefined} className={!indisponivel && secao === id ? 'ativo' : ''} onClick={indisponivel ? undefined : () => setSecao(id)}><span>{icone}</span>{texto}{indisponivel && <small className="adminEmDesenvolvimento">Em desenvolvimento</small>}</button>)}</nav>
-      <div className="adminAuditoria"><strong>♙ AUDITORIA ATIVA</strong><p>Sessão sob custódia de compliance. Todos os registros auditados geram hash SHA-256 irrevogável.</p></div>
-      <div className="adminMenuRodape"><button>◎ Perfil</button><button className="sair" onClick={aoSair}>↪ Sair</button></div>
+      <button className="adminNovo" disabled title="Funcionalidade indisponível">⊕ &nbsp; + Novo evento (indisponível)</button>
+      <nav aria-label="Seções administrativas">{itens.map(([id, icone, texto, indisponivel]) => <button key={id} disabled={indisponivel} title={indisponivel ? 'Funcionalidade em desenvolvimento' : undefined} aria-current={!indisponivel && secao === id ? 'page' : undefined} className={!indisponivel && secao === id ? 'ativo' : ''} onClick={indisponivel ? undefined : () => setSecao(id)}><Icone nome={icone} />{texto}{indisponivel && <small className="adminEmDesenvolvimento">Em desenvolvimento</small>}</button>)}</nav>
+      <div className="adminAuditoria"><strong>ADMINISTRAÇÃO</strong><p>Consulte eventos, usuários, cotações e propostas. Analise solicitações de acesso.</p></div>
+      <div className="adminMenuRodape"><button type="button" aria-current={secao === 'perfil' ? 'page' : undefined} className={secao === 'perfil' ? 'ativo' : ''} onClick={() => setSecao('perfil')}><Icone nome="perfil" />Meu perfil</button><button className="sair" onClick={aoSair}><Icone nome="sair" /> Sair</button></div>
     </aside>
   )
 }
 
 export function CartaoMetrica({ titulo, valor, texto, tom = 'roxo' }) {
-  return <article className={`adminMetrica ${tom}`}><div><small>{titulo}</small><span>▣</span></div><strong>{valor}</strong><p>{texto}</p></article>
+  return <article className={`adminMetrica ${tom}`}><div><small>{titulo}</small><Icone nome="custos" /></div><strong>{valor}</strong><p>{texto}</p></article>
 }
 
 export function AdminPortal({ aoSair }) {
@@ -134,11 +136,11 @@ export function AdminPortal({ aoSair }) {
   const [buscaEventos, setBuscaEventos] = useState('')
   const [filtroStatus, setFiltroStatus] = useState('todos')
   const [aba, setAba] = useState('todos')
-  const [ordem, setOrdem] = useState('Risco')
-  const [selecionados, setSelecionados] = useState([])
+  const [ordem, setOrdem] = useState('recentes')
   const [solicitacoes, setSolicitacoes] = useState([])
   const [mensagem, setMensagem] = useState('')
-  const [, setCarregando] = useState(true)
+  const [carregando, setCarregando] = useState(true)
+  const [erroSolicitacoes, setErroSolicitacoes] = useState('')
   useEffect(() => {
   const buscarSolicitacoes = async () => {
     try {
@@ -170,25 +172,21 @@ export function AdminPortal({ aoSair }) {
             id: item.id,
             nome: item.nome,
             tipo: item.perfil_solicitado === 'organizador' ? 'Org' : 'Forn',
-            hora: item.criada_em
+            criadaEm: item.criada_em,
+            hora: item.criada_em && Number.isFinite(Date.parse(item.criada_em))
               ? new Date(item.criada_em).toLocaleString('pt-BR')
-              : '',
+              : 'Data não informada',
             documento: item.email,
             atuacao: item.perfil_solicitado === 'organizador'
               ? 'Organizador de eventos'
               : 'Fornecedor',
             detalhe: item.justificativa,
-            responsavel: item.nome,
-            cargo: 'Solicitante',
-            score: 100,
-            risco: 'Pendente de análise',
-            docs: 0,
-            urgente: false
+            status: item.status
           }))
       )
     } catch (erro) {
       console.error('Erro ao carregar solicitações:', erro)
-      setMensagem(erro.message)
+      setErroSolicitacoes(erro.message)
     } finally {
       setCarregando(false)
     }
@@ -196,7 +194,18 @@ export function AdminPortal({ aoSair }) {
 
   buscarSolicitacoes()
   }, [])
-  const filtradas = solicitacoes.filter((item) => aba === 'todos' || (aba === 'organizadores' ? item.tipo === 'Org' : item.tipo === 'Forn'))
+  const filtradas = solicitacoes
+    .filter((item) => aba === 'todos' || (aba === 'organizadores' ? item.tipo === 'Org' : item.tipo === 'Forn'))
+    .sort((a, b) => {
+      const desempate = String(a.id).localeCompare(String(b.id), 'pt-BR', { numeric: true })
+      if (ordem === 'nome') return (a.nome || '').localeCompare(b.nome || '', 'pt-BR') || desempate
+      const dataA = Date.parse(a.criadaEm), dataB = Date.parse(b.criadaEm)
+      // Datas ausentes ficam ao final em ambas as direções.
+      if (!Number.isFinite(dataA)) return Number.isFinite(dataB) ? 1 : desempate
+      if (!Number.isFinite(dataB)) return -1
+      return (ordem === 'antigas' ? dataA - dataB : dataB - dataA) || desempate
+    })
+  const indicador = (valor) => carregando || erroSolicitacoes ? '—' : valor
   const totalPendentes = solicitacoes.length
 
   const totalOrganizadores = solicitacoes.filter(
@@ -213,14 +222,13 @@ export function AdminPortal({ aoSair }) {
   const percentualFornecedores = totalPendentes > 0
   ? 100 - percentualOrganizadores
   : 0
-  const alternar = (id) => setSelecionados((atuais) => atuais.includes(id) ? atuais.filter((item) => item !== id) : [...atuais, id])
   const atualizar = async (id, acao) => {
   const status = acao === 'homologado'
     ? 'aprovado'
     : 'rejeitado'
 
   const confirmado = window.confirm(
-    `Deseja realmente ${status === 'aprovado' ? 'aprovar' : 'rejeitar'} a solicitação #HOM-${id}?`
+    `Deseja realmente ${status === 'aprovado' ? 'aprovar' : 'rejeitar'} a solicitação #${id}?`
   )
 
   if (!confirmado) return
@@ -251,11 +259,7 @@ export function AdminPortal({ aoSair }) {
       atuais.filter((item) => item.id !== id)
     )
 
-    setSelecionados((atuais) =>
-      atuais.filter((item) => item !== id)
-    )
-
-    setMensagem(`Solicitação #HOM-${id} ${status} com sucesso!`)
+    setMensagem(`Solicitação #${id} ${status} com sucesso!`)
 
   } catch (erro) {
     console.error('Erro ao atualizar solicitação:', erro)
@@ -341,19 +345,19 @@ export function AdminPortal({ aoSair }) {
           <AdminMenu secao={secao} setSecao={setSecao} aoSair={aoSair} />
         </NavegacaoRecolhivel>
         <main className="adminConteudo">
-          {secao === 'eventos' ? (
+          {secao === 'perfil' ? <PerfilPessoal contexto="Administração" /> : secao === 'eventos' ? (
   <section className="adminHero">
     <div>
       <h1>Gestão de Eventos</h1>
       <div className="adminResumoEventos">
   <p>
-    Total de eventos: <strong>{eventosAdmin.length}</strong>
+    Total de eventos: <strong>{carregandoEventos || erroEventos ? '—' : eventosAdmin.length}</strong>
   </p>
 
   <p>
     Eventos ativos:{' '}
     <strong>
-      {eventosAdmin.filter(
+      {carregandoEventos || erroEventos ? '—' : eventosAdmin.filter(
         (evento) => evento.status === 'Ativo'
       ).length}
     </strong>
@@ -362,7 +366,7 @@ export function AdminPortal({ aoSair }) {
   <p>
     Em planejamento:{' '}
     <strong>
-      {eventosAdmin.filter(
+      {carregandoEventos || erroEventos ? '—' : eventosAdmin.filter(
         (evento) => evento.status === 'Em planejamento'
       ).length}
     </strong>
@@ -405,6 +409,7 @@ export function AdminPortal({ aoSair }) {
         <th>Local</th>
         <th>Status</th>
         <th>Organizador</th>
+        <th>Ações</th>
       </tr>
     </thead>
 
@@ -853,9 +858,9 @@ export function AdminPortal({ aoSair }) {
           
           <div className="adminTrilha">
   TrocaTicket Admin &nbsp;›&nbsp; Administração &nbsp;›&nbsp;
-  <b>Fornecedores & Contas</b>
+  <b>Solicitações de acesso</b>
 </div>
-          <section >
+          <section className="adminEtapas" aria-label="Etapas da solicitação">
   <div className="concluida">
     <b>1</b>
     <span>
@@ -886,7 +891,7 @@ export function AdminPortal({ aoSair }) {
       GESTÃO DE SOLICITAÇÕES DE ACESSO
     </div>
 
-    <h1>{totalPendentes} SOLICITAÇÕES PENDENTES</h1>
+    <h1>{indicador(totalPendentes)} SOLICITAÇÕES PENDENTES</h1>
 
     <p>
       Analise as solicitações de usuários que desejam se tornar
@@ -902,7 +907,7 @@ export function AdminPortal({ aoSair }) {
     <div>
       <span>
         <small>AGUARDANDO ANÁLISE</small>
-        <b>{totalPendentes} solicitações</b>
+        <b>{indicador(totalPendentes)} solicitações</b>
       </span>
 
       <span>
@@ -920,20 +925,20 @@ export function AdminPortal({ aoSair }) {
           <section className="adminMetricas">
   <CartaoMetrica
     titulo="ORGANIZADORES PENDENTES"
-    valor={totalOrganizadores}
+    valor={indicador(totalOrganizadores)}
     texto="Solicitações aguardando aprovação"
   />
 
   <CartaoMetrica
     titulo="FORNECEDORES PENDENTES"
-    valor={totalFornecedores}
+    valor={indicador(totalFornecedores)}
     texto="Solicitações aguardando aprovação"
     tom="laranja"
   />
 
   <CartaoMetrica
     titulo="TOTAL DE SOLICITAÇÕES"
-    valor={totalPendentes}
+    valor={indicador(totalPendentes)}
     texto="Solicitações pendentes de análise"
     tom="verde"
   />
@@ -944,26 +949,26 @@ export function AdminPortal({ aoSair }) {
   as solicitações de organizadores e fornecedores.
 </p></div><div className="adminAbas">
             <button  className={aba === 'todos' ? 'ativo' : ''} onClick={() => setAba('todos')}>
-            Todos ({totalPendentes})</button>
+            Todos ({indicador(totalPendentes)})</button>
 
             <button className={aba === 'organizadores' ? 'ativo' : ''} onClick={() => setAba('organizadores')}>
-            Organizadores ({totalOrganizadores})
+            Organizadores ({indicador(totalOrganizadores)})
             </button>
 
             <button className={aba === 'fornecedores' ? 'ativo' : ''} onClick={() => setAba('fornecedores')}>
-            Fornecedores ({totalFornecedores})
+            Fornecedores ({indicador(totalFornecedores)})
             </button></div></div>
-            <div className="adminProgresso"><b>{percentualOrganizadores}% Organizadores
-            ({totalOrganizadores} solicitações)</b><span><i style={{ width: `${percentualOrganizadores}%` }} /></span><b>{percentualFornecedores}% Fornecedores({totalFornecedores} solicitações)</b></div>
-            <div className="adminOrdenacao">Ordenar por: <select value={ordem} onChange={(e) => setOrdem(e.target.value)}><option>Risco</option><option>Prioridade</option><option>Mais recentes</option></select></div>
+            {!carregando && !erroSolicitacoes && <div className="adminProgresso"><b>{percentualOrganizadores}% Organizadores
+            ({totalOrganizadores} solicitações)</b><span><i style={{ width: `${percentualOrganizadores}%` }} /></span><b>{percentualFornecedores}% Fornecedores({totalFornecedores} solicitações)</b></div>}
+            <div className="adminOrdenacao"><label htmlFor="ordemSolicitacoes">Ordenar por:</label> <select id="ordemSolicitacoes" value={ordem} onChange={(e) => setOrdem(e.target.value)}><option value="recentes">Mais recentes</option><option value="antigas">Mais antigas</option><option value="nome">Nome do solicitante</option></select></div>
             {mensagem && <div className="adminMensagem" role="status">✓ {mensagem}<button onClick={() => setMensagem('')}>×</button></div>}
-            <div className="adminTabelaWrap" role="region" aria-label="Solicitações de acesso" tabIndex={0}><table className="adminTabela"><thead><tr><th><input type="checkbox" aria-label="Selecionar todos" checked={filtradas.length > 0 && filtradas.every((item) => selecionados.includes(item.id))} onChange={(e) => setSelecionados(e.target.checked ? filtradas.map((item) => item.id) : [])} /></th><th>PROTOCOLO / DATA</th><th>SOLICITANTE</th><th>ATUAÇÃO</th><th>RESPONSÁVEL</th><th>JUSTIFICATIVA</th><th>AÇÕES</th></tr></thead>
-              <tbody>{filtradas.map((item) => <tr key={item.id} className={item.urgente ? 'urgente' : ''}><td><input type="checkbox" aria-label={`Selecionar ${item.nome}`} checked={selecionados.includes(item.id)} onChange={() => alternar(item.id)} /></td><td><strong>#HOM-{item.id}</strong><small className={item.urgente ? 'atraso' : ''}>{item.hora}</small></td><td><strong>{item.nome}</strong><small>{item.documento}</small></td><td><strong>{item.atuacao}</strong><small>{item.detalhe}</small></td><td><strong>{item.responsavel}</strong><small>{item.cargo}</small></td><td>
+            <div className="adminTabelaWrap" role="region" aria-label="Solicitações de acesso" tabIndex={0}><table className="adminTabela"><thead><tr><th><input type="checkbox" aria-label="Seleção em lote indisponível" disabled title="Ações em lote indisponíveis" /></th><th>PROTOCOLO / DATA</th><th>SOLICITANTE</th><th>ATUAÇÃO</th><th>STATUS</th><th>JUSTIFICATIVA</th><th>AÇÕES</th></tr></thead>
+              <tbody>{carregando ? <tr><td colSpan="7" role="status">Carregando solicitações...</td></tr> : erroSolicitacoes ? <tr><td colSpan="7" role="alert">{erroSolicitacoes}</td></tr> : filtradas.length === 0 ? <tr><td colSpan="7">Nenhuma solicitação pendente neste filtro.</td></tr> : filtradas.map((item) => <tr key={item.id}><td><input type="checkbox" aria-label="Seleção em lote indisponível" disabled /></td><td><strong>#{item.id}</strong><small>{item.hora}</small></td><td><strong>{item.nome}</strong><small>{item.documento}</small></td><td><strong>{item.atuacao}</strong></td><td><span>{item.status}</span></td><td>
   <span>{item.detalhe || 'Não informada'}</span>
 </td><td><div className="adminAcoesLinha"><button className="aprovar" onClick={() => atualizar(item.id, 'homologado')}>Aprovar</button><button className="recusar" onClick={() => atualizar(item.id, 'recusado')}>Recusar</button></div></td></tr>)}</tbody></table></div>
             <div className="adminPaginacao">
   <span>
-    Exibindo {filtradas.length} de {totalPendentes} solicitações pendentes
+    Exibindo {indicador(filtradas.length)} de {indicador(totalPendentes)} solicitações pendentes
   </span>
 </div>
           </section>
@@ -973,6 +978,6 @@ export function AdminPortal({ aoSair }) {
           )}
         </main>
       </div>
-      <footer className="adminBarraLote"><div><b>{selecionados.length}</b><span><strong>{selecionados.length} cadastros selecionados para ação em lote</strong><small>Organizadores e fornecedores de estrutura técnica</small></span></div><div><button type="button"className="recusar" disabled title="Funcionalidade em desenvolvimento">⊘ Reprovar em lote (em breve)</button><button type="button"className="aprovarLote" disabled title="Funcionalidade em desenvolvimento">✥ Aprovar em lote (em breve)</button></div></footer></div>
+      {secao === 'contas' && <footer className="adminBarraLote"><div><span><strong>Ações em lote indisponíveis</strong><small>Utilize Aprovar ou Recusar em cada solicitação.</small></span></div><div><button type="button" className="recusar" disabled title="Funcionalidade em desenvolvimento">Reprovar em lote (indisponível)</button><button type="button" className="aprovarLote" disabled title="Funcionalidade em desenvolvimento">Aprovar em lote (indisponível)</button></div></footer>}</div>
   )
 }

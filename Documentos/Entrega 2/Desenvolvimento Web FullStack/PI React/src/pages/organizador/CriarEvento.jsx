@@ -17,7 +17,7 @@ export function CriarEvento({
       <button className="voltar" onClick={() => setPagina('eventos')}>
         ← Voltar para Meus Eventos
       </button>
-      <h1>CRIAR EVENTO</h1>
+      <h1>Criar evento</h1>
       <p>Comece pelos dados básicos para planejar o evento e as cotações.</p>
       <div className="etapas">
         <b>1 &nbsp; Dados Básicos</b>
@@ -58,7 +58,7 @@ export function CriarEvento({
             <input
               value={evento.local}
               onChange={(eventoDisparado) => aoAlterarCampo('local', eventoDisparado.target.value)}
-              placeholder="Ex: Centro de Convenções Rebouças - SP"
+              placeholder="Ex: Centro de Convenções Rebouças, SP"
               required
             />
           </div>

@@ -11,7 +11,8 @@ const { criarRepositorioUsuarios: criarMySQL } = require("../repositories/mysql/
 const usuario = { id: 7, nome: " Pessoa Á ", email: "PESSOA@example.invalid" };
 
 // Sem driver, SDK, .env ou conexoes. Nenhum metodo de escrita/auth esta disponivel.
-function simular(resposta = { data: { ...usuario }, error: null }, falha) {
+const perfilEsperado = { ...usuario, telefone: null, biografia: null, edicao_disponivel: true };
+function simular(resposta = { data: { ...usuario, telefone: null, biografia: null }, error: null }, falha) {
   const chamadas = [];
   const cliente = {};
   for (const metodo of ["schema", "from", "select", "eq"]) {
@@ -27,9 +28,9 @@ function simular(resposta = { data: { ...usuario }, error: null }, falha) {
 
 test("perfil: consulta schema/tabela, projecao e ID exatos", async () => {
   const { repo, chamadas } = simular();
-  assert.deepEqual(await repo.buscarPerfil(7), usuario);
+  assert.deepEqual(await repo.buscarPerfil(7), perfilEsperado);
   assert.deepEqual(chamadas, [["schema", "public"], ["from", "usuarios"],
-    ["select", "id, nome, email"], ["eq", "id", 7], ["maybeSingle"]]);
+    ["select", "id, nome, email, telefone, biografia"], ["eq", "id", 7], ["maybeSingle"]]);
 });
 
 test("perfil: preserva campos, tipos, textos e JSON do repositorio MySQL", async () => {
@@ -38,11 +39,11 @@ test("perfil: preserva campos, tipos, textos e JSON do repositorio MySQL", async
     assert.deepEqual(parametros, [7]);
     return [[usuario]];
   } });
-  const esperado = await mysql.buscarPerfil(7);
+  const esperado = { ...await mysql.buscarPerfil(7), telefone: null, biografia: null, edicao_disponivel: true };
   const recebido = await simular().repo.buscarPerfil(7);
   assert.deepEqual(recebido, esperado);
   assert.equal(JSON.stringify(recebido), JSON.stringify(esperado));
-  assert.deepEqual(Object.keys(recebido), ["id", "nome", "email"]);
+  assert.deepEqual(Object.keys(recebido), ["id", "nome", "email", "telefone", "biografia", "edicao_disponivel"]);
 });
 
 test("perfil: ausencia retorna undefined como no MySQL, sem confundir com erro", async () => {
@@ -83,9 +84,9 @@ test("perfil: resposta invalida ou de outro ID nao e retornada como usuario vali
 });
 
 test("perfil: nao retorna senha, perfil ou outros campos extras; nao modifica resposta", async () => {
-  const data = Object.freeze({ ...usuario, senha: "hash-ficticio", perfil: "admin", extra: 42 });
+  const data = Object.freeze({ ...usuario, telefone: null, biografia: null, senha: "hash-ficticio", perfil: "admin", extra: 42 });
   const resultado = await simular({ data, error: null }).repo.buscarPerfil(7);
-  assert.deepEqual(resultado, usuario);
+  assert.deepEqual(resultado, perfilEsperado);
   assert.equal(data.senha, "hash-ficticio");
   assert.equal(data.perfil, "admin");
 });
@@ -106,6 +107,7 @@ function carregarFabrica(falha) {
   const imports = [];
   let criacoes = 0;
   const contexto = { module: { exports: {} }, require(nome) {
+    if (nome === "./perfil-profissional.cjs") return require("../repositories/supabase/perfil-profissional.cjs");
     imports.push(nome);
     assert.equal(nome, "../../db-supabase.cjs");
     return { criarClienteSupabase() {
@@ -127,8 +129,8 @@ test("perfil: importacao inerte e reutilizacao tardia da fabrica existente", asy
   const repo = a.criar();
   assert.equal(a.criacoes(), 1);
   assert.deepEqual(a.imports, ["../../db-supabase.cjs"]);
-  assert.deepEqual(JSON.parse(JSON.stringify(await repo.buscarPerfil(7))), usuario);
-  assert.deepEqual(Object.keys(repo), ["criar", "buscarParaLogin", "buscarIdPorEmail", "buscarParaAutenticacao", "buscarPerfil", "listar"]);
+  assert.deepEqual(JSON.parse(JSON.stringify(await repo.buscarPerfil(7))), perfilEsperado);
+  assert.deepEqual(Object.keys(repo), ["buscarProfissional", "atualizarProfissional", "criar", "buscarParaLogin", "buscarIdPorEmail", "buscarParaAutenticacao", "buscarPerfil", "atualizarPerfil", "listar"]);
 });
 
 test("perfil: cliente injetado nao le configuracao nem inicializa SDK", async () => {

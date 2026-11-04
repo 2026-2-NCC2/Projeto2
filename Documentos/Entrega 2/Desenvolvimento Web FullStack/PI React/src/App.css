@@ -1,4 +1,7 @@
 :root {
+  --raio-cartao: 14px;
+  --raio-controle: 9px;
+  --sombra-cartao: 0 3px 14px rgba(29, 35, 48, 0.035);
   --cor-fundo-pagina: #f8f9fc;
   --cor-fundo-cartao: #ffffff;
   --cor-fundo-suave: #f0efff;
@@ -996,7 +999,7 @@ select { min-width: 0; max-width: 100%; }
 .perfilCabecalho h1, .perfilTituloCartao h2, .perfilSegurancaItem,
 .perfilEmpresaDados strong { overflow-wrap: anywhere; }
 
-.adminMenu nav button:disabled, .adminBarraLote button:disabled {
+.adminMenu button:disabled, .adminTopo button:disabled, .adminTopo input:disabled, .adminBarraLote button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -1016,4 +1019,207 @@ select { min-width: 0; max-width: 100%; }
   .fornTopo .logo small { flex-basis: 100%; }
   .fornMenu nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .fornCartao > button { min-height: 44px; }
+}
+
+/* Acabamento visual compartilhado pelos quatro perfis. */
+.icone { display: inline-block; flex-shrink: 0; vertical-align: middle; }
+button { transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease; }
+button:focus-visible, a:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--cor-primaria-foco);
+  outline-offset: 3px;
+}
+button:disabled { cursor: not-allowed; opacity: 0.6; }
+input, select, textarea {
+  border: 1px solid var(--cor-borda-campo);
+  border-radius: var(--raio-controle);
+  background: var(--cor-fundo-cartao);
+  color: var(--cor-texto-padrao);
+  padding: 12px 14px;
+  line-height: 1.5;
+}
+input:not([type='checkbox']), select { min-height: 46px; }
+input::placeholder, textarea::placeholder { color: var(--cor-texto-mutado); opacity: 1; }
+input:focus, select:focus, textarea:focus { border-color: var(--cor-primaria-foco); }
+textarea { resize: vertical; }
+input[type='checkbox'] { accent-color: var(--cor-primaria); }
+h1 { font-size: clamp(25px, 3vw, 32px); line-height: 1.25; letter-spacing: -0.6px; }
+h2 { line-height: 1.4; letter-spacing: -0.25px; }
+h1 small { display: block; margin-top: 10px; font-weight: 400; letter-spacing: 0; line-height: 1.5; }
+.tituloLinha > div > p:last-child, .fornTitulo p { color: var(--cor-texto-secundario); font-size: 14px; line-height: 1.7; }
+.trilhaNavegacao, .fornTrilha, .adminTrilha { font-size: 12px; line-height: 1.6; }
+.cabecalhoOrganizador, .fornTopo, .adminTopo { box-shadow: 0 2px 8px rgba(29, 35, 48, 0.025); }
+.logo { letter-spacing: -0.5px; gap: 10px; }
+.logo > .icone { width: 28px; height: 28px; }
+.menu nav { gap: 5px; }
+.menu nav button, .menuRodape button, .fornMenu nav button,
+.fornSair, .adminMenu nav button, .adminMenuRodape button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  font-size: 13px;
+  border-radius: var(--raio-controle);
+  line-height: 1.5;
+}
+.menuRodape { border-top: 1px solid var(--cor-borda-suave); padding-top: 16px; }
+.principal, .novo, .secundario, .perfilEditar, .categorias button,
+.fornFiltros button, .filtros button {
+  min-height: 44px;
+  border-radius: var(--raio-controle);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.principal, .novo { box-shadow: 0 2px 4px rgba(52, 39, 184, 0.12); }
+.principal .icone, .novo .icone { margin-right: 6px; }
+.secundario { color: var(--cor-texto-secundario); font-weight: 600; }
+.secundario:hover:enabled, .perfilEditar:hover:enabled { background: var(--cor-fundo-selecao); border-color: var(--cor-primaria); }
+.filtros { margin-top: 28px; gap: 8px; align-items: center; }
+.filtros button:not(.ativo):hover { background: var(--cor-fundo-destaque); }
+.cartaoFormulario, .cartaoTicket, .fornCartao, .perfilCartao,
+.adminMetrica, .adminFila, .resumoCategorias > div, .fornIndicadores > div {
+  border-radius: var(--raio-cartao);
+  border-color: var(--cor-borda);
+  box-shadow: var(--sombra-cartao);
+}
+.cartaoFormulario h2, .cartaoTicket h2, .fornCartao h2 { font-size: 19px; margin-top: 0; }
+.cartaoFormulario label, .fornForm label, .caixaLogin label { font-size: 13px; font-weight: 600; }
+.cartaoFormulario label { margin-top: 22px; }
+.cartaoFormulario p, .cartaoTicket p, .fornCartao p { line-height: 1.7; }
+.etapas { border-radius: var(--raio-cartao); padding: 20px; font-size: 13px; color: var(--cor-texto-secundario); }
+.acoes { padding-top: 22px; border-top: 1px solid var(--cor-borda-suave); }
+.resumoCategorias > div { padding: 20px; line-height: 1.7; }
+.listaEventos { border-radius: var(--raio-cartao); box-shadow: var(--sombra-cartao); }
+.listaEventos > [role='status'], .listaEventos > [role='alert'] { padding: 24px; }
+.evento { padding: 24px; gap: 18px; }
+.evento:last-child { border-bottom: 0; }
+.evento:hover { background: #fcfbff; }
+.eventoIdentidade {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  flex: 0 0 56px;
+  border-radius: 12px;
+  background: var(--cor-fundo-suave);
+  color: var(--cor-primaria);
+}
+.eventoInfo h2 { font-size: 17px; }
+.eventoInfo p { font-size: 13px; color: var(--cor-texto-secundario); }
+.eventoMetadados, .eventoMetadados > span { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.eventoMetadados { gap: 8px 18px; margin-top: 10px; }
+.numero small { font-size: 10px; font-weight: 600; letter-spacing: 0.35px; }
+.numero strong { font-size: 14px; font-variant-numeric: tabular-nums; }
+.status, .tag { font-size: 12px; font-weight: 600; line-height: 1.5; }
+.statusPlanejamento { background: var(--cor-fundo-suave); color: var(--cor-primaria); }
+.acaoExcluir { color: #b42336; border-color: #efc7ce; }
+.acaoPublicar { color: #147548; border-color: #b5dfca; }
+.tabela, .fornTabela, .adminTabelaEventos { border-radius: var(--raio-cartao); }
+.tabelaCabecalho, .fornTabelaCab { color: var(--cor-texto-secundario); font-size: 12px; padding: 16px 20px; }
+.tabelaLinha, .fornTabelaLinha { padding: 18px 20px; font-size: 14px; align-items: center; }
+.tabelaLinha:hover, .fornTabelaLinha:hover, .adminTabela tbody tr:hover { background: #faf9ff; }
+.total { background: var(--cor-fundo-selecao); }
+.fornTitulo { margin-bottom: 28px; }
+.fornTitulo h1 { font-size: clamp(25px, 3vw, 32px); }
+.fornHero { border-radius: var(--raio-cartao); padding: 28px; box-shadow: var(--sombra-cartao); }
+.fornHero h2 { font-size: 21px; }
+.fornHero p { font-size: 14px; line-height: 1.7; }
+.fornIndicadores small { font-size: 11px; font-weight: 600; letter-spacing: 0.3px; }
+.fornLista { gap: 20px; }
+.fornCartao { padding: 26px; }
+.fornCartao h3 { font-size: 18px; }
+.fornCartao p { font-size: 14px; color: var(--cor-texto-secundario); }
+.eventoCartao { border-top: 3px solid var(--cor-primaria); }
+.eventoCartao > .eventoIdentidade { margin-bottom: 18px; }
+.eventoDetalhes { max-width: 960px; }
+.eventoDetalhesTitulo { display: flex; align-items: center; gap: 18px; margin: 20px 0 26px; }
+.eventoDetalhesTitulo h2 { margin: 0; font-size: 24px; overflow-wrap: anywhere; }
+.perfilResumo, .perfilResumoFornecedor {
+  background: var(--cor-fundo-cartao);
+  color: var(--cor-texto-padrao);
+  border: 1px solid var(--cor-borda);
+  border-top: 5px solid var(--cor-primaria);
+  border-radius: var(--raio-cartao);
+  padding: 32px 28px;
+  box-shadow: var(--sombra-cartao);
+}
+.perfilAvatar { width: 80px; height: 80px; border: 1px solid var(--cor-borda); background: var(--cor-fundo-suave); }
+.perfilIdentidade h2 { font-size: 22px; }
+.perfilIdentidade p { color: var(--cor-texto-secundario); font-size: 14px; }
+.perfilResumoNumeros > div { border-color: var(--cor-borda); }
+.perfilResumoNumeros strong { color: var(--cor-primaria); }
+.perfilResumoNumeros small { color: var(--cor-texto-secundario); font-size: 12px; }
+.perfilTituloCartao { padding-bottom: 20px; margin-bottom: 22px; }
+.perfilTituloCartao h2 { font-size: 18px; }
+.perfilTituloCartao p, .perfilCampos label { font-size: 13px; }
+.perfilGradePessoal { grid-template-columns: minmax(0, 1fr); }
+.perfilDados input[readonly] { background: var(--cor-fundo, #f7f8fb); color: var(--cor-texto-secundario, #454a58); }
+.perfilCampos input, .perfilCampos textarea { font-size: 14px; }
+.perfilDados > p { font-size: 13px; color: var(--cor-texto-secundario); margin-top: 20px; }
+.perfilPagina:not(.perfilFornecedorPagina) .perfilGrade { grid-template-columns: minmax(0, 1fr); }
+.perfilProfissionalDados { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin: 0; }
+.perfilProfissionalDados > div { min-width: 0; }
+.perfilProfissionalDados dt { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+.perfilProfissionalDados dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; }
+.perfilProfissionalDados a { color: var(--cor-primaria, #3527b8); text-decoration: underline; }
+@media (max-width: 700px) { .perfilProfissionalDados { grid-template-columns: minmax(0, 1fr); } }
+.acaoEvento { margin: 12px 8px 0 0; }
+.fornMenu nav button { flex-wrap: wrap; }
+.fornMenu nav button > small { flex-basis: 100%; padding-left: 30px; }
+.perfilSegurancaItem strong, .perfilPreferencia strong, .perfilEmpresaDados strong { font-size: 13px; }
+.perfilSegurancaItem small, .perfilPreferencia small, .perfilEmpresaDados small { font-size: 12px; line-height: 1.6; }
+.caixaLogin { padding: 28px; background: var(--cor-fundo-cartao); border: 1px solid var(--cor-borda); border-radius: 16px; box-shadow: var(--sombra-cartao); margin-top: 40px; margin-bottom: 40px; }
+.caixaLogin h1 { font-size: 27px; }
+.caixaLogin > p { font-size: 14px; line-height: 1.7; }
+.caixaLogin .escolhaPerfil button { padding: 12px 8px; font-size: 13px; }
+.acessoSeguro { display: inline-flex; align-items: center; gap: 7px; color: var(--cor-texto-secundario); }
+.rotuloSenha button, .cadastro button, .caixaLogin > button:not(.botaoGoogle):not(.acessoAdmin) { border: 0; background: transparent; color: var(--cor-primaria); padding: 8px 0; font-size: 13px; }
+.rotuloSenha button:disabled { color: var(--cor-texto-mutado); }
+.caixaLogin .lembrar { font-size: 12px; }
+.adminMenu nav button { flex-wrap: wrap; }
+.adminEmDesenvolvimento { flex-basis: 100%; font-size: 11px; }
+.adminHero { border-radius: var(--raio-cartao); padding: 26px; }
+.adminHero h1 { font-size: 28px; }
+.adminHero p, .adminFila p { font-size: 13px; line-height: 1.7; }
+.adminRotulo, .adminCriterio, .adminStatusFila span, .adminStatusFila button,
+.adminOrdenacao, .adminOrdenacao select, .adminMensagem, .adminProgresso { font-size: 12px; }
+.adminStatusFila small, .adminAuditoria p { font-size: 12px; }
+.adminMetrica { padding: 24px; }
+.adminMetrica small, .adminMetrica p { font-size: 12px; line-height: 1.6; }
+.adminMetrica > strong { font-size: 30px; font-variant-numeric: tabular-nums; }
+.adminFilaCabecalho { padding: 22px 24px 14px; }
+.adminFila h2 { font-size: 19px; }
+.adminAbas { gap: 6px; }
+.adminAbas button { font-size: 12px; min-height: 44px; border-radius: var(--raio-controle); }
+.adminTabela { min-width: 1100px; table-layout: auto; }
+.adminTabela th { font-size: 11px; padding: 16px 12px; }
+.adminTabela td { font-size: 13px; padding: 18px 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.adminTabela td small { font-size: 12px; }
+.adminAcoesLinha { gap: 8px; }
+.adminAcoesLinha button, .adminPaginacao button { font-size: 12px; min-height: 44px; padding: 10px 12px; border-radius: var(--raio-controle); }
+.adminPaginacao { font-size: 12px; padding: 18px 24px; }
+.adminBarraLote span, .adminBarraLote button { font-size: 12px; }
+.adminTabelaEventos th, .adminTabelaEventos td { line-height: 1.6; }
+.adminModal h2, .adminDetalhesEvento h3 { margin-top: 0; font-size: 23px; }
+
+@media (max-width: 850px) {
+  .fornHero { padding: 22px; }
+  .eventoIdentidade { width: 48px; height: 48px; flex-basis: 48px; }
+  .evento { padding: 20px; }
+}
+@media (max-width: 600px) {
+  .caixaLogin { padding: 24px 20px; margin-top: 24px; }
+  .fornCartao, .adminHero, .adminMetrica { padding: 20px; }
+  .perfilResumo { padding: 24px 20px; }
+  .perfilResumoNumeros { border-color: var(--cor-borda); }
+  .perfilAvatar { width: 64px; height: 64px; }
+  .perfilIdentidade { flex-basis: 100%; }
+  .eventoDetalhesTitulo { align-items: flex-start; flex-direction: column; }
+  .eventoDetalhesTitulo h2 { font-size: 22px; }
+  .evento > .acaoExcluir, .evento > .acaoPublicar { flex: 1 1 120px; }
+  .adminFilaCabecalho, .adminPaginacao { padding: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  button, .adminTabelaEventos tbody tr { transition: none; }
+  .seta:hover { transform: none; }
 }

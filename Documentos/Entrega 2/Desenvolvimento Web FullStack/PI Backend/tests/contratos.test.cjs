@@ -67,7 +67,7 @@ function ambiente(perfil = "organizador", passos = []) {
     "./repositories/mysql/inscricoes.cjs": require("../repositories/mysql/inscricoes.cjs"),
     "./repositories/mysql/solicitacoes-acesso.cjs": require("../repositories/mysql/solicitacoes-acesso.cjs"),
     "./repositories/mysql/custos.cjs": require("../repositories/mysql/custos.cjs"),
-    "./isolamento.cjs": { modoExecucao: () => "principal" },
+    "./isolamento.cjs": { modoExecucao: () => "isolado" },
     dotenv: { config() {} },
   };
   vm.runInNewContext(fonte, {
@@ -108,7 +108,8 @@ function ambiente(perfil = "organizador", passos = []) {
 // null = qualquer perfil autenticado; publico = sem autenticacao.
 const contratos = [
   ["get /", "publico"], ["post /usuarios", "publico"], ["post /login", "publico"],
-  ["get /eventos", null], ["get /eventos/:id", null], ["get /perfil", null],
+  ["get /eventos", null], ["get /eventos/:id", null], ["get /perfil", null], ["patch /perfil", null],
+  ["get /perfil/profissional", null], ["patch /perfil/profissional", null],
   ["get /admin/eventos", "admin"], ["get /usuarios", "admin"],
   ["get /admin/cotacoes", "admin"], ["get /admin/propostas", "admin"],
   ["get /solicitacoes-acesso", "admin"], ["patch /solicitacoes-acesso/:id", "admin"],
@@ -123,7 +124,7 @@ const contratos = [
   ["post /fornecedor/propostas", "fornecedor"],
 ];
 
-test("inventario fixa exatamente os 29 pares metodo/caminho", () => {
+test("inventario fixa exatamente os 32 pares metodo/caminho", () => {
   assert.deepEqual([...ambiente().rotas.keys()].sort(), contratos.map(([rota]) => rota).sort());
 });
 for (const [rota, perfil] of contratos.filter(([, p]) => p !== "publico")) {
@@ -488,7 +489,7 @@ test("perfil: consulta adicional sem perfil e 404 se usuario desaparecer depois 
   for (const linhas of [[], [{ id: 7, nome: usuario.nome, email: usuario.email }]]) {
     const a = ambiente("participante", [{ sql: "SELECT id, nome, email FROM usuarios WHERE id = ?", params: [7], retorno: linhas }]);
     const r = await a.requisitar("get /perfil"); assert.equal(r.statusCode, linhas.length ? 200 : 404);
-    assert.deepEqual(r.body, linhas[0] || { erro: "Usuário não encontrado." }); a.verificar();
+    assert.deepEqual(r.body, linhas[0] ? { ...linhas[0], telefone: null, biografia: null, edicao_disponivel: false } : { erro: "Usuário não encontrado." }); a.verificar();
   }
 });
 test("publicas: raiz, cadastro normalizado sem hash e login sem senha na resposta", async () => {

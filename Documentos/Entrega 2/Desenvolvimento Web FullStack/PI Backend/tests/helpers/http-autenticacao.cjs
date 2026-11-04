@@ -15,7 +15,8 @@ const dataLocal = d => new Date(d + "T00:00:00");
 function fixture(provider) {
   const perfis = { 7: "organizador", 8: "fornecedor", 9: "participante", 10: "admin" };
   const usuarios = Object.entries(perfis).map(([id, perfil]) => ({ id: Number(id), perfil,
-    nome: `Teste ${id}`, email: `teste${id}@example.invalid`, senha: hash }));
+    redes_sociais: null, dados_comerciais: null,
+    telefone: null, biografia: null, nome: `Teste ${id}`, email: `teste${id}@example.invalid`, senha: hash }));
   const eventos = [13, 14].map((id, i) => ({ id, usuario_id: i ? 17 : 7, nome: "Evento sintético " + id,
     data: "2030-01-02", horario: "14:30:00", local: "Local fictício", categoria: "Corporativo", publico: 10,
     descricao: "Teste", status: "Em planejamento" }));
@@ -31,7 +32,8 @@ async function iniciar(t, provider, op = {}) {
   const state = fixture(provider), calls = [], imports = [], logs = [], rpcCalls = [];
   state.falha = null; state.authIdDivergente = false;
   const env = { JWT_SECRET: segredo, ...(provider === undefined ? {} : { DB_PROVIDER: provider }),
-    SUPABASE_URL: "https://supabase.invalid", SUPABASE_SECRET_KEY: secretKey };
+    SUPABASE_URL: "https://gnwybroqfvwosiqzsfla.supabase.co", SUPABASE_SECRET_KEY: secretKey,
+    ...(op.profissionalAtivo ? { PERFIL_PROFISSIONAL_ATIVO: "true" } : {}) };
   const evento = c => state.eventos.find(e => e.id === c.evento_id);
   const cotacao = p => state.cotacoes.find(c => c.id === p.cotacao_id);
   const perfilUsuario = u => Object.fromEntries(["id", "nome", "email", "perfil"].map(k => [k, u[k]]));
@@ -114,7 +116,8 @@ async function iniciar(t, provider, op = {}) {
   function selecionar(tabela, u) {
     const eq = (key, value) => u.searchParams.get(key) === "eq." + value;
     if (tabela === "usuarios") {
-      let rows = state.usuarios.filter(r => u.searchParams.has("email") ? eq("email", r.email) : eq("id", r.id));
+      let rows = state.usuarios.filter(r => (u.searchParams.has("email") ? eq("email", r.email) : eq("id", r.id)) &&
+        (!u.searchParams.has("perfil") || eq("perfil", r.perfil)));
       return rows.map(r => Object.fromEntries(u.searchParams.get("select").split(/,\s*/).map(k => [k, state.authIdDivergente && k === "id" ? r.id + 100 : r[k]])));
     }
     if (tabela === "eventos") return state.eventos.filter(e => (!u.searchParams.has("id") || eq("id", e.id)) && eq("usuario_id", e.usuario_id)).sort((a,b) => b.id-a.id);
@@ -129,7 +132,7 @@ async function iniciar(t, provider, op = {}) {
     throw Error("Tabela inesperada no transporte falso");
   }
   async function fetchFalso(url, options) {
-    const u = new URL(url); assert.equal(u.origin, "https://supabase.invalid");
+    const u = new URL(url); assert.equal(u.origin, env.SUPABASE_URL);
     const h = new Headers(options.headers);
     // A chave e exclusivamente do backend. Nenhum JWT proprio chega ao SDK.
     assert.equal(h.get("apikey"), secretKey); assert.equal(h.get("authorization"), "Bearer " + secretKey);
@@ -145,6 +148,22 @@ async function iniciar(t, provider, op = {}) {
       });
       data = rpc(name, args);
       if (data?.error) return new Response(JSON.stringify({ code: data.error, message: privado }), { status: 400 });
+    } else if (u.pathname === "/rest/v1/usuarios" &&
+        (state.schemaPerfilAntigo || state.erroPerfil) &&
+        /telefone|biografia/.test(u.searchParams.get("select") || "")) {
+      return new Response(JSON.stringify({ code: state.erroPerfil || "42703", message: privado }), { status: 400 });
+    } else if (u.pathname === "/rest/v1/usuarios" &&
+        (state.schemaProfissionalAntigo || state.erroProfissional) &&
+        /redes_sociais|dados_comerciais/.test(u.searchParams.get("select") || "")) {
+      return new Response(JSON.stringify({ code: state.erroProfissional || "42703", message: privado }), { status: 400 });
+    } else if (options.method === "PATCH") {
+      assert.equal(u.pathname, "/rest/v1/usuarios");
+      const row = state.usuarios.find(r => u.searchParams.get("id") === "eq." + r.id &&
+        (!u.searchParams.has("perfil") || u.searchParams.get("perfil") === "eq." + r.perfil));
+      const dados = JSON.parse(options.body);
+      assert.ok(Object.keys(dados).every(k => ["nome", "telefone", "biografia", "redes_sociais", "dados_comerciais"].includes(k)));
+      if (row) Object.assign(row, dados);
+      data = selecionar("usuarios", u);
     } else if (options.method === "POST") {
       assert.equal(u.pathname, "/rest/v1/usuarios"); const row = JSON.parse(options.body);
       state.usuarios.push({ id: 33, ...row }); data = { id: 33 };
@@ -181,13 +200,14 @@ async function iniciar(t, provider, op = {}) {
       }
       if (["bcryptjs", "jsonwebtoken", "cors"].includes(name)) return require(name);
       if (name === "dotenv") return { config() {} };
-      if (name.endsWith("isolamento.cjs")) return { modoExecucao: () => "principal" };
-      if (name.endsWith("config/banco.cjs")) return { ...config,
-        // Exclusivamente nesta VM: testa o caminho preparado; trava real intacta.
-        validarInicializacaoBanco: op.travaReal ? config.validarInicializacaoBanco : config.lerConfiguracaoBanco };
+      // MySQL e exercitado apenas no modo isolado; Supabase usa o guard real.
+      if (name.endsWith("isolamento.cjs")) return { modoExecucao: () => provider === "supabase" ? "principal" : "isolado" };
+      if (name.endsWith("config/banco.cjs")) return config;
+      if (name === "./config/startup-controlado.cjs") return { validarEntrada: (e, m) =>
+        require("../../config/startup-controlado.cjs").validarEntrada(e, m, { estado: { ler: () => ({ versao: 1, congelado: false, selado: false, instancias: [] }) } }) };
       if (name === "../db") { assert.notEqual(provider, "supabase"); return db; }
       if (name === "@supabase/supabase-js") return { createClient(url, key, options) {
-        assert.equal(url, "https://supabase.invalid"); assert.equal(key, secretKey);
+        assert.equal(url, env.SUPABASE_URL); assert.equal(key, secretKey);
         assert.deepEqual(JSON.parse(JSON.stringify(options.auth)), { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false });
         let fetch = fetchFalso;
         if (op.somenteLeitura) {

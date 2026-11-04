@@ -1,3 +1,4 @@
+import { Icone } from '../ui/Icone.jsx'
 import { useRef, useState } from 'react'
 
 // Navegação no fluxo da página: sem overlay ou bloqueio de foco.
@@ -27,7 +28,7 @@ export function NavegacaoRecolhivel({ id, rotulo, className = '', children }) {
         aria-label={rotulo}
         onClick={() => setAberto(atual => !atual)}
       >
-        <span aria-hidden="true">☰</span> Menu
+        <Icone nome="menu" /> Menu
       </button>
       <div id={id} className="painelNavegacao" data-aberto={aberto}
         onClick={evento => {

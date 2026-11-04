@@ -1,11 +1,14 @@
+import { PerfilPessoal } from '../../components/perfil/PerfilPessoal.jsx'
+import { Icone } from '../../components/ui/Icone.jsx'
 import { useState, useEffect } from 'react'
 import { apiUrl } from '../../services/api.js'
 
 export function PortalParticipante({ setPagina, aoSair }) {
   const [eventosDisponiveis, setEventosDisponiveis] = useState([])
   const [meusIngressos, setMeusIngressos] = useState([])
-  const [carregandoIngressos, setCarregandoIngressos] = useState(false)
+  const [carregandoIngressos, setCarregandoIngressos] = useState(true)
   const [erroIngressos, setErroIngressos] = useState('')
+  const [tentativaIngressos, setTentativaIngressos] = useState(0)
   const [abaParticipante, setAbaParticipante] = useState('inicio')
   const [busca, setBusca] = useState('')
   const idsEventosInscritos = new Set(
@@ -16,7 +19,7 @@ export function PortalParticipante({ setPagina, aoSair }) {
   const [erroEventos, setErroEventos] = useState('')
   
   useEffect(() => {
-  if (abaParticipante !== 'ingressos' && abaParticipante !== 'eventos') return
+  let ativo = true
 
   const buscarIngressos = async () => {
     setCarregandoIngressos(true)
@@ -39,20 +42,26 @@ export function PortalParticipante({ setPagina, aoSair }) {
       }
 
       const dados = await resposta.json()
-      setMeusIngressos(dados)
+      if (!Array.isArray(dados)) throw new Error('Resposta de inscrições inválida.')
+      if (ativo) setMeusIngressos(dados)
 
     } catch (erro) {
       console.error('Erro ao buscar ingressos:', erro)
-      setErroIngressos(erro.message)
+      if (ativo) {
+        setMeusIngressos([])
+        setErroIngressos('Não foi possível consultar suas inscrições. Novas inscrições estão bloqueadas.')
+      }
     } finally {
-      setCarregandoIngressos(false)
+      if (ativo) setCarregandoIngressos(false)
     }
   }
 
   buscarIngressos()
-}, [abaParticipante])
+  return () => { ativo = false }
+}, [tentativaIngressos])
  
   useEffect(() => {
+    let ativo = true
     const carregarEventos = async () => {
       try {
         setCarregandoEventos(true)
@@ -74,20 +83,26 @@ export function PortalParticipante({ setPagina, aoSair }) {
         }
 
         const dados = await resposta.json()
-        setEventosDisponiveis(dados)
+        if (!Array.isArray(dados)) throw new Error('Resposta de eventos inválida.')
+        if (ativo) setEventosDisponiveis(dados)
       } catch (erro) {
-        setErroEventos(erro.message)
+        if (ativo) {
+          setEventosDisponiveis([])
+          setErroEventos(erro.message)
+        }
       } finally {
-        setCarregandoEventos(false)
+        if (ativo) setCarregandoEventos(false)
       }
     }
 
     carregarEventos()
+    return () => { ativo = false }
   }, [])
 
 const [inscrevendoEventoId, setInscrevendoEventoId] = useState(null)
 
 const aoInscreverEvento = async (evento) => {
+  if (carregandoIngressos || erroIngressos || inscrevendoEventoId !== null || idsEventosInscritos.has(Number(evento.id))) return
   const confirmado = window.confirm(
     `Deseja se inscrever no evento "${evento.nome}"?`
   )
@@ -127,7 +142,8 @@ const aoInscreverEvento = async (evento) => {
     }
 
     alert('Inscrição realizada com sucesso!')
-
+    setCarregandoIngressos(true)
+    setTentativaIngressos((valor) => valor + 1)
     setAbaParticipante('ingressos')
   } catch (erro) {
     console.error('Erro ao realizar inscrição:', erro)
@@ -138,10 +154,10 @@ const aoInscreverEvento = async (evento) => {
 }
   
   const menuParticipante = [
-    ['inicio', '⌂ Início'],
-    ['eventos', '▦ Explorar eventos'],
-    ['ingressos', '▣ Meus ingressos'],
-    ['perfil', '♙ Meu perfil']
+    ['inicio', 'Início'],
+    ['eventos', 'Explorar eventos'],
+    ['ingressos', 'Meus ingressos'],
+    ['perfil', 'Meu perfil']
   ]
 
   const titulos = {
@@ -161,12 +177,21 @@ const aoInscreverEvento = async (evento) => {
     return texto.includes(busca.toLowerCase())
   })
 
+  const avisoInscricoes = <>
+    {carregandoIngressos && <p role="status">Consultando suas inscrições. Aguarde para se inscrever.</p>}
+    {erroIngressos && <div role="alert"><p>{erroIngressos}</p><button type="button" onClick={() => {
+      setCarregandoIngressos(true)
+      setErroIngressos('')
+      setTentativaIngressos((valor) => valor + 1)
+    }}>Tentar novamente</button></div>}
+  </>
+
   const listaEventos = (
     <>
-      {carregandoEventos && <p>Carregando eventos...</p>}
+      {carregandoEventos && <p role="status">Carregando eventos...</p>}
 
       {erroEventos && (
-        <p style={{ color: 'red' }}>{erroEventos}</p>
+        <p role="alert" style={{ color: 'red' }}>{erroEventos}</p>
       )}
 
       {!carregandoEventos &&
@@ -178,7 +203,8 @@ const aoInscreverEvento = async (evento) => {
       {!carregandoEventos &&
         !erroEventos &&
         eventosFiltrados.map((evento) => (
-          <article className="fornCartao" key={evento.id}>
+          <article className="fornCartao eventoCartao" key={evento.id}>
+            <div className="eventoIdentidade" aria-hidden="true"><Icone nome="eventos" tamanho={26} /></div>
             <span className="tag">
               {evento.categoria || 'Evento'}
             </span>
@@ -186,7 +212,7 @@ const aoInscreverEvento = async (evento) => {
             <h3>{evento.nome}</h3>
 
             <p>
-              <strong>📅 Data:</strong>{' '}
+              <strong>Data:</strong>{' '}
               {evento.data
                 ? new Date(evento.data).toLocaleDateString(
                     'pt-BR',
@@ -196,17 +222,17 @@ const aoInscreverEvento = async (evento) => {
             </p>
 
             <p>
-              <strong>🕒 Horário:</strong>{' '}
+              <strong>Horário:</strong>{' '}
               {evento.horario || 'Não informado'}
             </p>
 
             <p>
-              <strong>📍 Local:</strong>{' '}
+              <strong>Local:</strong>{' '}
               {evento.local || 'Não informado'}
             </p>
 
             <p>
-              <strong>👥 Público:</strong>{' '}
+              <strong>Público:</strong>{' '}
               {evento.publico || 'Não informado'}
             </p>
 
@@ -222,48 +248,26 @@ const aoInscreverEvento = async (evento) => {
     setEventoSelecionado(evento)
     setAbaParticipante('detalhes')
   }}
-  style={{
-    backgroundColor: 'white',
-    color: '#3528b8',
-    border: '1px solid #3528b8',
-    borderRadius: '6px',
-    padding: '10px 18px',
-    cursor: 'pointer',
-    marginTop: '12px',
-    marginRight: '10px'
-  }}
+  className="secundario acaoEvento"
 >
-  🔎 Ver detalhes
+  Ver detalhes
 </button>
 
             <button
   type="button"
   disabled={
+    carregandoIngressos || Boolean(erroIngressos) ||
     idsEventosInscritos.has(Number(evento.id)) ||
     inscrevendoEventoId !== null
   }
   onClick={() => aoInscreverEvento(evento)}
-  style={{
-    backgroundColor: idsEventosInscritos.has(Number(evento.id))
-      ? '#6c757d'
-      : '#3528b8',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    padding: '10px 18px',
-    cursor: idsEventosInscritos.has(Number(evento.id))
-      ? 'not-allowed'
-      : inscrevendoEventoId !== null
-        ? 'wait'
-        : 'pointer',
-    marginTop: '12px'
-  }}
+  className="principal acaoEvento"
 >
   {idsEventosInscritos.has(Number(evento.id))
-    ? '✓ Já inscrito'
+    ? 'Já inscrito'
     : inscrevendoEventoId === evento.id
       ? 'Realizando inscrição...'
-      : '🎟️ Inscrever-se'}
+      : 'Inscrever-se'}
 </button>
           </article>
         ))}
@@ -274,12 +278,12 @@ const aoInscreverEvento = async (evento) => {
     <div className="portalFornecedor">
       <div className="fornTopo">
         <div className="logo">
-          ▣ <span>TrocaTicket</span>
+          <Icone nome="ticket" /> <span>TrocaTicket</span>
           <small>PORTAL PARTICIPANTE</small>
         </div>
 
         <span className="fornSelo">
-          ● Área do participante
+          Área do participante
         </span>
       </div>
 
@@ -290,7 +294,7 @@ const aoInscreverEvento = async (evento) => {
             className="novo"
             onClick={() => setAbaParticipante('eventos')}
           >
-            ⌕ Buscar eventos
+            <Icone nome="busca" /> Buscar eventos
           </button>
 
           <nav>
@@ -303,7 +307,7 @@ const aoInscreverEvento = async (evento) => {
                 }
                 onClick={() => setAbaParticipante(id)}
               >
-                {label}
+                <Icone nome={({ inicio: 'inicio', eventos: 'eventos', ingressos: 'ticket', perfil: 'perfil' })[id]} />{label}
               </button>
             ))}
           </nav>
@@ -312,7 +316,7 @@ const aoInscreverEvento = async (evento) => {
             type="button"
             onClick={() => setPagina('solicitar-acesso')}
           >
-            ♧ Solicitar acesso
+            <Icone nome="acesso" /> Solicitar acesso
           </button>
 
           <button
@@ -320,7 +324,7 @@ const aoInscreverEvento = async (evento) => {
             className="fornSair"
             onClick={aoSair}
           >
-            ↪ Sair
+            <Icone nome="sair" /> Sair
           </button>
         </aside>
 
@@ -343,9 +347,9 @@ const aoInscreverEvento = async (evento) => {
             <>
               <div className="fornHero">
                 <div>
-                  <h2>Bem-vindo ao TrocaTicket!</h2>
+                  <h2>Sua participação nos eventos</h2>
                   <p>
-                    Explore eventos e encontre novas experiências.
+                    Consulte os eventos disponíveis e acompanhe suas inscrições.
                   </p>
                 </div>
               </div>
@@ -391,7 +395,7 @@ const aoInscreverEvento = async (evento) => {
             <>
               <div className="fornHero">
                 <div>
-                  <h2>🎟️ Eventos disponíveis para consulta</h2>
+                  <h2>Eventos disponíveis para consulta</h2>
                   <p>
                     Conheça os eventos cadastrados no TrocaTicket.
                   </p>
@@ -400,7 +404,7 @@ const aoInscreverEvento = async (evento) => {
 
               <input
                 aria-label="Buscar eventos"
-                placeholder="⌕ Buscar por nome, categoria ou local..."
+                placeholder="Buscar por nome, categoria ou local..."
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
               />
@@ -409,17 +413,18 @@ const aoInscreverEvento = async (evento) => {
                 className="fornLista"
                 style={{ marginTop: '20px' }}
               >
+                {avisoInscricoes}
                 {listaEventos}
               </div>
             </>
           )}
 
           {abaParticipante === 'detalhes' && eventoSelecionado && (
-  <section className="fornCartao">
+  <section className="fornCartao eventoDetalhes">
     <button
       type="button"
       onClick={() => setAbaParticipante('eventos')}
-      style={{ marginBottom: '20px', cursor: 'pointer' }}
+      className="voltar"
     >
       ← Voltar aos eventos
     </button>
@@ -428,10 +433,10 @@ const aoInscreverEvento = async (evento) => {
       {eventoSelecionado.categoria || 'Evento'}
     </span>
 
-    <h2>{eventoSelecionado.nome}</h2>
+    <div className="eventoDetalhesTitulo"><div className="eventoIdentidade" aria-hidden="true"><Icone nome="eventos" tamanho={30} /></div><h2>{eventoSelecionado.nome}</h2></div>
 
     <p>
-      <strong>📅 Data:</strong>{' '}
+      <strong>Data:</strong>{' '}
       {eventoSelecionado.data
         ? new Date(eventoSelecionado.data).toLocaleDateString('pt-BR', {
             timeZone: 'UTC'
@@ -440,17 +445,17 @@ const aoInscreverEvento = async (evento) => {
     </p>
 
     <p>
-      <strong>🕒 Horário:</strong>{' '}
+      <strong>Horário:</strong>{' '}
       {eventoSelecionado.horario || 'Não informado'}
     </p>
 
     <p>
-      <strong>📍 Local:</strong>{' '}
+      <strong>Local:</strong>{' '}
       {eventoSelecionado.local || 'Não informado'}
     </p>
 
     <p>
-      <strong>👥 Público:</strong>{' '}
+      <strong>Público:</strong>{' '}
       {eventoSelecionado.publico || 'Não informado'}
     </p>
 
@@ -458,6 +463,7 @@ const aoInscreverEvento = async (evento) => {
       <strong>Status:</strong> {eventoSelecionado.status}
     </p>
 
+    {avisoInscricoes}
     <h3>Sobre o evento</h3>
 
     <p>
@@ -466,45 +472,29 @@ const aoInscreverEvento = async (evento) => {
     <button
   type="button"
   disabled={
+    carregandoIngressos || Boolean(erroIngressos) ||
     idsEventosInscritos.has(Number(eventoSelecionado.id)) ||
     inscrevendoEventoId !== null
   }
   onClick={() => aoInscreverEvento(eventoSelecionado)}
-  style={{
-    backgroundColor: idsEventosInscritos.has(Number(eventoSelecionado.id))
-      ? '#6c757d'
-      : '#3528b8',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    padding: '12px 20px',
-    marginTop: '20px',
-    cursor: idsEventosInscritos.has(Number(eventoSelecionado.id))
-      ? 'not-allowed'
-      : 'pointer'
-  }}
+  className="principal acaoEvento"
 >
   {idsEventosInscritos.has(Number(eventoSelecionado.id))
-    ? '✓ Já inscrito'
+    ? 'Já inscrito'
     : inscrevendoEventoId === eventoSelecionado.id
       ? 'Realizando inscrição...'
-      : '🎟️ Inscrever-se'}
+      : 'Inscrever-se'}
 </button>
   </section>
 )}
           
           {abaParticipante === 'ingressos' && (
   <div className="fornCartao">
-    <h2>🎫 Meus ingressos</h2>
+    <h2>Meus ingressos</h2>
     <p>Confira os eventos em que você está inscrito.</p>
 
-    {carregandoIngressos ? (
-      <p>Carregando seus ingressos...</p>
-    ) : erroIngressos ? (
-      <p style={{ color: '#dc3545' }}>
-        {erroIngressos}
-      </p>
-    ) : meusIngressos.length === 0 ? (
+    {avisoInscricoes}
+    {!carregandoIngressos && !erroIngressos && (meusIngressos.length === 0 ? (
       <p>Você ainda não possui inscrições em eventos.</p>
     ) : (
       meusIngressos.map((ingresso) => (
@@ -516,7 +506,7 @@ const aoInscreverEvento = async (evento) => {
           <h3>{ingresso.evento_nome}</h3>
 
           <p>
-            📅 Data: {ingresso.evento_data
+            Data: {ingresso.evento_data
               ? new Date(ingresso.evento_data).toLocaleDateString('pt-BR', {
                   timeZone: 'UTC'
                 })
@@ -524,43 +514,26 @@ const aoInscreverEvento = async (evento) => {
           </p>
 
           <p>
-            🕒 Horário: {ingresso.evento_horario || 'Não informado'}
+            Horário: {ingresso.evento_horario || 'Não informado'}
           </p>
 
-          <p>📍 Local: {ingresso.evento_local}</p>
+          <p>Local: {ingresso.evento_local}</p>
 
-          <p>🎟️ Inscrição nº {ingresso.id}</p>
+          <p>Inscrição nº {ingresso.id}</p>
 
           <p>
             Status: <strong>{ingresso.status}</strong>
           </p>
         </div>
       ))
-    )}
+    ))}
   </div>
           )}
 
           {abaParticipante === 'perfil' && (
-            <div className="fornCartao">
-              <h2>👤 Meu perfil</h2>
-
-              <p>
-                Sua conta está ativa como participante.
-              </p>
-
-              <p>
-                Você também pode solicitar acesso como
-                organizador ou fornecedor.
-              </p>
-
-              <button
-                type="button"
-                className="principal"
-                onClick={() => setPagina('solicitar-acesso')}
-              >
-                Solicitar acesso →
-              </button>
-            </div>
+            <PerfilPessoal contexto="Participante">
+              <div className="perfilAcoes"><button type="button" className="secundario" onClick={() => setPagina('solicitar-acesso')}>Solicitar acesso como organizador ou fornecedor</button></div>
+            </PerfilPessoal>
           )}
         </main>
       </div>

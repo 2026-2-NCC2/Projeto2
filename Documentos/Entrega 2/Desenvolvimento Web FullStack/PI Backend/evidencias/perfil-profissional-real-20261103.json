@@ -1,0 +1,45 @@
+{
+  "inicio": "2026-11-04T01:11:57.452Z",
+  "etapas": [
+    "PostgREST real confirma duas colunas JSONB opcionais e recusa leitura anon; inspeção SQL pendente",
+    "quatro contas de teste existentes confirmadas por papel e senha; originais restauráveis",
+    "backend real: flag false retorna 503; true habilita GET nas quatro contas",
+    "401 sem sessão/inválida; 400 URLs inseguras/campos proibidos; 403 comerciais admin/participante; registros intactos",
+    "admin: API consulta/edita/remove; Chrome salva, recarrega, sai/entra e remove; persistência Supabase e isolamento confirmados",
+    "participante: API consulta/edita/remove; Chrome salva, recarrega, sai/entra e remove; persistência Supabase e isolamento confirmados",
+    "fornecedor: API consulta/edita/remove; Chrome salva, recarrega, sai/entra e remove; persistência Supabase e isolamento confirmados",
+    "organizador: API consulta/edita/remove; Chrome salva, recarrega, sai/entra e remove; persistência Supabase e isolamento confirmados",
+    "restauração exata das quatro contas confirmada; credenciais e demais campos preservados"
+  ],
+  "restaurado": true,
+  "pendencias": [
+    "Catálogo PostgreSQL indisponível: nullable/default/grants de authenticated/RLS/políticas/triggers não confirmados por SQL nesta execução."
+  ],
+  "schemaHttps": {
+    "colunas": [
+      "redes_sociais",
+      "dados_comerciais"
+    ],
+    "tipo": "jsonb",
+    "obrigatorias": false,
+    "anonStatus": 401
+  },
+  "flagAnterior": "ausente",
+  "ativacaoPersistida": {
+    "arquivo": "PI Backend/.env",
+    "PERFIL_PROFISSIONAL_ATIVO": "true",
+    "demaisVariaveisPreservadas": true,
+    "processoNovoLoginStatus": 200,
+    "processoNovoGetProfissionalStatus": 200,
+    "edicaoDisponivel": true
+  },
+  "checksLocais": {
+    "backendDirecionados": { "aprovados": 80, "falhas": 0 },
+    "frontendDirecionados": { "aprovados": 55, "falhas": 0 },
+    "build": "aprovado",
+    "lint": "aprovado",
+    "sintaxeScripts": "aprovada",
+    "diffCheck": "aprovado"
+  },
+  "fim": "2026-11-04T01:14:09.352Z"
+}

@@ -135,6 +135,7 @@ for (const caso of casos) {
     const imports = [];
     let criacoes = 0;
     const contexto = { module: { exports: {} }, require(nome) {
+      if (nome === "./perfil-profissional.cjs") return require("../repositories/supabase/perfil-profissional.cjs");
       imports.push(nome);
       assert.equal(nome, "../../db-supabase.cjs");
       return { criarClienteSupabase() { criacoes++; return cliente; } };

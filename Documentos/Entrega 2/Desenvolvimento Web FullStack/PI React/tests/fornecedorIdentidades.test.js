@@ -12,7 +12,7 @@ function load(file, name, env) {
   const source = readFileSync(new URL('../src/' + file, import.meta.url), 'utf8').replace(/^import .*\r?\n/gm, '').replaceAll('export function ', 'function ')
   const result = transformSync(file, source, { jsx: { runtime: 'classic', pragma: 'jsx', pragmaFrag: 'Fragment' } })
   assert.equal(result.errors.length, 0)
-  return vm.runInNewContext(result.code + '\n' + name, { jsx, Fragment: 'fragment', ...env })
+  return vm.runInNewContext(result.code + '\n' + name, { jsx, Fragment: 'fragment', Icone: 'svg', ...env })
 }
 function runtime(file, name, fetch) {
   const states = [], effects = [], cleanups = []
@@ -63,6 +63,17 @@ function fornecedor(fetch) {
   const props = () => ({ pagina: page, setPagina: value => { page = value }, aoSair() {}, PerfilFornecedor: () => null })
   return { ...r, render: () => r.render(props()), page: value => { page = value } }
 }
+
+test('recarregar elaboração sem cotação não renderiza formulário e retorna ao mural', async () => {
+  const r = fornecedor(async () => ok([]))
+  r.page('fornecedor-proposta')
+  const inicial = r.render()
+  assert.equal(nodes(inicial).filter(n => n.type === 'form').length, 0)
+  await tick()
+  const view = r.render()
+  assert.ok(nodes(view).some(n => n.type === 'input' && n.props['aria-label'] === 'Buscar oportunidades'))
+  assert.equal(nodes(view).filter(n => n.type === 'form').length, 0)
+})
 test('menu unifica propostas e bloqueia contratos/catalogo; URL antiga preservada', async () => {
   const r = fornecedor(async () => ok([])); r.page('fornecedor-cotacoes'); r.render(); await tick()
   const view = r.render(), buttons = nodes(view).filter(n => n.type === 'button')
@@ -115,11 +126,13 @@ test('cabecalhos compartilham identidade real e perfis consultam /perfil', () =>
     const source = readFileSync(new URL('../src/' + file, import.meta.url), 'utf8')
     assert.ok(source.includes('<IdentidadeConta />')); assert.doesNotMatch(source, /Roberto Albuquerque|Sonora Stage/)
   }
-  for (const file of ['App.jsx', 'pages/organizador/Perfil.jsx']) {
+  for (const file of ['App.jsx', 'pages/organizador/Perfil.jsx', 'components/admin/AdminPortal.jsx', 'pages/participante/PortalParticipante.jsx']) {
     const source = readFileSync(new URL('../src/' + file, import.meta.url), 'utf8')
-    assert.ok(source.includes('usePerfil()')); assert.ok(source.includes("value={identidade?.email || ''} readOnly"))
+    assert.ok(source.includes('<PerfilPessoal'))
     assert.doesNotMatch(source, /Roberto Albuquerque|Sonora Stage/)
   }
+  const source = readFileSync(new URL('../src/components/perfil/PerfilPessoal.jsx', import.meta.url), 'utf8')
+  assert.ok(source.includes('usePerfil()')); assert.ok(source.includes('value={perfil.email} readOnly'))
 })
 
 test('identidade compartilhada apresenta nome e email ou erro, sem fallback ficticio', () => {

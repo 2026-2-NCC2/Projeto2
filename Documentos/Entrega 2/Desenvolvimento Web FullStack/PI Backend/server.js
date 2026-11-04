@@ -25,6 +25,7 @@ const {
   solicitacoesAcesso: solicitacoesAcessoRepository,
 } = repositorios;
 const { ErroServico } = require("./services/suporte-transacoes.cjs");
+const { validarAlteracoesPerfil, respostaPerfil, validarProfissional } = require("./perfil.cjs");
 
 // Somente erros sanitizados pelos servicos podem fornecer texto/status publico.
 function responderErroServico(res, erro, mensagem) {
@@ -610,6 +611,9 @@ async function autenticar(req, res, next) {
   }
 }
 
+// Infraestrutura de imagens deliberadamente bloqueada nesta primeira etapa.
+require("./imagens/rotas.cjs").instalarRotasImagens(app, autenticar);
+
 // Rota protegida
 app.get("/perfil", autenticar, async (req, res) => {
   try {
@@ -621,7 +625,7 @@ app.get("/perfil", autenticar, async (req, res) => {
       });
     }
 
-    return res.status(200).json(usuario);
+    return res.status(200).json(respostaPerfil(usuario));
 
   } catch (erro) {
     console.error("Falha em GET /perfil.");
@@ -630,6 +634,61 @@ app.get("/perfil", autenticar, async (req, res) => {
       erro: "Erro interno ao buscar perfil."
     });
   }
+});
+app.patch("/perfil", autenticar, async (req, res) => {
+  let dados;
+  try {
+    dados = validarAlteracoesPerfil(req.body);
+  } catch (erro) {
+    return res.status(400).json({ erro: erro.message });
+  }
+  if (typeof usuariosRepository.atualizarPerfil !== "function") {
+    return res.status(503).json({ erro: "A edição de perfil ainda não está disponível neste ambiente." });
+  }
+  try {
+    const usuario = await usuariosRepository.atualizarPerfil(req.usuario.id, dados);
+    if (!usuario) return res.status(404).json({ erro: "Usuário não encontrado." });
+    return res.status(200).json(respostaPerfil(usuario));
+  } catch (erro) {
+    if (erro?.code === "PERFIL_MIGRACAO_PENDENTE") {
+      return res.status(503).json({ erro: "A edição de perfil aguarda atualização do banco de dados." });
+    }
+    console.error("Falha em PATCH /perfil.");
+    return res.status(500).json({ erro: "Não foi possível confirmar o salvamento. Recarregue o perfil antes de tentar novamente." });
+  }
+});
+// A ativação é privada e manual, após revisão/aplicação da migração.
+function profissionalDisponivel(req, res, next) {
+  if (process.env.PERFIL_PROFISSIONAL_ATIVO !== "true" ||
+      typeof usuariosRepository.buscarProfissional !== "function") {
+    return res.status(503).json({ erro: "As informações profissionais e redes sociais ainda não estão disponíveis." });
+  }
+  return next();
+}
+function falhaProfissional(res, erro) {
+  if (erro?.code === "PROFISSIONAL_MIGRACAO_PENDENTE") return res.status(503).json({ erro: "As informações profissionais aguardam atualização do banco de dados." });
+  console.error("Falha ao acessar perfil profissional.");
+  return res.status(500).json({ erro: "Não foi possível confirmar os dados profissionais. Recarregue antes de tentar novamente." });
+}
+app.get("/perfil/profissional", autenticar, profissionalDisponivel, async (req, res) => {
+  try {
+    const perfil = await usuariosRepository.buscarProfissional(req.usuario.id);
+    if (!perfil) return res.status(404).json({ erro: "Usuário não encontrado." });
+    return res.json(perfil);
+  } catch (erro) { return falhaProfissional(res, erro); }
+});
+app.patch("/perfil/profissional", autenticar, profissionalDisponivel, async (req, res) => {
+  let dados;
+  try { dados = validarProfissional(req.body, req.usuario.perfil); }
+  catch (erro) { return res.status(erro.status === 403 ? 403 : 400).json({ erro: erro.message }); }
+  try {
+    // Conferir schema antes de qualquer UPDATE; sem fallback ou escrita no schema antigo.
+    const atual = await usuariosRepository.buscarProfissional(req.usuario.id);
+    if (!atual) return res.status(404).json({ erro: "Usuário não encontrado." });
+    const perfil = await usuariosRepository.atualizarProfissional(req.usuario.id, req.usuario.perfil, dados);
+    if (!perfil) return res.status(409).json({ erro: "O perfil mudou. Recarregue os dados antes de salvar." });
+    return res.json(perfil);
+  } catch (erro) { return falhaProfissional(res, erro); }
 });
 function permitirPerfis(...perfisPermitidos) {
   return (req, res, next) => {

@@ -17,7 +17,7 @@ for (const provider of [undefined, "mysql", "supabase"]) {
     assert.equal(token.id, 7); assert.equal(token.perfil, "organizador"); assert.equal(token.exp-token.iat, 3600);
     assert.equal(jwt.decode(r.body.token, { complete: true }).header.alg, "HS256");
     const perfil = await a.request("GET", "/perfil", undefined, r.body.token);
-    assert.deepEqual(perfil, { status: 200, body: { id: 7, nome: "Teste 7", email: "teste7@example.invalid" } });
+    assert.deepEqual(perfil, { status: 200, body: { id: 7, nome: "Teste 7", email: "teste7@example.invalid", telefone: null, biografia: null, edicao_disponivel: provider === "supabase" } });
     semSegredos(a, r); semSegredos(a, perfil);
     assert.ok(a.calls.length >= 3);
     assert.ok(a.calls.every(c => c.kind === (provider === "supabase" ? "supabase" : "mysql")));
@@ -122,7 +122,10 @@ test("HTTP: contratos JSON de leituras coincidem entre MySQL e Supabase", async 
   const my = await iniciar(t, "mysql"), sb = await iniciar(t, "supabase");
   for (const [route, id] of [["/perfil", 7], ["/eventos", 7], ["/eventos/13", 7], ["/cotacoes", 7],
     ["/organizador/propostas", 7], ["/fornecedor/propostas", 8]]) {
-    assert.deepEqual(await sb.request("GET", route, undefined, sb.token(id)), await my.request("GET", route, undefined, my.token(id)));
+    const supabase = await sb.request("GET", route, undefined, sb.token(id));
+    const mysql = await my.request("GET", route, undefined, my.token(id));
+    if (route === "/perfil") mysql.body.edicao_disponivel = true;
+    assert.deepEqual(supabase, mysql);
   }
 });
 test("HTTP Supabase: resposta de autenticacao com ID divergente falha fechada", async t => {

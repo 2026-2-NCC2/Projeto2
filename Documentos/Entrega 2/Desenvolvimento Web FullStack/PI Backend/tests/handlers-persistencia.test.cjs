@@ -11,7 +11,7 @@ function ambiente(provider, caso, op = {}) {
   const perfil = op.perfil ?? (caso === "acesso" ? "admin" : "organizador");
   const usuario = { id: 7, nome: "Teste", email: "teste@example.invalid", perfil };
   const env = { JWT_SECRET: segredo, ...(provider === undefined ? {} : { DB_PROVIDER: provider }),
-    SUPABASE_URL: "https://integracao.invalid", SUPABASE_SECRET_KEY: "sb_secret_ficticia" };
+    SUPABASE_URL: "https://gnwybroqfvwosiqzsfla.supabase.co", SUPABASE_SECRET_KEY: "sb_secret_ficticia" };
   let clientCount = 0, signals = [], salvos = [], resolveLate;
   const connection = {
     async beginTransaction() { transacao.push("begin"); },
@@ -80,12 +80,10 @@ function ambiente(provider, caso, op = {}) {
         if (token === "invalido") throw Error("segredo privado"); return { id: 7 };
       } };
       if (name === "dotenv") return { config() {} };
-      if (name.endsWith("isolamento.cjs")) return { modoExecucao: () => "principal" };
-      if (name.endsWith("config/banco.cjs")) return {
-        ...config,
-        // Somente no teste: exercitar caminho preparado sem liberar startup real.
-        validarInicializacaoBanco: op.testarStartupReal ? config.validarInicializacaoBanco : config.lerConfiguracaoBanco,
-      };
+      if (name.endsWith("isolamento.cjs")) return { modoExecucao: () => provider === "supabase" ? "principal" : "isolado" };
+      if (name.endsWith("config/banco.cjs")) return config;
+      if (name === "./config/startup-controlado.cjs") return { validarEntrada: (e, m) =>
+        require("../config/startup-controlado.cjs").validarEntrada(e, m, { estado: { ler: () => ({ versao: 1, congelado: false, selado: false, instancias: [], ...(op.estadoLocal || {}) }) } }) };
       if (name === "../db" || name === "./db") { assert.notEqual(provider, "supabase", "Supabase importou db.js"); return db; }
       if (name === "../db-supabase.cjs") {
         assert.equal(provider, "supabase"); return { criarClienteSupabase() { clientCount++; return client; } };
@@ -199,8 +197,8 @@ test("handlers Supabase: timeout incerto sem reenvio, mesmo com resposta tardia"
     a.late(); await Promise.resolve(); assert.equal(a.rpcs.length, 1); assert.doesNotMatch(JSON.stringify(res.body), /privad/);
   }
 });
-test("startup Supabase real continua bloqueado antes da fabrica, pool ou SDK", () => {
-  assert.throws(() => ambiente("supabase", "custos", { testarStartupReal: true }), e => e.code === "DB_PROVIDER_NOT_IMPLEMENTED");
+test("startup Supabase com transicao incerta bloqueia antes da fabrica, pool ou SDK", () => {
+  assert.throws(() => ambiente("supabase", "custos", { estadoLocal: { transicao: { fase: "INCERTA" } } }), /STARTUP_ESTADO_LOCAL_BLOQUEADO/);
 });
 test("handlers nao confiam em status ou mensagem forjados por erros de integracao", async () => {
   for (const caso of Object.keys(rotas)) {

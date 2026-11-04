@@ -529,19 +529,15 @@ function carregarServidor(principal, modo) {
   return { ...carregado, estado, app };
 }
 
-test("node server.js principal preserva escuta e todas as rotas, importacao nao inicia HTTP", () => {
-  const principal = carregarServidor(true, "principal");
+test("MySQL principal e recusado; isolado preserva rotas sem iniciar HTTP na importacao", () => {
+  assert.throws(() => carregarServidor(true, "principal"), /STARTUP_MYSQL_APOS_ATIVACAO_RECUSADO/);
   const isolado = carregarServidor(false, "isolado");
-  const importado = carregarServidor(false, "principal");
-  assert.equal(principal.estado.dotenv, 1);
-  assert.equal(principal.estado.escutas[0][0], 3001);
-  assert.equal(principal.estado.escutas[0].length, 2);
-  assert.equal(principal.modulo, principal.app);
+  assert.throws(() => carregarServidor(false, "principal"), /STARTUP_MYSQL_APOS_ATIVACAO_RECUSADO/);
+  assert.equal(isolado.modulo, isolado.app);
   assert.equal(isolado.estado.dotenv, 0);
   assert.equal(isolado.estado.escutas.length, 0);
-  assert.equal(importado.estado.escutas.length, 0);
-  assert.deepEqual(isolado.estado.rotas, principal.estado.rotas);
-  assert.ok(principal.estado.rotas.some(([metodo, rota]) => metodo === "put" && rota === "/eventos/:id/custos"));
+  assert.equal(isolado.estado.rotas.length, 35);
+  assert.ok(isolado.estado.rotas.some(([metodo, rota]) => metodo === "put" && rota === "/eventos/:id/custos"));
 })
 
 test("startup com server.js e db.js reais usa apenas o adaptador simulado e nunca dotenv", async () => {

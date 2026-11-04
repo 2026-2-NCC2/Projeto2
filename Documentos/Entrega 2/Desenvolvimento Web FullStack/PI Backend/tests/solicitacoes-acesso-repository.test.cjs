@@ -150,7 +150,7 @@ function ambiente(opcoes = {}) {
   const dependencias = {
     express: Object.assign(() => app, { json: () => () => {} }), cors: () => () => {},
     bcryptjs: {}, jsonwebtoken: { verify: () => ({ id: 7 }) },
-    dotenv: { config() {} }, "./isolamento.cjs": { modoExecucao: () => "principal" }, "./db": db,
+    dotenv: { config() {} }, "./isolamento.cjs": { modoExecucao: () => "isolado" }, "./db": db,
   };
   for (const dominio of ["usuarios", "eventos", "custos", "cotacoes", "propostas", "inscricoes", "solicitacoes-acesso"]) {
     dependencias[`./repositories/mysql/${dominio}.cjs`] = require(`../repositories/mysql/${dominio}.cjs`);

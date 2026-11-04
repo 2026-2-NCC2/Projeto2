@@ -88,7 +88,7 @@ function ambiente(opcoes = {}) {
   const dependencias = {
     express: Object.assign(() => app, { json: () => () => {} }), cors: () => () => {},
     bcryptjs: {}, jsonwebtoken: { verify: () => ({ id: 7 }) }, dotenv: { config() {} },
-    "./db": db, "./isolamento.cjs": { modoExecucao: () => "principal" },
+    "./db": db, "./isolamento.cjs": { modoExecucao: () => "isolado" },
     "./repositories/mysql/usuarios.cjs": require("../repositories/mysql/usuarios.cjs"),
     "./repositories/mysql/eventos.cjs": require("../repositories/mysql/eventos.cjs"),
     "./repositories/mysql/cotacoes.cjs": require("../repositories/mysql/cotacoes.cjs"),

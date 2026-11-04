@@ -1,5 +1,7 @@
-import { usePerfil } from './hooks/usePerfil.js'
+import { PerfilPessoal } from './components/perfil/PerfilPessoal.jsx'
 import { useSessao } from './hooks/useSessao.js'
+import { useAutenticacao } from './hooks/useAutenticacao.js'
+import { paginaAutorizada, paginasPorPerfil } from './services/autenticacao.js'
 import { useNavegacao } from './hooks/useNavegacao.js'
 import { PortalParticipante } from './pages/participante/PortalParticipante.jsx'
 import { PortalFornecedor } from './pages/fornecedor/PortalFornecedor.jsx'
@@ -35,40 +37,26 @@ import { AdminPortal } from './components/admin/AdminPortal'
 
 
 
-function PerfilFornecedor({ perfil, setPerfil, propostas }) {
-  const { perfil: identidade, erro } = usePerfil()
-  const [editando, setEditando] = useState(false)
-  const [salvo, setSalvo] = useState(false)
-  const [preferencias, setPreferencias] = useState({ oportunidades: true, propostas: true, contratos: true, marketing: false })
-  const alterar = (campo, valor) => { setPerfil((atual) => ({ ...atual, [campo]: valor })); setSalvo(false) }
-  const salvar = (evento) => { evento.preventDefault(); setEditando(false); setSalvo(true) }
-  const aprovadas = propostas.filter((item) => item.status === 'Aprovada').length
+function PerfilFornecedor({ propostas = [] }) {
+  const aprovadas = propostas.filter(item => item.status === 'Aprovada').length
   const volume = propostas.reduce((soma, item) => soma + item.valor, 0)
-  return <div className="perfilPagina perfilFornecedorPagina">
-    {erro && <p role="alert">{erro}</p>}
-    <div className="perfilCabecalho"><div><p className="fornTrilha">TrocaTicket Fornecedor › Minha conta › Perfil</p><h1>Perfil do fornecedor</h1><p>Gerencie os dados comerciais, catálogo de serviços e segurança da empresa.</p></div><span className="perfilContaAtiva">● Empresa homologada</span></div>
-    {salvo && <div className="perfilSucesso" role="status">Rascunho local atualizado; não salvo no servidor.</div>}
-    <section className="perfilResumo perfilResumoFornecedor"><div className="perfilAvatar">◉</div><div className="perfilIdentidade"><h2>{identidade?.nome || 'Conta'}</h2><p>Fornecedor</p></div><div className="perfilResumoNumeros"><div><strong>{propostas.length}</strong><small>Propostas enviadas</small></div><div><strong>{aprovadas}</strong><small>Aprovadas</small></div><div><strong>{formatarMoeda(volume)}</strong><small>Volume proposto</small></div></div></section>
-    <div className="perfilGrade">
-      <form className="perfilCartao perfilDados" onSubmit={salvar}><div className="perfilTituloCartao"><div><h2>Dados da empresa</h2><p>Nome e e-mail da conta. Demais campos são rascunhos locais.</p></div><button type="button" className="perfilEditar" onClick={() => { setEditando((valor) => !valor); setSalvo(false) }}>{editando ? 'Cancelar' : '✎ Editar dados'}</button></div>
-        <div className="perfilCampos"><label>Nome da conta<input disabled={!editando} value={identidade?.nome || ''} readOnly /></label><label>E-mail comercial<input type="email" disabled={!editando} value={identidade?.email || ''} readOnly /></label><label>Telefone<input disabled={!editando} value={perfil.telefone} onChange={(e) => alterar('telefone', e.target.value)} /></label><label>Cidade<input disabled={!editando} value={perfil.cidade} onChange={(e) => alterar('cidade', e.target.value)} /></label><label className="perfilCampoInteiro">Serviços oferecidos<textarea rows="3" disabled={!editando} value={perfil.servicos} onChange={(e) => alterar('servicos', e.target.value)} /></label></div>
-        {editando && <div className="perfilAcoes"><button type="button" className="secundario" onClick={() => setEditando(false)}>Cancelar</button><button className="principal" type="submit">Salvar alterações</button></div>}
-      </form>
-      <aside className="perfilColuna"><section className="perfilCartao"><div className="perfilTituloCartao"><div><h2>Segurança</h2><p>Proteção e acesso ao portal.</p></div></div><div className="perfilSegurancaItem"><span>◈</span><div><strong>Senha</strong><small>Atualizada há 21 dias</small></div><button onClick={() => alert('Link de redefinição enviado ao e-mail comercial.')}>Alterar</button></div><div className="perfilSegurancaItem"><span>✓</span><div><strong>Autenticação em duas etapas</strong><small>Ativada por aplicativo</small></div><b>Ativa</b></div><div className="perfilSegurancaItem"><span>⌁</span><div><strong>Sessões ativas</strong><small>1 dispositivo conectado</small></div><button onClick={() => alert('Todas as outras sessões foram encerradas.')}>Gerenciar</button></div></section>
-        <section className="perfilCartao"><div className="perfilTituloCartao"><div><h2>Preferências</h2><p>Escolha quais avisos deseja receber.</p></div></div>{[['oportunidades','Novas oportunidades','Cotações compatíveis com seu catálogo'],['propostas','Atualizações de propostas','Mudanças de status e solicitações'],['contratos','Contratos e pagamentos','Prazos, assinaturas e repasses'],['marketing','Novidades da plataforma','Recursos, eventos e conteúdos']].map(([id,titulo,texto]) => <label className="perfilPreferencia" key={id}><span><strong>{titulo}</strong><small>{texto}</small></span><input type="checkbox" checked={preferencias[id]} onChange={(e) => setPreferencias((atual) => ({...atual,[id]:e.target.checked}))} /></label>)}</section></aside>
-      <section className="perfilCartao perfilEmpresa"><div className="perfilTituloCartao"><div><h2>Homologação e documentação</h2><p>Situação cadastral para participação nas cotações.</p></div><span className="perfilHomologada">✓ Documentação válida</span></div><div className="perfilEmpresaDados"><div><small>STATUS</small><strong>Fornecedor homologado</strong></div><div><small>CNPJ</small><strong>Não informado</strong></div><div><small>VALIDADE CADASTRAL</small><strong>Não informada</strong></div><div><small>CATEGORIA PRINCIPAL</small><strong>Não informada</strong></div></div></section>
-    </div>
-  </div>
+  const indicadores = <div className="perfilResumoNumeros"><div><strong>{propostas.length}</strong><small>Propostas enviadas</small></div><div><strong>{aprovadas}</strong><small>Aprovadas</small></div><div><strong>{formatarMoeda(volume)}</strong><small>Volume proposto</small></div></div>
+  return <PerfilPessoal contexto="Fornecedor" indicadores={indicadores} />
 }
 
 function App() {
-  const [pagina, definirPagina] = useState(() => {
+  const [paginaSolicitada, definirPagina] = useState(() => {
   const token = sessionStorage.getItem('token')
   const paginaSalva = sessionStorage.getItem('paginaAtual')
 
   return token && paginaSalva ? paginaSalva : 'login'
 })
+  const autenticacao = useAutenticacao(paginaSolicitada)
+  const pagina = paginaAutorizada(paginaSolicitada, autenticacao.sessao?.perfil)
   const [eventos, setEventos] = useState([])
+  const [carregandoEventos, setCarregandoEventos] = useState(true)
+  const [erroEventos, setErroEventos] = useState('')
+  const [tentativaEventos, setTentativaEventos] = useState(0)
   useNavegacao(pagina)
   
   useEffect(() => {
@@ -77,10 +65,13 @@ function App() {
   let consultaAtiva = true
 
   const buscarEventos = async () => {
+    setCarregandoEventos(true)
+    setErroEventos('')
+    setEventos([])
     try {
       const token = sessionStorage.getItem('token')
 
-      if (!token) return
+      if (!token) throw new Error('Sessão indisponível')
 
       const resposta = await listarEventos(token)
 
@@ -89,10 +80,17 @@ function App() {
       }
 
       const dados = await resposta.json()
+      if (!Array.isArray(dados)) throw new Error('Resposta de eventos inválida')
 
       if (consultaAtiva) setEventos(dados)
     } catch (erro) {
       console.error('Erro ao carregar eventos:', erro)
+      if (consultaAtiva) {
+        setEventos([])
+        setErroEventos('Não foi possível carregar os eventos. Tente novamente.')
+      }
+    } finally {
+      if (consultaAtiva) setCarregandoEventos(false)
     }
   }
 
@@ -100,8 +98,10 @@ function App() {
 
   return () => {
     consultaAtiva = false
+    setCarregandoEventos(true)
+    setEventos([])
   }
-}, [pagina])
+}, [pagina, tentativaEventos])
 
   const [geracaoSessaoCustos, setGeracaoSessaoCustos] = useState(0)
   const geracaoSessaoCustosRef = useRef(0)
@@ -117,15 +117,7 @@ function App() {
   const paginaAtualRef = useRef(pagina)
   const custos = rascunhosCustos[chaveEvento]?.itens || []
   const rascunhoCustosAtual = rascunhosCustos[chaveEvento]
-  const [eventoEmEdicao, setEventoEmEdicao] = useState({
-    nome: 'Summit Corporativo de Inovação & Tecnologia 2026',
-    data: '2026-11-18',
-    horario: '09:00',
-    local: 'Centro de Convenções Rebouças - São Paulo - SP',
-    categoria: 'Corporativo',
-    publico: 600,
-    descricao: 'Evento corporativo focado em inovação, tecnologia e integração entre equipes.',
-  })
+  const [eventoEmEdicao, setEventoEmEdicao] = useState(dadosNovoEvento)
   const persistenciaCustos = useCustosPersistidos({
     pagina, chaveEvento, rascunhos: rascunhosCustos, setRascunhos: setRascunhosCustos,
     geracaoSessao: geracaoSessaoCustos, geracaoSessaoRef: geracaoSessaoCustosRef,
@@ -151,11 +143,11 @@ function App() {
   function dadosNovoEvento() {
     return {
       nome: '',
-      data: '2026-11-20',
-      horario: '10:00',
+      data: '',
+      horario: '',
       local: '',
       categoria: 'Corporativo',
-      publico: 500,
+      publico: '',
       descricao: '',
     }
   }
@@ -296,7 +288,13 @@ function App() {
 
 const { aoSair } = useSessao({
   confirmarDescarteDaSessao, limparRascunhosDaSessao, paginaAtualRef, definirPagina,
+  invalidarAutenticacao: autenticacao.invalidar,
 })
+
+async function aoAutenticar(token, perfil) {
+  const confirmado = await autenticacao.iniciarSessao(token, perfil)
+  if (confirmado) setPagina(paginasPorPerfil[confirmado][0])
+}
 
 const aoSelecionarEvento = (eventoClicado) => {
   const id = Number(eventoClicado.id)
@@ -317,10 +315,10 @@ const aoSelecionarEvento = (eventoClicado) => {
     id,
     nome: eventoClicado.nome,
     data: dataFormatada,
-    horario: eventoClicado.horario?.substring(0, 5) || '09:00',
-    local: eventoClicado.local || 'São Paulo - SP',
-    categoria: eventoClicado.categoria || 'Corporativo',
-    publico: eventoClicado.publico || 500,
+    horario: eventoClicado.horario?.substring(0, 5) || '',
+    local: eventoClicado.local || '',
+    categoria: eventoClicado.categoria || '',
+    publico: eventoClicado.publico ?? '',
     descricao: eventoClicado.descricao || '',
   } }
 }
@@ -415,7 +413,7 @@ const aoExcluirEvento = async (evento) => {
   }
 }
 
-  const aoFinalizarESalvar = async (ticketSugerido) => {
+  const aoFinalizarESalvar = async () => {
   if (!custos.length) {
     alert('Cadastre os custos do evento antes de finalizar o planejamento financeiro.')
     return
@@ -437,7 +435,7 @@ const aoExcluirEvento = async (evento) => {
 const editando = Boolean(eventoEmEdicao.id)
 
 const resposta = await salvarEvento(eventoEmEdicao.id, {
-        nome: eventoEmEdicao.nome || 'Novo Evento Corporativo',
+        nome: eventoEmEdicao.nome,
         data: eventoEmEdicao.data,
         horario: eventoEmEdicao.horario,
         local: eventoEmEdicao.local,
@@ -462,8 +460,7 @@ const eventoSalvo = {
   id: eventoEmEdicao.id || dados.evento?.id || dados.id,
   data: eventoEmEdicao.data.split('-').reverse().join('/'),
   horario: eventoEmEdicao.horario,
-  cotacao: '5/5',
-  ticket: formatarMoeda(ticketSugerido)
+
 }
 
 if (!editando && !vincularRascunhoAoEvento(eventoSalvo.id, versaoAoSalvar)) {
@@ -497,6 +494,7 @@ alert(
   }
 }
 
+  if (autenticacao.verificando) return <p role="status">Validando sessão...</p>
   if (pagina === 'admin') {
     return <AdminPortal aoSair={aoSair} />
   }
@@ -504,7 +502,7 @@ alert(
     return <PortalFornecedor pagina={pagina} setPagina={setPagina} aoSair={aoSair} PerfilFornecedor={PerfilFornecedor} />
   }
   if (pagina === 'login') {
-    return <Login setPagina={setPagina} />
+    return <Login setPagina={setPagina} aoAutenticarSessao={aoAutenticar} erroSessao={autenticacao.erro} />
   }
   if (pagina === 'cadastro') {
   return <Cadastro setPagina={setPagina} />
@@ -539,6 +537,9 @@ alert(
       {pagina === 'eventos' && (
         <Eventos
           eventos={eventos}
+          carregando={carregandoEventos}
+          erro={erroEventos}
+          aoTentarNovamente={() => setTentativaEventos((valor) => valor + 1)}
           setPagina={setPagina}
           aoSelecionarEvento={aoSelecionarEvento}
           aoCriarNovoEvento={aoCriarNovoEvento}

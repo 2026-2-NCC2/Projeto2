@@ -11,7 +11,7 @@ function carregar(file, nomes, hooks = {}) {
     .replace(/^import .*\r?\n/gm, '').replaceAll('export function ', 'function ')
   const result = transformSync(file, source, { jsx: { runtime: 'classic', pragma: 'jsx', pragmaFrag: 'Fragment' } })
   assert.equal(result.errors.length, 0)
-  return vm.runInNewContext(result.code + '\n({' + nomes.join(',') + '})', { jsx, Fragment: 'fragment', IdentidadeConta: () => null, ...hooks })
+  return vm.runInNewContext(result.code + '\n({' + nomes.join(',') + '})', { jsx, Fragment: 'fragment', Icone: 'svg', IdentidadeConta: () => null, ...hooks })
 }
 function disclosure() {
   let open = false, focused = 0
@@ -57,12 +57,12 @@ test('menu e topo administrativos conservam destinos e saida', () => {
   const { AdminMenu, AdminTopo } = carregar('components/admin/AdminPortal.jsx', ['AdminMenu', 'AdminTopo'])
   const actions = [], view = AdminMenu({ secao: 'eventos', setSecao: x => actions.push(x), aoSair: () => actions.push('sair') })
   for (const b of nodes(view).filter(x => x.type === 'button' && x.props.onClick)) b.props.onClick()
-  assert.deepEqual(actions, ['eventos', 'usuarios', 'cotacoes', 'propostas', 'contas', 'sair'])
+  assert.deepEqual(actions, ['eventos', 'usuarios', 'cotacoes', 'propostas', 'contas', 'perfil', 'sair'])
   const unavailable = nodes(view).filter(x => x.type === 'button' && x.props.disabled)
-  assert.equal(unavailable.length, 2)
+  assert.equal(unavailable.length, 3)
   for (const button of unavailable) {
     assert.equal(button.props.onClick, undefined)
-    assert.equal(button.props.title, 'Funcionalidade em desenvolvimento')
+    assert.match(button.props.title, /Funcionalidade (em desenvolvimento|indisponível)/)
   }
   const logout = nodes(AdminTopo({ aoSair: () => actions.push('sair-topo') })).find(x => x.props['aria-label'] === 'Sair da conta de administrador')
   logout.props.onClick(); assert.equal(actions.at(-1), 'sair-topo')

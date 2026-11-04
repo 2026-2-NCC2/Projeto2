@@ -2,6 +2,20 @@
 const assert=require('node:assert/strict'),crypto=require('node:crypto');
 const {lerConfiguracaoBanco,validarInicializacaoBanco}=require('./banco.cjs');
 const {criarEstadoPrivado}=require('./estado-supervisor.cjs');
+const fs=require('node:fs'),path=require('node:path');
+function validarAtivacao(){
+  // Arquivo versionado, sem autoridade para migracao, recuperacao ou rollback.
+  // Falhas de leitura/JSON e qualquer divergencia recusam o startup normal.
+  const manifesto=JSON.parse(fs.readFileSync(path.join(__dirname,'ativacao-supabase.json'),'utf8'));
+  assert.deepEqual(manifesto,{
+    versao:1,status:'ATIVACAO_DEFINITIVA',escopo:'INICIALIZACAO_NORMAL',provider:'supabase',
+    projeto:'gnwybroqfvwosiqzsfla',url:REF,
+    encerramento:'evidencias/resultado-encerramento-administrativo-20261103.json',
+    criterio:'RECONCILIACAO_ATUAL',ausenciaHistoricaDeEscritasComprovada:false,
+    lacunaHistoricaExplicitamenteAceita:true,snapshotIndependenteAnteriorAusente:true,
+  },'STARTUP_MANIFESTO_INVALIDO');
+  return manifesto;
+}
 const REF='https://gnwybroqfvwosiqzsfla.supabase.co',contextos=new WeakSet();let instalado;
 function fingerprint(env){const c=lerConfiguracaoBanco(env,'principal');assert.equal(c.provider,'supabase');assert.equal(c.url,REF);assert.equal(env.TROCATICKET_HOMOLOGACAO,undefined);assert.ok(typeof env.JWT_SECRET==='string'&&env.JWT_SECRET.length>=32);assert.notEqual(env.JWT_SECRET,env.HOMOLOG_JWT_SECRET);return crypto.createHash('sha256').update(JSON.stringify([c.provider,c.url,c.secretKey,env.JWT_SECRET])).digest('hex');}
 function consumirEntrada({estado,env,instancia,ticket,pid=process.pid,instalar=false}){
@@ -25,11 +39,25 @@ function consumirRestabelecimento({estado,env,instancia,ticket,pid=process.pid,i
   const ctx={estado,instancia,pid,janela:t.id,tipo:'RESTABELECIMENTO_SELADO',admissaoId:r.id};contextos.add(ctx);if(instalar)instalado=ctx;return ctx;
 }
 function validarEntrada(env,modo='principal',{contexto=instalado,estado=contexto?.estado||criarEstadoPrivado()}={}){
-  const c=lerConfiguracaoBanco(env,modo);if(modo==='isolado')return validarInicializacaoBanco(env,modo);const e=estado.ler(),t=e.transicao;
-  if(c.provider==='mysql'){assert.ok(t?.fase!=='CONCLUIDA','STARTUP_MYSQL_APOS_ATIVACAO_RECUSADO');return validarInicializacaoBanco(env,modo);}
-  if(!t)return validarInicializacaoBanco(env,modo); // Trava historica mantida.
+  if(modo==='isolado')return validarInicializacaoBanco(env,modo);
+  const e=estado.ler(),t=e.transicao;
+  assert.ok(e?.versao===1&&typeof e.congelado==='boolean'&&typeof e.selado==='boolean'&&Array.isArray(e.instancias)&&e.instancias.every(x=>typeof x==='string')&&(!e.selado||e.congelado),'SUPERVISOR_ESTADO_INVALIDO');
+  if(!contextos.has(contexto)||t?.fase==='CONCLUIDA'){
+    // Bloqueios locais sempre precedem a autorizacao portavel. Sem fallback.
+    assert.ok(!e.congelado&&!e.selado&&(t===undefined||(t&&typeof t==='object'&&!Array.isArray(t)&&t.fase==='CONCLUIDA')),'STARTUP_ESTADO_LOCAL_BLOQUEADO');
+    const manifesto=validarAtivacao();
+    const c=lerConfiguracaoBanco(env,modo);
+    assert.equal(env.DB_PROVIDER,'supabase','STARTUP_MYSQL_APOS_ATIVACAO_RECUSADO');
+    assert.equal(c.url,manifesto.url,'STARTUP_PROJETO_DIVERGENTE');
+    assert.equal(env.TROCATICKET_HOMOLOGACAO,undefined);
+    assert.ok(typeof env.JWT_SECRET==='string'&&env.JWT_SECRET.length>=32,'STARTUP_JWT_INVALIDO');
+    assert.notEqual(env.JWT_SECRET,env.HOMOLOG_JWT_SECRET);
+    return c;
+  }
+  // Somente capacidades privadas ja consumidas admitem procedimentos selados.
+  // Fingerprints e tickets destes procedimentos permanecem inalterados.
+  const c=lerConfiguracaoBanco(env,modo);
   assert.equal(modo,'principal');assert.equal(c.url,REF);assert.equal(t.configuracaoHash,fingerprint(env));
-  if(t.fase==='CONCLUIDA'){assert.ok(!e.congelado&&!e.selado);return c;}
   if(t.fase==='INCERTA'){
     const r=t.restabelecimento;assert.ok(contextos.has(contexto)&&contexto.tipo==='RESTABELECIMENTO_SELADO'&&contexto.estado===estado&&contexto.janela===t.id,'RESTABELECIMENTO_CONTEXTO_RECUSADO');
     assert.ok(e.congelado&&e.selado&&['CONSUMIDA','ADMITIDA_SELADA'].includes(r?.etapa)&&r.ticket===null);assert.equal(r.id,contexto.admissaoId);assert.equal(r.destino,contexto.instancia);assert.equal(r.pidDestino,contexto.pid);assert.equal(r.checkpointId,t.checkpointId);assert.equal(r.janelaId,t.id);assert.equal(r.configuracaoHash,fingerprint(env));assert.deepEqual(e.instancias,[r.destino]);return c;

@@ -1,8 +1,9 @@
+import { Icone } from '../ui/Icone.jsx'
 export function Menu({ pagina, setPagina, aoCriarNovoEvento, aoSair }) {
   return (
     <aside className="menu" aria-label="Navegação do organizador">
       <div className="logo">
-        ▣ <span>TrocaTicket</span>
+        <Icone nome="ticket" /> <span>TrocaTicket</span>
       </div>
       <button
         className="novo"
@@ -11,7 +12,7 @@ export function Menu({ pagina, setPagina, aoCriarNovoEvento, aoSair }) {
           setPagina('criar')
         }}
       >
-        + Novo evento
+        <Icone nome="adicionar" /> Novo evento
       </button>
       <nav aria-label="Seções do organizador">
         <button
@@ -19,35 +20,35 @@ export function Menu({ pagina, setPagina, aoCriarNovoEvento, aoSair }) {
           className={pagina === 'eventos' ? 'ativo' : ''}
           onClick={() => setPagina('eventos')}
         >
-          ▦ Meus Eventos
+          <Icone nome="eventos" /> Meus eventos
         </button>
         <button
           aria-current={pagina === 'criar' ? 'page' : undefined}
           className={pagina === 'criar' ? 'ativo' : ''}
           onClick={() => setPagina('criar')}
         >
-          ➕ Criar Evento
+          <Icone nome="adicionar" /> Criar evento
         </button>
         <button
           aria-current={pagina === 'custos' ? 'page' : undefined}
           className={pagina === 'custos' ? 'ativo' : ''}
           onClick={() => setPagina('custos')}
         >
-          📊 Custos
+          <Icone nome="custos" /> Custos
         </button>
         <button
           aria-current={pagina === 'cotacao' ? 'page' : undefined}
           className={pagina === 'cotacao' ? 'ativo' : ''}
           onClick={() => setPagina('cotacao')}
         >
-          ▣ Cotações & Concorrência
+          <Icone nome="documento" /> Cotações e concorrência
         </button>
         <button
           aria-current={pagina === 'ticket' ? 'page' : undefined}
           className={pagina === 'ticket' ? 'ativo' : ''}
           onClick={() => setPagina('ticket')}
         >
-          ◇ Propostas & Ticket
+          <Icone nome="ticket" /> Propostas e ticket
         </button>
       </nav>
       <div className="menuRodape">
@@ -56,9 +57,9 @@ export function Menu({ pagina, setPagina, aoCriarNovoEvento, aoSair }) {
           className={pagina === 'perfil' ? 'ativo' : ''}
           onClick={() => setPagina('perfil')}
         >
-          ◉ Perfil
+          <Icone nome="perfil" /> Perfil
         </button>
-        <button onClick={aoSair}>↪ Sair</button>
+        <button onClick={aoSair}><Icone nome="sair" /> Sair</button>
       </div>
     </aside>
   )

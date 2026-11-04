@@ -52,7 +52,7 @@ function ambiente() {
       if (nome === "./repositories/mysql/inscricoes.cjs") return require("../repositories/mysql/inscricoes.cjs");
       if (nome === "./repositories/mysql/solicitacoes-acesso.cjs") return require("../repositories/mysql/solicitacoes-acesso.cjs");
       if (nome === "./repositories/mysql/custos.cjs") return require("../repositories/mysql/custos.cjs");
-      if (nome === "./isolamento.cjs") return { modoExecucao: () => "principal" };
+      if (nome === "./isolamento.cjs") return { modoExecucao: () => "isolado" };
       if (nome === "dotenv") return { config() {} };
       throw new Error("Dependencia inesperada");
     },

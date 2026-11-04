@@ -22,6 +22,10 @@ function criar(db, { agora, modulos = {} } = {}) {
   } };
 }
 function dependencia(nome, db, options) {
+  if (nome === "./imagens/rotas.cjs") return require("../../imagens/rotas.cjs");
+  if (nome === "./perfil.cjs") return require("../../perfil.cjs");
+  if (nome === "./config/startup-controlado.cjs") return { validarEntrada: (env, modo) =>
+    require('../../config/startup-controlado.cjs').validarEntrada(env, modo, { estado: { ler: () => ({ versao: 1, congelado: false, selado: false, instancias: [] }) } }) };
   if (nome === "./config/banco.cjs") return require("../../config/banco.cjs");
   if (nome === "./services/suporte-transacoes.cjs") return suporte;
   if (nome === "./repositories/index.cjs") return { criarPersistencia: () => criar(db, options) };

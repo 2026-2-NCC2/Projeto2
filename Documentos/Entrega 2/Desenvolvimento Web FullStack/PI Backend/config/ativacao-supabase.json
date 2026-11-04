@@ -1,0 +1,13 @@
+{
+  "versao": 1,
+  "status": "ATIVACAO_DEFINITIVA",
+  "escopo": "INICIALIZACAO_NORMAL",
+  "provider": "supabase",
+  "projeto": "gnwybroqfvwosiqzsfla",
+  "url": "https://gnwybroqfvwosiqzsfla.supabase.co",
+  "encerramento": "evidencias/resultado-encerramento-administrativo-20261103.json",
+  "criterio": "RECONCILIACAO_ATUAL",
+  "ausenciaHistoricaDeEscritasComprovada": false,
+  "lacunaHistoricaExplicitamenteAceita": true,
+  "snapshotIndependenteAnteriorAusente": true
+}

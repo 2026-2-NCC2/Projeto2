@@ -66,7 +66,14 @@ async function main({relacoes=false,propostas=false,fornecedor=false}={}){
     });
     if(users?.length){
       const u=users[0],missing=Math.max(...users.map(r=>r.id))+1;assert.ok(missing<=2147483647);
-      await check('usuarios.buscarPerfil: filtro id e projecao',async()=>{const r=await usersRepo.buscarPerfil(u.id);assert.deepEqual(r,{id:u.id,nome:u.nome,email:u.email});});
+      await check('usuarios.buscarPerfil: filtro id e projecao',async()=>{
+        const r=await usersRepo.buscarPerfil(u.id);
+        const {telefone,biografia,edicao_disponivel,...identidade}=r;
+        assert.deepEqual(identidade,{id:u.id,nome:u.nome,email:u.email});
+        assert.equal(typeof edicao_disponivel,'boolean');
+        for(const campo of [telefone,biografia])assert.ok(campo===null||typeof campo==='string');
+        if(!edicao_disponivel){assert.equal(telefone,null);assert.equal(biografia,null);}
+      });
       await check('usuarios.buscarParaAutenticacao: perfil atual sem JWT',async()=>{assert.deepEqual(await usersRepo.buscarParaAutenticacao(u.id),u);});
       await check('usuarios.buscarIdPorEmail: filtro exato e projecao',async()=>{assert.deepEqual(await usersRepo.buscarIdPorEmail(u.email),{id:u.id});});
       await check('usuarios: ausencia por id retorna undefined',async()=>{assert.equal(await usersRepo.buscarPerfil(missing),undefined);assert.equal(await usersRepo.buscarParaAutenticacao(missing),undefined);});
