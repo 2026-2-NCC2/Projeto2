@@ -125,6 +125,21 @@ A API utiliza **http://localhost:3001**. Abra o endereço informado pelo Vite pa
 
 O comando `npm start` utiliza os certificados confiáveis do sistema e mantém a verificação TLS. Para detalhes, consulte o [guia de instalação do backend](Documentos/Entrega%202/Desenvolvimento%20Web%20FullStack/PI%20Backend/INSTALACAO.md). A instalação normal utiliza Supabase e não exige executar migrações ou scripts SQL.
 
+
+## Declaração de Uso de Inteligência Artificial
+
+| Campo | Declaração |
+|---|---|
+| **Ferramenta utilizada** | ChatGPT (OpenAI) |
+| **Versão/modelo** | GPT Sol 6.1 |
+| **Disciplina / Trabalho** | Desenvolvimento Web Full Stack — Projeto TrocaTicket |
+| **Finalidade de uso** | Auxiliar na compreensão e no planejamento da migração do banco de dados do projeto para o Supabase, por meio de orientações técnicas, esclarecimento de dúvidas e sugestões de procedimentos. A ferramenta também foi consultada para auxiliar na avaliação de possíveis melhorias visuais da plataforma, apresentando algumas sugestões de alterações na interface. |
+| **Prompts principais utilizados** | Solicitações de orientações para a migração do banco de dados para o Supabase, esclarecimento de dúvidas sobre configuração e conexão e sugestões de melhorias na aparência visual do TrocaTicket. |
+| **Trechos ou entregas afetadas** | Planejamento e orientações técnicas relacionadas à migração do banco de dados para o Supabase e sugestões de alterações visuais da plataforma. |
+
+A inteligência artificial foi utilizada como ferramenta auxiliar de consulta e orientação. A análise das sugestões, as decisões sobre sua utilização e a responsabilidade pelo conteúdo final permanecem com os integrantes do projeto.
+
+
 ## 📋 Licença/License
 
 [TrocaTicket](https://github.com/2026-2-NCC2/Projeto2) © 2026 por [Carlos Eduardo da Silva](https://github.com/IC4DUI), [Lucas Pelliciotti Cintra Da Silva](https://github.com/lucaspelliciotti), [Guilherme Harada Morato](https://github.com/guilhermehmorato-glitch) e [Guilherme Fernandes Alexandre de Carvalho](https://github.com/GuilhermeF420) está licenciado sob [Creative Commons Atribuição 4.0 Internacional](https://creativecommons.org/licenses/by/4.0/).
