@@ -24,6 +24,7 @@ O projeto reúne áreas para **organizadores, fornecedores, participantes e admi
 
 ## 🛠 Estrutura de pastas
 
+<<<<<<< HEAD
 - **Raiz**
   - **Documentos**
     - **Entrega 1**
@@ -53,6 +54,21 @@ O projeto reúne áreas para **organizadores, fornecedores, participantes e admi
   - **README.md**
 
 As pastas em `src/` contêm arquivos de reserva. O código executável está em **Documentos**, nas pastas de Desenvolvimento Web FullStack.
+=======
+- **Documentos/**
+  - **Entrega 1/** — materiais das disciplinas e frontend em `Desenvolvimento Web FullStack/PI React/`.
+  - **Entrega 2/** — materiais das disciplinas e desenvolvimento em `Desenvolvimento Web FullStack/`:
+    - **PI React/** — frontend.
+    - **PI Backend/** — API.
+    - **Banco de dados/** — scripts SQL e documentação.
+    - **arquivo/** — documentação arquivada.
+- **src/**
+  - **Entrega 1/** — pastas Backend e Frontend.
+  - **Entrega 2/** — pastas Backend e Frontend.
+- **README.md** — apresentação e instruções do projeto.
+
+As pastas em `src/` contêm arquivos de reserva. O código executável está em **Documentos/**, nos caminhos indicados acima. Os materiais acadêmicos de cada disciplina estão relacionados na tabela a seguir.
+>>>>>>> ac853b5be47caebcf19f7b0aeb1253075341348d
 
 ## 💾 Tabela de entregas
 
@@ -132,12 +148,18 @@ O comando `npm start` utiliza os certificados confiáveis do sistema e mantém a
 
 ## 📋 Licença/License
 
+<<<<<<< HEAD
 [TrocaTicket](https://github.com/2026-2-NCC2/Projeto2) © 2026 por [Carlos Eduardo da Silva](https://github.com/IC4DUI), [Lucas Pelliciotti Cintra Da Silva](https://github.com/lucaspelliciotti), [Guilherme Harada Morato](https://github.com/guilhermehmorato-glitch) e [Guilherme Fernandes Alexandre de Carvalho](https://github.com/GuilhermeF420) está licenciado sob [Creative Commons Atribuição 4.0 Internacional](https://creativecommons.org/licenses/by/4.0/).
 
 <a href="https://creativecommons.org/licenses/by/4.0/">
   <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="Creative Commons" width="32">
   <img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="Atribuição" width="32">
 </a>
+=======
+**Pendente de definição pela equipe.**
+
+As informações de licença existentes no projeto apresentam divergências. A licença será formalizada após confirmação dos quatro integrantes oficiais.
+>>>>>>> ac853b5be47caebcf19f7b0aeb1253075341348d
 
 ## 🎓 Reference
 
