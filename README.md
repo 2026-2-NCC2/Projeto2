@@ -136,4 +136,4 @@ O comando `npm start` utiliza os certificados confiáveis do sistema e mantém a
 
 ## 🎓 Reference
 
-(https://trocaticket.com.br/index)
+[TrocaTicket](https://trocaticket.com.br/index)
