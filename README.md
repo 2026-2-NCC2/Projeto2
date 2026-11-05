@@ -2,19 +2,16 @@
 
 <p align="center">
 <a href="https://www.fecap.br/"><img src="https://tse4.mm.bing.net/th/id/OIP.mmndDi3pHHHtTOmlNkpU0QHaCZ?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="FECAP - Fundação de Comércio Álvares Penteado" border="0"></a>
-<<<<<<< HEAD
-=======
 <
->>>>>>> 30a0d1558f3fa2cb4dc0299535418bb0fcf11454
 </p>
 
 # TrocaTicket
 
 ## Integrantes: <a href="https://github.com/IC4DUI">Carlos Eduardo da Silva</a>, <a href="https://github.com/lucaspelliciotti">Lucas Pelliciotti Cintra Da Silva</a>, <a href="https://github.com/guilhermehmorato-glitch">Guilherme Harada Morato</a>, <a href="https://github.com/GuilhermeF420">Guilherme Fernandes Alexandre de Carvalho</a>
-<<<<<<< HEAD
+
 
 ## Professores Orientadores: <a href="https://www.linkedin.com/in/francisco-escobar/">Francisco de Souza Escobar</a>, <a href="https://www.linkedin.com/in/paula-astorino-432b5812a/">Paula Sanchez Astorino</a>, <a href="https://www.linkedin.com/in/dolemes/">David De Oliveira Lemes</a>, <a href="https://www.linkedin.com/in/jesuslisboagomes/">Jésus De Lisboa Gomes</a>, <a href="https://www.linkedin.com/in/katia-bossi/">Katia Milani Lara Bossi</a>
-=======
+
 
 </p>TrocaTicket
 Integrantes: <a href="https://github.com/IC4DUI">Carlos Eduardo da Silva</a>, <a href="https://github.com/lucaspelliciotti">Lucas Pelliciotti Cintra Da Silva</a>, <a href="https://github.com/guilhermehmorato-glitch">Guilherme Harada Morato</a>, <a href="https://github.com/GuilhermeF420">Guilherme Fernandes Alexandre de Carvalho</a>
@@ -24,16 +21,15 @@ O TrocaTicket é uma plataforma desenvolvida para facilitar a organização de e
 
 A proposta do sistema é centralizar diferentes etapas do processo de organização de um evento em um único ambiente, permitindo que o organizador cadastre seus eventos, planeje os custos e publique cotações para receber propostas de fornecedores.
 
->>>>>>> 30a0d1558f3fa2cb4dc0299535418bb0fcf11454
+
 
 ## 📌 Descrição
 
-<<<<<<< HEAD
-=======
+
 Dessa forma, o TrocaTicket busca tornar o planejamento de eventos mais prático, organizado e transparente, reduzindo a necessidade de utilizar diferentes ferramentas durante o processo.
 
 
->>>>>>> 30a0d1558f3fa2cb4dc0299535418bb0fcf11454
+
 O **TrocaTicket** é uma plataforma desenvolvida para facilitar a organização de eventos por meio da conexão entre organizadores e fornecedores de serviços.
 
 A proposta do sistema é centralizar diferentes etapas do processo de organização de um evento em um único ambiente, permitindo que o organizador cadastre seus eventos, planeje os custos e publique cotações para receber propostas de fornecedores.
