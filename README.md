@@ -2,16 +2,38 @@
 
 <p align="center">
 <a href="https://www.fecap.br/"><img src="https://tse4.mm.bing.net/th/id/OIP.mmndDi3pHHHtTOmlNkpU0QHaCZ?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="FECAP - Fundação de Comércio Álvares Penteado" border="0"></a>
+<<<<<<< HEAD
+=======
+<
+>>>>>>> 30a0d1558f3fa2cb4dc0299535418bb0fcf11454
 </p>
 
 # TrocaTicket
 
 ## Integrantes: <a href="https://github.com/IC4DUI">Carlos Eduardo da Silva</a>, <a href="https://github.com/lucaspelliciotti">Lucas Pelliciotti Cintra Da Silva</a>, <a href="https://github.com/guilhermehmorato-glitch">Guilherme Harada Morato</a>, <a href="https://github.com/GuilhermeF420">Guilherme Fernandes Alexandre de Carvalho</a>
+<<<<<<< HEAD
 
 ## Professores Orientadores: <a href="https://www.linkedin.com/in/francisco-escobar/">Francisco de Souza Escobar</a>, <a href="https://www.linkedin.com/in/paula-astorino-432b5812a/">Paula Sanchez Astorino</a>, <a href="https://www.linkedin.com/in/dolemes/">David De Oliveira Lemes</a>, <a href="https://www.linkedin.com/in/jesuslisboagomes/">Jésus De Lisboa Gomes</a>, <a href="https://www.linkedin.com/in/katia-bossi/">Katia Milani Lara Bossi</a>
+=======
+
+</p>TrocaTicket
+Integrantes: <a href="https://github.com/IC4DUI">Carlos Eduardo da Silva</a>, <a href="https://github.com/lucaspelliciotti">Lucas Pelliciotti Cintra Da Silva</a>, <a href="https://github.com/guilhermehmorato-glitch">Guilherme Harada Morato</a>, <a href="https://github.com/GuilhermeF420">Guilherme Fernandes Alexandre de Carvalho</a>
+Professores Orientadores: <a href="https://www.linkedin.com/in/francisco-escobar/">Francisco de Souza Escobar</a>, <a href="https://www.linkedin.com/in/paula-astorino-432b5812a/">Paula Sanchez Astorino</a>, <a href="https://www.linkedin.com/in/dolemes/">David De Oliveira Lemes</a>, <a href="https://www.linkedin.com/in/jesuslisboagomes/">Jésus De Lisboa Gomes</a>, <a href="https://www.linkedin.com/in/katia-bossi/">Katia Milani Lara Bossi</a>
+📌 Descrição
+O TrocaTicket é uma plataforma desenvolvida para facilitar a organização de eventos por meio da conexão entre organizadores e fornecedores de serviços.
+
+A proposta do sistema é centralizar diferentes etapas do processo de organização de um evento em um único ambiente, permitindo que o organizador cadastre seus eventos, planeje os custos e publique cotações para receber propostas de fornecedores.
+
+>>>>>>> 30a0d1558f3fa2cb4dc0299535418bb0fcf11454
 
 ## 📌 Descrição
 
+<<<<<<< HEAD
+=======
+Dessa forma, o TrocaTicket busca tornar o planejamento de eventos mais prático, organizado e transparente, reduzindo a necessidade de utilizar diferentes ferramentas durante o processo.
+
+
+>>>>>>> 30a0d1558f3fa2cb4dc0299535418bb0fcf11454
 O **TrocaTicket** é uma plataforma desenvolvida para facilitar a organização de eventos por meio da conexão entre organizadores e fornecedores de serviços.
 
 A proposta do sistema é centralizar diferentes etapas do processo de organização de um evento em um único ambiente, permitindo que o organizador cadastre seus eventos, planeje os custos e publique cotações para receber propostas de fornecedores.
@@ -25,6 +47,13 @@ Dessa forma, o TrocaTicket busca tornar o planejamento de eventos mais **prátic
 > Imagem da plataforma: pendente de inclusão de uma captura de tela do projeto.
 
 ### Missão
+<<<<<<< HEAD
+=======
+=======
+Confira o protótipo no Figma.
+Imagem da plataforma: pendente de inclusão de uma captura de tela do projeto.
+
+>>>>>>> 30a0d1558f3fa2cb4dc0299535418bb0fcf11454
 
 Facilitar a organização de eventos por meio de uma plataforma que conecta organizadores a fornecedores, permitindo encontrar serviços, solicitar e comparar propostas e acompanhar contratações de forma prática, segura e transparente.
 
@@ -43,6 +72,10 @@ Ser uma plataforma de referência para a organização de eventos, tornando mais
 
 ## 🎯 Proposta de Valor
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 30a0d1558f3fa2cb4dc0299535418bb0fcf11454
 O TrocaTicket busca solucionar uma dificuldade comum na organização de eventos: encontrar fornecedores adequados, analisar diferentes propostas e organizar o planejamento em um único ambiente.
 
 A jornada implementada reúne as seguintes etapas:
@@ -94,6 +127,50 @@ O frontend do TrocaTicket utiliza **React e Vite**. Na **Entrega 1**, foi desenv
 
 ### Funcionalidades implementadas no código
 
+<<<<<<< HEAD
+=======
+
+Entrar → Visualizar eventos → Criar evento → Planejar custos → Publicar cotação → Receber e avaliar propostas
+
+A contratação e seu acompanhamento fazem parte da proposta do projeto; a área de contratos ativos ainda está indisponível.
+🛠 Estrutura de Pastas
+A organização principal do repositório é:
+- Documentos
+  - Entrega 1
+    - Cálculo II
+    - Desenvolvimento Web FullStack
+      - PI React — frontend da primeira entrega
+    - Gestão Empresarial e Dinâmicas das Organizações
+    - Projeto Interdisciplinar Programação Web
+    - Projeto em Banco de Dados
+  - Entrega 2
+    - Cálculo II
+    - Desenvolvimento Web FullStack
+      - PI React — frontend atual
+      - PI Backend — API do projeto
+      - Banco de dados — scripts SQL e documentação
+      - arquivo — documentação arquivada
+    - Gestão Empresarial e Dinâmicas das Organizações
+    - Projeto Interdisciplinar Programação Web
+    - Projeto em Banco de Dados
+- src
+  - Entrega 1
+    - Backend
+    - Frontend
+  - Entrega 2
+    - Backend
+    - Frontend
+- README.md
+README.md: guia principal com a apresentação e as instruções do projeto.
+
+Documentos: reúne os materiais acadêmicos e o código das duas entregas.
+
+src: contém a estrutura de reserva das entregas, com arquivos Código aqui.txt. O código executável está em Documentos, nos caminhos indicados acima.
+💻 Desenvolvimento Web
+O frontend do TrocaTicket utiliza React e Vite. Na Entrega 1, foi desenvolvido o protótipo navegável. Na Entrega 2, a aplicação passou a contar com um backend em Node.js e Express, integrado ao Supabase.
+Funcionalidades implementadas no código
+>>>>>>> 47a3d71a6a1a7f8230c853c6fef285925df01eaf
+>>>>>>> 30a0d1558f3fa2cb4dc0299535418bb0fcf11454
 - Cadastro, login e navegação por perfil de usuário.
 - Listagem, criação, edição e publicação de eventos.
 - Cancelamento e encerramento de eventos.
