@@ -1,18 +1,15 @@
 # FECAP - Fundação de Comércio Álvares Penteado
 
 <p align="center">
-  <a href="https://www.fecap.br/">
-    <img src="https://tse4.mm.bing.net/th/id/OIP.mmndDi3pHHHtTOmlNkpU0QHaCZ?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="FECAP - Fundação de Comércio Álvares Penteado" width="420">
-  </a>
+<a href= "https://www.fecap.br/"><img src="https://tse4.mm.bing.net/th/id/OIP.mmndDi3pHHHtTOmlNkpU0QHaCZ?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="FECAP - Fundação de Comércio Álvares Penteado" border="0"></a>
 </p>
 
 # TrocaTicket
+## CLJG
 
-**Projeto acadêmico interdisciplinar voltado à organização de eventos.**
+## Integrantes: <a href="https://github.com/IC4DUI">Carlos Eduardo da Silva</a>, <a href="https://github.com/lucaspelliciotti">Lucas Pelliciotti Cintra Da Silva</a>, <a href="https://github.com/guilhermehmorato-glitch">Guilherme Harada Morato</a>, <a href="https://github.com/GuilhermeF420">Guilherme Fernandes Alexandre de Carvalho</a>
 
-**Integrantes:** [Carlos Eduardo da Silva](https://github.com/IC4DUI), [Lucas Pelliciotti Cintra Da Silva](https://github.com/lucaspelliciotti), [Guilherme Harada Morato](https://github.com/guilhermehmorato-glitch) e [Guilherme Fernandes Alexandre de Carvalho](https://github.com/GuilhermeF420).
-
-**Professores orientadores:** [Francisco de Souza Escobar](https://www.linkedin.com/in/francisco-escobar/), [Paula Sanchez Astorino](https://www.linkedin.com/in/paula-astorino-432b5812a/), [David De Oliveira Lemes](https://www.linkedin.com/in/dolemes/), [Jésus De Lisboa Gomes](https://www.linkedin.com/in/jesuslisboagomes/) e [Katia Milani Lara Bossi](https://www.linkedin.com/in/katia-bossi/).
+## Professores Orientadores: <a href="https://www.linkedin.com/in/francisco-escobar/">Francisco de Souza Escobar</a>, <a href="https://www.linkedin.com/in/paula-astorino-432b5812a/">Paula Sanchez Astorino</a>, <a href="https://www.linkedin.com/in/dolemes/">David De Oliveira Lemes</a>, <a href="https://www.linkedin.com/in/jesuslisboagomes/">Jésus De Lisboa Gomes</a>, <a href="https://www.linkedin.com/in/katia-bossi/">Katia Milani Lara Bossi</a>
 
 ## 📌 Descrição
 
@@ -24,7 +21,6 @@ O projeto reúne áreas para **organizadores, fornecedores, participantes e admi
 
 ## 🛠 Estrutura de pastas
 
-<<<<<<< HEAD
 - **Raiz**
   - **Documentos**
     - **Entrega 1**
@@ -52,23 +48,6 @@ O projeto reúne áreas para **organizadores, fornecedores, participantes e admi
       - Backend
       - Frontend
   - **README.md**
-
-As pastas em `src/` contêm arquivos de reserva. O código executável está em **Documentos**, nas pastas de Desenvolvimento Web FullStack.
-=======
-- **Documentos/**
-  - **Entrega 1/** — materiais das disciplinas e frontend em `Desenvolvimento Web FullStack/PI React/`.
-  - **Entrega 2/** — materiais das disciplinas e desenvolvimento em `Desenvolvimento Web FullStack/`:
-    - **PI React/** — frontend.
-    - **PI Backend/** — API.
-    - **Banco de dados/** — scripts SQL e documentação.
-    - **arquivo/** — documentação arquivada.
-- **src/**
-  - **Entrega 1/** — pastas Backend e Frontend.
-  - **Entrega 2/** — pastas Backend e Frontend.
-- **README.md** — apresentação e instruções do projeto.
-
-As pastas em `src/` contêm arquivos de reserva. O código executável está em **Documentos/**, nos caminhos indicados acima. Os materiais acadêmicos de cada disciplina estão relacionados na tabela a seguir.
->>>>>>> ac853b5be47caebcf19f7b0aeb1253075341348d
 
 ## 💾 Tabela de entregas
 
@@ -148,18 +127,12 @@ O comando `npm start` utiliza os certificados confiáveis do sistema e mantém a
 
 ## 📋 Licença/License
 
-<<<<<<< HEAD
 [TrocaTicket](https://github.com/2026-2-NCC2/Projeto2) © 2026 por [Carlos Eduardo da Silva](https://github.com/IC4DUI), [Lucas Pelliciotti Cintra Da Silva](https://github.com/lucaspelliciotti), [Guilherme Harada Morato](https://github.com/guilhermehmorato-glitch) e [Guilherme Fernandes Alexandre de Carvalho](https://github.com/GuilhermeF420) está licenciado sob [Creative Commons Atribuição 4.0 Internacional](https://creativecommons.org/licenses/by/4.0/).
 
 <a href="https://creativecommons.org/licenses/by/4.0/">
   <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="Creative Commons" width="32">
   <img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="Atribuição" width="32">
 </a>
-=======
-**Pendente de definição pela equipe.**
-
-As informações de licença existentes no projeto apresentam divergências. A licença será formalizada após confirmação dos quatro integrantes oficiais.
->>>>>>> ac853b5be47caebcf19f7b0aeb1253075341348d
 
 ## 🎓 Reference
 
