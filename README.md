@@ -136,4 +136,4 @@ O comando `npm start` utiliza os certificados confiáveis do sistema e mantém a
 
 ## 🎓 Reference
 
-Site oficial do TrocaTicket: URL ainda não confirmada nos arquivos verificados.
+(https://trocaticket.com.br/index)
