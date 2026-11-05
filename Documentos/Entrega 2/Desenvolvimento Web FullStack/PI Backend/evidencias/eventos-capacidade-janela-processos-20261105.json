@@ -1,0 +1,15 @@
+﻿{
+    "Porta3001Livre":  true,
+    "Porta5173Livre":  true,
+    "BackendIdentificadoAtivo":  false,
+    "ViteEncerradoPorCtrlC":  true,
+    "PidViteEncerrado":  34636,
+    "Forcado":  false,
+    "ReinicioObservado":  false,
+    "Observacoes":  [
+                        "2026-11-05T04:24:08.0761472Z",
+                        "2026-11-05T04:24:18.4861214Z",
+                        "2026-11-05T04:24:28.8178246Z"
+                    ],
+    "Limite":  "Inventario local; clientes remotos externos nao bloqueados"
+}

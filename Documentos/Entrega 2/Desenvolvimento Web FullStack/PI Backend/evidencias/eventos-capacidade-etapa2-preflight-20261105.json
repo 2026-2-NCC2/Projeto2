@@ -1,0 +1,333 @@
+{
+  "projeto": "gnwybroqfvwosiqzsfla",
+  "somenteLeitura": true,
+  "tlsVerificado": true,
+  "coletadoEm": "2026-11-05T03:31:14.486Z",
+  "pronto": true,
+  "checks": {
+    "versaoRevisada": true,
+    "roles": true,
+    "tabela": true,
+    "colunas": true,
+    "indices": true,
+    "restricoes": true,
+    "contrato": true,
+    "bucket": true,
+    "permissoes": true,
+    "dependencias": true,
+    "gestaoV1": true
+  },
+  "catalogo": {
+    "tabelaExiste": true,
+    "bucket": {
+      "id": "eventos-imagens",
+      "public": false,
+      "file_size_limit": "10485760",
+      "allowed_mime_types": [
+        "image/webp"
+      ]
+    },
+    "colunas": [
+      {
+        "column_name": "operacao",
+        "data_type": "uuid",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "evento_id",
+        "data_type": "integer",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "evento_origem",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "usuario_id",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "posicao",
+        "data_type": "smallint",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "bucket",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "caminho",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "mime",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "tamanho",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "largura",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "altura",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "estado",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "reserva_ate",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "limpeza_apos",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "lease_ate",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "tentativas",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "ultimo_erro_codigo",
+        "data_type": "text",
+        "is_nullable": "YES"
+      },
+      {
+        "column_name": "criado_em",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "atualizado_em",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO"
+      }
+    ],
+    "indices": [
+      {
+        "nome": "eventos_imagens_atual_unica",
+        "indisvalid": true,
+        "indisready": true,
+        "indisunique": true,
+        "definicao": "CREATE UNIQUE INDEX eventos_imagens_atual_unica ON public.eventos_imagens USING btree (evento_id, posicao) WHERE (estado = 'atual'::text)"
+      },
+      {
+        "nome": "eventos_imagens_bucket_caminho_key",
+        "indisvalid": true,
+        "indisready": true,
+        "indisunique": true,
+        "definicao": "CREATE UNIQUE INDEX eventos_imagens_bucket_caminho_key ON public.eventos_imagens USING btree (bucket, caminho)"
+      },
+      {
+        "nome": "eventos_imagens_limpeza",
+        "indisvalid": true,
+        "indisready": true,
+        "indisunique": false,
+        "definicao": "CREATE INDEX eventos_imagens_limpeza ON public.eventos_imagens USING btree (estado, limpeza_apos)"
+      },
+      {
+        "nome": "eventos_imagens_orfaos",
+        "indisvalid": true,
+        "indisready": true,
+        "indisunique": false,
+        "definicao": "CREATE INDEX eventos_imagens_orfaos ON public.eventos_imagens USING btree (usuario_id) WHERE ((evento_id IS NULL) AND (estado = ANY (ARRAY['atual'::text, 'reservado'::text])))"
+      },
+      {
+        "nome": "eventos_imagens_pkey",
+        "indisvalid": true,
+        "indisready": true,
+        "indisunique": true,
+        "definicao": "CREATE UNIQUE INDEX eventos_imagens_pkey ON public.eventos_imagens USING btree (operacao)"
+      },
+      {
+        "nome": "eventos_imagens_reserva_unica",
+        "indisvalid": true,
+        "indisready": true,
+        "indisunique": true,
+        "definicao": "CREATE UNIQUE INDEX eventos_imagens_reserva_unica ON public.eventos_imagens USING btree (evento_id, posicao) WHERE (estado = 'reservado'::text)"
+      },
+      {
+        "nome": "eventos_imagens_usuario_evento",
+        "indisvalid": true,
+        "indisready": true,
+        "indisunique": false,
+        "definicao": "CREATE INDEX eventos_imagens_usuario_evento ON public.eventos_imagens USING btree (usuario_id, evento_id)"
+      }
+    ],
+    "restricoes": [
+      {
+        "conname": "eventos_imagens_altura_check",
+        "contype": "c",
+        "convalidated": true,
+        "destino": "-",
+        "confdeltype": " ",
+        "definicao": "CHECK (((altura >= 1) AND (altura <= 1920)))"
+      },
+      {
+        "conname": "eventos_imagens_bucket_caminho_key",
+        "contype": "u",
+        "convalidated": true,
+        "destino": "-",
+        "confdeltype": " ",
+        "definicao": "UNIQUE (bucket, caminho)"
+      },
+      {
+        "conname": "eventos_imagens_bucket_check",
+        "contype": "c",
+        "convalidated": true,
+        "destino": "-",
+        "confdeltype": " ",
+        "definicao": "CHECK ((bucket = 'eventos-imagens'::text))"
+      },
+      {
+        "conname": "eventos_imagens_check",
+        "contype": "c",
+        "convalidated": true,
+        "destino": "-",
+        "confdeltype": " ",
+        "definicao": "CHECK (((evento_id IS NULL) OR (evento_id = evento_origem)))"
+      },
+      {
+        "conname": "eventos_imagens_check1",
+        "contype": "c",
+        "convalidated": true,
+        "destino": "-",
+        "confdeltype": " ",
+        "definicao": "CHECK ((caminho = ((((evento_origem)::text || '/'::text) || (operacao)::text) || '.webp'::text)))"
+      },
+      {
+        "conname": "eventos_imagens_check2",
+        "contype": "c",
+        "convalidated": true,
+        "destino": "-",
+        "confdeltype": " ",
+        "definicao": "CHECK (((estado <> ALL (ARRAY['limpeza'::text, 'limpando'::text])) OR (limpeza_apos IS NOT NULL)))"
+      },
+      {
+        "conname": "eventos_imagens_check3",
+        "contype": "c",
+        "convalidated": true,
+        "destino": "-",
+        "confdeltype": " ",
+        "definicao": "CHECK (((estado <> 'limpando'::text) OR (lease_ate IS NOT NULL)))"
+      },
+      {
+        "conname": "eventos_imagens_estado_check",
+        "contype": "c",
+        "convalidated": true,
+        "destino": "-",
+        "confdeltype": " ",
+        "definicao": "CHECK ((estado = ANY (ARRAY['reservado'::text, 'atual'::text, 'limpeza'::text, 'limpando'::text, 'removido'::text])))"
+      },
+      {
+        "conname": "eventos_imagens_evento_id_fkey",
+        "contype": "f",
+        "convalidated": true,
+        "destino": "eventos",
+        "confdeltype": "n",
+        "definicao": "FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE SET NULL"
+      },
+      {
+        "conname": "eventos_imagens_evento_origem_check",
+        "contype": "c",
+        "convalidated": true,
+        "destino": "-",
+        "confdeltype": " ",
+        "definicao": "CHECK ((evento_origem > 0))"
+      },
+      {
+        "conname": "eventos_imagens_largura_check",
+        "contype": "c",
+        "convalidated": true,
+        "destino": "-",
+        "confdeltype": " ",
+        "definicao": "CHECK (((largura >= 1) AND (largura <= 1920)))"
+      },
+      {
+        "conname": "eventos_imagens_mime_check",
+        "contype": "c",
+        "convalidated": true,
+        "destino": "-",
+        "confdeltype": " ",
+        "definicao": "CHECK ((mime = 'image/webp'::text))"
+      },
+      {
+        "conname": "eventos_imagens_operacao_check",
+        "contype": "c",
+        "convalidated": true,
+        "destino": "-",
+        "confdeltype": " ",
+        "definicao": "CHECK (((\"substring\"((operacao)::text, 15, 1) = '4'::text) AND (\"substring\"((operacao)::text, 20, 1) = ANY (ARRAY['8'::text, '9'::text, 'a'::text, 'b'::text]))))"
+      },
+      {
+        "conname": "eventos_imagens_pkey",
+        "contype": "p",
+        "convalidated": true,
+        "destino": "-",
+        "confdeltype": " ",
+        "definicao": "PRIMARY KEY (operacao)"
+      },
+      {
+        "conname": "eventos_imagens_posicao_check",
+        "contype": "c",
+        "convalidated": true,
+        "destino": "-",
+        "confdeltype": " ",
+        "definicao": "CHECK (((posicao >= 0) AND (posicao <= 8)))"
+      },
+      {
+        "conname": "eventos_imagens_tamanho_check",
+        "contype": "c",
+        "convalidated": true,
+        "destino": "-",
+        "confdeltype": " ",
+        "definicao": "CHECK (((tamanho >= 1) AND (tamanho <= 10485760)))"
+      },
+      {
+        "conname": "eventos_imagens_tentativas_check",
+        "contype": "c",
+        "convalidated": true,
+        "destino": "-",
+        "confdeltype": " ",
+        "definicao": "CHECK ((tentativas >= 0))"
+      },
+      {
+        "conname": "eventos_imagens_ultimo_erro_codigo_check",
+        "contype": "c",
+        "convalidated": true,
+        "destino": "-",
+        "confdeltype": " ",
+        "definicao": "CHECK ((length(ultimo_erro_codigo) <= 64))"
+      },
+      {
+        "conname": "eventos_imagens_usuario_id_fkey",
+        "contype": "f",
+        "convalidated": true,
+        "destino": "usuarios",
+        "confdeltype": "r",
+        "definicao": "FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT"
+      }
+    ]
+  }
+}

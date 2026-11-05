@@ -16,9 +16,13 @@ documentos(tabela,doc) AS (
 )
 SELECT jsonb_build_object(
   'etapa3',jsonb_build_object(
+    'versao_instalada',public.eventos_capacidades_v1(),
+    -- Inclui versão, chave/payload e datas de gestão; exclui somente a coluna nova.
+    'hash_eventos_sem_capacidade',(SELECT md5(COALESCE(jsonb_agg(to_jsonb(e)-'capacidade_maxima'
+      ORDER BY e.id),'[]'::jsonb)::text) FROM public.eventos e),
     'sem_limite',(SELECT count(*) FROM public.eventos e WHERE to_jsonb(e)->>'capacidade_maxima' IS NULL),
     'capacidade_configurada',(SELECT count(*) FROM public.eventos e WHERE to_jsonb(e)->>'capacidade_maxima' IS NOT NULL),
-    'inscricoes_por_status',(SELECT COALESCE(jsonb_agg(to_jsonb(s)),'[]'::jsonb) FROM
+    'inscricoes_por_status',(SELECT COALESCE(jsonb_agg(to_jsonb(s) ORDER BY s.status COLLATE pg_catalog."C"),'[]'::jsonb) FROM
       (SELECT status,count(*) AS quantidade FROM public.inscricoes GROUP BY status) s),
     'duplicidades',(SELECT count(*) FROM (SELECT usuario_id,evento_id FROM public.inscricoes GROUP BY usuario_id,evento_id HAVING count(*)>1) d),
     'acima_da_capacidade',(SELECT count(*) FROM public.eventos e WHERE (to_jsonb(e)->>'capacidade_maxima')::integer <

@@ -1,6 +1,8 @@
 -- PREFLIGHT Etapa 3: somente leitura, executar como postgres no projeto confirmado.
 -- Não mostra linhas de usuários. Salvar também eventos_capacidade.verificacao.sql.
-BEGIN TRANSACTION READ ONLY;
+BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY;
+SET LOCAL statement_timeout='10s';
+SET LOCAL lock_timeout='2s';
 SELECT current_database() AS banco,current_user AS usuario,current_setting('server_version_num') AS versao,
  public.eventos_capacidades_v1() AS etapa_instalada,
  current_setting('default_transaction_isolation') AS isolamento_padrao;
@@ -16,7 +18,11 @@ SELECT tgname,tgenabled,pg_get_triggerdef(oid) AS definicao FROM pg_trigger
  WHERE NOT tgisinternal AND tgrelid IN ('public.eventos'::regclass,'public.inscricoes'::regclass);
 SELECT p.oid::regprocedure::text AS funcao,pg_get_functiondef(p.oid) AS definicao,p.proacl::text
  FROM pg_proc p WHERE p.pronamespace='public'::regnamespace AND p.proname IN
- ('gerir_evento_v1','eventos_guardar_v1','inscricoes_guardar_evento_v1','inscrever_evento_v1','eventos_capacidades_v1');
+ ('gerir_evento_v1','eventos_guardar_v1','inscricoes_guardar_evento_v1','inscrever_evento_v1','eventos_capacidades_v1','eventos_vagas_v3','eventos_vagas_guardar_v3');
+SELECT rolname,rolsuper,rolbypassrls FROM pg_roles WHERE rolname IN ('anon','authenticated','service_role') ORDER BY rolname;
+SELECT t.nome AS tabela,pg_get_serial_sequence('public.'||t.nome,'id') AS sequencia,
+ has_sequence_privilege('service_role',pg_get_serial_sequence('public.'||t.nome,'id'),'USAGE') AS service_role_usage
+ FROM (VALUES ('eventos'),('inscricoes')) t(nome);
 SELECT table_name,column_name,data_type,is_nullable,column_default FROM information_schema.columns
  WHERE table_schema='public' AND table_name IN ('eventos','inscricoes') ORDER BY table_name,ordinal_position;
 ROLLBACK;

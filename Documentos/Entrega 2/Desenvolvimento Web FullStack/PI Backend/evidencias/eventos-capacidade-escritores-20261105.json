@@ -1,0 +1,54 @@
+﻿{
+    "ColetadoEm":  "2026-11-05T03:31:08.6334188Z",
+    "ProcessosNode":  [
+                          {
+                              "Pid":  27832,
+                              "Pai":  19416,
+                              "Criado":  "2026-11-05T03:11:10.3732860Z",
+                              "Backend":  false,
+                              "Gerenciador":  false,
+                              "Vite":  false,
+                              "Workspace":  false
+                          },
+                          {
+                              "Pid":  30140,
+                              "Pai":  20292,
+                              "Criado":  "2026-11-05T03:11:21.4235180Z",
+                              "Backend":  false,
+                              "Gerenciador":  false,
+                              "Vite":  false,
+                              "Workspace":  false
+                          },
+                          {
+                              "Pid":  34536,
+                              "Pai":  34428,
+                              "Criado":  "2026-11-05T03:12:11.8594370Z",
+                              "Backend":  false,
+                              "Gerenciador":  false,
+                              "Vite":  false,
+                              "Workspace":  false
+                          },
+                          {
+                              "Pid":  34636,
+                              "Pai":  34612,
+                              "Criado":  "2026-11-05T03:12:12.4203480Z",
+                              "Backend":  false,
+                              "Gerenciador":  false,
+                              "Vite":  true,
+                              "Workspace":  true
+                          }
+                      ],
+    "Listeners":  [
+                      {
+                          "Porta":  5173,
+                          "Pid":  34636
+                      }
+                  ],
+    "ServicosRelacionados":  [
+
+                             ],
+    "TarefasRelacionadas":  [
+
+                            ],
+    "Limite":  "Inventario local; nao atesta inexistencia de escritores externos futuros"
+}

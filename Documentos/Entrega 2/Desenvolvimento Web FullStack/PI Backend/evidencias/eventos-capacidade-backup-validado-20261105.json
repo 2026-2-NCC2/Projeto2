@@ -1,0 +1,129 @@
+{
+  "projeto": "gnwybroqfvwosiqzsfla",
+  "iniciadoEm": "2026-11-05T04:00:17.662Z",
+  "snapshotConcluidoEm": "2026-11-05T04:01:54.672Z",
+  "validadoEm": "2026-11-05T04:06:21.674Z",
+  "destino": "C:\\Users\\Lucas\\BackupsTrocaTicket\\backup-etapa3-20261105",
+  "acl": "Lucas e SYSTEM; conferida antes e depois",
+  "backup": {
+    "arquivo": "banco-completo.dump",
+    "bytes": 475401,
+    "sha256": "55774f5a08fe0fef8f0cbf217af408e3efc8d951c6ed1a852558e994b11cdcc6"
+  },
+  "rolesSemSenhas": {
+    "arquivo": "roles-sem-senhas.sql",
+    "bytes": 5900,
+    "sha256": "2ff69ca03533f1a631341d7cd4433e9edb9e34961d6accef7d9c2351946292ea"
+  },
+  "manifestoSha256": "2427320df0fd10a8d79a43beb8522c401c4c4d124892fc0a02f4963d23818ab0",
+  "tabelas": 53,
+  "totalRegistros": 328,
+  "tabelasPublicas": 13,
+  "publicRows": 67,
+  "catalogo": {
+    "tables": {
+      "quantidade": 13,
+      "sha256": "e62c2dec56d69540e88605dc8caed664e958cfa698338acc15a50859d0ff00ff"
+    },
+    "indexes": {
+      "quantidade": 38,
+      "sha256": "ab676c13f8ffe04d41df53830a807310324f8228bcd513464f0a23258d557daf"
+    },
+    "policies": {
+      "quantidade": 0,
+      "sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+    },
+    "triggers": {
+      "quantidade": 2,
+      "sha256": "3c07e3fdc41eb55636325fbcf29fdc934bd7f1e3b40d096775351631563701c4"
+    },
+    "functions": {
+      "quantidade": 10,
+      "sha256": "2d9b41ba8d67a318b0b0b0a52605b764f3cf42ce2e5fa5109480cdf4a81a009a"
+    },
+    "sequences": {
+      "quantidade": 8,
+      "sha256": "20753214c65dc667ac3043cb1deec58b1bef836f9edd0e95abb1e41e9530b36d"
+    },
+    "constraints": {
+      "quantidade": 75,
+      "sha256": "5cb52c534bdd347fb2c7cf00607ed4e8e8eb545825a9afe4fc742f7174e21af6"
+    }
+  },
+  "verificacaoEventos": {
+    "eventos": {
+      "md5": "9aabdd7c6fb88f5f5ee7b8eb93ce425c",
+      "quantidade": 6
+    },
+    "cotacoes": {
+      "md5": "203f202d576b14836568c7479ea0520e",
+      "quantidade": 6
+    },
+    "propostas": {
+      "md5": "3d8c5ad4845aa93a8804a4153515bbe3",
+      "quantidade": 6
+    },
+    "inscricoes": {
+      "md5": "9c91bc2d70c1bd89e668c7cee5a4c796",
+      "quantidade": 5
+    },
+    "custos_evento": {
+      "md5": "822ceff85987cd77b9c1ef891216d96d",
+      "quantidade": 2
+    },
+    "itens_cotacao": {
+      "md5": "ba11711acc4770291f205a216e5f8a3d",
+      "quantidade": 17
+    }
+  },
+  "estados": [
+    {
+      "status": "Ativo",
+      "quantidade": 4
+    },
+    {
+      "status": "Em planejamento",
+      "quantidade": 2
+    }
+  ],
+  "versaoGestao": 1,
+  "etapa2": {
+    "eventosImagens": 0
+  },
+  "restauracao": {
+    "validada": true,
+    "rede": "none",
+    "portas": [],
+    "dadosTmpfs": true,
+    "cloneRemovido": true,
+    "temporariosRemovidos": true,
+    "equivalenciaRestricao": {
+      "nome": "eventos_ciclo_v1",
+      "diferenca": "Cast varchar[]->text[] distribuido por elemento no deparse",
+      "casosVerificados": 11,
+      "resultadoIgual": true,
+      "alteracaoDeRestricao": false
+    }
+  },
+  "storage": {
+    "bytesIncluidos": false,
+    "objetosPorBucket": [
+      {
+        "bucket_id": "perfil-capas",
+        "quantidade": 2
+      },
+      {
+        "bucket_id": "perfil-fotos",
+        "quantidade": 3
+      }
+    ],
+    "inventarioPrivado": "storage-arquivos-nao-incluidos.json",
+    "inventarioSha256": "b8ba3e688e140c392b9a0fab948760cc327791cde5b8c00d832549c57b4dc845"
+  },
+  "origemEscritas": 0,
+  "migracaoExecutada": false,
+  "uploadsHabilitados": false,
+  "backupPreservado": true,
+  "retencao": "Preservar dump e manifesto ate autorizacao explicita",
+  "scriptSha256": "3602dec7ac0e7d3b4032938836a94708251abb067526560be8aaedf032674836"
+}

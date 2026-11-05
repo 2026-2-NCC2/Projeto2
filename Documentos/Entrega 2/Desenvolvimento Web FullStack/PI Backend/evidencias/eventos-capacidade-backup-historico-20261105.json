@@ -1,0 +1,23 @@
+{
+  "escopo": "backup historico 2026-10-31; nao confirma ponto atual",
+  "manifestoExiste": true,
+  "dumpExiste": true,
+  "backupAtualConfirmado": false,
+  "projeto": "gnwybroqfvwosiqzsfla",
+  "inicio": "2026-10-31T05:40:24.787Z",
+  "status": "BACKUP_COMPLETO_RESTAURADO",
+  "restauracaoHistoricaVerificada": true,
+  "manifestoRegistraRestore": [
+    "container",
+    "image",
+    "imageId",
+    "network",
+    "ports",
+    "removed",
+    "bootstrapRole"
+  ],
+  "dumpSha256": "a2d6a75b9379d0e6f6014793734e7e675b7f22a2d9210bed1b58604a179b6a9d",
+  "hashIgualAEvidenciaHistorica": true,
+  "tamanhoBytes": 418007,
+  "evidenciaHistorica": "evidencias/backups-isolados-20261031.json"
+}

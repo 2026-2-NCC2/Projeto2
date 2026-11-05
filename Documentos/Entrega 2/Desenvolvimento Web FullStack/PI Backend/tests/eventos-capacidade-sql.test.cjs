@@ -36,13 +36,50 @@ test('Etapa 3: integridade e concorrência PostgreSQL descartável',
 
   const pasta=path.join(__dirname,'../../Banco de dados');
   await pool.query(fs.readFileSync(path.join(pasta,'eventos_gestao.incremental.sql'),'utf8'));
+  const snapshot=async()=>{
+    const r={};
+    for(const tabela of ['eventos','inscricoes','custos_evento','cotacoes','itens_cotacao','propostas'])
+      r[tabela]=(await pool.query(`SELECT to_jsonb(t)-'capacidade_maxima' AS linha FROM public.${tabela} t ORDER BY (to_jsonb(t)-'capacidade_maxima')::text COLLATE "C"`)).rows;
+    return r;
+  };
+  const preflight=async()=>{
+    const c=await pool.connect();
+    try{return await c.query(fs.readFileSync(path.join(pasta,'eventos_capacidade.preflight.sql'),'utf8'));}
+    finally{await c.query('ROLLBACK');c.release();}
+  };
+  const aplicar=async()=>{
+    const c=await pool.connect();
+    try{await c.query(fs.readFileSync(path.join(pasta,'eventos_capacidade.incremental.sql'),'utf8'));}
+    finally{await c.query('ROLLBACK');c.release();}
+  };
   const verificacao=()=>pool.query(fs.readFileSync(path.join(pasta,'eventos_capacidade.verificacao.sql'),'utf8')).then(r=>r.rows[0].verificacao);
+  const linhasAntes=await snapshot();
+  const etapaNoPreflight=r=>r.find(x=>x.rows[0]?.etapa_instalada!==undefined).rows[0].etapa_instalada;
+  const pfAntes=await preflight();assert.equal(etapaNoPreflight(pfAntes),1);
   const antes=await verificacao();
-  await pool.query(fs.readFileSync(path.join(pasta,'eventos_capacidade.incremental.sql'),'utf8'));
+  await t.test('lock NOWAIT aborta sem objetos parciais nem alteração dos registros',async()=>{
+    const c=await pool.connect();try{
+      await c.query('BEGIN');await c.query('SELECT id FROM public.eventos LIMIT 1');
+      const inicio=Date.now();await assert.rejects(aplicar(),{code:'55P03'});assert.ok(Date.now()-inicio<2000);
+    }finally{await c.query('ROLLBACK');c.release();}
+    assert.deepEqual(await verificacao(),antes);assert.deepEqual(await snapshot(),linhasAntes);
+  });
+  await aplicar();
   const depois=await verificacao();
+  const pfDepois=await preflight();assert.equal(etapaNoPreflight(pfDepois),3);
+  assert.deepEqual(await snapshot(),linhasAntes);
   for(const campo of ['integridade','estados','chaves_estrangeiras','seguranca_tabelas','sequencias'])assert.deepEqual(depois[campo],antes[campo]);
   assert.equal(depois.etapa3.sem_limite,antes.etapa3.sem_limite);
   assert.equal(depois.etapa3.acima_da_capacidade,0);
+  assert.equal(depois.etapa3.hash_eventos_sem_capacidade,antes.etapa3.hash_eventos_sem_capacidade);
+  assert.equal(antes.etapa3.versao_instalada,1);assert.equal(depois.etapa3.versao_instalada,3);
+  assert.equal(depois.funcoes.length,7);assert.equal(depois.triggers.length,3);
+  assert.ok(depois.funcoes.every(f=>!f.security_definer&&!f.anon&&!f.authenticated&&f.service_role&&!f.service_role_grant_option));
+  assert.deepEqual(depois.etapa3.coluna,[{tipo:'integer',nula:'YES',padrao:null}]);
+  assert.ok(depois.etapa3.restricao[0].validada);assert.ok(depois.etapa3.indice[0].valido&&depois.etapa3.indice[0].pronto);
+  await t.test('reaplicação é recusada e rollback preserva dados e objetos',async()=>{
+    await assert.rejects(aplicar(),{code:'P0001'});assert.deepEqual(await verificacao(),depois);assert.deepEqual(await snapshot(),linhasAntes);
+  });
   await pool.query("INSERT INTO usuarios SELECT n,'participante' FROM generate_series(100,160) n");
   const query=async(sql,args=[])=>{
     const c=await pool.connect();
@@ -57,7 +94,56 @@ test('Etapa 3: integridade e concorrência PostgreSQL descartável',
   };
   const inscrever=(u,e)=>query('SELECT public.inscrever_evento_v1($1,$2) AS r',[u,e]);
   const vagas=e=>query('SELECT public.eventos_vagas_v3(ARRAY[$1]::integer[]) AS r',[e]).then(r=>r[0]);
+  await t.test('Etapa 1 permanece após v3: estrutura, metadados, versão, terminais e histórico',async()=>{
+    let v=await criar(2);
+    await assert.rejects(gerir('editar',v.id,v.versao,{...dados(),local:'Outro local',capacidade_maxima:2}),{code:'EV409'});
+    await assert.rejects(query('UPDATE eventos SET criacao_payload=$1::jsonb WHERE id=$2 RETURNING id AS r',['{}',v.id]),{code:'EV409'});
+    await assert.rejects(query('UPDATE eventos SET versao=100 WHERE id=$1 RETURNING id AS r',[v.id]),{code:'EV409'});
+    await assert.rejects(gerir('encerrar',v.id,v.versao),{code:'EV409'});
+    v=await gerir('editar',v.id,v.versao,{...dados(),descricao:'Aviso',capacidade_maxima:3});
+    assert.equal(v.versao,3);
+    await inscrever(9,v.id);
+    const inscricoes=(await pool.query('SELECT * FROM inscricoes WHERE evento_id=$1',[v.id])).rows;
+    v=await gerir('cancelar',v.id,v.versao);assert.equal(v.status,'Cancelado');
+    assert.deepEqual((await pool.query('SELECT * FROM inscricoes WHERE evento_id=$1',[v.id])).rows,inscricoes);
+    await assert.rejects(gerir('editar',v.id,v.versao,{...dados(),capacidade_maxima:4}),{code:'EV409'});
+    const fim=await gerir('encerrar',1,1);assert.equal(fim.status,'Encerrado');
+    await assert.rejects(inscrever(9,1),{code:'IN409'});
+    assert.equal((await pool.query('SELECT count(*)::integer AS n FROM custos_evento WHERE evento_id=1')).rows[0].n,1);
+  });
   let e;
+  // Espera uma contenção real no servidor, em vez de depender de sleeps/ordem JS.
+  async function esperarLock(pid){
+    const ate=Date.now()+2000;
+    while(Date.now()<ate){
+      if((await pool.query("SELECT wait_event_type='Lock' AS esperando FROM pg_stat_activity WHERE pid=$1",[pid])).rows[0]?.esperando)return;
+      await new Promise(r=>setTimeout(r,10));
+    }
+    assert.fail('A segunda transação não disputou o lock esperado');
+  }
+  async function corridaControlada(primeira,segunda){
+    const a=await pool.connect(),b=await pool.connect();let pendente;
+    try{
+      for(const c of [a,b]){await c.query('BEGIN');await c.query('SET LOCAL ROLE service_role');await c.query("SET LOCAL statement_timeout='5s'");}
+      const pid=(await b.query('SELECT pg_backend_pid() AS pid')).rows[0].pid;
+      await primeira(a);
+      pendente=segunda(b).then(async r=>{await b.query('COMMIT');return{ok:true,r};},async e=>{await b.query('ROLLBACK');return{ok:false,code:e.code};});
+      await esperarLock(pid);await a.query('COMMIT');return await pendente;
+    }finally{
+      await a.query('ROLLBACK');await pendente;
+      await b.query('ROLLBACK');a.release();b.release();
+    }
+  }
+  const inscricaoSQL=(c,u,id)=>c.query('SELECT public.inscrever_evento_v1($1,$2)',[u,id]);
+  const reduzirSQL=(c,v)=>c.query('SELECT public.gerir_evento_v1($1,$2,$3,$4::jsonb,$5)',[
+    'editar',7,v.id,JSON.stringify({...dados(),capacidade_maxima:1}),v.versao]);
+  await t.test('duas transações disputam a última vaga; a segunda espera e recebe LT409',async()=>{
+    const v=await criar(1);
+    const r=await corridaControlada(c=>inscricaoSQL(c,150,v.id),c=>inscricaoSQL(c,151,v.id));
+    assert.deepEqual(r,{ok:false,code:'LT409'});assert.equal((await vagas(v.id)).inscritos_confirmados,1);
+    await assert.rejects(inscrever(152,v.id),{code:'LT409'});
+    assert.equal((await vagas(v.id)).vagas_restantes,0);
+  });
   await t.test('vinte concorrentes disputam três vagas sem ultrapassar limite',async()=>{
     e=await criar(3);
     const r=await Promise.allSettled(Array.from({length:20},(_,n)=>inscrever(100+n,e.id)));
@@ -95,10 +181,17 @@ test('Etapa 3: integridade e concorrência PostgreSQL descartável',
     await gerir('editar',v.id,v.versao,dados());
     assert.equal((await vagas(v.id)).capacidade_maxima,1);
   });
-  await t.test('edição disputa mesma trava de inscrição; saldo permanece íntegro',async()=>{
+  await t.test('redução primeiro: inscrição aguarda commit e observa a capacidade nova',async()=>{
     const v=await criar(2);await inscrever(144,v.id);
-    await Promise.allSettled([gerir('editar',v.id,v.versao,{...dados(),capacidade_maxima:1}),inscrever(145,v.id)]);
-    const s=await vagas(v.id);assert.ok(s.inscritos_confirmados<=s.capacidade_maxima);
+    const r=await corridaControlada(c=>reduzirSQL(c,v),c=>inscricaoSQL(c,145,v.id));
+    assert.deepEqual(r,{ok:false,code:'LT409'});
+    assert.deepEqual(await vagas(v.id),{id:v.id,capacidade_maxima:1,inscritos_confirmados:1,vagas_restantes:0,lotado:true});
+  });
+  await t.test('inscrição primeiro: redução aguarda commit e recusa capacidade abaixo da ocupação',async()=>{
+    const v=await criar(2);await inscrever(144,v.id);
+    const r=await corridaControlada(c=>inscricaoSQL(c,145,v.id),c=>reduzirSQL(c,v));
+    assert.deepEqual(r,{ok:false,code:'CP409'});
+    assert.deepEqual(await vagas(v.id),{id:v.id,capacidade_maxima:2,inscritos_confirmados:2,vagas_restantes:0,lotado:true});
   });
   await t.test('cancelamento/horário e nível de isolamento não abrem inscrição',async()=>{
     const v=await criar(2);await gerir('cancelar',v.id,v.versao);
