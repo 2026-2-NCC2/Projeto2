@@ -1,176 +1,153 @@
-FECAP — Fundação Escola de Comércio Álvares Penteado
+FECAP - Fundação de Comércio Álvares Penteado
 <p align="center">
-  <a href="https://www.fecap.br/">
-    <img src="https://tse4.mm.bing.net/th/id/OIP.mmndDi3pHHHtTOmlNkpU0QHaCZ?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="Logo da FECAP" width="380">
-  </a>
+<a href="https://www.fecap.br/"><img src="https://tse4.mm.bing.net/th/id/OIP.mmndDi3pHHHtTOmlNkpU0QHaCZ?r=0&rs=1&pid=ImgDetMain&o=7&rm=3" alt="FECAP - Fundação de Comércio Álvares Penteado" border="0"></a>
 </p>TrocaTicket
-Projeto acadêmico interdisciplinar — organização de eventos e conexão entre organizadores e fornecedores.
-Sumário
-- Equipe e orientação
-- Sobre o projeto
-- Tecnologias utilizadas
-- Funcionalidades
-- Estrutura de pastas
-- Instalação e execução
-- Configuração de ambiente
-- Entregas acadêmicas
-- Licença
-- Referências
-Equipe e orientação
-Integrantes
-Integrante	GitHub
-Carlos Eduardo da Silva	IC4DUI
-Lucas Pelliciotti Cintra Da Silva	lucaspelliciotti
-Guilherme Harada Morato	guilhermehmorato-glitch
-Guilherme Fernandes Alexandre de Carvalho	GuilhermeF420
+Integrantes: <a href="https://github.com/IC4DUI">Carlos Eduardo da Silva</a>, <a href="https://github.com/lucaspelliciotti">Lucas Pelliciotti Cintra Da Silva</a>, <a href="https://github.com/guilhermehmorato-glitch">Guilherme Harada Morato</a>, <a href="https://github.com/GuilhermeF420">Guilherme Fernandes Alexandre de Carvalho</a>
+Professores Orientadores: <a href="https://www.linkedin.com/in/francisco-escobar/">Francisco de Souza Escobar</a>, <a href="https://www.linkedin.com/in/paula-astorino-432b5812a/">Paula Sanchez Astorino</a>, <a href="https://www.linkedin.com/in/dolemes/">David De Oliveira Lemes</a>, <a href="https://www.linkedin.com/in/jesuslisboagomes/">Jésus De Lisboa Gomes</a>, <a href="https://www.linkedin.com/in/katia-bossi/">Katia Milani Lara Bossi</a>
+📌 Descrição
+O TrocaTicket é uma plataforma desenvolvida para facilitar a organização de eventos por meio da conexão entre organizadores e fornecedores de serviços.
 
+A proposta do sistema é centralizar diferentes etapas do processo de organização de um evento em um único ambiente, permitindo que o organizador cadastre seus eventos, planeje os custos e publique cotações para receber propostas de fornecedores.
 
-Professores orientadores
-- Francisco de Souza Escobar
-- Paula Sanchez Astorino
-- David De Oliveira Lemes
-- Jésus De Lisboa Gomes
-- Katia Milani Lara Bossi
-Sobre o projeto
-O TrocaTicket é uma plataforma web voltada à organização de eventos e à conexão entre organizadores e fornecedores de serviços. A proposta é reunir o planejamento do evento, seus custos, a publicação de cotações e o acompanhamento de propostas em um único ambiente.
+A plataforma reúne áreas para organizadores, fornecedores, participantes e administradores, com recursos de gestão de eventos, acompanhamento de propostas e inscrições.
 
-A Entrega 1 contém o protótipo navegável em React. A Entrega 2 reúne a evolução do frontend e uma API em Node.js e Express, com integração ao Supabase, além de áreas para organizadores, fornecedores, participantes e administração.
-Missão, visão e valores
-Missão: facilitar a organização de eventos, conectando organizadores e fornecedores para encontrar serviços, solicitar e comparar propostas e acompanhar contratações.
+Dessa forma, o TrocaTicket busca tornar o planejamento de eventos mais prático, organizado e transparente, reduzindo a necessidade de utilizar diferentes ferramentas durante o processo.
 
-Visão: ser uma plataforma de referência para a organização de eventos e para a conexão entre organizadores e fornecedores.
+Confira o protótipo no Figma.
+Imagem da plataforma: pendente de inclusão de uma captura de tela do projeto.
 
-Valores: segurança, transparência, praticidade, confiabilidade, inovação e foco no usuário.
+Missão
+Facilitar a organização de eventos por meio de uma plataforma que conecta organizadores a fornecedores, permitindo encontrar serviços, solicitar e comparar propostas e acompanhar contratações de forma prática, segura e transparente.
+Visão
+Ser uma plataforma de referência para a organização de eventos, tornando mais simples e eficiente a conexão entre organizadores e fornecedores e proporcionando uma experiência confiável durante o processo de contratação.
+Valores
+- Segurança
+- Transparência
+- Praticidade
+- Confiabilidade
+- Inovação
+- Foco no usuário
+🎯 Proposta de Valor
+O TrocaTicket busca solucionar uma dificuldade comum na organização de eventos: encontrar fornecedores adequados, analisar diferentes propostas e organizar o planejamento em um único ambiente.
 
-Esses objetivos representam a proposta do projeto; a disponibilidade dos recursos está detalhada em Funcionalidades.
-Apresentação visual
-Consultar o protótipo no Figma.
+A jornada implementada reúne as seguintes etapas:
 
-Captura da plataforma: pendente de inclusão. Não foi localizada uma captura de tela da aplicação no repositório. O arquivo hero.png dos frontends é uma ilustração genérica e não representa a interface do TrocaTicket.
-Tecnologias utilizadas
-Área	Tecnologias confirmadas
-Frontend	React, React DOM, JavaScript, JSX, HTML e CSS
-Desenvolvimento do frontend	Vite e ESLint
-Backend	Node.js, Express, CORS e dotenv
-Autenticação	JSON Web Token (jsonwebtoken) e bcryptjs
-Persistência principal	Supabase, com cliente @supabase/supabase-js
-Integrações de banco presentes no backend	pg e mysql2
-Processamento de imagens	Sharp
-Versionamento e prototipação	Git, GitHub e Figma
+Entrar → Visualizar eventos → Criar evento → Planejar custos → Publicar cotação → Receber e avaliar propostas
 
+A contratação e seu acompanhamento fazem parte da proposta do projeto; a área de contratos ativos ainda está indisponível.
+🛠 Estrutura de Pastas
+A organização principal do repositório é:
+- Documentos
+  - Entrega 1
+    - Cálculo II
+    - Desenvolvimento Web FullStack
+      - PI React — frontend da primeira entrega
+    - Gestão Empresarial e Dinâmicas das Organizações
+    - Projeto Interdisciplinar Programação Web
+    - Projeto em Banco de Dados
+  - Entrega 2
+    - Cálculo II
+    - Desenvolvimento Web FullStack
+      - PI React — frontend atual
+      - PI Backend — API do projeto
+      - Banco de dados — scripts SQL e documentação
+      - arquivo — documentação arquivada
+    - Gestão Empresarial e Dinâmicas das Organizações
+    - Projeto Interdisciplinar Programação Web
+    - Projeto em Banco de Dados
+- src
+  - Entrega 1
+    - Backend
+    - Frontend
+  - Entrega 2
+    - Backend
+    - Frontend
+- README.md
+README.md: guia principal com a apresentação e as instruções do projeto.
 
-A presença de pg e mysql2 nas dependências não significa que sejam modos alternativos de execução normal. A instalação atual documentada exige DB_PROVIDER=supabase e não faz fallback para MySQL.
-Funcionalidades
-Implementadas no código
-Área	Recursos
-Autenticação e acesso	Cadastro, login com JWT, validação de sessão, navegação por perfil e solicitações de acesso
-Organizador	Listagem, consulta, criação, edição e publicação de eventos; operações de cancelamento e encerramento
-Planejamento financeiro	Rascunhos de custos por evento, consulta e salvamento de custos, cálculo do planejamento financeiro
-Cotações e propostas	Publicação e consulta de cotações, envio e acompanhamento de propostas pelo fornecedor e avaliação de propostas pelo organizador
-Participante	Consulta de eventos e inscrição, com consulta das próprias inscrições
-Administração	Consultas de usuários, eventos, cotações e propostas; análise de solicitações de acesso
-Perfil	Consulta e edição de dados pessoais
+Documentos: reúne os materiais acadêmicos e o código das duas entregas.
 
-
-Implementação no código não equivale a validação do ambiente remoto. As operações dependem das permissões do perfil, da preparação do banco e dos controles de disponibilidade do backend.
-Em desenvolvimento ou com disponibilidade condicionada
-Recurso	Situação identificada
-Contratos ativos	Opção indisponível no portal do fornecedor; não deve ser apresentada como contratação concluída
-Imagens de eventos	Código presente, mas ativação desabilitada no arquivo versionado config/ativacao-eventos-imagens.json
-Perfil profissional	Disponibilidade condicionada à variável PERFIL_PROFISSIONAL_ATIVO e à preparação correspondente
-Portfólio do fornecedor	Interface e integração presentes; disponibilidade condicionada à configuração do backend e à preparação do banco
-Imagens de perfil	Ativação registrada em config/ativacao-imagens.json, com verificações adicionais na inicialização
-Controle de capacidade dos eventos	Depende das capacidades informadas pela API e da preparação do banco
-
-
-O roteiro de instalação abaixo não ativa recursos opcionais nem executa alterações de banco.
-Estrutura de pastas
-A organização abaixo resume os diretórios relevantes, preservando os nomes reais:
-- Documentos/
-  - Entrega 1/
-    - Cálculo II/
-    - Desenvolvimento Web FullStack/
-      - PI React/ — frontend da primeira entrega
-    - Gestão Empresarial e Dinâmicas das Organizações/
-    - Projeto Interdisciplinar Programação Web/
-    - Projeto em Banco de Dados/
-  - Entrega 2/
-    - Cálculo II/
-    - Desenvolvimento Web FullStack/
-      - PI React/ — frontend da segunda entrega
-      - PI Backend/ — API, configurações, serviços, repositórios e testes
-      - Banco de dados/ — scripts SQL e documentação técnica
-      - arquivo/ — documentação arquivada
-    - Gestão Empresarial e Dinâmicas das Organizações/
-    - Projeto Interdisciplinar Programação Web/
-    - Projeto em Banco de Dados/
-- src/
-  - Entrega 1/Backend/ e Entrega 1/Frontend/
-  - Entrega 2/Backend/ e Entrega 2/Frontend/
-- README.md — apresentação e guia principal
-- AGENTS.md — orientações para agentes de desenvolvimento
-As pastas em src/ contêm arquivos de reserva chamados Código aqui.txt. O código executável está nos diretórios de Desenvolvimento Web FullStack em Documentos/. Não há pasta imagens/ na raiz.
-Instalação e execução
-Pré-requisitos
-- Node.js 24 e npm, conforme a documentação de instalação do backend.
-- Git para clonar o repositório.
-- Acesso autorizado ao ambiente Supabase esperado pelo projeto.
-- Editor de código de sua preferência.
-Obter o projeto
+src: contém a estrutura de reserva das entregas, com arquivos Código aqui.txt. O código executável está em Documentos, nos caminhos indicados acima.
+💻 Desenvolvimento Web
+O frontend do TrocaTicket utiliza React e Vite. Na Entrega 1, foi desenvolvido o protótipo navegável. Na Entrega 2, a aplicação passou a contar com um backend em Node.js e Express, integrado ao Supabase.
+Funcionalidades implementadas no código
+- Cadastro, login e navegação por perfil de usuário.
+- Listagem, criação, edição e publicação de eventos.
+- Cancelamento e encerramento de eventos.
+- Planejamento e salvamento de custos por evento.
+- Publicação e consulta de cotações.
+- Envio e acompanhamento de propostas pelos fornecedores.
+- Avaliação de propostas pelo organizador.
+- Consulta de eventos e inscrições dos participantes.
+- Consulta e edição do perfil pessoal.
+- Área administrativa e análise de solicitações de acesso.
+A execução desses recursos depende das permissões de cada perfil e da configuração do ambiente.
+Funcionalidades em desenvolvimento ou condicionadas à ativação
+- Contratos ativos: área ainda indisponível no portal do fornecedor.
+- Imagens de eventos: implementação presente, com ativação desabilitada na configuração versionada.
+- Perfil profissional e portfólio: dependem das configurações do backend e da preparação do banco.
+- Imagens de perfil: ativação registrada no projeto, sujeita às verificações da inicialização.
+- Controle de capacidade dos eventos: depende da preparação do banco e das capacidades liberadas pela API.
+💻 Configuração para Desenvolvimento
+Para executar o projeto, é necessário possuir:
+- Node.js 24 e npm.
+- Git.
+- Visual Studio Code ou outra IDE compatível.
+- Acesso autorizado ao ambiente Supabase utilizado pelo projeto.
+1. Baixar o projeto
 git clone https://github.com/2026-2-NCC2/Projeto2.git
 cd Projeto2
-Os comandos seguintes consideram terminais abertos na raiz Projeto2. Os caminhos estão entre aspas porque contêm espaços.
-Backend — Entrega 2
-No primeiro terminal:
+2. Configurar o ambiente
+Na pasta Documentos/Entrega 2/Desenvolvimento Web FullStack/PI Backend, crie um arquivo .env com os valores fornecidos pelo responsável pelo ambiente:
+DB_PROVIDER=supabase
+SUPABASE_URL=<URL_DO_PROJETO_AUTORIZADO>
+SUPABASE_SECRET_KEY=<CHAVE_SECRETA_DO_BACKEND>
+JWT_SECRET=<SEGREDO_SEGURO_COM_PELO_MENOS_32_CARACTERES>
+PORT=3001
+Substitua os marcadores pelos valores privados. Não publique o .env nem coloque a chave secreta no frontend. O projeto Supabase deve corresponder à configuração versionada do backend.
+
+A instalação normal utiliza Supabase, sem fallback para MySQL. Não é necessário executar migrações ou scripts SQL para seguir este guia.
+3. Executar o backend
+Em um terminal aberto na raiz do repositório:
 cd "Documentos/Entrega 2/Desenvolvimento Web FullStack/PI Backend"
 npm install
-Antes de iniciar, crie o arquivo privado .env conforme Configuração de ambiente.
 npm start
-A porta prevista é 3001. O script aplica --use-system-ca, mantendo a verificação TLS e utilizando também os certificados confiáveis do sistema.
+O backend utiliza a porta 3001. O comando npm start mantém a verificação TLS e utiliza os certificados confiáveis do sistema.
 
-O endpoint http://localhost:3001/ verifica a resposta HTTP da API; ele não confirma a conexão com o banco.
-
-Para detalhes e diagnóstico, consulte [INSTALACAO.md](Documentos/Entrega%202/Desenvolvimento%20Web%20FullStack/PI%20Backend/INSTALACAO.md). Se os controles de inicialização bloquearem o servidor, consulte o responsável pelo ambiente; não remova os controles para contornar o bloqueio.
-Frontend — Entrega 2
-Em outro terminal, a partir da raiz:
+Verificar a resposta HTTP da API. Esse endereço não verifica a conexão com o banco.
+4. Executar o frontend
+Em outro terminal, aberto na raiz do repositório:
 cd "Documentos/Entrega 2/Desenvolvimento Web FullStack/PI React"
 npm install
 npm run dev
-Abra o endereço informado pelo Vite, normalmente http://localhost:5173/.
-
-O frontend principal usa a API em http://localhost:3001, definida em src/services/api.js. Mantenha o backend em execução nessa porta para utilizar essa configuração.
-Frontend — Entrega 1
-Para consultar o protótipo da primeira entrega, em um terminal separado a partir da raiz:
+Abra o endereço informado pelo Vite, normalmente http://localhost:5173/. A configuração principal do frontend utiliza a API em http://localhost:3001.
+<details>
+<summary>Executar o protótipo da Entrega 1</summary>
+Em um terminal aberto na raiz:
 cd "Documentos/Entrega 1/Desenvolvimento Web FullStack/PI React"
 npm install
 npm run dev
-Use o endereço informado pelo Vite. Esse diretório corresponde à primeira versão e não substitui o frontend da Entrega 2.
-Comandos de verificação disponíveis
-Diretório da Entrega 2	Comando	Finalidade
-PI React	npm run build	Gerar o build do frontend
-PI React	npm run lint	Executar a análise do ESLint
-PI React	npm run preview	Visualizar localmente o build gerado
-PI Backend	npm test	Executar os testes declarados no pacote
+Abra o endereço informado pelo Vite.
+</details><details>
+<summary>Verificações e documentação complementar</summary>
+No frontend da Entrega 2, estão disponíveis npm run build, npm run lint e npm run preview. No backend, os testes são executados com npm test.
 
-
-Configuração de ambiente
-Crie .env somente em Documentos/Entrega 2/Desenvolvimento Web FullStack/PI Backend/, com valores fornecidos pelo responsável pelo ambiente.
-
-Exemplo com marcadores, sem credenciais:
-DB_PROVIDER=supabase
-SUPABASE_URL=<URL_DO_PROJETO_SUPABASE_AUTORIZADO>
-SUPABASE_SECRET_KEY=<CHAVE_SECRETA_FORNECIDA_PELO_RESPONSAVEL>
-JWT_SECRET=<SEGREDO_SEGURO_COM_PELO_MENOS_32_CARACTERES>
-PORT=3001
-Substitua os marcadores antes de executar. O ambiente deve corresponder ao projeto esperado pela configuração versionada; apontar para outro Supabase não constitui uma instalação equivalente.
-- Não versione .env nem publique chaves, senhas ou tokens.
-- A chave secreta do Supabase pertence exclusivamente ao backend. Não a copie para o frontend nem para variáveis VITE_.
-- Variáveis já definidas no processo prevalecem sobre o arquivo .env.
-- Preserve a verificação TLS e os arquivos de ativação versionados.
-- A instalação normal não exige executar migrações, recuperação, rollback ou scripts SQL.
-- O arquivo [`.env.example`](Documentos/Entrega%202/Desenvolvimento%20Web%20FullStack/PI%20Backend/.env.example) contém configurações adicionais. Variáveis de homologação e preparação não devem ser ativadas como parte deste guia.
-Entregas acadêmicas
-Os links abaixo apontam para materiais existentes no repositório. A presença de um arquivo não comprova aprovação ou conclusão acadêmica; datas e notas não foram atribuídas sem confirmação.
+Consulte [INSTALACAO.md](Documentos/Entrega%202/Desenvolvimento%20Web%20FullStack/PI%20Backend/INSTALACAO.md) e [`.env.example`](Documentos/Entrega%202/Desenvolvimento%20Web%20FullStack/PI%20Backend/.env.example) para os detalhes do ambiente. Preserve os controles de inicialização e a verificação TLS; em caso de bloqueio, consulte o responsável pelo ambiente.
+</details>🖥 Tecnologias Utilizadas
+- React e React DOM
+- JavaScript e JSX
+- HTML e CSS
+- Vite e ESLint
+- Node.js e Express
+- Supabase
+- JWT e bcryptjs
+- CORS e dotenv
+- Sharp
+- Git e GitHub
+- Figma
+Os pacotes pg e mysql2 também estão presentes nas dependências do backend. A execução normal documentada utiliza Supabase.
+💾 Entregas
+Os links apontam para os materiais existentes no repositório.
 Entrega	Disciplina	Material
 1	Cálculo II	[Polinômio de Taylor — PDF](Documentos/Entrega%201/C%C3%A1lculo%20II/Projeto%20Interdisciplinar%20-%20Polinomio%20de%20Taylor%20TrocaTicket%2000.pdf)
 1	Desenvolvimento Web FullStack	Frontend React
@@ -184,15 +161,13 @@ Entrega	Disciplina	Material
 2	Projeto em Banco de Dados	[Diagrama de modelagem — PDF](Documentos/Entrega%202/Projeto%20em%20Banco%20de%20Dados/Diagrama%20modelagem.pdf)
 
 
-Licença
+📋 Licença / License
 Pendente de definição pela equipe.
 
-Este README não atribui uma licença ao projeto. A definição e a formalização das condições de uso, modificação e distribuição serão realizadas pela equipe.
-
-Equipe responsável: Carlos Eduardo da Silva, Lucas Pelliciotti Cintra Da Silva, Guilherme Harada Morato e Guilherme Fernandes Alexandre de Carvalho.
-Referências
-- FECAP — instituição de ensino.
-- Protótipo TrocaTicket no Figma — endereço registrado nos materiais acadêmicos.
-- [Documentação de instalação do backend](Documentos/Entrega%202/Desenvolvimento%20Web%20FullStack/PI%20Backend/INSTALACAO.md) — requisitos e orientações de execução.
-- [Dependências e scripts do frontend](Documentos/Entrega%202/Desenvolvimento%20Web%20FullStack/PI%20React/package.json).
-- [Dependências e scripts do backend](Documentos/Entrega%202/Desenvolvimento%20Web%20FullStack/PI%20Backend/package.json).
+Autores: Carlos Eduardo da Silva, Lucas Pelliciotti Cintra Da Silva, Guilherme Harada Morato e Guilherme Fernandes Alexandre de Carvalho.
+🎓 Referências
+1. FECAP.
+2. Protótipo TrocaTicket no Figma.
+3. [Dependências e scripts do frontend](Documentos/Entrega%202/Desenvolvimento%20Web%20FullStack/PI%20React/package.json).
+4. [Dependências e scripts do backend](Documentos/Entrega%202/Desenvolvimento%20Web%20FullStack/PI%20Backend/package.json).
+5. [Guia de instalação do backend](Documentos/Entrega%202/Desenvolvimento%20Web%20FullStack/PI%20Backend/INSTALACAO.md).
