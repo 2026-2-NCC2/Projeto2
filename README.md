@@ -130,7 +130,8 @@ O comando `npm start` utiliza os certificados confiáveis do sistema e mantém a
 
 
 ### Disciplina 1 — Full-Stack
-
+| Campo | Declaração |
+|---|---|
 | **Aluno(s) Responsável(veis)** | Lucas Pelliciotti Cintra da Silva. ||
 | **Ferramenta utilizada** | ChatGPT (OpenAI) |
 | **Versão/modelo** | GPT Sol 6.1 |
