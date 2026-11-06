@@ -1,0 +1,99 @@
+{
+  "coletadoEm": "2026-11-06T19:08:32.631Z",
+  "baselineComparado": "Anterior a Etapa 3 administrativa, preservando Etapas 1/2 locais; comparacao de copias temporarias sem sobrescrever workspace",
+  "testes": {
+    "frontend": {
+      "total": 296,
+      "pass": 296,
+      "fail": 0,
+      "skip": 0
+    },
+    "backendDirecionado": {
+      "total": 114,
+      "pass": 114,
+      "fail": 0,
+      "skip": 0
+    },
+    "backendCompleto": {
+      "total": 1609,
+      "pass": 1419,
+      "fail": 175,
+      "skip": 15
+    },
+    "lint": "PASS",
+    "build": "PASS"
+  },
+  "mesmas175Falhas": true,
+  "novasFalhas": [],
+  "grupos": [
+    {
+      "causa": "Allowlists de imports nas VMs desatualizadas",
+      "quantidade": 161,
+      "arquivos": {
+        "contratos.test.cjs": 108,
+        "cotacoes.test.cjs": 15,
+        "custos-repository.test.cjs": 13,
+        "cutover-transicao-final.test.cjs": 1,
+        "seguranca.test.cjs": 10,
+        "solicitacoes-acesso-repository.test.cjs": 13,
+        "banco-provider.test.cjs": 1
+      }
+    },
+    {
+      "causa": "Fixtures de handlers/transporte retornam 500 em cenarios esperados como sucesso; causa fina ainda pendente",
+      "quantidade": 6,
+      "arquivos": {
+        "handlers-persistencia.test.cjs": 6
+      }
+    },
+    {
+      "causa": "VM nao fornece require para registrar portfolio",
+      "quantidade": 3,
+      "arquivos": {
+        "propostas-avaliar-supabase.test.cjs": 3
+      }
+    },
+    {
+      "causa": "Carregamento/inicializacao de backend copiado no isolamento",
+      "quantidade": 2,
+      "arquivos": {
+        "isolamento.test.cjs": 2
+      }
+    },
+    {
+      "causa": "Timeout HTTP no harness de homologacao; causa raiz nao comprovada",
+      "quantidade": 2,
+      "arquivos": {
+        "homologacao-http.test.cjs": 2
+      }
+    },
+    {
+      "causa": "Inventario exato de metodos nao inclui buscarAdministrativo da etapa anterior",
+      "quantidade": 1,
+      "arquivos": {
+        "eventos-supabase-repository.test.cjs": 1
+      }
+    }
+  ],
+  "backend": {
+    "porta": 3001,
+    "consoleSession": 69316,
+    "inicializacao": "PASS",
+    "supervisor": "ATIVO_COM_AUTORIZACAO",
+    "forcado": false
+  },
+  "visual": {
+    "status": "BLOQUEADA_POR_ACESSO",
+    "hostNavegador": "INDISPONIVEL",
+    "janela": "TrocaTicket localhost:5173 no VS Code",
+    "resultadoAcesso": "Computer Use app approval timed out",
+    "paginas": [],
+    "consoleNavegadorVerificado": false,
+    "contornoDeProtecao": false
+  },
+  "dadosReais": {
+    "testesEscrita": false,
+    "decisoes": false,
+    "uploadsEventos": false
+  }
+}

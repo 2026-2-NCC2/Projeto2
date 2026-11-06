@@ -1,0 +1,90 @@
+{
+  "coletadoEm": "2026-11-06T19:07:03.707Z",
+  "somenteLeitura": true,
+  "http": [
+    {
+      "rota": "/eventos/capacidades",
+      "status": 401,
+      "cors": true
+    },
+    {
+      "rota": "/eventos/capacidades",
+      "status": 200,
+      "cors": true
+    },
+    {
+      "rota": "/eventos/capacidades",
+      "status": 401,
+      "cors": true
+    },
+    {
+      "rota": "/admin/eventos",
+      "status": 403,
+      "cors": true
+    },
+    {
+      "rota": "/admin/eventos",
+      "status": 200,
+      "cors": true
+    },
+    {
+      "rota": "/eventos",
+      "status": 200,
+      "cors": true
+    },
+    {
+      "rota": "/participante/eventos",
+      "status": 200,
+      "cors": true
+    },
+    {
+      "rota": "/eventos/imagens/capacidades",
+      "status": 200,
+      "cors": true
+    }
+  ],
+  "dadosGestaoPreservados": true,
+  "fila": [
+    {
+      "estado": "removido",
+      "quantidade": 5,
+      "leases": 0
+    }
+  ],
+  "storage": [],
+  "semReferenciaAtual": true,
+  "capacidades": {
+    "controleCapacidade": true,
+    "criar": true,
+    "editar": true,
+    "publicar": true,
+    "inscrever": true,
+    "controleVersao": true,
+    "cancelar": true,
+    "encerrar": true,
+    "excluir": false
+  },
+  "eventos": {
+    "quantidade": 6,
+    "semLimite": 6,
+    "inscritos": 5,
+    "estados": [
+      {
+        "status": "Ativo",
+        "quantidade": 4
+      },
+      {
+        "status": "Em planejamento",
+        "quantidade": 2
+      }
+    ]
+  },
+  "eventosProprios": 5,
+  "eventosDisponiveis": 4,
+  "imagens": {
+    "consultar": false,
+    "alterar": false,
+    "limiteGaleria": 8
+  },
+  "uploadsDesativados": true
+}

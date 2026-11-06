@@ -1,0 +1,405 @@
+.peaPainel {
+  --pea-roxo: #6540c9;
+  --pea-azul: #2456bd;
+  color: #202a44;
+  min-width: 0;
+  max-width: 1280px;
+  margin: auto;
+}
+
+.peaPainel * {
+  box-sizing: border-box;
+}
+
+.peaCabecalho,.peaSecaoTopo,.peaHero {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: center;
+}
+
+.peaCabecalho {
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.peaCabecalho h1 {
+  margin: 0 0 8px;
+  font-size: clamp(1.5rem,3vw,2rem);
+}
+
+.peaCabecalho p {
+  color: #58627b;
+  margin: 0;
+}
+
+.peaCabecalho label {
+  display: grid;
+  gap: 8px;
+  font-weight: 600;
+  max-width: 100%;
+  min-width: 250px;
+}
+
+.peaCabecalho select {
+  padding: 12px;
+  border: 1px solid #c8cce0;
+  border-radius: 12px;
+  max-width: 100%;
+  background: white;
+  color: #202a44;
+  font: inherit;
+}
+
+.peaHero {
+  background: linear-gradient(120deg,#5332ab,#2456bd);
+  color: white;
+  padding: 28px;
+  border-radius: 20px;
+}
+
+.peaHero h2 {
+  font-size: clamp(1.3rem,3vw,1.9rem);
+  margin: 10px 0;
+  overflow-wrap: anywhere;
+}
+
+.peaHero>div>span {
+  font-size: .72rem;
+  letter-spacing: .08em;
+}
+
+.peaEstado {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 99px;
+  font-weight: 700;
+  font-size: .85rem;
+  white-space: nowrap;
+  background: #edf0f7;
+  color: #37415b;
+}
+
+.peaEstado--ativo {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.peaEstado--planejamento {
+  background: #e8e5ff;
+  color: #51319c;
+}
+
+.peaEstado--cancelado {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.peaEstado--encerrado {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.peaNav {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 20px 0;
+}
+
+.peaNav a {
+  background: #fff;
+  border: 1px solid #d7d9e8;
+  padding: 10px 15px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.peaPainel a {
+  color: #4f31a5;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.peaPainel a:focus-visible,.peaPainel button:focus-visible,.peaPainel select:focus-visible,.peaTabela:focus-visible {
+  outline: 3px solid #2456bd;
+  outline-offset: 3px;
+}
+
+.peaSecao {
+  background: #fff;
+  border: 1px solid #e0e3ee;
+  border-radius: 18px;
+  padding: 24px;
+  margin-bottom: 20px;
+  scroll-margin-top: 24px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  box-shadow: 0 4px 16px #25205b06;
+}
+
+.peaSecao h3 {
+  margin: 0 0 16px;
+  font-size: 1.15rem;
+}
+
+.peaDados,.peaMetricas {
+  display: grid;
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  gap: 16px;
+}
+
+.peaDados {
+  margin: 0 0 24px;
+}
+
+.peaPainel dt {
+  color: #626b80;
+  font-size: .85rem;
+  margin-bottom: 6px;
+}
+
+.peaPainel dd {
+  margin: 0;
+  font-weight: 600;
+  white-space: pre-wrap;
+}
+
+.peaMetricas article {
+  background: #f4f2fc;
+  border: 1px solid #e4dff7;
+  padding: 18px;
+  border-radius: 14px;
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.peaMetricas article:nth-child(2) {
+  background: #eff5ff;
+  border-color: #dae6fb;
+}
+
+.peaMetricas span {
+  font-size: .84rem;
+  color: #505a74;
+}
+
+.peaMetricas strong {
+  font-size: 1.1rem;
+}
+
+.peaMetricas .peaAlerta {
+  background: #fff4df;
+  border-color: #edcf98;
+  color: #754900;
+}
+
+.peaNota {
+  color: #5d677e;
+  font-size: .87rem;
+  line-height: 1.6;
+}
+
+.peaSecaoTopo h3,.peaSecaoTopo h4 {
+  margin: 0;
+}
+
+.peaSecaoTopo {
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.peaSecaoTopo>strong {
+  color: #51319c;
+}
+
+.peaTabela {
+  overflow: auto;
+  border: 1px solid #e4e7f0;
+  border-radius: 12px;
+}
+
+.peaTabela table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 420px;
+}
+
+.peaTabela th,.peaTabela td {
+  text-align: left;
+  padding: 14px;
+  border-bottom: 1px solid #e4e7f0;
+  font-size: .9rem;
+}
+
+.peaTabela th {
+  background: #f4f5fa;
+}
+
+.peaTabela td:last-child {
+  white-space: nowrap;
+}
+
+.peaCards {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 16px;
+}
+
+.peaCotacao {
+  background: #fafbfe;
+  border: 1px solid #e0e4ee;
+  border-radius: 14px;
+  padding: 20px;
+  scroll-margin-top: 24px;
+  min-width: 0;
+}
+
+.peaCotacao h4 {
+  margin-top: 0;
+}
+
+.peaCotacao p,.peaSecao>p {
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.peaItens {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0;
+}
+
+.peaItens li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid #e0e4ee;
+  padding: 12px 0;
+  font-size: .88rem;
+}
+
+.peaItens li>span {
+  white-space: nowrap;
+}
+
+.peaItens p {
+  margin: 4px 0;
+}
+
+.peaPropostaDados {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 0;
+}
+
+.peaVazio {
+  padding: 22px;
+  background: #f5f6fc;
+  color: #58627b;
+  border: 1px dashed #cbd0e3;
+  border-radius: 12px;
+}
+
+.peaErro {
+  padding: 24px;
+  background: #fff1f2;
+  border: 1px solid #efbec5;
+  border-radius: 14px;
+  color: #8f2033;
+}
+
+.peaErro button {
+  background: #6540c9;
+  color: #fff;
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 20px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.peaSkeleton {
+  display: grid;
+  gap: 18px;
+}
+
+.peaSkeleton>div,.peaSkeletonGrid>div {
+  min-height: 120px;
+  border-radius: 16px;
+  background: linear-gradient(100deg,#e9eaf2 25%,#f7f8fc 50%,#e9eaf2 75%);
+  background-size: 200% 100%;
+  animation: peaPulse 1.4s ease-in-out infinite;
+}
+
+.peaSkeletonGrid {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 16px;
+  background: none;
+  animation: none;
+}
+
+.peaSrOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@keyframes peaPulse {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .peaSkeleton>div,.peaSkeletonGrid>div {
+    animation: none;
+  }
+}
+
+@media (max-width:1000px) {
+  .peaDados,.peaMetricas,.peaSkeletonGrid {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+  .peaCards {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width:540px) {
+  .peaCabecalho label {
+    width: 100%;
+    min-width: 0;
+  }
+  .peaHero {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 20px;
+  }
+  .peaSecao {
+    padding: 16px;
+  }
+  .peaDados,.peaMetricas,.peaSkeletonGrid {
+    grid-template-columns: 1fr;
+  }
+  .peaNav a {
+    flex: 1;
+    text-align: center;
+  }
+  .peaCotacao {
+    padding: 16px;
+  }
+  .peaItens li {
+    flex-direction: column;
+  }
+  .peaSecaoTopo {
+    align-items: flex-start;
+  }
+}

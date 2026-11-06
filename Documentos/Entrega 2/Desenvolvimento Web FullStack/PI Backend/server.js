@@ -105,6 +105,13 @@ function limitarFrequencia(limite, janelaMs) {
   };
 }
 
+require('./painel-evento-admin-http.cjs').instalarPainelEventoAdmin(app,{
+  autenticar,permitirPerfis,repositorios,responderErroServico,
+});
+require('./admin-consultas-http.cjs').instalarConsultasAdmin(app,{
+  autenticar,permitirPerfis,repositorios,responderErroServico,
+});
+
 app.get("/", (req, res) => {
   res.json({
     mensagem: "Backend do TrocaTicket funcionando!"

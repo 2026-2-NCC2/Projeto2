@@ -1,0 +1,25 @@
+{
+  "coletadoEm": "2026-11-06T17:31:11.204Z",
+  "frontend": [
+    {
+      "rota": "/",
+      "status": 200
+    },
+    {
+      "rota": "/src/main.jsx",
+      "status": 200
+    },
+    {
+      "rota": "/src/App.jsx",
+      "status": 200
+    },
+    {
+      "rota": "/src/services/api.js",
+      "status": 200
+    },
+    {
+      "rota": "/src/components/eventos/VagasEvento.jsx",
+      "status": 200
+    }
+  ]
+}

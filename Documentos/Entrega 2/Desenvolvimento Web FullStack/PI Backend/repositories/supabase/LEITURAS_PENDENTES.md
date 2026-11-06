@@ -1,29 +1,31 @@
 # Leituras Supabase — estado consolidado da Etapa 5
 
+> Nota documental de 06/11/2026: conteúdo técnico e registros históricos preservados. Referências consolidadas apontam para o [README principal](../../../../../../README.md#arquivo-tecnico-e-recuperacao). Originais e evidências permanecem no arquivo técnico externo com manifesto SHA-256. Contagens e bloqueios históricos abaixo não descrevem necessariamente o estado atual.
+
 **Encerramento atual: 27/27 implementadas localmente.** Contrato ICU de
 propostas.listarPorFornecedor explicitamente aprovado e implementado, com SQL
 real validado em PostgreSQL descartavel. Suite completa: 731 PASS/0 FAIL/8 SKIP
 historicos. HTTP e ativacao continuam pendentes. Ver
-[estado final](../../CONSOLIDACAO_ETAPA_5.md) e
-[contrato/evidencias](../../CONTRATO_RPC_PROPOSTAS_FORNECEDOR.md).
+[estado final](../../../../../../README.md#persistencia-e-transacoes) e
+[contrato/evidencias](../../../../../../README.md#propostas-de-fornecedores).
 Todas as contagens/pendencias de implementacao abaixo sao historicas.
 
 **Estado atual: 26/27 implementacoes locais; HTTP e ativacao separados.**
-Ver [relatorio unico](../../CONSOLIDACAO_ETAPA_5.md): criterio uniforme para as
+Ver [relatorio unico](../../../../../../README.md#persistencia-e-transacoes): criterio uniforme para as
 27 operacoes, evidencias preservadas e bloqueios. Os 22/27 abaixo sao historicos;
 misturavam codigo e integracao. Nao repetir testes SQL ja comprovados.
 
 Progresso: 22/27 metodos SELECT implementados, ainda sem ativacao nas rotas.
 Testes iniciais usaram mocks. A RPC de custos agora foi validada em PostgreSQL
-17.11 descartavel: ver [resultado real](../../RESULTADO_VALIDACAO_RPC_CUSTOS_DESCARTAVEL.md).
+17.11 descartavel: ver [resultado real](../../../../../../README.md#validacao-e-limitacoes).
 Esta evidencia atualiza as pendencias D abaixo; nao comprova PostgREST/Supabase,
 GET integrado ou publicacao efetiva. As linhas seguintes preservam o historico.
 Atualizacao posterior: a publicacao efetiva em PostgreSQL e a concorrencia real
 PUT/publicacao nos dois sentidos tambem passaram; ver
-[resultado de publicacao](../../RESULTADO_VALIDACAO_PUBLICACAO_DESCARTAVEL.md).
+[resultado de publicacao](../../../../../../README.md#validacao-e-limitacoes).
 Nao confundir essa evidencia com publicacao HTTP integrada.
 Decisao de acesso tambem validada em PostgreSQL direto: ver
-[resultado de acesso](../../RESULTADO_VALIDACAO_ACESSO_DESCARTAVEL.md).
+[resultado de acesso](../../../../../../README.md#validacao-e-limitacoes).
 As tres preparacoes atomicas tem provas SQL reais; HTTP/integracao continuam
 separados e pendentes. Contagem reavaliada pelos criterios integrais: 22/27.
 Contagem reavaliada apos completar o GET de custos: o inventario conta o metodo
@@ -64,7 +66,7 @@ concluida do destino. Nenhuma dessas autorizacoes foi presumida nesta revisao.
 | cotacoes.bloquearCustosDoEvento | RPC original e adaptador preparados; fluxo SQL real validado | Lock anterior do evento, comparacao e snapshot na mesma transacao | **L:** mocks 409/timeout. **D PostgreSQL:** compilacao, propriedade, snapshot/ordem/decimais, vazio, TP409, rollback apos cotacao/primeiro item e concorrencia real com PUT comprovados | PostgREST: binding/resposta HTTP, privilegios reais da chave, timeout apos possivel commit; falha de commit/transporte nao exercitada. Nao repetir provas SQL concluidas sem mudanca. |
 | solicitacoesAcesso.bloquearPorId | RPC original e adaptador preparados; fluxo SQL real validado | Admin autenticado; solicitacao antes do estado; aprovacao condicional unica e status atomico | **L:** 25 testes do adaptador/MySQL. **D PostgreSQL:** compilacao, casts, NUMERIC grande, EXECUTE/guard separados, TA404/TA409/TA412, rejeicao em todos os perfis, rollback perfil/status, concorrencia mesma solicitacao e pedidos distintos do mesmo usuario comprovados | Integracao PostgREST: binding JSON NUMERIC/erros/status, identidade e privilegios efetivos, timeout/perda de resposta apos commit. Ligacao futura ao admin do middleware, nunca ao corpo. Nao repetir provas SQL concluidas sem mudanca. |
 | custos.listarPorEvento | GET independente implementado em [custos.cjs](custos.cjs), com segundo argumento recusado; releitura do PUT continua na RPC atomica | Separacao explicita GET(id) versus substituir(id, usuario, custos), sem handle REST; propriedade no chamador | **L:** 12 testes do GET, comparação MySQL, campos/ordem/decimais historicos, vazio, erros/paginas, recusa de conexao e SDK com fetch falso; SQL e adaptador atomico preservados | Nenhuma lacuna local do GET/interface neste escopo. **D:** compilar/testar RPC, binding/privilegios, releitura das proprias escritas antes do commit, IDs/vazio/precisao e rollback em falha; validar equivalencia da leitura independente e limitacao de snapshot paginado. So entao considerar substituido o metodo original completo, sem exigir ativacao em producao. |
-| propostas.listarPorFornecedor | [Contrato RPC e fixtures](../../CONTRATO_RPC_PROPOSTAS_FORNECEDOR.md); sem SQL de RPC/adaptador implementado | Uma consulta com joins/agregacao, DISTINCT da origem, NULL/vazio, ordenacao externa, limite em bytes e instantes | **L:** SQL MySQL e contrato conhecidos, testes sinteticos; oito comparacoes reais continuam SKIP. Collation ICU de destino ja auditada | **M:** charset/collation efetivos e group_concat_max_len/codificacoes da sessao do pool, representantes e truncamento/avisos ainda sem evidencia. **L apos M:** implementar agregacao/adapter sem aproximar regras. **D:** comparar fixtures controladas, instantes e limites de resposta. |
+| propostas.listarPorFornecedor | [Contrato RPC e fixtures](../../../../../../README.md#propostas-de-fornecedores); sem SQL de RPC/adaptador implementado | Uma consulta com joins/agregacao, DISTINCT da origem, NULL/vazio, ordenacao externa, limite em bytes e instantes | **L:** SQL MySQL e contrato conhecidos, testes sinteticos; oito comparacoes reais continuam SKIP. Collation ICU de destino ja auditada | **M:** charset/collation efetivos e group_concat_max_len/codificacoes da sessao do pool, representantes e truncamento/avisos ainda sem evidencia. **L apos M:** implementar agregacao/adapter sem aproximar regras. **D:** comparar fixtures controladas, instantes e limites de resposta. |
 
 As evidencias **L** nao comprovam execucao PostgreSQL, concorrencia, rollback ou
 equivalencia de collation da origem. Oito SKIP nao sao aprovacao. Os tres locks
@@ -74,8 +76,8 @@ nao exige ativacao em producao, mas tambem nao a autoriza.
 
 Documentacao de referencia, sem repetir suas analises:
 - [Plano transacional e preparacoes locais](../../PLANO_TRANSACOES_SUPABASE.md).
-- [Dependencia de custos.listarPorEvento](../../DEPENDENCIA_TRANSACIONAL_CUSTOS.md).
-- [Contrato de propostas do fornecedor](../../CONTRATO_RPC_PROPOSTAS_FORNECEDOR.md).
+- [Dependencia de custos.listarPorEvento](../../../../../../README.md#custos-e-cotacoes).
+- [Contrato de propostas do fornecedor](../../../../../../README.md#propostas-de-fornecedores).
 
 GET monetario de custos/interface de integracao preparados localmente neste
 incremento, com restricao transacional explicita. Nos fluxos atomicos preparados, as garantias de banco estao
@@ -101,7 +103,7 @@ O progresso permanece 22/27. Nenhuma leitura real de banco ou mudanca de ACL foi
 executada para este diagnostico; a analise usa codigo, contratos e documentacao.
 
 Preparacao tecnica posterior: ver
-[CONTRATO_RPC_PROPOSTAS_FORNECEDOR.md](../../CONTRATO_RPC_PROPOSTAS_FORNECEDOR.md).
+[CONTRATO_RPC_PROPOSTAS_FORNECEDOR.md](../../../../../../README.md#propostas-de-fornecedores).
 Contrato de entrada/saida e fixtures sinteticas preparados; nenhuma RPC ou
 adaptacao de rota foi implementada. Testes de contrato ficam separados de oito
 comparacoes reais explicitamente SKIP, que nao constituem evidencias aprovadas.

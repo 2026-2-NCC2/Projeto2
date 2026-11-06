@@ -179,7 +179,7 @@ test("importacao inerte, fabrica existente e somente as duas operacoes autorizad
   assert.deepEqual(JSON.parse(JSON.stringify(await repo.listarAdministrativo())), []);
   assert.equal(criacoes, 1);
   assert.deepEqual(imports, ["../../db-supabase.cjs"]);
-  assert.deepEqual(Object.keys(repo), ["listarPorOrganizador", "listarAdministrativo", "listarDisponiveisParaFornecedor", "listarItens"]);
+  assert.deepEqual(Object.keys(repo), ["listarPorOrganizador", "listarAdministrativo", "buscarAdministrativo", "listarDisponiveisParaFornecedor", "listarItens"]);
 });
 
 test("DATE local e TIMESTAMPTZ mantem JSON do contrato nos dois fusos", () => {

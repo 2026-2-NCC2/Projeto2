@@ -94,23 +94,24 @@ for (const modo of ['principal', 'isolado']) {
 
 test('as referencias dos componentes usam apiUrl com destinos preservados', async () => {
   const { apiUrl: construirIsolado } = await carregarApi({ MODE: 'isolado', TROCATICKET_API_MODO: 'isolado' })
-  let totalFetch = 0
   for (const arquivo of [
-    '../src/services/eventos.js', '../src/services/imagensEvento.js', '../src/pages/participante/PortalParticipante.jsx', '../src/pages/fornecedor/PortalFornecedor.jsx', '../src/pages/auth/SolicitarAcesso.jsx', '../src/pages/auth/Login.jsx', '../src/pages/auth/Cadastro.jsx', '../src/pages/organizador/Cotacao.jsx', '../src/components/admin/AdminPortal.jsx',
+    '../src/services/eventos.js', '../src/services/imagensEvento.js', '../src/pages/participante/PortalParticipante.jsx', '../src/pages/fornecedor/PortalFornecedor.jsx', '../src/pages/auth/SolicitarAcesso.jsx', '../src/pages/auth/Login.jsx', '../src/pages/auth/Cadastro.jsx', '../src/pages/organizador/Cotacao.jsx',
   ]) {
     const fonte = readFileSync(new URL(arquivo, import.meta.url), 'utf8')
     assert.doesNotMatch(fonte, /(?:localhost|127\.0\.0\.1):3001/u)
     assert.match(fonte, /import \{ apiUrl \} from /u)
     const chamadas = [...fonte.matchAll(/apiUrl\((['"`])([^'"`\r\n]*)\1\)/gu)]
     assert.ok(chamadas.length>0)
-    totalFetch += [...fonte.matchAll(/\bfetch\(/gu)].length
     for (const [, , expressao] of chamadas) {
       const caminho = expressao.replace(/\$\{[^}]+\}/gu, '42')
       assert.equal(apiUrl(caminho), `http://localhost:3001${caminho}`)
       assert.equal(construirIsolado(caminho), `/api${caminho}`)
     }
   }
-  assert.ok(totalFetch>=21)
+  const admin = readFileSync(new URL('../src/services/admin.js', import.meta.url), 'utf8')
+  assert.match(admin, /import \{ apiUrl \} from /u)
+  assert.match(admin, /fetch\(apiUrl\(caminho\)/u)
+  assert.doesNotMatch(admin, /(?:localhost|127\.0\.0\.1):3001/u)
 })
 
 test('respostas simuladas funcionam nos dois modos sem requisicoes reais', async () => {

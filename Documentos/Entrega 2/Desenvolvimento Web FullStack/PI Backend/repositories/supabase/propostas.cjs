@@ -4,7 +4,7 @@
 function criarRepositorioPropostas(
   cliente = require("../../db-supabase.cjs").criarClienteSupabase()
 ) {
-  async function listar(organizador, organizadorId) {
+  async function listar(organizador, organizadorId, eventoId) {
     const { erroResposta, listarPaginas, instante, decimalTexto } = require("./suporte-leitura.cjs");
     const code = "SUPABASE_PROPOSTA_RESPONSE";
     if (organizador && organizadorId === undefined) throw erroResposta(code);
@@ -17,6 +17,7 @@ function criarRepositorioPropostas(
     return listarPaginas(() => {
       let consulta = cliente.schema("public").from("propostas").select(projecao, { count: "exact" });
       if (organizador) consulta = consulta.eq("cotacao.evento.usuario_id", organizadorId);
+      if (eventoId !== undefined) consulta = consulta.eq('cotacao.evento.id',eventoId);
       return consulta.order("criada_em", { ascending: false }).order("id", { ascending: false });
     }, item => {
       const cotacao = item.cotacao;
@@ -83,7 +84,7 @@ function criarRepositorioPropostas(
       return require('./propostas-fornecedor.cjs').criarLeituraPropostasFornecedor(cliente).listarPorFornecedor(fornecedorId);
     },
     async listarPorOrganizador(organizadorId) { return listar(true, organizadorId); },
-    async listarAdministrativo() { return listar(false); },
+    async listarAdministrativo(eventoId) { return listar(false,undefined,eventoId); },
 
     async buscarCotacaoDisponivel(cotacaoId) {
       const { erroResposta } = require("./suporte-leitura.cjs");

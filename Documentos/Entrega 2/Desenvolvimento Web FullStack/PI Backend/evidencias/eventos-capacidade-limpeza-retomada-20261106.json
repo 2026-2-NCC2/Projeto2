@@ -1,0 +1,14 @@
+{
+  "coletadoEm": "2026-11-06T17:34:29.362Z",
+  "somenteLeitura": true,
+  "fila": {
+    "registros": 5,
+    "removidos": 5,
+    "leases": 0,
+    "erros": 0,
+    "tombstones_quarentena": 5
+  },
+  "objetosStorage": 0,
+  "backendConsoleSession": 9438,
+  "frontendConsoleSession": 39220
+}

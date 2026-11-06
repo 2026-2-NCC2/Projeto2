@@ -1,0 +1,30 @@
+{
+  "coletadoEm": "2026-11-06T17:26:43.136Z",
+  "somenteLeitura": true,
+  "servicosIniciados": false,
+  "verificacaoIgualAposMigracao": true,
+  "marcador": 3,
+  "funcoes": 7,
+  "triggers": 3,
+  "estados": [
+    {
+      "status": "Ativo",
+      "quantidade": 4
+    },
+    {
+      "status": "Em planejamento",
+      "quantidade": 2
+    }
+  ],
+  "eventosSemLimite": 6,
+  "confirmados": 5,
+  "saldo": "NULL: sem limite configurado",
+  "fila": {
+    "registros": 5,
+    "elegiveis": 5,
+    "leases": 0,
+    "referenciados": 0
+  },
+  "filaHashPreservado": true,
+  "uploadsDesativados": true
+}

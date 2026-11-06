@@ -57,9 +57,9 @@ test('menu e topo administrativos conservam destinos e saida', () => {
   const { AdminMenu, AdminTopo } = carregar('components/admin/AdminPortal.jsx', ['AdminMenu', 'AdminTopo'])
   const actions = [], view = AdminMenu({ secao: 'eventos', setSecao: x => actions.push(x), aoSair: () => actions.push('sair') })
   for (const b of nodes(view).filter(x => x.type === 'button' && x.props.onClick)) b.props.onClick()
-  assert.deepEqual(actions, ['eventos', 'usuarios', 'cotacoes', 'propostas', 'contas', 'perfil', 'sair'])
+  assert.deepEqual(actions, ['painel', 'eventos', 'usuarios', 'cotacoes', 'propostas', 'contas', 'perfil', 'sair'])
   const unavailable = nodes(view).filter(x => x.type === 'button' && x.props.disabled)
-  assert.equal(unavailable.length, 3)
+  assert.equal(unavailable.length, 2)
   for (const button of unavailable) {
     assert.equal(button.props.onClick, undefined)
     assert.match(button.props.title, /Funcionalidade (em desenvolvimento|indisponível)/)

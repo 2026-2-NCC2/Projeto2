@@ -1,0 +1,1132 @@
+{
+  "projeto": "gnwybroqfvwosiqzsfla",
+  "coletadoEm": "2026-11-06T17:15:39.344Z",
+  "somenteLeitura": true,
+  "backup": {
+    "banco-completo.dump": true,
+    "roles-sem-senhas.sql": true,
+    "manifesto.json": true,
+    "storage-arquivos-nao-incluidos.json": true
+  },
+  "sql": {
+    "eventos_capacidade.incremental.sql": "e5fde4026e650955308e5063f7c07c3d61fbb1b0ae319f857e637534f0e0f20e",
+    "eventos_capacidade.preflight.sql": "716f72f7dfbdf511c4e4c61c900788f2dd170e2db408a15aff16d011ef3eefd0",
+    "eventos_capacidade.verificacao.sql": "6f9f995d0e69ba1546d0c24c0d35ac2d87fac4dd7510da0d2b772e647968a0ae"
+  },
+  "checks": {
+    "integridade": true,
+    "estados": true,
+    "legados_com_metadados_iniciais": true,
+    "colunas_gestao": true,
+    "sequencias": true,
+    "seguranca_tabelas": true,
+    "chaves_estrangeiras": true,
+    "funcoes": true,
+    "triggers": true,
+    "restricao_estados": true,
+    "indice_idempotencia": true,
+    "etapa3": true
+  },
+  "tlsVerificado": true,
+  "preflight": [
+    {
+      "campos": [
+        "banco",
+        "usuario",
+        "versao",
+        "etapa_instalada",
+        "isolamento_padrao"
+      ],
+      "linhas": [
+        {
+          "banco": "postgres",
+          "usuario": "postgres",
+          "versao": "170011",
+          "etapa_instalada": 1,
+          "isolamento_padrao": "read committed"
+        }
+      ]
+    },
+    {
+      "campos": [
+        "status",
+        "quantidade"
+      ],
+      "linhas": [
+        {
+          "status": "Confirmada",
+          "quantidade": "5"
+        }
+      ]
+    },
+    {
+      "campos": [
+        "grupos_duplicados"
+      ],
+      "linhas": [
+        {
+          "grupos_duplicados": "0"
+        }
+      ]
+    },
+    {
+      "campos": [
+        "conname",
+        "definicao",
+        "convalidated",
+        "condeferrable"
+      ],
+      "linhas": [
+        {
+          "conname": "fk_inscricao_evento",
+          "definicao": "FOREIGN KEY (evento_id) REFERENCES eventos(id)",
+          "convalidated": true,
+          "condeferrable": false
+        },
+        {
+          "conname": "fk_inscricao_usuario",
+          "definicao": "FOREIGN KEY (usuario_id) REFERENCES usuarios(id)",
+          "convalidated": true,
+          "condeferrable": false
+        },
+        {
+          "conname": "uq_inscricao_usuario_evento",
+          "definicao": "UNIQUE (usuario_id, evento_id)",
+          "convalidated": true,
+          "condeferrable": false
+        }
+      ]
+    },
+    {
+      "campos": [
+        "relname",
+        "relrowsecurity",
+        "relforcerowsecurity",
+        "relacl",
+        "politicas"
+      ],
+      "linhas": [
+        {
+          "relname": "eventos",
+          "relrowsecurity": true,
+          "relforcerowsecurity": false,
+          "relacl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+          "politicas": "0"
+        },
+        {
+          "relname": "inscricoes",
+          "relrowsecurity": true,
+          "relforcerowsecurity": false,
+          "relacl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+          "politicas": "0"
+        }
+      ]
+    },
+    {
+      "campos": [
+        "tgname",
+        "tgenabled",
+        "definicao"
+      ],
+      "linhas": [
+        {
+          "tgname": "eventos_guardar_v1",
+          "tgenabled": "O",
+          "definicao": "CREATE TRIGGER eventos_guardar_v1 BEFORE UPDATE ON public.eventos FOR EACH ROW EXECUTE FUNCTION eventos_guardar_v1()"
+        },
+        {
+          "tgname": "inscricoes_guardar_evento_v1",
+          "tgenabled": "O",
+          "definicao": "CREATE TRIGGER inscricoes_guardar_evento_v1 BEFORE INSERT ON public.inscricoes FOR EACH ROW EXECUTE FUNCTION inscricoes_guardar_evento_v1()"
+        }
+      ]
+    },
+    {
+      "campos": [
+        "funcao",
+        "definicao",
+        "proacl"
+      ],
+      "linhas": [
+        {
+          "funcao": "eventos_capacidades_v1()",
+          "definicao": "CREATE OR REPLACE FUNCTION public.eventos_capacidades_v1()\n RETURNS integer\n LANGUAGE sql\n STABLE\n SET search_path TO 'pg_catalog'\nAS $function$ SELECT 1 $function$\n",
+          "proacl": "{postgres=X/postgres,service_role=X/postgres}"
+        },
+        {
+          "funcao": "eventos_guardar_v1()",
+          "definicao": "CREATE OR REPLACE FUNCTION public.eventos_guardar_v1()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO 'pg_catalog'\nAS $function$\r\nBEGIN\r\n  IF OLD.status IN ('Cancelado','Encerrado') THEN RAISE EXCEPTION USING ERRCODE='EV409',MESSAGE='Evento finalizado.'; END IF;\r\n  IF NEW.usuario_id<>OLD.usuario_id THEN RAISE EXCEPTION USING ERRCODE='EV409',MESSAGE='Proprietário imutável neste fluxo.'; END IF;\r\n  IF ROW(NEW.criacao_chave,NEW.criacao_payload,NEW.publicado_em,NEW.cancelado_em,NEW.encerrado_em,NEW.versao)\r\n    IS DISTINCT FROM ROW(OLD.criacao_chave,OLD.criacao_payload,OLD.publicado_em,OLD.cancelado_em,OLD.encerrado_em,OLD.versao) THEN\r\n    RAISE EXCEPTION USING ERRCODE='EV409',MESSAGE='Metadados de criação, versão e histórico são geridos pelo banco.';\r\n  END IF;\r\n  IF NEW.status IS DISTINCT FROM OLD.status AND NOT (\r\n    (OLD.status='Em planejamento' AND NEW.status IN ('Ativo','Cancelado')) OR\r\n    (OLD.status='Ativo' AND NEW.status IN ('Cancelado','Encerrado'))) THEN\r\n    RAISE EXCEPTION USING ERRCODE='EV409',MESSAGE='Transição inválida.';\r\n  END IF;\r\n  IF OLD.status='Ativo' AND ROW(NEW.nome COLLATE pg_catalog.\"C\",NEW.data,NEW.horario,NEW.local COLLATE pg_catalog.\"C\",NEW.categoria COLLATE pg_catalog.\"C\",NEW.publico)\r\n      IS DISTINCT FROM ROW(OLD.nome COLLATE pg_catalog.\"C\",OLD.data,OLD.horario,OLD.local COLLATE pg_catalog.\"C\",OLD.categoria COLLATE pg_catalog.\"C\",OLD.publico) THEN\r\n    RAISE EXCEPTION USING ERRCODE='EV409',MESSAGE='Evento publicado permite somente descrição.';\r\n  END IF;\r\n  IF NEW.status='Ativo' AND (NEW.data+NEW.horario) AT TIME ZONE 'America/Sao_Paulo'<=clock_timestamp() THEN\r\n    RAISE EXCEPTION USING ERRCODE='EV409',MESSAGE='Evento já iniciado.';\r\n  END IF;\r\n  IF NEW.status='Encerrado' AND (NEW.data+NEW.horario) AT TIME ZONE 'America/Sao_Paulo'>clock_timestamp() THEN\r\n    RAISE EXCEPTION USING ERRCODE='EV409',MESSAGE='Evento ainda não iniciou.';\r\n  END IF;\r\n  NEW.versao:=OLD.versao+1;\r\n  IF NEW.status IS DISTINCT FROM OLD.status THEN\r\n    IF NEW.status='Ativo' THEN NEW.publicado_em:=clock_timestamp(); END IF;\r\n    IF NEW.status='Cancelado' THEN NEW.cancelado_em:=clock_timestamp(); END IF;\r\n    IF NEW.status='Encerrado' THEN NEW.encerrado_em:=clock_timestamp(); END IF;\r\n  END IF;\r\n  RETURN NEW;\r\nEND $function$\n",
+          "proacl": "{postgres=X/postgres,service_role=X/postgres}"
+        },
+        {
+          "funcao": "gerir_evento_v1(text,integer,integer,jsonb,integer,uuid)",
+          "definicao": "CREATE OR REPLACE FUNCTION public.gerir_evento_v1(p_acao text, p_usuario integer, p_evento integer DEFAULT NULL::integer, p_dados jsonb DEFAULT '{}'::jsonb, p_versao integer DEFAULT NULL::integer, p_chave uuid DEFAULT NULL::uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SET search_path TO 'pg_catalog'\nAS $function$\r\nDECLARE e public.eventos%ROWTYPE; perfil_atual text; dados jsonb; v_data date; v_horario time;\r\nBEGIN\r\n  SET LOCAL lock_timeout='2s';\r\n  SELECT perfil::text INTO perfil_atual FROM public.usuarios WHERE id=p_usuario FOR UPDATE;\r\n  IF perfil_atual IS DISTINCT FROM 'organizador' OR EXISTS(SELECT 1 FROM public.contas_teste_imagens WHERE usuario_id=p_usuario AND estado<>'ativa') THEN\r\n    RAISE EXCEPTION USING ERRCODE='EV403',MESSAGE='Organizador indisponível.';\r\n  END IF;\r\n  IF p_acao IN ('criar','editar') THEN\r\n    IF jsonb_typeof(p_dados) IS DISTINCT FROM 'object' OR\r\n      EXISTS(SELECT 1 FROM unnest(ARRAY['nome','data','horario','local','categoria','descricao']) c WHERE jsonb_typeof(p_dados->c) IS DISTINCT FROM 'string') OR\r\n      jsonb_typeof(p_dados->'publico') IS DISTINCT FROM 'number' OR (p_dados->>'publico')!~'^[1-9][0-9]*$' OR\r\n      length(btrim(p_dados->>'nome')) NOT BETWEEN 1 AND 100 OR length(btrim(p_dados->>'local')) NOT BETWEEN 1 AND 200 OR\r\n      length(btrim(p_dados->>'categoria')) NOT BETWEEN 1 AND 100 OR length(p_dados->>'descricao')>10000 OR\r\n      (p_dados->>'data')!~'^[0-9]{4}-[0-9]{2}-[0-9]{2}$' OR (p_dados->>'horario')!~'^([01][0-9]|2[0-3]):[0-5][0-9]$' THEN\r\n      RAISE EXCEPTION USING ERRCODE='EV400',MESSAGE='Dados inválidos.';\r\n    END IF;\r\n    IF EXISTS(SELECT 1 FROM unnest(ARRAY['nome','local','categoria']) c WHERE (p_dados->>c) COLLATE pg_catalog.\"C\" ~ '[[:cntrl:]]') OR\r\n      translate(p_dados->>'descricao',chr(9)||chr(10)||chr(13),'') COLLATE pg_catalog.\"C\" ~ '[[:cntrl:]]' OR\r\n      (p_dados->>'data') COLLATE pg_catalog.\"C\" < '1000-01-01' THEN\r\n      RAISE EXCEPTION USING ERRCODE='EV400',MESSAGE='Dados inválidos.';\r\n    END IF;\r\n    BEGIN\r\n      v_data:=(p_dados->>'data')::date;v_horario:=(p_dados->>'horario')::time;\r\n      IF (p_dados->>'publico')::integer<=0 THEN RAISE EXCEPTION USING ERRCODE='EV400',MESSAGE='Público inválido.'; END IF;\r\n    EXCEPTION WHEN invalid_datetime_format OR datetime_field_overflow OR numeric_value_out_of_range THEN\r\n      RAISE EXCEPTION USING ERRCODE='EV400',MESSAGE='Data, horário ou público inválido.';\r\n    END;\r\n    dados:=jsonb_build_object('nome',btrim(p_dados->>'nome'),'data',to_char(v_data,'YYYY-MM-DD'),'horario',left(v_horario::text,5),\r\n      'local',btrim(p_dados->>'local'),'categoria',btrim(p_dados->>'categoria'),'publico',(p_dados->>'publico')::integer,'descricao',btrim(p_dados->>'descricao'));\r\n  END IF;\r\n  IF p_acao='criar' THEN\r\n    IF p_chave IS NULL THEN RAISE EXCEPTION USING ERRCODE='EV400',MESSAGE='Chave obrigatória.'; END IF;\r\n    SELECT * INTO e FROM public.eventos WHERE usuario_id=p_usuario AND criacao_chave=p_chave FOR UPDATE;\r\n    IF FOUND THEN\r\n      IF e.criacao_payload IS DISTINCT FROM dados THEN RAISE EXCEPTION USING ERRCODE='EV409',MESSAGE='Chave já utilizada com outros dados.'; END IF;\r\n      RETURN to_jsonb(e)-'criacao_payload'-'criacao_chave';\r\n    END IF;\r\n    IF (v_data+v_horario) AT TIME ZONE 'America/Sao_Paulo'<=clock_timestamp() THEN RAISE EXCEPTION USING ERRCODE='EV400',MESSAGE='Início deve ser futuro.'; END IF;\r\n    INSERT INTO public.eventos(nome,data,horario,local,categoria,publico,descricao,status,usuario_id,criacao_chave,criacao_payload)\r\n      VALUES(dados->>'nome',v_data,v_horario,dados->>'local',dados->>'categoria',(dados->>'publico')::integer,dados->>'descricao','Em planejamento',p_usuario,p_chave,dados) RETURNING * INTO e;\r\n  ELSE\r\n    SELECT * INTO e FROM public.eventos WHERE id=p_evento AND usuario_id=p_usuario FOR UPDATE;\r\n    IF NOT FOUND THEN RAISE EXCEPTION USING ERRCODE='EV404',MESSAGE='Evento não encontrado.'; END IF;\r\n    IF p_versao IS NULL OR e.versao<>p_versao THEN RAISE EXCEPTION USING ERRCODE='EV409',MESSAGE='Versão divergente.'; END IF;\r\n    IF p_acao='editar' THEN\r\n      IF e.status='Ativo' THEN\r\n        -- A UI envia todos os campos. Compare a representação normalizada,\r\n        -- mas preserve literalmente os valores legados, inclusive NULL e segundos.\r\n        IF dados-'descricao' IS DISTINCT FROM jsonb_build_object('nome',btrim(e.nome),'data',to_char(e.data,'YYYY-MM-DD'),\r\n          'horario',left(e.horario::text,5),'local',btrim(e.local),\r\n          'categoria',COALESCE(NULLIF(btrim(e.categoria),''),'Corporativo'),'publico',e.publico) THEN\r\n          RAISE EXCEPTION USING ERRCODE='EV409',MESSAGE='Evento publicado permite somente descrição.';\r\n        END IF;\r\n        UPDATE public.eventos SET descricao=dados->>'descricao' WHERE id=e.id RETURNING * INTO e;\r\n      ELSE\r\n        IF (v_data+v_horario) AT TIME ZONE 'America/Sao_Paulo'<=clock_timestamp() THEN RAISE EXCEPTION USING ERRCODE='EV409',MESSAGE='Evento já iniciado.'; END IF;\r\n        UPDATE public.eventos SET nome=dados->>'nome',data=v_data,horario=v_horario,local=dados->>'local',categoria=dados->>'categoria',\r\n          publico=(dados->>'publico')::integer,descricao=dados->>'descricao' WHERE id=e.id RETURNING * INTO e;\r\n      END IF;\r\n    ELSIF p_acao='publicar' AND e.status='Em planejamento' THEN UPDATE public.eventos SET status='Ativo' WHERE id=e.id RETURNING * INTO e;\r\n    ELSIF p_acao='cancelar' AND e.status IN ('Em planejamento','Ativo') THEN UPDATE public.eventos SET status='Cancelado' WHERE id=e.id RETURNING * INTO e;\r\n    ELSIF p_acao='encerrar' AND e.status='Ativo' THEN UPDATE public.eventos SET status='Encerrado' WHERE id=e.id RETURNING * INTO e;\r\n    ELSE RAISE EXCEPTION USING ERRCODE='EV409',MESSAGE='Transição inválida.'; END IF;\r\n  END IF;\r\n  RETURN to_jsonb(e)-'criacao_payload'-'criacao_chave';\r\nEND $function$\n",
+          "proacl": "{postgres=X/postgres,service_role=X/postgres}"
+        },
+        {
+          "funcao": "inscrever_evento_v1(integer,integer)",
+          "definicao": "CREATE OR REPLACE FUNCTION public.inscrever_evento_v1(p_usuario integer, p_evento integer)\n RETURNS integer\n LANGUAGE plpgsql\n SET search_path TO 'pg_catalog'\nAS $function$\r\nDECLARE novo_id integer;\r\nBEGIN\r\n  SET LOCAL lock_timeout='2s';\r\n  INSERT INTO public.inscricoes(usuario_id,evento_id) VALUES(p_usuario,p_evento) RETURNING id INTO novo_id;\r\n  RETURN novo_id;\r\nEND $function$\n",
+          "proacl": "{postgres=X/postgres,service_role=X/postgres}"
+        },
+        {
+          "funcao": "inscricoes_guardar_evento_v1()",
+          "definicao": "CREATE OR REPLACE FUNCTION public.inscricoes_guardar_evento_v1()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO 'pg_catalog'\nAS $function$\r\nDECLARE e public.eventos%ROWTYPE; perfil_atual text;\r\nBEGIN\r\n  SELECT perfil::text INTO perfil_atual FROM public.usuarios WHERE id=NEW.usuario_id FOR UPDATE;\r\n  IF perfil_atual IS DISTINCT FROM 'participante' OR EXISTS(SELECT 1 FROM public.contas_teste_imagens WHERE usuario_id=NEW.usuario_id AND estado<>'ativa') THEN\r\n    RAISE EXCEPTION USING ERRCODE='EV403',MESSAGE='Participante indisponível.';\r\n  END IF;\r\n  SELECT * INTO e FROM public.eventos WHERE id=NEW.evento_id FOR UPDATE;\r\n  IF NOT FOUND OR e.status<>'Ativo' OR (e.data+e.horario) AT TIME ZONE 'America/Sao_Paulo'<=clock_timestamp() THEN\r\n    RAISE EXCEPTION USING ERRCODE='EV409',MESSAGE='Evento indisponível para inscrição.';\r\n  END IF;\r\n  RETURN NEW;\r\nEND $function$\n",
+          "proacl": "{postgres=X/postgres,service_role=X/postgres}"
+        }
+      ]
+    },
+    {
+      "campos": [
+        "rolname",
+        "rolsuper",
+        "rolbypassrls"
+      ],
+      "linhas": [
+        {
+          "rolname": "anon",
+          "rolsuper": false,
+          "rolbypassrls": false
+        },
+        {
+          "rolname": "authenticated",
+          "rolsuper": false,
+          "rolbypassrls": false
+        },
+        {
+          "rolname": "service_role",
+          "rolsuper": false,
+          "rolbypassrls": true
+        }
+      ]
+    },
+    {
+      "campos": [
+        "tabela",
+        "sequencia",
+        "service_role_usage"
+      ],
+      "linhas": [
+        {
+          "tabela": "eventos",
+          "sequencia": "public.eventos_id_seq",
+          "service_role_usage": true
+        },
+        {
+          "tabela": "inscricoes",
+          "sequencia": "public.inscricoes_id_seq",
+          "service_role_usage": true
+        }
+      ]
+    },
+    {
+      "campos": [
+        "table_name",
+        "column_name",
+        "data_type",
+        "is_nullable",
+        "column_default"
+      ],
+      "linhas": [
+        {
+          "table_name": "eventos",
+          "column_name": "id",
+          "data_type": "integer",
+          "is_nullable": "NO",
+          "column_default": null
+        },
+        {
+          "table_name": "eventos",
+          "column_name": "nome",
+          "data_type": "character varying",
+          "is_nullable": "NO",
+          "column_default": null
+        },
+        {
+          "table_name": "eventos",
+          "column_name": "data",
+          "data_type": "date",
+          "is_nullable": "NO",
+          "column_default": null
+        },
+        {
+          "table_name": "eventos",
+          "column_name": "horario",
+          "data_type": "time without time zone",
+          "is_nullable": "NO",
+          "column_default": null
+        },
+        {
+          "table_name": "eventos",
+          "column_name": "local",
+          "data_type": "character varying",
+          "is_nullable": "NO",
+          "column_default": null
+        },
+        {
+          "table_name": "eventos",
+          "column_name": "categoria",
+          "data_type": "character varying",
+          "is_nullable": "YES",
+          "column_default": "'Corporativo'::character varying"
+        },
+        {
+          "table_name": "eventos",
+          "column_name": "publico",
+          "data_type": "integer",
+          "is_nullable": "NO",
+          "column_default": null
+        },
+        {
+          "table_name": "eventos",
+          "column_name": "descricao",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null
+        },
+        {
+          "table_name": "eventos",
+          "column_name": "status",
+          "data_type": "character varying",
+          "is_nullable": "YES",
+          "column_default": "'Em planejamento'::character varying"
+        },
+        {
+          "table_name": "eventos",
+          "column_name": "usuario_id",
+          "data_type": "integer",
+          "is_nullable": "NO",
+          "column_default": null
+        },
+        {
+          "table_name": "eventos",
+          "column_name": "versao",
+          "data_type": "integer",
+          "is_nullable": "NO",
+          "column_default": "1"
+        },
+        {
+          "table_name": "eventos",
+          "column_name": "criacao_chave",
+          "data_type": "uuid",
+          "is_nullable": "YES",
+          "column_default": null
+        },
+        {
+          "table_name": "eventos",
+          "column_name": "criacao_payload",
+          "data_type": "jsonb",
+          "is_nullable": "YES",
+          "column_default": null
+        },
+        {
+          "table_name": "eventos",
+          "column_name": "publicado_em",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": null
+        },
+        {
+          "table_name": "eventos",
+          "column_name": "cancelado_em",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": null
+        },
+        {
+          "table_name": "eventos",
+          "column_name": "encerrado_em",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": null
+        },
+        {
+          "table_name": "inscricoes",
+          "column_name": "id",
+          "data_type": "integer",
+          "is_nullable": "NO",
+          "column_default": null
+        },
+        {
+          "table_name": "inscricoes",
+          "column_name": "usuario_id",
+          "data_type": "integer",
+          "is_nullable": "NO",
+          "column_default": null
+        },
+        {
+          "table_name": "inscricoes",
+          "column_name": "evento_id",
+          "data_type": "integer",
+          "is_nullable": "NO",
+          "column_default": null
+        },
+        {
+          "table_name": "inscricoes",
+          "column_name": "data_inscricao",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "NO",
+          "column_default": "CURRENT_TIMESTAMP"
+        },
+        {
+          "table_name": "inscricoes",
+          "column_name": "status",
+          "data_type": "character varying",
+          "is_nullable": "NO",
+          "column_default": "'Confirmada'::character varying"
+        }
+      ]
+    }
+  ],
+  "verificacao": {
+    "etapa3": {
+      "coluna": [],
+      "indice": [],
+      "restricao": [],
+      "sem_limite": 6,
+      "duplicidades": 0,
+      "versao_instalada": 1,
+      "acima_da_capacidade": 0,
+      "inscricoes_por_status": [
+        {
+          "status": "Confirmada",
+          "quantidade": 5
+        }
+      ],
+      "capacidade_configurada": 0,
+      "hash_eventos_sem_capacidade": "d8e50c0b779d2a8866a0181228e0f476"
+    },
+    "estados": [
+      {
+        "status": "Ativo",
+        "quantidade": 4
+      },
+      {
+        "status": "Em planejamento",
+        "quantidade": 2
+      }
+    ],
+    "funcoes": [
+      {
+        "anon": false,
+        "funcao": "eventos_capacidades_v1()",
+        "configuracao": [
+          "search_path=pg_catalog"
+        ],
+        "service_role": true,
+        "authenticated": false,
+        "security_definer": false,
+        "service_role_grant_option": false
+      },
+      {
+        "anon": false,
+        "funcao": "eventos_guardar_v1()",
+        "configuracao": [
+          "search_path=pg_catalog"
+        ],
+        "service_role": true,
+        "authenticated": false,
+        "security_definer": false,
+        "service_role_grant_option": false
+      },
+      {
+        "anon": false,
+        "funcao": "gerir_evento_v1(text,integer,integer,jsonb,integer,uuid)",
+        "configuracao": [
+          "search_path=pg_catalog"
+        ],
+        "service_role": true,
+        "authenticated": false,
+        "security_definer": false,
+        "service_role_grant_option": false
+      },
+      {
+        "anon": false,
+        "funcao": "inscrever_evento_v1(integer,integer)",
+        "configuracao": [
+          "search_path=pg_catalog"
+        ],
+        "service_role": true,
+        "authenticated": false,
+        "security_definer": false,
+        "service_role_grant_option": false
+      },
+      {
+        "anon": false,
+        "funcao": "inscricoes_guardar_evento_v1()",
+        "configuracao": [
+          "search_path=pg_catalog"
+        ],
+        "service_role": true,
+        "authenticated": false,
+        "security_definer": false,
+        "service_role_grant_option": false
+      }
+    ],
+    "contexto": {
+      "banco": "postgres",
+      "versao": "170011",
+      "usuario": "postgres"
+    },
+    "triggers": [
+      {
+        "nome": "eventos_guardar_v1",
+        "tabela": "eventos",
+        "definicao": "CREATE TRIGGER eventos_guardar_v1 BEFORE UPDATE ON public.eventos FOR EACH ROW EXECUTE FUNCTION eventos_guardar_v1()",
+        "habilitado": "O"
+      },
+      {
+        "nome": "inscricoes_guardar_evento_v1",
+        "tabela": "inscricoes",
+        "definicao": "CREATE TRIGGER inscricoes_guardar_evento_v1 BEFORE INSERT ON public.inscricoes FOR EACH ROW EXECUTE FUNCTION inscricoes_guardar_evento_v1()",
+        "habilitado": "O"
+      }
+    ],
+    "sequencias": [
+      {
+        "tabela": "eventos",
+        "sequencia": "public.eventos_id_seq",
+        "service_role_usage": true
+      },
+      {
+        "tabela": "inscricoes",
+        "sequencia": "public.inscricoes_id_seq",
+        "service_role_usage": true
+      }
+    ],
+    "integridade": {
+      "eventos": {
+        "md5": "9aabdd7c6fb88f5f5ee7b8eb93ce425c",
+        "quantidade": 6
+      },
+      "cotacoes": {
+        "md5": "203f202d576b14836568c7479ea0520e",
+        "quantidade": 6
+      },
+      "propostas": {
+        "md5": "3d8c5ad4845aa93a8804a4153515bbe3",
+        "quantidade": 6
+      },
+      "inscricoes": {
+        "md5": "9c91bc2d70c1bd89e668c7cee5a4c796",
+        "quantidade": 5
+      },
+      "custos_evento": {
+        "md5": "822ceff85987cd77b9c1ef891216d96d",
+        "quantidade": 2
+      },
+      "itens_cotacao": {
+        "md5": "ba11711acc4770291f205a216e5f8a3d",
+        "quantidade": 17
+      }
+    },
+    "colunas_gestao": [
+      {
+        "nula": "NO",
+        "tipo": "integer",
+        "coluna": "versao",
+        "padrao": "1"
+      },
+      {
+        "nula": "YES",
+        "tipo": "uuid",
+        "coluna": "criacao_chave",
+        "padrao": null
+      },
+      {
+        "nula": "YES",
+        "tipo": "jsonb",
+        "coluna": "criacao_payload",
+        "padrao": null
+      },
+      {
+        "nula": "YES",
+        "tipo": "timestamp with time zone",
+        "coluna": "publicado_em",
+        "padrao": null
+      },
+      {
+        "nula": "YES",
+        "tipo": "timestamp with time zone",
+        "coluna": "cancelado_em",
+        "padrao": null
+      },
+      {
+        "nula": "YES",
+        "tipo": "timestamp with time zone",
+        "coluna": "encerrado_em",
+        "padrao": null
+      }
+    ],
+    "restricao_estados": [
+      {
+        "nome": "eventos_ciclo_v1",
+        "validada": true,
+        "definicao": "CHECK (((status IS NOT NULL) AND (((status)::text COLLATE \"C\") = ANY ((ARRAY['Em planejamento'::character varying, 'Ativo'::character varying, 'Cancelado'::character varying, 'Encerrado'::character varying])::text[]))))"
+      }
+    ],
+    "seguranca_tabelas": [
+      {
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+        "rls": true,
+        "tabela": "eventos",
+        "force_rls": false,
+        "politicas": 0
+      },
+      {
+        "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+        "rls": true,
+        "tabela": "inscricoes",
+        "force_rls": false,
+        "politicas": 0
+      }
+    ],
+    "chaves_estrangeiras": [
+      {
+        "nome": "fk_cotacao_evento",
+        "tabela": "cotacoes",
+        "validada": true,
+        "definicao": "FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE CASCADE"
+      },
+      {
+        "nome": "fk_custos_evento_evento",
+        "tabela": "custos_evento",
+        "validada": true,
+        "definicao": "FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE CASCADE"
+      },
+      {
+        "nome": "fk_evento_usuario",
+        "tabela": "eventos",
+        "validada": true,
+        "definicao": "FOREIGN KEY (usuario_id) REFERENCES usuarios(id)"
+      },
+      {
+        "nome": "fk_inscricao_evento",
+        "tabela": "inscricoes",
+        "validada": true,
+        "definicao": "FOREIGN KEY (evento_id) REFERENCES eventos(id)"
+      },
+      {
+        "nome": "fk_inscricao_usuario",
+        "tabela": "inscricoes",
+        "validada": true,
+        "definicao": "FOREIGN KEY (usuario_id) REFERENCES usuarios(id)"
+      },
+      {
+        "nome": "fk_item_cotacao",
+        "tabela": "itens_cotacao",
+        "validada": true,
+        "definicao": "FOREIGN KEY (cotacao_id) REFERENCES cotacoes(id) ON DELETE CASCADE"
+      },
+      {
+        "nome": "fk_propostas_cotacao",
+        "tabela": "propostas",
+        "validada": true,
+        "definicao": "FOREIGN KEY (cotacao_id) REFERENCES cotacoes(id)"
+      },
+      {
+        "nome": "fk_propostas_fornecedor",
+        "tabela": "propostas",
+        "validada": true,
+        "definicao": "FOREIGN KEY (fornecedor_id) REFERENCES usuarios(id)"
+      }
+    ],
+    "indice_idempotencia": [
+      {
+        "unico": true,
+        "pronto": true,
+        "valido": true,
+        "definicao": "CREATE UNIQUE INDEX eventos_criacao_unica_v1 ON public.eventos USING btree (usuario_id, criacao_chave) WHERE (criacao_chave IS NOT NULL)"
+      }
+    ],
+    "legados_com_metadados_iniciais": 6
+  },
+  "catalogoChecks": {
+    "tables": true,
+    "indexes": true,
+    "policies": true,
+    "triggers": true,
+    "functions": true,
+    "sequences": true,
+    "constraints": true
+  },
+  "tabelas": [
+    {
+      "tabela": "contas_teste_imagens",
+      "quantidade": 2,
+      "sha256": "7c7a181cf8eb6caa56b804039269e5de1b0b681cae3f4c0403afb0c8953c7a19",
+      "igual": true
+    },
+    {
+      "tabela": "cotacoes",
+      "quantidade": 6,
+      "sha256": "8c45ca0e4d3f2a2b8a8eb34aad33df893b65df290c2358a99a806dd2ce533fa4",
+      "igual": true
+    },
+    {
+      "tabela": "custos_evento",
+      "quantidade": 2,
+      "sha256": "489d824430eedeea7c071b8034e5782be8903f81c992013c5903dfb3564b7679",
+      "igual": true
+    },
+    {
+      "tabela": "eventos",
+      "quantidade": 6,
+      "sha256": "2843ab5d8bfc3c308b8d3292b1d2fcb0ecffdecc27562d714f1b11fcdbfb612a",
+      "igual": true
+    },
+    {
+      "tabela": "eventos_imagens",
+      "quantidade": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "igual": true
+    },
+    {
+      "tabela": "inscricoes",
+      "quantidade": 5,
+      "sha256": "148d0bdcf633efd7d7fc7b23e9c86e9003cf601d2eb08d1c1d2b607f9f8bb853",
+      "igual": true
+    },
+    {
+      "tabela": "itens_cotacao",
+      "quantidade": 17,
+      "sha256": "91a637b408976ad0421ff296e71728e64fa4b40968b626eb57473753acaa390c",
+      "igual": true
+    },
+    {
+      "tabela": "perfil_imagens",
+      "quantidade": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "igual": true
+    },
+    {
+      "tabela": "perfil_imagens_objetos",
+      "quantidade": 5,
+      "sha256": "d7ac53ab30050a6bcda3389e9bbc836e8bca1d5b9ffb8c9004371d2bb4f61102",
+      "igual": true
+    },
+    {
+      "tabela": "portfolio_itens",
+      "quantidade": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "igual": true
+    },
+    {
+      "tabela": "propostas",
+      "quantidade": 6,
+      "sha256": "3a18a65a9eda625a45157ce22ffc5963913fc6fdcffeecccaa12544659f2a821",
+      "igual": true
+    },
+    {
+      "tabela": "solicitacoes_acesso",
+      "quantidade": 6,
+      "sha256": "25f5b0f3166b4a4e1519f1132f454cb71d438a9496e74cb4509447b09f675f06",
+      "igual": true
+    },
+    {
+      "tabela": "usuarios",
+      "quantidade": 12,
+      "sha256": "e1d141f70d95b1ca7800b68e1980a0879d547e77b9a320c351f9632408a54895",
+      "igual": true
+    }
+  ],
+  "atividade": [
+    {
+      "backend_type": "client backend",
+      "usename": "authenticator",
+      "application_name": "PostgREST 14.18",
+      "state": "idle",
+      "sessoes": 2,
+      "transacoes": 0
+    },
+    {
+      "backend_type": "client backend",
+      "usename": "pgbouncer",
+      "application_name": "",
+      "state": "idle",
+      "sessoes": 1,
+      "transacoes": 0
+    },
+    {
+      "backend_type": "client backend",
+      "usename": "pgbouncer",
+      "application_name": "Supavisor (auth_query)",
+      "state": "idle",
+      "sessoes": 1,
+      "transacoes": 0
+    },
+    {
+      "backend_type": "client backend",
+      "usename": "supabase_admin",
+      "application_name": "",
+      "state": "idle",
+      "sessoes": 1,
+      "transacoes": 0
+    },
+    {
+      "backend_type": "client backend",
+      "usename": "supabase_admin",
+      "application_name": "postgres_exporter",
+      "state": "idle",
+      "sessoes": 1,
+      "transacoes": 0
+    },
+    {
+      "backend_type": "pg_cron launcher",
+      "usename": "supabase_admin",
+      "application_name": "pg_cron scheduler",
+      "state": null,
+      "sessoes": 1,
+      "transacoes": 0
+    },
+    {
+      "backend_type": "pg_net 0.20.4 worker",
+      "usename": "postgres",
+      "application_name": "pg_net 0.20.4",
+      "state": "idle",
+      "sessoes": 1,
+      "transacoes": 0
+    }
+  ],
+  "locks": [],
+  "limpeza": {
+    "registros": 5,
+    "leases": 0,
+    "vencidas": 5
+  },
+  "etapa2": {
+    "projeto": "gnwybroqfvwosiqzsfla",
+    "somenteLeitura": true,
+    "tlsVerificado": true,
+    "coletadoEm": "2026-11-06T17:15:52.827Z",
+    "pronto": true,
+    "checks": {
+      "versaoRevisada": true,
+      "roles": true,
+      "tabela": true,
+      "colunas": true,
+      "indices": true,
+      "restricoes": true,
+      "contrato": true,
+      "bucket": true,
+      "permissoes": true,
+      "dependencias": true,
+      "gestaoV1": true
+    },
+    "catalogo": {
+      "tabelaExiste": true,
+      "bucket": {
+        "id": "eventos-imagens",
+        "public": false,
+        "file_size_limit": "10485760",
+        "allowed_mime_types": [
+          "image/webp"
+        ]
+      },
+      "colunas": [
+        {
+          "column_name": "operacao",
+          "data_type": "uuid",
+          "is_nullable": "NO"
+        },
+        {
+          "column_name": "evento_id",
+          "data_type": "integer",
+          "is_nullable": "YES"
+        },
+        {
+          "column_name": "evento_origem",
+          "data_type": "integer",
+          "is_nullable": "NO"
+        },
+        {
+          "column_name": "usuario_id",
+          "data_type": "integer",
+          "is_nullable": "NO"
+        },
+        {
+          "column_name": "posicao",
+          "data_type": "smallint",
+          "is_nullable": "NO"
+        },
+        {
+          "column_name": "bucket",
+          "data_type": "text",
+          "is_nullable": "NO"
+        },
+        {
+          "column_name": "caminho",
+          "data_type": "text",
+          "is_nullable": "NO"
+        },
+        {
+          "column_name": "mime",
+          "data_type": "text",
+          "is_nullable": "NO"
+        },
+        {
+          "column_name": "tamanho",
+          "data_type": "integer",
+          "is_nullable": "NO"
+        },
+        {
+          "column_name": "largura",
+          "data_type": "integer",
+          "is_nullable": "NO"
+        },
+        {
+          "column_name": "altura",
+          "data_type": "integer",
+          "is_nullable": "NO"
+        },
+        {
+          "column_name": "estado",
+          "data_type": "text",
+          "is_nullable": "NO"
+        },
+        {
+          "column_name": "reserva_ate",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "NO"
+        },
+        {
+          "column_name": "limpeza_apos",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES"
+        },
+        {
+          "column_name": "lease_ate",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES"
+        },
+        {
+          "column_name": "tentativas",
+          "data_type": "integer",
+          "is_nullable": "NO"
+        },
+        {
+          "column_name": "ultimo_erro_codigo",
+          "data_type": "text",
+          "is_nullable": "YES"
+        },
+        {
+          "column_name": "criado_em",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "NO"
+        },
+        {
+          "column_name": "atualizado_em",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "NO"
+        }
+      ],
+      "indices": [
+        {
+          "nome": "eventos_imagens_atual_unica",
+          "indisvalid": true,
+          "indisready": true,
+          "indisunique": true,
+          "definicao": "CREATE UNIQUE INDEX eventos_imagens_atual_unica ON public.eventos_imagens USING btree (evento_id, posicao) WHERE (estado = 'atual'::text)"
+        },
+        {
+          "nome": "eventos_imagens_bucket_caminho_key",
+          "indisvalid": true,
+          "indisready": true,
+          "indisunique": true,
+          "definicao": "CREATE UNIQUE INDEX eventos_imagens_bucket_caminho_key ON public.eventos_imagens USING btree (bucket, caminho)"
+        },
+        {
+          "nome": "eventos_imagens_limpeza",
+          "indisvalid": true,
+          "indisready": true,
+          "indisunique": false,
+          "definicao": "CREATE INDEX eventos_imagens_limpeza ON public.eventos_imagens USING btree (estado, limpeza_apos)"
+        },
+        {
+          "nome": "eventos_imagens_orfaos",
+          "indisvalid": true,
+          "indisready": true,
+          "indisunique": false,
+          "definicao": "CREATE INDEX eventos_imagens_orfaos ON public.eventos_imagens USING btree (usuario_id) WHERE ((evento_id IS NULL) AND (estado = ANY (ARRAY['atual'::text, 'reservado'::text])))"
+        },
+        {
+          "nome": "eventos_imagens_pkey",
+          "indisvalid": true,
+          "indisready": true,
+          "indisunique": true,
+          "definicao": "CREATE UNIQUE INDEX eventos_imagens_pkey ON public.eventos_imagens USING btree (operacao)"
+        },
+        {
+          "nome": "eventos_imagens_reserva_unica",
+          "indisvalid": true,
+          "indisready": true,
+          "indisunique": true,
+          "definicao": "CREATE UNIQUE INDEX eventos_imagens_reserva_unica ON public.eventos_imagens USING btree (evento_id, posicao) WHERE (estado = 'reservado'::text)"
+        },
+        {
+          "nome": "eventos_imagens_usuario_evento",
+          "indisvalid": true,
+          "indisready": true,
+          "indisunique": false,
+          "definicao": "CREATE INDEX eventos_imagens_usuario_evento ON public.eventos_imagens USING btree (usuario_id, evento_id)"
+        }
+      ],
+      "restricoes": [
+        {
+          "conname": "eventos_imagens_altura_check",
+          "contype": "c",
+          "convalidated": true,
+          "destino": "-",
+          "confdeltype": " ",
+          "definicao": "CHECK (((altura >= 1) AND (altura <= 1920)))"
+        },
+        {
+          "conname": "eventos_imagens_bucket_caminho_key",
+          "contype": "u",
+          "convalidated": true,
+          "destino": "-",
+          "confdeltype": " ",
+          "definicao": "UNIQUE (bucket, caminho)"
+        },
+        {
+          "conname": "eventos_imagens_bucket_check",
+          "contype": "c",
+          "convalidated": true,
+          "destino": "-",
+          "confdeltype": " ",
+          "definicao": "CHECK ((bucket = 'eventos-imagens'::text))"
+        },
+        {
+          "conname": "eventos_imagens_check",
+          "contype": "c",
+          "convalidated": true,
+          "destino": "-",
+          "confdeltype": " ",
+          "definicao": "CHECK (((evento_id IS NULL) OR (evento_id = evento_origem)))"
+        },
+        {
+          "conname": "eventos_imagens_check1",
+          "contype": "c",
+          "convalidated": true,
+          "destino": "-",
+          "confdeltype": " ",
+          "definicao": "CHECK ((caminho = ((((evento_origem)::text || '/'::text) || (operacao)::text) || '.webp'::text)))"
+        },
+        {
+          "conname": "eventos_imagens_check2",
+          "contype": "c",
+          "convalidated": true,
+          "destino": "-",
+          "confdeltype": " ",
+          "definicao": "CHECK (((estado <> ALL (ARRAY['limpeza'::text, 'limpando'::text])) OR (limpeza_apos IS NOT NULL)))"
+        },
+        {
+          "conname": "eventos_imagens_check3",
+          "contype": "c",
+          "convalidated": true,
+          "destino": "-",
+          "confdeltype": " ",
+          "definicao": "CHECK (((estado <> 'limpando'::text) OR (lease_ate IS NOT NULL)))"
+        },
+        {
+          "conname": "eventos_imagens_estado_check",
+          "contype": "c",
+          "convalidated": true,
+          "destino": "-",
+          "confdeltype": " ",
+          "definicao": "CHECK ((estado = ANY (ARRAY['reservado'::text, 'atual'::text, 'limpeza'::text, 'limpando'::text, 'removido'::text])))"
+        },
+        {
+          "conname": "eventos_imagens_evento_id_fkey",
+          "contype": "f",
+          "convalidated": true,
+          "destino": "eventos",
+          "confdeltype": "n",
+          "definicao": "FOREIGN KEY (evento_id) REFERENCES eventos(id) ON DELETE SET NULL"
+        },
+        {
+          "conname": "eventos_imagens_evento_origem_check",
+          "contype": "c",
+          "convalidated": true,
+          "destino": "-",
+          "confdeltype": " ",
+          "definicao": "CHECK ((evento_origem > 0))"
+        },
+        {
+          "conname": "eventos_imagens_largura_check",
+          "contype": "c",
+          "convalidated": true,
+          "destino": "-",
+          "confdeltype": " ",
+          "definicao": "CHECK (((largura >= 1) AND (largura <= 1920)))"
+        },
+        {
+          "conname": "eventos_imagens_mime_check",
+          "contype": "c",
+          "convalidated": true,
+          "destino": "-",
+          "confdeltype": " ",
+          "definicao": "CHECK ((mime = 'image/webp'::text))"
+        },
+        {
+          "conname": "eventos_imagens_operacao_check",
+          "contype": "c",
+          "convalidated": true,
+          "destino": "-",
+          "confdeltype": " ",
+          "definicao": "CHECK (((\"substring\"((operacao)::text, 15, 1) = '4'::text) AND (\"substring\"((operacao)::text, 20, 1) = ANY (ARRAY['8'::text, '9'::text, 'a'::text, 'b'::text]))))"
+        },
+        {
+          "conname": "eventos_imagens_pkey",
+          "contype": "p",
+          "convalidated": true,
+          "destino": "-",
+          "confdeltype": " ",
+          "definicao": "PRIMARY KEY (operacao)"
+        },
+        {
+          "conname": "eventos_imagens_posicao_check",
+          "contype": "c",
+          "convalidated": true,
+          "destino": "-",
+          "confdeltype": " ",
+          "definicao": "CHECK (((posicao >= 0) AND (posicao <= 8)))"
+        },
+        {
+          "conname": "eventos_imagens_tamanho_check",
+          "contype": "c",
+          "convalidated": true,
+          "destino": "-",
+          "confdeltype": " ",
+          "definicao": "CHECK (((tamanho >= 1) AND (tamanho <= 10485760)))"
+        },
+        {
+          "conname": "eventos_imagens_tentativas_check",
+          "contype": "c",
+          "convalidated": true,
+          "destino": "-",
+          "confdeltype": " ",
+          "definicao": "CHECK ((tentativas >= 0))"
+        },
+        {
+          "conname": "eventos_imagens_ultimo_erro_codigo_check",
+          "contype": "c",
+          "convalidated": true,
+          "destino": "-",
+          "confdeltype": " ",
+          "definicao": "CHECK ((length(ultimo_erro_codigo) <= 64))"
+        },
+        {
+          "conname": "eventos_imagens_usuario_id_fkey",
+          "contype": "f",
+          "convalidated": true,
+          "destino": "usuarios",
+          "confdeltype": "r",
+          "definicao": "FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT"
+        }
+      ]
+    }
+  },
+  "uploadsDesativados": true,
+  "filaPendenteAutorizada": true,
+  "aprovado": true
+}

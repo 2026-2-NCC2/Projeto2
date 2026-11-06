@@ -1,6 +1,8 @@
 # Plano transacional PostgreSQL/Supabase — Etapa 5
 
-Referencia atual: [consolidacao unica](CONSOLIDACAO_ETAPA_5.md). Tres fluxos SQL
+> Nota documental de 06/11/2026: conteúdo técnico e registros históricos preservados. Referências consolidadas apontam para o [README principal](../../../../README.md#arquivo-tecnico-e-recuperacao). Originais e evidências permanecem no arquivo técnico externo com manifesto SHA-256. Contagens e bloqueios históricos abaixo não descrevem necessariamente o estado atual.
+
+Referencia atual: [consolidacao unica](../../../../README.md#persistencia-e-transacoes). Tres fluxos SQL
 validados, implementacao local 26/27, HTTP e ativacao separados. Os estados e
 22/27 das secoes seguintes preservam o historico, nao a contagem atual.
 
@@ -36,7 +38,7 @@ plano; a RPC de propostas nao foi retomada.
 
 ## Fluxo 1 — substituir custos
 
-Reutilizar [DEPENDENCIA_TRANSACIONAL_CUSTOS.md](DEPENDENCIA_TRANSACIONAL_CUSTOS.md),
+Reutilizar [DEPENDENCIA_TRANSACIONAL_CUSTOS.md](../../../../README.md#custos-e-cotacoes),
 sem reimplementar aqui sua analise ou ignorar o argumento conexao da leitura.
 
 Sequencia MySQL: validar a lista inteira -> getConnection -> BEGIN -> bloquear
@@ -800,7 +802,7 @@ O PUT permanece no adaptador atomico/RPC, com releitura interna; nenhum SQL,
 handler, provedor ativo ou adaptador de substituicao foi alterado.
 
 Contrato detalhado e reavaliacao de contagem atualizados no documento existente
-[DEPENDENCIA_TRANSACIONAL_CUSTOS.md](DEPENDENCIA_TRANSACIONAL_CUSTOS.md), sem
+[DEPENDENCIA_TRANSACIONAL_CUSTOS.md](../../../../README.md#custos-e-cotacoes), sem
 duplicar sua analise; os criterios das cinco operacoes continuam na matriz
 [LEITURAS_PENDENTES.md](repositories/supabase/LEITURAS_PENDENTES.md).
 

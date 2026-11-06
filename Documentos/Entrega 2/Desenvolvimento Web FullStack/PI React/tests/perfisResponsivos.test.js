@@ -46,21 +46,24 @@ function regions(file) {
     if (!n || typeof n !== 'object') return
     if (n.type === 'JSXOpeningElement') {
       const attrs = Object.fromEntries(n.attributes.filter(a => a.type === 'JSXAttribute').map(a => [a.name.name, a.value?.type === 'JSXExpressionContainer' ? a.value.expression.value : a.value?.value]))
-      if (['adminTabelaEventos', 'adminTabelaWrap', 'fornTabela'].includes(attrs.className)) found.push(attrs)
+      if (['adminTabelaEventos', 'adminTabelaWrap', 'fornTabela', 'admTabela'].includes(attrs.className)) {
+        if (n.attributes.some(a => a.type === 'JSXAttribute' && a.name.name === 'aria-label' && a.value?.type === 'JSXExpressionContainer')) attrs['aria-label'] = 'Nome dinâmico do catálogo'
+        found.push(attrs)
+      }
     }
     for (const value of Object.values(n)) if (Array.isArray(value)) value.forEach(visit); else if (value && typeof value === 'object') visit(value)
   }
   visit(ast)
   return found
 }
-test('tabelas dos fornecedores e das cinco listagens administrativas possuem acesso por teclado', () => {
-  const admin = regions('components/admin/AdminPortal.jsx'), supplier = regions('pages/fornecedor/PortalFornecedor.jsx')
-  assert.equal(admin.length, 5)
+test('tabelas reutilizáveis administrativas, itens e solicitações possuem acesso por teclado', () => {
+  const admin = [...regions('components/admin/AdminCatalogos.jsx'), ...regions('components/admin/AdminSolicitacoes.jsx')], supplier = regions('pages/fornecedor/PortalFornecedor.jsx')
+  assert.equal(admin.length, 3)
   assert.equal(supplier.length, 1)
   for (const r of [...admin, ...supplier]) {
     assert.equal(r.tabIndex, 0)
     assert.equal(r.role, 'region')
     assert.ok(r['aria-label'].length > 5)
   }
-  assert.equal(new Set(admin.map(r => r['aria-label'])).size, 5)
+  assert.equal(new Set(admin.map(r => r['aria-label'])).size, 3)
 })

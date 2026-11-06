@@ -238,6 +238,14 @@ function criarRepositorioEventos(
         .order("id", { ascending: false }), campos, true);
     },
 
+    async buscarAdministrativo(id) {
+      const selecao=await camposLeitura();
+      const lista=await listarTodas(()=>cliente.schema('public').from('eventos')
+        .select(`${selecao.join(', ')}, organizador:usuarios!inner(nome)`,{count:'exact'})
+        .eq('id',id).order('id',{ascending:false}),selecao,true);
+      return lista[0];
+    },
+
     async listarAtivosParaParticipante() {
       const camposParticipante = campos.filter(campo => campo !== "usuario_id");
       const lista=await listarTodas(() => cliente.schema("public").from("eventos")

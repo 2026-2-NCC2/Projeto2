@@ -76,16 +76,17 @@ const source = readFileSync(new URL('../src/components/admin/AdminPortal.jsx', i
 function admin(section) {
   const js = transformSync('AdminPortal.jsx', source.replace(/^import .*\r?\n/gm, '').replaceAll('export function ', 'function '), { jsx: { runtime: 'classic', pragma: 'jsx', pragmaFrag: 'Fragment' } })
   assert.equal(js.errors.length, 0)
-  const component = vm.runInNewContext(js.code + '\nAdminPortal', { jsx: (type, props, ...children) => ({ type, props: props || {}, children: children.flat() }), Fragment: 'fragment', useState: value => [value === 'contas' ? section : value, () => {}], useEffect() {}, useFocoModal: () => ({ current: null }), NavegacaoRecolhivel: 'nav' })
+  const component = vm.runInNewContext(js.code + '\nAdminPortal', { jsx: (type, props, ...children) => ({ type, props: props || {}, children: children.flat() }), Fragment: 'fragment', AdminCatalogo: 'catalogo', AdminSolicitacoes: 'solicitacoes', useState: value => [value === 'contas' ? section : value, () => {}], NavegacaoRecolhivel: 'nav' })
   return component({ aoSair() {} })
 }
 function nodes(view) { return [view, ...view.children.filter(x => x && typeof x === 'object').flatMap(nodes)] }
-test('Aprovar em lote e nativamente desabilitado e possui titulo explicativo', () => {
-  const button = nodes(admin('contas')).find(n => n.props.className === 'aprovarLote')
-  assert.equal(button.props.disabled, true); assert.equal(button.props.title, 'Funcionalidade em desenvolvimento'); assert.equal(button.props.disabledtitle, undefined)
+test('Solicitações possuem componente próprio sem montar outros catálogos', () => {
+  assert.ok(nodes(admin('contas')).some(n => n.type === 'solicitacoes'))
+  assert.equal(nodes(admin('contas')).some(n => n.type === 'catalogo'), false)
 })
-test('Painel e Relatorios nao mostram indevidamente o conteudo de Contas', () => {
-  for (const section of ['painel', 'relatorios']) {
+test('Painel possui componente proprio e Relatorios continua indisponivel', () => {
+  assert.ok(nodes(admin('painel')).some(n => typeof n.type === 'function' && n.type.name === 'PaginaPainelAdmin'))
+  for (const section of ['relatorios']) {
     const view = nodes(admin(section)), status = view.find(n => n.props.role === 'status')
     assert.ok(status.children.includes('Funcionalidade em desenvolvimento.'))
     assert.equal(view.some(n => n.props.className === 'adminFila'), false)

@@ -1,0 +1,48 @@
+{
+  "coletadoEm": "2026-11-06T18:37:38.990Z",
+  "somenteLeitura": true,
+  "supervisorIniciado": false,
+  "rotas": [
+    {
+      "rota": "/admin/eventos",
+      "statusAdmin": 200,
+      "statusParticipante": 403,
+      "statusSemToken": 401,
+      "registros": 6
+    },
+    {
+      "rota": "/usuarios",
+      "statusAdmin": 200,
+      "statusParticipante": 403,
+      "statusSemToken": 401,
+      "registros": 12
+    },
+    {
+      "rota": "/admin/cotacoes",
+      "statusAdmin": 200,
+      "statusParticipante": 403,
+      "statusSemToken": 401,
+      "registros": 6
+    },
+    {
+      "rota": "/admin/propostas",
+      "statusAdmin": 200,
+      "statusParticipante": 403,
+      "statusSemToken": 401,
+      "registros": 6
+    },
+    {
+      "rota": "/solicitacoes-acesso",
+      "statusAdmin": 200,
+      "statusParticipante": 403,
+      "statusSemToken": 401,
+      "registros": 6
+    }
+  ],
+  "cotacoesVerificadas": 6,
+  "itens": 17,
+  "uploadsDesativados": true,
+  "dadosPreservados": true,
+  "marcador": 3,
+  "aprovado": true
+}

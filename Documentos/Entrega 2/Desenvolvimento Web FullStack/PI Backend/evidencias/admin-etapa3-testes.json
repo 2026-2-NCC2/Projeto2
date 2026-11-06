@@ -1,0 +1,63 @@
+{
+  "coletadoEm": "2026-11-06T18:39:09.151Z",
+  "escopo": "Comparacao local anterior a Etapa 3 administrativa, preservando Etapas 1/2 locais; nao e um checkout HEAD",
+  "workspaceSobrescrito": false,
+  "metodo": "Copias temporarias de server.js e cotacoes.cjs sem a rota/metodo desta etapa; loader de testes local; nenhuma credencial ou consulta remota",
+  "baseline": {
+    "testes": 1604,
+    "passaram": 1414,
+    "falhas": 175,
+    "ignorados": 15
+  },
+  "atual": {
+    "testes": 1609,
+    "passaram": 1419,
+    "falhas": 175,
+    "ignorados": 15
+  },
+  "novasFalhas": [],
+  "falhasResolvidas": [],
+  "mesmosTestesFalham": true,
+  "porArquivo": {
+    "tests\\banco-provider.test.cjs": 1,
+    "tests\\contratos.test.cjs": 108,
+    "tests\\cotacoes.test.cjs": 15,
+    "tests\\custos-repository.test.cjs": 13,
+    "tests\\cutover-transicao-final.test.cjs": 1,
+    "tests\\eventos-supabase-repository.test.cjs": 1,
+    "tests\\handlers-persistencia.test.cjs": 6,
+    "tests\\homologacao-http.test.cjs": 2,
+    "tests\\isolamento.test.cjs": 2,
+    "tests\\propostas-avaliar-supabase.test.cjs": 3,
+    "tests\\seguranca.test.cjs": 10,
+    "tests\\solicitacoes-acesso-repository.test.cjs": 13
+  },
+  "fronteiras": {
+    "frontend": {
+      "testes": 296,
+      "passaram": 296,
+      "falhas": 0,
+      "ignorados": 0
+    },
+    "backendDirecionado": {
+      "testes": 114,
+      "passaram": 114,
+      "falhas": 0,
+      "ignorados": 0
+    },
+    "lint": true,
+    "build": true
+  },
+  "hashesComparacao": {
+    "server.js": "f4a2c8f9ae657d4ca156e636a2310a0aaa90a3563bc4af438a55265cbfacdf10",
+    "cotacoes.cjs": "6619e7141e13ffd927271c2429059f59b50cf6c2c4f7523eb1bf6e4704362041",
+    "preload.cjs": "8c238250e6d9dd52372ce1de43b99c787ba120f5463ae94c4679cfbed03f8a17"
+  },
+  "operacaoFinal": {
+    "backend3001": "PARADO_APOS_AVISO_DRENAGEM",
+    "frontend5173": "ATIVO",
+    "encerramentoForcado": false,
+    "reinicioAposAviso": false,
+    "inspecaoVisual": "PENDENTE"
+  }
+}

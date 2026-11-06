@@ -41,7 +41,7 @@ function instante(valor) {
 function criarRepositorioCotacoes(
   cliente = require("../../db-supabase.cjs").criarClienteSupabase()
 ) {
-  async function listar(organizador, usuarioId, fornecedor = false) {
+  async function listar(organizador, usuarioId, fornecedor = false, eventoId, cotacaoId) {
     if (organizador && usuarioId === undefined) throw respostaInvalida();
     const dadosEvento = organizador || fornecedor;
     const eventoCampos = organizador ? "nome, data, local, usuario_id" : fornecedor ? "nome, data, local" : "nome";
@@ -54,6 +54,8 @@ function criarRepositorioCotacoes(
       let consulta = cliente.schema("public").from("cotacoes")
         .select(`${campos.join(", ")}, evento:eventos!inner(${eventoCampos})`, { count: "exact" });
       if (organizador) consulta = consulta.eq("evento.usuario_id", usuarioId);
+      if (eventoId !== undefined) consulta = consulta.eq('evento_id',eventoId);
+      if (cotacaoId !== undefined) consulta = consulta.eq('id',cotacaoId);
       // Valor de entrada DATE interpretado pelo PostgreSQL em cada requisicao,
       // nao uma data UTC calculada no Node. Validar o fuso da sessao PostgREST
       // contra o MySQL antes de ativar: nao se presume que sejam iguais.
@@ -91,7 +93,8 @@ function criarRepositorioCotacoes(
 
   return {
     async listarPorOrganizador(usuarioId) { return listar(true, usuarioId); },
-    async listarAdministrativo() { return listar(false); },
+    async listarAdministrativo(eventoId) { return listar(false,undefined,false,eventoId); },
+    async buscarAdministrativo(id) { return (await listar(false,undefined,false,undefined,id))[0]; },
     async listarDisponiveisParaFornecedor() { return listar(false, undefined, true); },
 
     async listarItens(cotacaoId) {

@@ -1,0 +1,57 @@
+{
+  "somenteLeitura": true,
+  "portas": [
+    3001,
+    5173
+  ],
+  "rotas": [
+    {
+      "rota": "/admin/eventos",
+      "admin": 200,
+      "participante": 403,
+      "semToken": 401,
+      "registros": 6
+    },
+    {
+      "rota": "/usuarios",
+      "admin": 200,
+      "participante": 403,
+      "semToken": 401,
+      "registros": 12
+    },
+    {
+      "rota": "/admin/cotacoes",
+      "admin": 200,
+      "participante": 403,
+      "semToken": 401,
+      "registros": 6
+    },
+    {
+      "rota": "/admin/propostas",
+      "admin": 200,
+      "participante": 403,
+      "semToken": 401,
+      "registros": 6
+    },
+    {
+      "rota": "/solicitacoes-acesso",
+      "admin": 200,
+      "participante": 403,
+      "semToken": 401,
+      "registros": 6
+    }
+  ],
+  "itens": 17,
+  "frontendModulosHttp200": true,
+  "cotacoes": 6,
+  "fila": [
+    {
+      "estado": "removido",
+      "registros": 5,
+      "leases": 0,
+      "elegiveis": 0,
+      "erros": 0
+    }
+  ],
+  "coletadoEm": "2026-11-06T19:08:19.594Z"
+}
