@@ -128,11 +128,13 @@ O comando `npm start` utiliza os certificados confiáveis do sistema e mantém a
 
 ## Declaração de Uso de Inteligência Artificial
 
-| Campo | Declaração |
-|---|---|
+
+### Disciplina 1 — Full-Stack
+
+| **Aluno(s) Responsável(veis)** | Lucas Pelliciotti Cintra da Silva. ||
 | **Ferramenta utilizada** | ChatGPT (OpenAI) |
 | **Versão/modelo** | GPT Sol 6.1 |
-| **Disciplina / Trabalho** | Desenvolvimento Web Full Stack — Projeto TrocaTicket |
+| **Disciplina / Trabalho** | Desenvolvimento Web Full Stack |
 | **Finalidade de uso** | Auxiliar na compreensão e no planejamento da migração do banco de dados do projeto para o Supabase, por meio de orientações técnicas, esclarecimento de dúvidas e sugestões de procedimentos. A ferramenta também foi consultada para auxiliar na avaliação de possíveis melhorias visuais da plataforma, apresentando algumas sugestões de alterações na interface. |
 | **Prompts principais utilizados** | Solicitações de orientações para a migração do banco de dados para o Supabase, esclarecimento de dúvidas sobre configuração e conexão e sugestões de melhorias na aparência visual do TrocaTicket. |
 | **Trechos ou entregas afetadas** | Planejamento e orientações técnicas relacionadas à migração do banco de dados para o Supabase e sugestões de alterações visuais da plataforma. |
