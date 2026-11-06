@@ -1,9 +1,0 @@
-APROVADO: padrao e somente leitura
-APROVADO: Verificar explicito nao coordena admissao
-APROVADO: Verificar com autorizacao conflitante e recusado
-APROVADO: Retomar sem autorizacao e recusado
-APROVADO: Retomar sem referencia e recusado
-APROVADO: Retomar sem hash da correcao e recusado
-APROVADO: pacote alterado recusa coordenador
-APROVADO: modo e autorizacao explicitos chegam somente ao coordenador falso
-TESTES_ENTRADA_ISOLADA: 8
