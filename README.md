@@ -129,7 +129,7 @@ O comando `npm start` utiliza os certificados confiáveis do sistema e mantém a
 ## Declaração de Uso de Inteligência Artificial
 
 
-### Disciplina 1 — Full-Stack
+### Disciplina 1 — Desenvolvimento Web Full Stack
 | Campo | Declaração |
 |---|---|
 | **Aluno(s) Responsável(veis)** | Lucas Pelliciotti Cintra da Silva. ||
