@@ -56,12 +56,12 @@ O projeto reúne áreas para **organizadores, fornecedores, participantes e admi
 | 1 | Cálculo II | [Polinômio de Taylor — PDF](Documentos/Entrega%201/C%C3%A1lculo%20II/Projeto%20Interdisciplinar%20-%20Polinomio%20de%20Taylor%20TrocaTicket%2000.pdf) |
 | 1 | Desenvolvimento Web FullStack | [Frontend React](Documentos/Entrega%201/Desenvolvimento%20Web%20FullStack/PI%20React) |
 | 1 | Gestão Empresarial e Dinâmicas das Organizações | [Documento da Entrega 1 — PDF](Documentos/Entrega%201/Gest%C3%A3o%20Empresarial%20e%20Din%C3%A2micas%20das%20Organiza%C3%A7%C3%B5es/TrocaTicket_Entrega_1_Missao_Visao_Valores_Proposta_de_Valor.pdf) |
-| 1 | Projeto Interdisciplinar Programação Web | [Documentação](https://github.com/2026-2-NCC2/Projeto2/blob/main/Documentos/Entrega%202/Projeto%20Interdisciplinar%20Programa%C3%A7%C3%A3o%20Web/Documento%20-%20Projeto%20de%20Extens%C3%A3o%20-%20COM%20Empresa%20-%202026_1.docx) |
+| 1 | Projeto Interdisciplinar Programação Web | [Link do Figma](Documentos/Entrega%202/Projeto%20Interdisciplinar%20Programa%C3%A7%C3%A3o%20Web/link%20figma.txt) |
 | 1 | Projeto em Banco de Dados | [Registro da modelagem](Documentos/Entrega%201/Projeto%20em%20Banco%20de%20Dados/Diagrama%20modelagem.txt) |
 | 2 | Cálculo II | [Relatório Completo — PDF](https://github.com/2026-2-NCC2/Projeto2/blob/main/Documentos/Entrega%202/C%C3%A1lculo%20II/Projeto_TrocaTicket_-_Relat%C3%B3rio_Completo.pdf) |
 | 2 | Desenvolvimento Web FullStack | [Frontend](Documentos/Entrega%202/Desenvolvimento%20Web%20FullStack/PI%20React) · [Backend](Documentos/Entrega%202/Desenvolvimento%20Web%20FullStack/PI%20Backend) · [Banco de dados](Documentos/Entrega%202/Desenvolvimento%20Web%20FullStack/Banco%20de%20dados) |
 | 2 | Gestão Empresarial e Dinâmicas das Organizações | [Mapa de processos — PDF](Documentos/Entrega%202/Gest%C3%A3o%20Empresarial%20e%20Din%C3%A2micas%20das%20Organiza%C3%A7%C3%B5es/TrocaTicket_Mapa_de_Processos.pdf) |
-| 2 | Projeto Interdisciplinar Programação Web | [Link do Figma](Documentos/Entrega%202/Projeto%20Interdisciplinar%20Programa%C3%A7%C3%A3o%20Web/link%20figma.txt) |
+| 2 | Projeto Interdisciplinar Programação Web | [Documentação](https://github.com/2026-2-NCC2/Projeto2/blob/main/Documentos/Entrega%202/Projeto%20Interdisciplinar%20Programa%C3%A7%C3%A3o%20Web/Documento%20-%20Projeto%20de%20Extens%C3%A3o%20-%20COM%20Empresa%20-%202026_1.docx) |
 | 2 | Projeto em Banco de Dados | [Diagrama de modelagem — PDF](Documentos/Entrega%202/Projeto%20em%20Banco%20de%20Dados/Diagrama%20modelagem.pdf) |
 
 ## 🔧 Instalação
