@@ -1,9 +1,10 @@
+import { Marca } from '../ui/Marca.jsx'
 import { Icone } from '../ui/Icone.jsx'
 export function Menu({ pagina, setPagina, aoCriarNovoEvento, aoSair }) {
   return (
     <aside className="menu" aria-label="Navegação do organizador">
       <div className="logo">
-        <Icone nome="ticket" /> <span>TrocaTicket</span>
+        <Marca compacto />
       </div>
       <button
         className="novo"

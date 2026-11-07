@@ -8,7 +8,7 @@ export function carregarAdmin(file, nomes, env = {}) {
   const source = readFileSync(new URL('../../src/' + file, import.meta.url), 'utf8').replace(/^import .*\r?\n/gm, '').replaceAll('export ', '')
   const compiled = transformSync(file, source, { jsx: { runtime: 'classic', pragma: 'jsx', pragmaFrag: 'Fragment' } })
   if (compiled.errors.length) throw Error('Falha ao compilar fixture JSX')
-  return vm.runInNewContext(compiled.code + ';({' + nomes.join(',') + '})', { jsx, Fragment: 'fragment', ...env })
+  return vm.runInNewContext(compiled.code + ';({' + nomes.join(',') + '})', { jsx, Fragment: 'fragment', Marca: 'marca', ...env })
 }
 export function hooksAdmin(env = {}) {
   const values = [], effects = [], deps = []; let cursor = 0, ec = 0

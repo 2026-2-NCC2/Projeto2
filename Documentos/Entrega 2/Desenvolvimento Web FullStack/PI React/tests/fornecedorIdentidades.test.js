@@ -1,3 +1,4 @@
+import { primitivasFixture, jsxPrimitivas } from './helpers/primitivasFixture.js'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
@@ -5,14 +6,14 @@ import vm from 'node:vm'
 import { setImmediate } from 'node:timers'
 import { transformSync } from 'rolldown/utils'
 
-const jsx = (type, props, ...children) => ({ type, props: props || {}, children: children.flat(Infinity) })
+const jsx = jsxPrimitivas
 const nodes = v => v && typeof v === 'object' ? [v, ...(v.children || []).flatMap(nodes)] : []
 const text = v => v && typeof v === 'object' ? (v.children || []).map(text).join(' ') : String(v ?? '')
 function load(file, name, env) {
   const source = readFileSync(new URL('../src/' + file, import.meta.url), 'utf8').replace(/^import .*\r?\n/gm, '').replaceAll('export function ', 'function ')
   const result = transformSync(file, source, { jsx: { runtime: 'classic', pragma: 'jsx', pragmaFrag: 'Fragment' } })
   assert.equal(result.errors.length, 0)
-  return vm.runInNewContext(result.code + '\n' + name, { jsx, MidiaEvento: 'section', CapaEvento: 'capa', Fragment: 'fragment', Icone: 'svg', ...env })
+  return vm.runInNewContext(result.code + '\n' + name, { ...primitivasFixture, jsx, MidiaEvento: 'section', CapaEvento: 'capa', Fragment: 'fragment', Icone: 'svg', ...env })
 }
 function runtime(file, name, fetch) {
   const states = [], effects = [], cleanups = []

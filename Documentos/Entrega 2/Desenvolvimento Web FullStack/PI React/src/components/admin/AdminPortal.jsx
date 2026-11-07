@@ -1,3 +1,4 @@
+import { Marca } from '../ui/Marca.jsx'
 import { useConsultaAdmin } from '../../hooks/useConsultaAdmin.js'
 import { AdminCatalogo } from './AdminCatalogos.jsx'
 import { AdminSolicitacoes } from './AdminSolicitacoes.jsx'
@@ -12,7 +13,7 @@ import { PainelEventoAdmin } from './PainelEventoAdmin.jsx'
 export function AdminTopo({ aoSair }) {
   return (
     <header className="adminTopo">
-      <div className="adminMarca"><span>TT</span><strong>TrocaTicket</strong><small>Gestão Corporativa</small></div>
+      <div className="adminMarca marcaAdmin"><Marca compacto /><small>Gestão Corporativa</small></div>
       <div className="adminSeguro">Administração</div>
       <label className="adminBusca"><Icone nome="busca" tamanho={16} /><input aria-label="Busca geral indisponível" placeholder="Busca geral indisponível" disabled /></label>
       <button className="adminIcone" aria-label="Notificações indisponíveis" title="Notificações indisponíveis" disabled>●</button>

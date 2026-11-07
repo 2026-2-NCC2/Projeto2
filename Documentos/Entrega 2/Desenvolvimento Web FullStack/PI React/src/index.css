@@ -1,7 +1,43 @@
   :root {
-  --fonte-padrao: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  --cor-fundo-base: #f8f9fc;
-  --cor-texto-base: #1d2330;
+  /* Identidade e papeis visuais: valores de marca separados de acao e estado. */
+  --marca-coral: #F26457;
+  --marca-coral-escuro: #B83F35;
+  --marca-coral-suave: #FFF0ED;
+  --texto-principal: #252B35;
+  --texto-secundario: #626B76;
+  --superficie-pagina: #F2F5F6;
+  --superficie-cartao: #FFFFFF;
+  --superficie-neutra: #E9EEF0;
+  --borda-superficie: #DCE2E6;
+  --borda-controle: #7A858F;
+  --acao-primaria-fundo: var(--marca-coral);
+  --acao-primaria-texto: var(--texto-principal);
+  --acao-hover-fundo: var(--marca-coral-escuro);
+  --acao-hover-texto: var(--superficie-cartao);
+  --acao-escura: #A6362D;
+  --link-cor: var(--marca-coral-escuro);
+  --foco-cor: var(--marca-coral-escuro);
+  --foco-separacao: var(--superficie-cartao);
+  --desabilitado-fundo: var(--superficie-neutra);
+  --desabilitado-texto: #56616C;
+  --skeleton-base: #E4EAED;
+  --skeleton-realce: #F2F5F6;
+  --estado-sucesso-texto: #14663F;
+  --estado-sucesso-fundo: #EAF8F1;
+  --estado-alerta-texto: #805407;
+  --estado-alerta-fundo: #FFF0C9;
+  --estado-erro-texto: #B42336;
+  --estado-erro-fundo: #FFF0F1;
+  --estado-info-texto: #2859B8;
+  --estado-info-fundo: #EDF4FF;
+  --grafico-secundario: #2859B8;
+  --raio-cartao: 14px;
+  --raio-controle: 9px;
+  --sombra-cartao: 0 3px 14px rgba(37, 43, 53, 0.045);
+  --sombra-modal: 0 20px 60px rgba(37, 43, 53, 0.22);
+  --fonte-padrao: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  --cor-fundo-base: var(--superficie-pagina);
+  --cor-texto-base: var(--texto-principal);
 
   font-family: var(--fonte-padrao);
   line-height: 1.5;

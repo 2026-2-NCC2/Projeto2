@@ -1,3 +1,5 @@
+import { Skeleton, Botao, Badge, Alerta } from '../ui/Primitivas.jsx'
+import '../perfil/Perfis.css'
 import { useEffect, useRef, useState } from 'react'
 import { acessarImagem, validarArquivoImagem } from '../../services/imagensPerfil.js'
 import { Icone } from '../ui/Icone.jsx'
@@ -76,38 +78,38 @@ export function ImagemPerfil({ token, id, tipo, habilitado = false, integrado = 
     const acao = `${imagem ? 'Alterar' : 'Adicionar'} ${tipo === 'foto' ? 'foto' : 'capa'}`
     const consultar = () => { setConsulta(n => n + 1); setImagem(null); setArquivo(null); setMensagem('') }
     return <div className={`${tipo === 'foto' ? 'perfilFotoVisual' : 'perfilCapaVisual'} perfilMidiaControle`} aria-busy={ocupado || carregando}>
-      {imagem ? <img className="perfilMidiaAtual" src={imagem.url} alt={titulo} referrerPolicy="no-referrer" onError={() => {setImagem(null);setErro('Não foi possível carregar a imagem. Consulte novamente.')}} /> : tipo === 'foto' && <Icone nome="perfil" tamanho={44} />}
-      <button type="button" className="perfilMidiaEscolher" aria-label={acao} disabled={bloqueado}
+      {carregando ? <Skeleton tipo={tipo === 'foto' ? 'avatar' : 'card'} rotulo={`Carregando ${titulo.toLowerCase()}`} /> : imagem ? <img className="perfilMidiaAtual" src={imagem.url} alt={titulo} referrerPolicy="no-referrer" onError={() => {setImagem(null);setErro('Não foi possível carregar a imagem. Consulte novamente.')}} /> : tipo === 'foto' && <Icone nome="perfil" tamanho={44} />}
+      <Botao variante="secundario" type="button" className="perfilMidiaEscolher" aria-label={acao} disabled={bloqueado}
         title={!habilitado ? 'Personalização de imagens indisponível' : acao} onClick={() => entrada.current?.click()}>
         <Icone nome="camera" tamanho={20} /><span>{acao}</span>
-      </button>
+      </Botao>
       <input ref={entrada} type="file" accept="image/jpeg,image/png,image/webp" aria-label={`Selecionar ${titulo.toLowerCase()}`} hidden disabled={bloqueado} onChange={selecionar} />
-      {habilitado && imagem && <button type="button" className="perfilMidiaRemover" disabled={bloqueado} onClick={() => alterar('DELETE')}>{`Remover ${tipo === 'foto' ? 'foto' : 'capa'}`}</button>}
-      {erro && !arquivo && <div className="perfilMidiaFeedback"><p role="alert">{erro}</p><button type="button" className="secundario" disabled={!habilitado || ocupado || carregando} onClick={consultar}>Consultar novamente</button></div>}
-      {mensagem && <p className="perfilMidiaFeedback" role="status">{mensagem}</p>}
+      {habilitado && imagem && <Botao variante="destrutivo" type="button" className="perfilMidiaRemover" disabled={bloqueado} onClick={() => alterar('DELETE')}>{`Remover ${tipo === 'foto' ? 'foto' : 'capa'}`}</Botao>}
+      {erro && !arquivo && <div className="perfilMidiaFeedback"><Alerta variante="erro">{erro}</Alerta><Botao variante="secundario" type="button" className="secundario" disabled={!habilitado || ocupado || carregando} onClick={consultar}>Consultar novamente</Botao></div>}
+      {mensagem && <Alerta className="perfilMidiaFeedback" variante="sucesso">{mensagem}</Alerta>}
       {arquivo && <div className="perfilMidiaFundo"><section className="perfilMidiaEditor" ref={modalRef} role="dialog" aria-modal="true" aria-label={`Prévia de ${titulo.toLowerCase()}`} tabIndex={-1} aria-busy={ocupado}>
         <h2>Prévia de {titulo.toLowerCase()}</h2>
         {previa && <img className={`perfilMidiaPrevia perfilMidiaPrevia-${tipo}`} src={previa} alt={`Prévia de ${titulo.toLowerCase()}`} />}
         <p>A imagem será enviada somente ao salvar. JPEG, PNG ou WebP, até {tipo === 'foto' ? '5' : '10'} MiB.</p>
-        {erro && <p role="alert">{erro}</p>}
-        <div className="perfilAcoes"><button type="button" className="secundario" disabled={ocupado} onClick={() => setArquivo(null)}>Cancelar</button>
-          <button type="button" className="principal" disabled={bloqueado || !previa} onClick={() => alterar('PUT')}>{ocupado ? 'Salvando...' : 'Salvar imagem'}</button></div>
+        {erro && <Alerta variante="erro">{erro}</Alerta>}
+        <div className="perfilAcoes"><Botao variante="secundario" type="button" className="secundario" disabled={ocupado} onClick={() => setArquivo(null)}>Cancelar</Botao>
+          <Botao variante="primario" type="button" className="principal" disabled={bloqueado || !previa} onClick={() => alterar('PUT')} ocupado={ocupado}>{ocupado ? 'Salvando...' : 'Salvar imagem'}</Botao></div>
       </section></div>}
     </div>
   }
   return <section className={`perfilCartao perfilImagem perfilImagem-${tipo}`} aria-busy={ocupado || carregando}>
     <h2>{titulo}</h2>
-    {imagem ? <img src={imagem.url} alt={titulo} referrerPolicy="no-referrer" onError={() => { setImagem(null); setErro('A imagem expirou ou não pôde ser carregada. Consulte novamente.') }} /> :
+    {carregando ? <Skeleton tipo={tipo === 'foto' ? 'avatar' : 'card'} rotulo={`Carregando ${titulo.toLowerCase()}`} /> : imagem ? <img src={imagem.url} alt={titulo} referrerPolicy="no-referrer" onError={() => { setImagem(null); setErro('A imagem expirou ou não pôde ser carregada. Consulte novamente.') }} /> :
       <div className="perfilImagemVazia"><Icone nome="perfil" tamanho={32} /><span>Sem imagem disponível</span></div>}
-    {!habilitado && <p role="status">A personalização de imagens ainda não está disponível.</p>}
+    {!habilitado && <Alerta variante="informacao">A personalização de imagens ainda não está disponível.</Alerta>}
     <p>JPEG, PNG ou WebP. Máximo {tipo === 'foto' ? '5' : '10'} MiB. Sem animações.</p>
     <label>Selecionar {titulo.toLowerCase()}<input ref={entrada} type="file" accept="image/jpeg,image/png,image/webp" disabled={!habilitado || !disponivel || ocupado || carregando || incerto} onChange={selecionar} /></label>
-    {erro && <p role="alert">{erro}</p>}
-    {mensagem && <p role="status">{mensagem}</p>}
+    {erro && <Alerta variante="erro">{erro}</Alerta>}
+    {mensagem && <Alerta variante="sucesso">{mensagem}</Alerta>}
     <div className="perfilAcoes">
-      <button type="button" className="principal" disabled={!habilitado || !disponivel || ocupado || carregando || incerto || !arquivo} onClick={() => alterar('PUT')}>{imagem ? 'Substituir imagem' : 'Enviar imagem'}</button>
-      <button type="button" className="secundario" disabled={!habilitado || !disponivel || ocupado || carregando || incerto || !imagem} onClick={() => alterar('DELETE')}>Remover imagem</button>
-      <button type="button" className="secundario" disabled={!habilitado || ocupado || carregando} onClick={() => { setConsulta(n => n + 1); setImagem(null); setArquivo(null); setMensagem(''); if (entrada.current) entrada.current.value = '' }}>Consultar imagens</button>
+      <Botao variante="primario" type="button" className="principal" disabled={!habilitado || !disponivel || ocupado || carregando || incerto || !arquivo} onClick={() => alterar('PUT')}>{imagem ? 'Substituir imagem' : 'Enviar imagem'}</Botao>
+      <Botao variante="destrutivo" type="button" className="secundario" disabled={!habilitado || !disponivel || ocupado || carregando || incerto || !imagem} onClick={() => alterar('DELETE')}>Remover imagem</Botao>
+      <Botao variante="secundario" type="button" className="secundario" disabled={!habilitado || ocupado || carregando} onClick={() => { setConsulta(n => n + 1); setImagem(null); setArquivo(null); setMensagem(''); if (entrada.current) entrada.current.value = '' }}>Consultar imagens</Botao>
     </div>
   </section>
 }
@@ -121,7 +123,7 @@ export function ImagensPerfil({ perfil, indicadores, habilitado = false }) {
     <div className="perfilApresentacaoCorpo">
       <ImagemPerfil key={`${token}:${perfil?.id}:foto`} token={token} id={perfil?.id} tipo="foto" habilitado={habilitado} integrado />
       <div className="perfilApresentacaoIdentidade">
-        <span className="perfilPapel">{papeis[perfil?.perfil] || 'Minha conta'}</span>
+        <Badge variante="neutro" className="perfilPapel">{papeis[perfil?.perfil] || 'Minha conta'}</Badge>
         <h2>{perfil?.nome}</h2><p>{perfil?.email}</p>
       </div>
       {!habilitado && <p className="perfilMidiaAviso">A personalização de foto e capa ainda não está disponível.</p>}

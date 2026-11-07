@@ -1,3 +1,5 @@
+import { Skeleton, Botao, Campo, Alerta, EstadoVazio } from '../../components/ui/Primitivas.jsx'
+import './Organizador.css'
 import { useEffect, useMemo, useState } from 'react'
 import { formatarMoeda } from '../../utils/formatarMoeda.js'
 import { rascunhoCustosTemAlteracoes } from '../../utils/rascunhosCustos.js'
@@ -140,10 +142,10 @@ export function Custos({
   }
 
   return (
-    <div>
-      <button className="voltar" onClick={() => setPagina('criar')}>
+    <div className="organizadorPagina">
+      <Botao className="voltar" variante="discreto" onClick={() => setPagina('criar')}>
         ← Voltar para Dados Básicos
-      </button>
+      </Botao>
       <div className="tituloLinha">
         <div>
           <h1>ITENS DE CUSTO</h1>
@@ -156,45 +158,42 @@ export function Custos({
       <form className="cartaoFormulario" onSubmit={aplicarFormulario} noValidate>
         <h2>{edicao ? 'Editar item do rascunho' : 'Adicionar item de custo'}</h2>
         <p>Adicionar, editar ou remover altera o rascunho. Use “Salvar custos no banco” para persistir a lista.</p>
-        <label htmlFor="custo-categoria">Categoria *</label>
-        <input
-          id="custo-categoria"
+        <Campo id="custo-categoria" label="Categoria"
+
           value={formulario.categoria}
           onChange={(e) => alterarCampo('categoria', e.target.value)}
           aria-describedby="custo-regras"
-          required
-        />
-        <label htmlFor="custo-descricao">Descrição *</label>
-        <input
-          id="custo-descricao"
+          obrigatorio
+         />
+        <Campo id="custo-descricao" label="Descrição"
+
           value={formulario.descricao}
           onChange={(e) => alterarCampo('descricao', e.target.value)}
           aria-describedby="custo-regras"
-          required
-        />
-        <label htmlFor="custo-valor">Valor estimado (R$) *</label>
-        <input
-          id="custo-valor"
+          obrigatorio
+         />
+        <Campo id="custo-valor" label="Valor estimado (R$)"
+
           type="text"
           inputMode="decimal"
           value={formulario.valor}
           onChange={(e) => alterarCampo('valor', e.target.value)}
           placeholder="0,00"
           aria-describedby="custo-regras"
-          required
-        />
+          obrigatorio
+         />
         <p id="custo-regras">
           Categoria: até 100 caracteres. Descrição: até 255 caracteres.
           Valor não negativo, com até duas casas decimais; use vírgula ou ponto, sem separador de milhar.
         </p>
-        {erro && <p role="alert">{erro}</p>}
+        {erro && <Alerta variante="erro">{erro}</Alerta>}
         <div className="acoes" style={{ flexWrap: 'wrap' }}>
-          <button type="button" className="secundario" onClick={cancelarFormulario}>
+          <Botao variante="secundario" type="button" className="secundario" onClick={cancelarFormulario}>
             {edicao ? 'Cancelar edição' : 'Limpar campos'}
-          </button>
-          <button type="submit" className="principal">
+          </Botao>
+          <Botao type="submit" className="principal">
             {edicao ? 'Aplicar edição ao rascunho' : 'Adicionar ao rascunho'}
-          </button>
+          </Botao>
         </div>
       </form>
       <div className="resumoCategorias">
@@ -208,7 +207,7 @@ export function Custos({
       </div>
       <div className="tabela" role="region" aria-label="Itens de custo do evento" tabIndex={0}>
         {custos.length === 0 ? (
-          <p role="status">Nenhum item de custo cadastrado neste evento. Adicione o primeiro item ao rascunho.</p>
+          <EstadoVazio titulo="Nenhum item de custo cadastrado neste evento. Adicione o primeiro item ao rascunho." />
         ) : (
           <>
             <div className="tabelaCabecalho">
@@ -223,12 +222,12 @@ export function Custos({
                 <div style={{ minWidth: 0, overflowWrap: 'anywhere' }}>
                   <strong>{formatarMoeda(itemCusto.valor)}</strong>
                   <div className="acoes" style={{ flexWrap: 'wrap', marginTop: 12 }}>
-                    <button type="button" className="secundario" onClick={() => iniciarEdicao(itemCusto)}>
+                    <Botao variante="secundario" type="button" className="secundario" onClick={() => iniciarEdicao(itemCusto)}>
                       Editar
-                    </button>
-                    <button type="button" className="secundario" onClick={() => removerItem(itemCusto)}>
+                    </Botao>
+                    <Botao variante="destrutivo" type="button" className="secundario" onClick={() => removerItem(itemCusto)}>
                       Remover
-                    </button>
+                    </Botao>
                   </div>
                 </div>
               </div>
@@ -240,14 +239,14 @@ export function Custos({
         <span>Total estimado</span>
         <strong>{formatarTotalCentavos(totalCentavos)}</strong>
       </div>
-      {!persistencia.disponivel && <p role="status">Persistência disponível somente no ambiente isolado. Neste ambiente, os custos continuam locais.</p>}
-      {semId && <p role="status">Salve os dados básicos do evento antes de persistir custos.</p>}
-      {carregando && <p role="status">Consultando os custos do evento...</p>}
-      {salvando && <p role="status">Salvando a lista enviada. Edições posteriores continuam locais.</p>}
-      {rascunho.get.erro && <p role="alert">{rascunho.get.erro}</p>}
-      {rascunho.put.erro && <p role="alert">{rascunho.put.erro}</p>}
-      {rascunho.put.mensagem && <p role="status">{rascunho.put.mensagem}</p>}
-      {rascunho.conflitoRemoto && <p role="alert">O servidor possui custos diferentes. O rascunho foi preservado. Revise antes de substituir a lista.</p>}
+      {!persistencia.disponivel && <Alerta variante="informacao">Persistência disponível somente no ambiente isolado. Neste ambiente, os custos continuam locais.</Alerta>}
+      {semId && <Alerta variante="informacao">Salve os dados básicos do evento antes de persistir custos.</Alerta>}
+      {carregando && <Skeleton tipo="tabela" rotulo="Consultando os custos do evento..." />}
+      {salvando && <Alerta variante="informacao">Salvando a lista enviada. Edições posteriores continuam locais.</Alerta>}
+      {rascunho.get.erro && <Alerta variante="erro">{rascunho.get.erro}</Alerta>}
+      {rascunho.put.erro && <Alerta variante="erro">{rascunho.put.erro}</Alerta>}
+      {rascunho.put.mensagem && <Alerta variante="informacao">{rascunho.put.mensagem}</Alerta>}
+      {rascunho.conflitoRemoto && <Alerta variante="erro">O servidor possui custos diferentes. O rascunho foi preservado. Revise antes de substituir a lista.</Alerta>}
       {rascunho.conflitoRemoto && (
         <details>
           <summary>Conferir última lista do servidor</summary>
@@ -256,36 +255,36 @@ export function Custos({
           ))}</ul>
         </details>
       )}
-      {temAlteracoes() && <p role="status">Aplique ou cancele os campos do formulário antes de salvar no banco.</p>}
+      {temAlteracoes() && <Alerta variante="informacao">Aplique ou cancele os campos do formulário antes de salvar no banco.</Alerta>}
       <div className="acoes">
-        <button type="button" className="secundario" onClick={persistencia.carregar}
+        <Botao variante="secundario" type="button" className="secundario" onClick={persistencia.carregar}
           disabled={!persistencia.disponivel || semId || carregando || salvando}>
           {incerto ? 'Verificar resultado no servidor' : 'Consultar custos no servidor'}
-        </button>
-        <button type="button" className="secundario" onClick={aoUsarServidor}
+        </Botao>
+        <Botao variante="secundario" type="button" className="secundario" onClick={aoUsarServidor}
           disabled={!persistencia.disponivel || rascunho.basePersistida === null || carregando || salvando || incerto || rascunho.get.estado !== 'carregado'}>
           Usar última lista do servidor
-        </button>
-        <button type="button" className="principal" onClick={persistencia.salvar}
+        </Botao>
+        <Botao type="button" className="principal" onClick={persistencia.salvar}
           disabled={!persistencia.disponivel || semId || rascunho.basePersistida === null || carregando || salvando || incerto || temAlteracoes() || rascunho.get.estado !== 'carregado' || !rascunhoCustosTemAlteracoes(rascunho)}>
           {salvando ? 'Salvando custos...' : 'Salvar custos no banco'}
-        </button>
+        </Botao>
       </div>
       <div className="acoes">
-        <button
+        <Botao variante="secundario"
           type="button"
           className="secundario"
           onClick={() => setPagina('criar')}
         >
           Voltar
-        </button>
-        <button
+        </Botao>
+        <Botao
           type="button"
           className="principal"
           onClick={() => setPagina('cotacao')}
         >
           Revisar rascunho e avançar para Cotação →
-        </button>
+        </Botao>
       </div>
     </div>
   )

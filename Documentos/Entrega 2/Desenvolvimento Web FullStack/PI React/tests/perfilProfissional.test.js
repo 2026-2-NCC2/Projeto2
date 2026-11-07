@@ -1,10 +1,11 @@
+import { primitivasFixture, jsxPrimitivas } from './helpers/primitivasFixture.js'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
 import { transformSync } from 'rolldown/utils'
 
-const jsx = (type, props, ...children) => ({ type, props: props || {}, children: children.flat(Infinity) })
+const jsx = jsxPrimitivas
 const nodes = v => v && typeof v === 'object' ? [v, ...(v.children || []).flatMap(nodes)] : []
 const text = v => v && typeof v === 'object' ? (v.children || []).map(text).join(' ') : String(v ?? '')
 const button = (v, label) => nodes(v).find(n => n.type === 'button' && text(n).includes(label))
@@ -13,7 +14,7 @@ function load(file, name, env = {}) {
   const source = readFileSync(new URL('../src/' + file, import.meta.url), 'utf8').replace(/^import .*\r?\n/gm, '').replaceAll('export function ', 'function ').replaceAll('export async function ', 'async function ')
   const result = transformSync(file, source, { jsx: { runtime: 'classic', pragma: 'jsx', pragmaFrag: 'Fragment' } })
   assert.equal(result.errors.length, 0)
-  return vm.runInNewContext(result.code + '\n' + name, { jsx, Fragment: 'fragment', URL, AbortController, apiUrl: x => x, sessionStorage: { getItem: () => 'token-a' }, ...env })
+  return vm.runInNewContext(result.code + '\n' + name, { ...primitivasFixture, jsx, Fragment: 'fragment', URL, AbortController, apiUrl: x => x, sessionStorage: { getItem: () => 'token-a' }, ...env })
 }
 function runtime(name, env = {}) {
   const cells = [], effects = []

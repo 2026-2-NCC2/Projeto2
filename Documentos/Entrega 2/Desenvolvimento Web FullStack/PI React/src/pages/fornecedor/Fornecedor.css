@@ -1,0 +1,14 @@
+/* Reutiliza o layout existente e limita o acabamento ao portal fornecedor. */
+.fornecedorPagina .ttCampo { margin-block: 18px; }
+.fornecedorPagina .ttCampo > label { margin: 0; font-size: .875rem; }
+.fornecedorPagina .ttAlerta { margin-block: 16px; }
+.fornecedorPagina .ttAlerta p { color: inherit; }
+.fornecedorPagina .ttBotao { max-width: 100%; white-space: normal; }
+.fornecedorPagina .fornMenu nav .ttBotao:enabled { background: transparent; color: var(--texto-secundario); }
+.fornecedorPagina .fornMenu nav .ttBotao.ativo:enabled, .fornecedorPagina .fornFiltros .ttBotao.selecionado:enabled { background: var(--marca-coral-suave); color: var(--link-cor); border-color: var(--link-cor); }
+.fornecedorPagina .fornLista > .ttSkeleton, .fornecedorPagina .fornLista > .ttAlerta, .fornecedorPagina .fornLista > .ttVazio { grid-column: 1 / -1; }
+.fornecedorPagina .fornIndicadores .ttSkeleton { min-height: 38px; }
+.fornecedorPagina .fornTabela { overflow-x: auto; }
+.fornecedorPagina .fornTabela:focus-visible { outline: 3px solid var(--foco-cor); outline-offset: 3px; }
+.fornecedorPagina .fornTabelaLinha .ttBadge { justify-self: start; }
+.fornecedorPagina .ttCampoControle:focus-visible, .fornecedorPagina .ttBotao:focus-visible { outline-color: var(--foco-cor); }

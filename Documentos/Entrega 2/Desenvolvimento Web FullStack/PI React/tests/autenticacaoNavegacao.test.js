@@ -16,7 +16,7 @@ function load(file, name, env) {
     .replace(/^export default .*$/gm, '')
   const result = transformSync(file, source, { jsx: { runtime: 'classic', pragma: 'jsx', pragmaFrag: 'Fragment' } })
   assert.equal(result.errors.length, 0)
-  return vm.runInNewContext(result.code + '\n' + name, { jsx, Fragment: 'fragment', Icone: 'svg', ...env })
+  return vm.runInNewContext(result.code + '\n' + name, { jsx, Fragment: 'fragment', Marca: 'marca', Icone: 'svg', ...env })
 }
 function runtime(dados = {}, fetch = async () => { throw Error('Rede inesperada') }) {
   const storage = new Map(Object.entries(dados)), cells = [], effects = []
@@ -25,6 +25,7 @@ function runtime(dados = {}, fetch = async () => { throw Error('Rede inesperada'
     sessionStorage: {
       getItem: k => storage.get(k) ?? null, setItem: (k, v) => storage.set(k, v), removeItem: k => storage.delete(k),
     }, fetch, apiUrl: p => p, AbortController,
+    Campo: 'Campo', Botao: 'Botao', Alerta: 'Alerta', lerAvisoCadastro: () => '', limparAvisoCadastro() {},
     useState(initial) {
       const i = cursor++
       if (!(i in cells)) cells[i] = typeof initial === 'function' ? initial() : initial

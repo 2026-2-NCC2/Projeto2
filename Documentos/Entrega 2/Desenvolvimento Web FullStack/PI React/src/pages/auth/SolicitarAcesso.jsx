@@ -1,4 +1,4 @@
-import { Icone } from '../../components/ui/Icone.jsx'
+import { Marca } from '../../components/ui/Marca.jsx'
 import { useState } from 'react'
 import { apiUrl } from '../../services/api.js'
 
@@ -57,7 +57,7 @@ export function SolicitarAcesso({ setPagina }) {
     <div className="paginaLogin">
       <div className="cabecalhoLogin">
         <div className="logo">
-          <Icone nome="ticket" /> <span>TrocaTicket</span>
+          <Marca />
         </div>
       </div>
 

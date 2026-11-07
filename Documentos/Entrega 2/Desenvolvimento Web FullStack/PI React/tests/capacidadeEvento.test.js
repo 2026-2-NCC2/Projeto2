@@ -1,14 +1,15 @@
+import { primitivasFixture, jsxPrimitivas } from './helpers/primitivasFixture.js'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
 import { transformSync } from 'rolldown/utils'
-const jsx=(type,props,...children)=>({type,props:props||{},children:children.flat(Infinity)})
+const jsx = jsxPrimitivas
 const nodes=v=>v&&typeof v==='object'?[v,...(v.children||[]).flatMap(nodes)]:[]
 const text=v=>v&&typeof v==='object'?(v.children||[]).map(text).join(' '):String(v??'')
 function carregar(file,nome){
  const s=readFileSync(new URL('../src/'+file,import.meta.url),'utf8').replace(/^import .*\r?\n/gm,'').replace('export function ','function ')
- return vm.runInNewContext(transformSync(file,s,{jsx:{runtime:'classic',pragma:'jsx'}}).code+'\n'+nome,{jsx,React:{Fragment:'fragment'},VagasEvento:'vagas',MidiaEvento:'midia'})
+ return vm.runInNewContext(transformSync(file,s,{jsx:{runtime:'classic',pragma:'jsx'}}).code+'\n'+nome,{...primitivasFixture,jsx,React:{Fragment:'fragment'},VagasEvento:'vagas',MidiaEvento:'midia'})
 }
 test('disponibilidade distingue saldo zero, vagas e ausência de limite',()=>{
  const View=carregar('components/eventos/VagasEvento.jsx','VagasEvento')
@@ -40,7 +41,7 @@ test('participante bloqueia inscrição lotada na lista e nos detalhes',()=>{
    let i=0
    const estado={0:[lotado,livre],1:[],2:false,5:aba,7:true,8:lotado,9:false}
    const Portal=vm.runInNewContext(transformSync(file,fonte,{jsx:{runtime:'classic',pragma:'jsx'}}).code+'\nPortalParticipante',{
-     jsx,React:{Fragment:'fragment'},VagasEvento:'vagas',Icone:'icone',CapaEvento:'capa',MidiaEvento:'midia',PerfilPessoal:'perfil',
+     ...primitivasFixture, jsx,React:{Fragment:'fragment'},VagasEvento:'vagas',Icone:'icone',CapaEvento:'capa',MidiaEvento:'midia',PerfilPessoal:'perfil',
      useEffect(){},useState:v=>[Object.hasOwn(estado,i)?estado[i++]:((i++),v),()=>{}],
    })
    const view=Portal({setPagina(){},aoSair(){}})

@@ -1,3 +1,4 @@
+import { primitivasFixture, jsxPrimitivas } from './helpers/primitivasFixture.js'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
@@ -6,7 +7,7 @@ import { setImmediate } from 'node:timers'
 import { transformSync } from 'rolldown/utils'
 import postcss from 'postcss'
 
-const jsx = (type, props, ...children) => ({ type, props: props || {}, children: children.flat(Infinity) })
+const jsx = jsxPrimitivas
 const nodes = v => v && typeof v === 'object' ? [v, ...(v.children || []).flatMap(nodes)] : []
 const text = v => v && typeof v === 'object' ? (v.children || []).map(text).join(' ') : String(v ?? '')
 const tick = () => new Promise(r => setImmediate(r))
@@ -16,7 +17,7 @@ function load(file, name, env = {}) {
   const result = transformSync(file, source, { jsx: { runtime: 'classic', pragma: 'jsx', pragmaFrag: 'Fragment' } })
   assert.equal(result.errors.length, 0)
   class URLTeste extends URL { static createObjectURL(){return 'blob:previa-local'} static revokeObjectURL(){} }
-  return vm.runInNewContext(result.code + '\n' + name, { jsx, Fragment: 'fragment', URL:URLTeste, Icone: 'svg', AbortController, useFocoModal:()=>({current:null}),
+  return vm.runInNewContext(result.code + '\n' + name, { ...primitivasFixture, jsx, Fragment: 'fragment', URL:URLTeste, Icone: 'svg', AbortController, useFocoModal:()=>({current:null}),
     apiUrl: x => x, sessionStorage: { getItem: () => 'token-a' }, ...env })
 }
 const arquivo = { size: 20, type: 'image/png' }

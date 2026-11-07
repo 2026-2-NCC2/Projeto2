@@ -1,3 +1,4 @@
+import { primitivasFixture, jsxPrimitivas } from './helpers/primitivasFixture.js'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
@@ -6,7 +7,7 @@ import { setImmediate } from 'node:timers'
 import { transformSync } from 'rolldown/utils'
 
 const tick = () => new Promise(resolve => setImmediate(resolve))
-const jsx = (type, props, ...children) => ({ type, props: props || {}, children: children.flat(Infinity) })
+const jsx = jsxPrimitivas
 const nodes = v => v && typeof v === 'object' ? [v, ...(v.children || []).flatMap(nodes)] : []
 const text = v => v && typeof v === 'object' ? (v.children || []).map(text).join(' ') : String(v ?? '')
 const findButton = (v, label) => nodes(v).find(n => n.type === 'button' && text(n).includes(label))
@@ -16,7 +17,7 @@ function load(file, name, env) {
     .replace(/^import .*\r?\n/gm, '').replaceAll('export function ', 'function ').replaceAll('export async function ', 'async function ')
   const result = transformSync(file, source, { jsx: { runtime: 'classic', pragma: 'jsx', pragmaFrag: 'Fragment' } })
   assert.equal(result.errors.length, 0)
-  return vm.runInNewContext(result.code + '\n' + name, { jsx, Fragment: 'fragment', Icone: 'svg', PerfilProfissional: 'section', ConsultaPortfolios: 'section', ImagensPerfil: 'section', ...env })
+  return vm.runInNewContext(result.code + '\n' + name, { ...primitivasFixture, jsx, Fragment: 'fragment', Icone: 'svg', PerfilProfissional: 'section', ConsultaPortfolios: 'section', ImagensPerfil: 'section', ...env })
 }
 function runtime(file, name, env = {}) {
   const cells = [], pending = []

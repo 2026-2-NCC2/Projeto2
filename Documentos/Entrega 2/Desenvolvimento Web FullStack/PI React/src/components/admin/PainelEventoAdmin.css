@@ -1,7 +1,7 @@
 .peaPainel {
-  --pea-roxo: #6540c9;
-  --pea-azul: #2456bd;
-  color: #202a44;
+  --pea-roxo: var(--marca-coral-escuro);
+  --pea-azul: var(--estado-info-texto);
+  color: var(--texto-principal);
   min-width: 0;
   max-width: 1280px;
   margin: auto;
@@ -29,7 +29,7 @@
 }
 
 .peaCabecalho p {
-  color: #58627b;
+  color: var(--texto-secundario);
   margin: 0;
 }
 
@@ -42,18 +42,19 @@
 }
 
 .peaCabecalho select {
+  min-height: 44px;
   padding: 12px;
-  border: 1px solid #c8cce0;
+  border: 1px solid var(--borda-controle);
   border-radius: 12px;
   max-width: 100%;
-  background: white;
-  color: #202a44;
+  background: var(--superficie-cartao);
+  color: var(--texto-principal);
   font: inherit;
 }
 
 .peaHero {
-  background: linear-gradient(120deg,#5332ab,#2456bd);
-  color: white;
+  background: linear-gradient(120deg,var(--acao-hover-fundo),var(--acao-escura));
+  color: var(--superficie-cartao);
   padding: 28px;
   border-radius: 20px;
 }
@@ -77,28 +78,28 @@
   font-weight: 700;
   font-size: .85rem;
   white-space: nowrap;
-  background: #edf0f7;
-  color: #37415b;
+  background: var(--superficie-neutra);
+  color: var(--texto-secundario);
 }
 
 .peaEstado--ativo {
-  background: #dcfce7;
-  color: #166534;
+  background: var(--estado-sucesso-fundo);
+  color: var(--estado-sucesso-texto);
 }
 
 .peaEstado--planejamento {
-  background: #e8e5ff;
-  color: #51319c;
+  background: var(--superficie-neutra);
+  color: var(--texto-secundario);
 }
 
 .peaEstado--cancelado {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--estado-erro-fundo);
+  color: var(--estado-erro-texto);
 }
 
 .peaEstado--encerrado {
-  background: #e2e8f0;
-  color: #334155;
+  background: var(--superficie-neutra);
+  color: var(--texto-secundario);
 }
 
 .peaNav {
@@ -109,34 +110,34 @@
 }
 
 .peaNav a {
-  background: #fff;
-  border: 1px solid #d7d9e8;
+  background: var(--superficie-cartao);
+  border: 1px solid var(--borda-superficie);
   padding: 10px 15px;
-  border-radius: 10px;
+  border-radius: var(--raio-controle);
   font-weight: 600;
 }
 
 .peaPainel a {
-  color: #4f31a5;
+  color: var(--link-cor);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .peaPainel a:focus-visible,.peaPainel button:focus-visible,.peaPainel select:focus-visible,.peaTabela:focus-visible {
-  outline: 3px solid #2456bd;
+  outline: 3px solid var(--foco-cor);
   outline-offset: 3px;
 }
 
 .peaSecao {
-  background: #fff;
-  border: 1px solid #e0e3ee;
-  border-radius: 18px;
+  background: var(--superficie-cartao);
+  border: 1px solid var(--borda-superficie);
+  border-radius: var(--raio-cartao);
   padding: 24px;
   margin-bottom: 20px;
   scroll-margin-top: 24px;
   min-width: 0;
   overflow-wrap: anywhere;
-  box-shadow: 0 4px 16px #25205b06;
+  box-shadow: 0 4px 16px rgba(37, 43, 53, 0.04);
 }
 
 .peaSecao h3 {
@@ -155,7 +156,7 @@
 }
 
 .peaPainel dt {
-  color: #626b80;
+  color: var(--texto-secundario);
   font-size: .85rem;
   margin-bottom: 6px;
 }
@@ -167,23 +168,23 @@
 }
 
 .peaMetricas article {
-  background: #f4f2fc;
-  border: 1px solid #e4dff7;
+  background: var(--marca-coral-suave);
+  border: 1px solid var(--marca-coral-suave);
   padding: 18px;
-  border-radius: 14px;
+  border-radius: var(--raio-cartao);
   display: grid;
   gap: 10px;
   align-content: start;
 }
 
 .peaMetricas article:nth-child(2) {
-  background: #eff5ff;
-  border-color: #dae6fb;
+  background: var(--estado-info-fundo);
+  border-color: var(--borda-superficie);
 }
 
 .peaMetricas span {
   font-size: .84rem;
-  color: #505a74;
+  color: var(--texto-secundario);
 }
 
 .peaMetricas strong {
@@ -191,13 +192,13 @@
 }
 
 .peaMetricas .peaAlerta {
-  background: #fff4df;
-  border-color: #edcf98;
-  color: #754900;
+  background: var(--estado-alerta-fundo);
+  border-color: var(--estado-alerta-texto);
+  color: var(--estado-alerta-texto);
 }
 
 .peaNota {
-  color: #5d677e;
+  color: var(--texto-secundario);
   font-size: .87rem;
   line-height: 1.6;
 }
@@ -212,12 +213,12 @@
 }
 
 .peaSecaoTopo>strong {
-  color: #51319c;
+  color: var(--link-cor);
 }
 
 .peaTabela {
   overflow: auto;
-  border: 1px solid #e4e7f0;
+  border: 1px solid var(--borda-superficie);
   border-radius: 12px;
 }
 
@@ -230,12 +231,12 @@
 .peaTabela th,.peaTabela td {
   text-align: left;
   padding: 14px;
-  border-bottom: 1px solid #e4e7f0;
+  border-bottom: 1px solid var(--borda-superficie);
   font-size: .9rem;
 }
 
 .peaTabela th {
-  background: #f4f5fa;
+  background: var(--superficie-pagina);
 }
 
 .peaTabela td:last-child {
@@ -249,8 +250,8 @@
 }
 
 .peaCotacao {
-  background: #fafbfe;
-  border: 1px solid #e0e4ee;
+  background: var(--superficie-pagina);
+  border: 1px solid var(--borda-superficie);
   border-radius: 14px;
   padding: 20px;
   scroll-margin-top: 24px;
@@ -276,7 +277,7 @@
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  border-top: 1px solid #e0e4ee;
+  border-top: 1px solid var(--borda-superficie);
   padding: 12px 0;
   font-size: .88rem;
 }
@@ -297,25 +298,26 @@
 
 .peaVazio {
   padding: 22px;
-  background: #f5f6fc;
-  color: #58627b;
-  border: 1px dashed #cbd0e3;
+  background: var(--superficie-pagina);
+  color: var(--texto-secundario);
+  border: 1px dashed var(--borda-superficie);
   border-radius: 12px;
 }
 
 .peaErro {
   padding: 24px;
-  background: #fff1f2;
-  border: 1px solid #efbec5;
+  background: var(--estado-erro-fundo);
+  border: 1px solid var(--estado-erro-texto);
   border-radius: 14px;
-  color: #8f2033;
+  color: var(--estado-erro-texto);
 }
 
 .peaErro button {
-  background: #6540c9;
-  color: #fff;
+  min-height: 44px;
+  background: var(--acao-hover-fundo);
+  color: var(--superficie-cartao);
   border: 0;
-  border-radius: 10px;
+  border-radius: var(--raio-controle);
   padding: 12px 20px;
   cursor: pointer;
   font: inherit;
@@ -329,7 +331,7 @@
 .peaSkeleton>div,.peaSkeletonGrid>div {
   min-height: 120px;
   border-radius: 16px;
-  background: linear-gradient(100deg,#e9eaf2 25%,#f7f8fc 50%,#e9eaf2 75%);
+  background: linear-gradient(100deg, var(--skeleton-base) 25%, var(--skeleton-realce) 50%, var(--skeleton-base) 75%);
   background-size: 200% 100%;
   animation: peaPulse 1.4s ease-in-out infinite;
 }
@@ -402,4 +404,15 @@
   .peaSecaoTopo {
     align-items: flex-start;
   }
+}
+
+.peaPainel :focus-visible {
+  outline-color: var(--foco-cor);
+  box-shadow: 0 0 0 2px var(--foco-separacao);
+}
+
+.peaPainel button:disabled {
+  background: var(--desabilitado-fundo);
+  color: var(--desabilitado-texto);
+  opacity: 1;
 }

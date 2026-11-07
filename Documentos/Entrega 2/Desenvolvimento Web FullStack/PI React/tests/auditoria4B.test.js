@@ -1,3 +1,4 @@
+import { primitivasFixture, jsxPrimitivas } from './helpers/primitivasFixture.js'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
@@ -6,7 +7,7 @@ import { setImmediate } from 'node:timers'
 import { transformSync } from 'rolldown/utils'
 
 const tick = () => new Promise(resolve => setImmediate(resolve))
-const jsx = (type, props, ...children) => ({ type, props: props || {}, children: children.flat(Infinity) })
+const jsx = jsxPrimitivas
 const nodes = v => v && typeof v === 'object' ? [v, ...(v.children || []).flatMap(nodes)] : []
 const text = v => v && typeof v === 'object' ? (v.children || []).map(text).join(' ') : String(v ?? '')
 const ok = data => ({ ok: true, json: async () => data })
@@ -14,7 +15,7 @@ function runtime(file, name, extra = {}) {
   const cells = [], pending = []
   let cursor = 0
   const env = {
-    jsx, VagasEvento: 'vagas', MidiaEvento: 'section', CapaEvento: 'capa', ProvedorImagensEvento: 'provedor', Fragment: 'fragment', Icone: 'svg', console: { error() {} }, useMemo: fn => fn(),
+    ...primitivasFixture, jsx, VagasEvento: 'vagas', MidiaEvento: 'section', CapaEvento: 'capa', ProvedorImagensEvento: 'provedor', Fragment: 'fragment', Icone: 'svg', console: { error() {} }, useMemo: fn => fn(),
     sessionStorage: { getItem: () => 'token' }, apiUrl: p => p, capacidadesEventos:async()=>ok({criar:true,editar:true,publicar:true,inscrever:true}),
     useState(initial) {
       const i = cursor++

@@ -1,3 +1,5 @@
+import { Skeleton, Botao, Campo, Badge, Alerta, EstadoVazio } from '../../components/ui/Primitivas.jsx'
+import './Organizador.css'
 import { Icone } from '../../components/ui/Icone.jsx'
 import { useState, useMemo, useEffect } from 'react'
 import { ConsultaPortfolios } from '../../components/portfolio/Portfolio.jsx'
@@ -60,6 +62,7 @@ export function Cotacao({
   }
 }, [evento?.id])
   const [avaliandoPropostaId, setAvaliandoPropostaId] = useState(null)
+  const [feedbackAvaliacao, setFeedbackAvaliacao] = useState(null)
   const avaliarProposta = async (propostaId, novoStatus) => {
   if (avaliandoPropostaId !== null) return
 
@@ -71,6 +74,7 @@ export function Cotacao({
 
   if (!confirmou) return
 
+  setFeedbackAvaliacao(null)
   try {
     setAvaliandoPropostaId(propostaId)
 
@@ -104,11 +108,11 @@ export function Cotacao({
       )
     )
 
-    alert(dados.mensagem)
+    setFeedbackAvaliacao({ tipo: 'sucesso', mensagem: dados.mensagem })
 
   } catch (erro) {
     console.error('Erro ao avaliar proposta:', erro)
-    alert(erro.message)
+    setFeedbackAvaliacao({ tipo: 'erro', mensagem: erro.message })
 
   } finally {
     setAvaliandoPropostaId(null)
@@ -133,10 +137,10 @@ const aoPublicarCotacao = async () => {
 }
 
   return (
-    <div>
-      <button className="voltar" onClick={() => setPagina('custos')}>
+    <div className="organizadorPagina">
+      <Botao className="voltar" variante="discreto" onClick={() => setPagina('custos')}>
         ← Voltar para Itens de Custo
-      </button>
+      </Botao>
       <h1>PUBLICAR COTAÇÃO</h1>
       <p>Revise o resumo dos itens e configure o prazo para fornecedores.</p>
       <div className="gradeCotacao">
@@ -161,25 +165,23 @@ const aoPublicarCotacao = async () => {
         </div>
         <div className="cartaoFormulario">
           <h2>Parâmetros & Prazo da Concorrência</h2>
-          <label>Prazo para envio de propostas</label>
-          <input
+          <Campo id="cotacao-campo-1" label="Prazo para envio de propostas"
             type="date"
             value={prazo}
             onChange={(eventoDisparado) => setPrazo(eventoDisparado.target.value)}
-          />
+           />
           <label>Modalidade da cotação</label>
           <div className="opcaoSelecionada">
             Cotação fechada
             <small>Melhor preço e condições comerciais com sigilo até abertura.</small>
           </div>
-          <label>Observações para os fornecedores</label>
-          <textarea
+          <Campo id="cotacao-campo-2" label="Observações para os fornecedores" como="textarea"
             rows="5"
             value={observacoes}
             onChange={(eventoDisparado) => setObservacoes(eventoDisparado.target.value)}
-          />
+           />
           
-<button
+<Botao
   type="button"
   className="principal"
   style={{ width: '100%', marginTop: '20px' }}
@@ -189,33 +191,37 @@ const aoPublicarCotacao = async () => {
   {publicando
     ? 'Publicando cotação...'
     : 'Publicar Cotação & Simular Ticket →'}
-          </button>
+          </Botao>
           {(publicacao.motivo || publicacao.mensagem) && (
-            <p role="status">{publicacao.motivo || publicacao.mensagem}</p>
+            <Alerta variante="informacao">{publicacao.motivo || publicacao.mensagem}</Alerta>
           )}
           {publicacao.estado === 'conflito' && (
-            <button type="button" className="secundario" onClick={() => setPagina('custos')}>
+            <Botao variante="secundario" type="button" className="secundario" onClick={() => setPagina('custos')}>
               Atualizar e revisar custos
-            </button>
+            </Botao>
           )}
         </div>
       </div>
             <section className="cartaoFormulario" style={{ marginTop: '24px' }}>
         <h2><Icone nome="documento" /> Propostas recebidas</h2>
         <p>Propostas enviadas pelos fornecedores para este evento.</p>
+        {feedbackAvaliacao && <Alerta variante={feedbackAvaliacao.tipo}>
+          <p>{feedbackAvaliacao.mensagem}</p>
+          {feedbackAvaliacao.tipo === 'erro' && <p>Não foi possível confirmar o resultado. Consulte as propostas antes de repetir a operação.</p>}
+        </Alerta>}
 
         {carregandoPropostas && (
-          <p>Carregando propostas...</p>
+          <Skeleton tipo="card" rotulo="Carregando propostas..." />
         )}
 
         {erroPropostas && (
-          <p style={{ color: 'red' }}>{erroPropostas}</p>
+          <Alerta variante="erro">{erroPropostas}</Alerta>
         )}
 
         {!carregandoPropostas &&
           !erroPropostas &&
           propostasRecebidas.length === 0 && (
-            <p>Nenhuma proposta recebida para este evento.</p>
+            <EstadoVazio titulo="Nenhuma proposta recebida para este evento." />
           )}
 
         {!carregandoPropostas &&
@@ -248,11 +254,11 @@ const aoPublicarCotacao = async () => {
               </p>
 
               <p>
-                <strong>Status:</strong> {proposta.status}
+                <strong>Status:</strong> <Badge variante={proposta.status === 'Aprovada' ? 'sucesso' : proposta.status === 'Recusada' ? 'erro' : 'alerta'}>{proposta.status}</Badge>
               </p>
               {proposta.status === 'Em avaliação' && (
               <div className="acoes acoesProposta">
-              <button
+              <Botao
                 type="button"
                 className="principal"
                 onClick={() => avaliarProposta(proposta.id, 'Aprovada')}
@@ -261,16 +267,17 @@ const aoPublicarCotacao = async () => {
                   {avaliandoPropostaId === proposta.id
                   ? 'Processando...'
                   : '✓ Aprovar proposta'}
-              </button>
-              <button
+              </Botao>
+              <Botao
                 type="button"
+                variante="destrutivo"
                 onClick={() => avaliarProposta(proposta.id, 'Recusada')}
                 disabled={avaliandoPropostaId !== null}
               >
                 {avaliandoPropostaId === proposta.id
                 ? 'Processando...'
                 : '✕ Recusar proposta'}
-              </button>
+              </Botao>
               </div>
               )}
             </div>

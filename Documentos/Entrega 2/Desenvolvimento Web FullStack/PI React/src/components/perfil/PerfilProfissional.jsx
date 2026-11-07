@@ -1,3 +1,5 @@
+import { Skeleton, Botao, Campo, Alerta, EstadoVazio } from '../ui/Primitivas.jsx'
+import '../perfil/Perfis.css'
 import { useEffect, useRef, useState } from 'react'
 import { acessarProfissional, urlProfissionalSegura } from '../../services/perfilProfissional.js'
 
@@ -39,23 +41,21 @@ export function SecaoProfissional({ titulo, campos, secao, aoSalvar }) {
   const preenchidos = campos.filter(([k]) => Array.isArray(secao?.[k]) ? secao[k].length > 0 : !!secao?.[k]?.trim())
   return <form className="perfilCartao perfilDados" aria-busy={salvando} onSubmit={salvar}>
     <div className="perfilTituloCartao"><div><h2>{titulo}</h2><p>Informe apenas os dados que deseja compartilhar.</p></div>
-      {!editando && <button className="perfilEditar" type="button" onClick={() => { setDados(rascunho(secao)); setEditando(true); setSucesso(false); setErro('') }}>Editar</button>}
+      {!editando && <Botao variante="secundario" className="perfilEditar" type="button" onClick={() => { setDados(rascunho(secao)); setEditando(true); setSucesso(false); setErro('') }}>Editar</Botao>}
     </div>
-    {erro && <p role="alert">{erro}</p>}
-    {sucesso && <p className="perfilSucesso" role="status">Informações atualizadas.</p>}
+    {erro && <Alerta variante="erro">{erro}</Alerta>}
+    {sucesso && <Alerta variante="sucesso">Informações atualizadas.</Alerta>}
     {editando ? <>
       <p>Os campos são opcionais. Apague um valor para removê-lo. Use HTTPS nos links.</p>
       <div className="perfilCampos">{campos.map(([k, label, tipo = 'url', limite = 2048]) => {
         const props = { value: dados[k] || '', disabled: salvando, maxLength: limite, onChange: e => { setDados(atual => ({ ...atual, [k]: e.target.value })); setErro(''); setSucesso(false) } }
-        return <label key={k} className={tipo === 'textarea' ? 'perfilCampoInteiro' : undefined}>{label}
-          {tipo === 'textarea' ? <textarea {...props} rows={4} /> : <input {...props} type={tipo} />}
-        </label>
+        return <Campo key={k} label={label} className={tipo === 'textarea' ? 'perfilCampoInteiro' : undefined} {...props} como={tipo === 'textarea' ? 'textarea' : 'input'} {...(tipo === 'textarea' ? { rows: 4 } : { type: tipo })} />
       })}</div>
-      <div className="perfilAcoes"><button type="button" className="secundario" disabled={salvando} onClick={() => { setEditando(false); setErro(''); setSucesso(false) }}>Cancelar</button>
-        {preenchidos.length > 0 && <button type="button" className="secundario" disabled={salvando} onClick={e => salvar(e, true)}>Remover informações</button>}
-        <button className="principal" type="submit" disabled={salvando}>{salvando ? 'Salvando...' : 'Salvar alterações'}</button></div>
+      <div className="perfilAcoes"><Botao variante="secundario" type="button" className="secundario" disabled={salvando} onClick={() => { setEditando(false); setErro(''); setSucesso(false) }}>Cancelar</Botao>
+        {preenchidos.length > 0 && <Botao variante="destrutivo" type="button" className="secundario" disabled={salvando} onClick={e => salvar(e, true)}>Remover informações</Botao>}
+        <Botao variante="primario" className="principal" type="submit" disabled={salvando} ocupado={salvando}>{salvando ? 'Salvando...' : 'Salvar alterações'}</Botao></div>
     </> : preenchidos.length ? <dl className="perfilProfissionalDados">{preenchidos.map(([k, label]) => <div key={k}><dt>{label}</dt><dd>{Array.isArray(secao[k]) ? secao[k].join(', ') :
-      (k === 'site_oficial' || redes.some(([campo]) => campo === k)) ? (urlProfissionalSegura(secao[k]) && <a href={secao[k]} target="_blank" rel="noopener noreferrer">{secao[k]}</a>) : secao[k]}</dd></div>)}</dl> : <p>Nenhuma informação cadastrada.</p>}
+      (k === 'site_oficial' || redes.some(([campo]) => campo === k)) ? (urlProfissionalSegura(secao[k]) && <a href={secao[k]} target="_blank" rel="noopener noreferrer">{secao[k]}</a>) : secao[k]}</dd></div>)}</dl> : <EstadoVazio titulo="Nenhuma informação cadastrada." />}
   </form>
 }
 
@@ -77,8 +77,8 @@ export function PerfilProfissional({ token, id }) {
     return atualizado[campo]
   }
   if (!perfil) return <section className="perfilCartao perfilDados"><h2>Informações profissionais e redes sociais</h2>
-    <p role={erro && !indisponivel ? 'alert' : 'status'}>{erro || 'Carregando informações...'}</p>
-    {erro && <button type="button" className="secundario" onClick={() => { setErro(''); setIndisponivel(false); setTentativa(v => v + 1) }}>Tentar novamente</button>}</section>
+    {erro ? <Alerta variante={indisponivel ? 'informacao' : 'erro'} titulo={indisponivel ? 'Consulta indisponível' : 'Falha na consulta'}>{erro}</Alerta> : <Skeleton tipo="card" rotulo="Carregando informações..." />}
+    {erro && <Botao variante="secundario" type="button" className="secundario" onClick={() => { setErro(''); setIndisponivel(false); setTentativa(v => v + 1) }}>Tentar novamente</Botao>}</section>
   const profissional = ['fornecedor', 'organizador'].includes(perfil.perfil)
   const campos = comerciais.map(c => c[0] === 'nome_comercial' && perfil.perfil === 'organizador' ? [c[0], 'Nome da organização', c[2], c[3]] : c)
   if (perfil.perfil === 'fornecedor') campos.push(['categorias_servicos', 'Categorias de serviços, uma por linha', 'textarea', 1619])

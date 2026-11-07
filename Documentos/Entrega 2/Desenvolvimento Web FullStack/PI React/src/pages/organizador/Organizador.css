@@ -1,0 +1,14 @@
+/* Escopo local: conserva grades, navegacao e dimensoes do portal existente. */
+.organizadorPagina .ttCampo { margin-block: 18px; }
+.organizadorPagina .ttCampo > label { margin: 0; font-size: .875rem; }
+.organizadorPagina .ttAlerta { margin-block: 16px; }
+.organizadorPagina .ttAlerta p { margin-top: 0; }
+.organizadorPagina .ttBotao { white-space: normal; }
+.organizadorPagina .filtros > .ttBotao:not(.ativo):enabled, .organizadorPagina .categorias > .ttBotao:not(.selecionado):enabled { background: var(--superficie-cartao); color: var(--texto-secundario); border-color: var(--borda-controle); }
+.organizadorPagina .filtros > .ttBotao.ativo:enabled, .organizadorPagina .categorias > .ttBotao.selecionado:enabled { background: var(--marca-coral-suave); color: var(--link-cor); border-color: var(--link-cor); }
+.organizadorPagina .ttBotao--destrutivo:enabled { background: var(--estado-erro-texto); color: var(--superficie-cartao); border-color: var(--estado-erro-texto); }
+.organizadorPagina .ttBotao--destrutivo:hover:enabled { background: var(--estado-erro-fundo); color: var(--estado-erro-texto); }
+.organizadorPagina .categoriasTitulo { margin-top: 22px; font-size: .875rem; font-weight: 600; }
+.organizadorPagina .listaEventos > .ttSkeleton { padding: 24px; }
+.organizadorPagina .acoes > .ttBotao { max-width: 100%; }
+.organizadorPagina .ttCampoControle[type="date"], .organizadorPagina .ttCampoControle[type="time"] { min-width: 0; }

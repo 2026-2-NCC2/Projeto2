@@ -1,3 +1,5 @@
+import { Botao } from '../../components/ui/Primitivas.jsx'
+import './Organizador.css'
 import { useState, useMemo } from 'react'
 import { formatarMoeda } from '../../utils/formatarMoeda.js'
 
@@ -29,10 +31,10 @@ export function Ticket({
     </section>
   )
   return (
-    <div>
-      <button className="voltar" onClick={() => setPagina('cotacao')}>
+    <div className="organizadorPagina">
+      <Botao className="voltar" variante="discreto" onClick={() => setPagina('cotacao')}>
         ← Voltar às Cotações
-      </button>
+      </Botao>
       <div className="tituloLinha">
         <div>
           <h1>TICKET ESTIMADO & VIABILIDADE</h1>
@@ -72,16 +74,17 @@ export function Ticket({
         </div>
         <div className="cartaoTicket">
           <h2>Simulação e Detalhamento</h2>
-          <label style={{ display: 'block', margin: '15px 0 5px', fontWeight: 600 }}>
+          <label htmlFor="ticket-margem" style={{ display: 'block', margin: '15px 0 5px', fontWeight: 600 }}>
             Ajustar acréscimo sobre os custos: {margemPercentual}%
           </label>
           <input
+            id="ticket-margem"
             type="range"
             min="0"
             max="100"
             value={margemPercentual}
             onChange={(eventoDisparado) => setMargemPercentual(Number(eventoDisparado.target.value))}
-            style={{ width: '100%', accentColor: '#3427b8' }}
+            style={{ width: '100%', accentColor: 'var(--marca-coral)' }}
           />
           <h3 style={{ marginTop: '25px', fontSize: '15px' }}>Composição dos custos</h3>
           <div style={{ marginTop: '15px' }}>
@@ -93,11 +96,11 @@ export function Ticket({
             ))}
           </div>
           <p>O ticket é uma simulação e não será salvo com os dados do evento.</p>
-          <button
+          <Botao
             type="button"
             className="principal"
             style={{ width: '100%', marginTop: '30px' }}
-            disabled={salvando}
+            disabled={salvando} ocupado={salvando}
             onClick={async () => {
               if (salvando) return
               setSalvando(true)
@@ -109,7 +112,7 @@ export function Ticket({
             }}
           >
             {salvando ? 'Salvando evento...' : 'Salvar dados do evento →'}
-          </button>
+          </Botao>
         </div>
       </div>
     </div>

@@ -1,3 +1,5 @@
+import { Skeleton, Botao, Campo, Badge, Alerta, EstadoVazio } from '../ui/Primitivas.jsx'
+import '../perfil/Perfis.css'
 import { useEffect, useRef, useState } from 'react'
 import { usePerfil } from '../../hooks/usePerfil.js'
 import { consultarPortfolio, salvarItemPortfolio, removerItemPortfolio, listarFornecedoresPortfolio } from '../../services/portfolio.js'
@@ -43,35 +45,35 @@ export function Portfolio({ donoId, editar = false }) {
   return <section className="perfilCartao portfolioPagina" aria-busy={salvando || carregando}>
     <h2>{editar ? 'Meu portfólio profissional' : `Portfólio${lista?.fornecedor ? ' — '+lista.fornecedor.nome : ''}`}</h2>
     <p>{editar ? 'Cadastre trabalhos ou serviços reais. Os itens serão visíveis aos usuários autenticados.' : 'Trabalhos e serviços publicados pelo fornecedor.'}</p>
-    {erro && <p role="alert">{erro}</p>}{mensagem && <p role="status">{mensagem}</p>}
-    <button type="button" className="secundario" disabled={salvando || carregando} onClick={()=>{limpar();setTentativa(n=>n+1)}}>Recarregar dados e descartar rascunho</button>
-    {carregando && <p role="status">Carregando portfólio...</p>}
+    {erro && <Alerta variante="erro">{erro}</Alerta>}{mensagem && <Alerta variante="sucesso">{mensagem}</Alerta>}
+    <Botao variante="secundario" type="button" className="secundario" disabled={salvando || carregando} onClick={()=>{limpar();setTentativa(n=>n+1)}}>Recarregar dados e descartar rascunho</Botao>
+    {carregando && <Skeleton tipo="card" rotulo="Carregando portfólio..." />}
     {editar && <form onSubmit={e=>{e.preventDefault();executar(signal=>salvarItemPortfolio({token,donoId,item,dados,signal}))}}>
       <h3>{item ? 'Editar item' : 'Novo trabalho ou serviço'}</h3>
       <div className="perfilCampos">
-        <label>Título<input required maxLength={120} value={dados.titulo} disabled={bloqueado} onChange={e=>setDados(d=>({...d,titulo:e.target.value}))} /></label>
-        <label>Categoria<input required maxLength={80} value={dados.categoria} disabled={bloqueado} onChange={e=>setDados(d=>({...d,categoria:e.target.value}))} /></label>
-        <label className="perfilCampoInteiro">Descrição<textarea required maxLength={2000} rows={4} value={dados.descricao} disabled={bloqueado} onChange={e=>setDados(d=>({...d,descricao:e.target.value}))} /></label>
+        <Campo label="Título" obrigatorio maxLength={120} value={dados.titulo} disabled={bloqueado} onChange={e=>setDados(d=>({...d,titulo:e.target.value}))} />
+        <Campo label="Categoria" obrigatorio maxLength={80} value={dados.categoria} disabled={bloqueado} onChange={e=>setDados(d=>({...d,categoria:e.target.value}))} />
+        <Campo label="Descrição" className="perfilCampoInteiro" como="textarea" obrigatorio maxLength={2000} rows={4} value={dados.descricao} disabled={bloqueado} onChange={e=>setDados(d=>({...d,descricao:e.target.value}))} />
       </div>
       <label>Imagem do trabalho ou serviço<input type="file" accept="image/jpeg,image/png,image/webp" disabled /></label>
-      <p>Imagens indisponíveis até a ativação segura do Storage. O cadastro textual é independente.</p>
-      <div className="perfilAcoes"><button type="submit" className="principal" disabled={bloqueado}>{salvando ? 'Salvando...' : item ? 'Salvar alterações' : 'Cadastrar item'}</button>
-        {item && <button type="button" className="secundario" disabled={salvando} onClick={limpar}>Cancelar edição</button>}</div>
+      <Alerta variante="informacao">Imagens indisponíveis até a ativação segura do Storage. O cadastro textual é independente.</Alerta>
+      <div className="perfilAcoes"><Botao variante="primario" type="submit" className="principal" disabled={bloqueado} ocupado={salvando}>{salvando ? 'Salvando...' : item ? 'Salvar alterações' : 'Cadastrar item'}</Botao>
+        {item && <Botao variante="secundario" type="button" className="secundario" disabled={salvando} onClick={limpar}>Cancelar edição</Botao>}</div>
     </form>}
     {!carregando && lista && <>
-      {lista.itens.length===0 ? <p>Nenhum trabalho ou serviço cadastrado nesta página.</p> : <div className="portfolioGrade">{lista.itens.map(i=><article className="portfolioItem" key={i.id}>
-        <span className="tag">{i.categoria}</span><h3>{i.titulo}</h3><p className="portfolioDescricao">{i.descricao}</p>
-        {editar && <div className="perfilAcoes"><button type="button" className="secundario" disabled={bloqueado} onClick={()=>{setItem(i);setDados({titulo:i.titulo,descricao:i.descricao,categoria:i.categoria});setMensagem('')}}>Editar</button>
-          <button type="button" className="secundario" disabled={bloqueado} onClick={()=>{if(window.confirm('Remover este item do portfólio?'))executar(signal=>removerItemPortfolio({token,item:i,signal}))}}>Remover</button></div>}
+      {lista.itens.length===0 ? <EstadoVazio titulo="Nenhum trabalho ou serviço cadastrado nesta página." /> : <div className="portfolioGrade">{lista.itens.map(i=><article className="portfolioItem" key={i.id}>
+        <Badge variante="informacao">{i.categoria}</Badge><h3>{i.titulo}</h3><p className="portfolioDescricao">{i.descricao}</p>
+        {editar && <div className="perfilAcoes"><Botao variante="secundario" type="button" className="secundario" disabled={bloqueado} onClick={()=>{setItem(i);setDados({titulo:i.titulo,descricao:i.descricao,categoria:i.categoria});setMensagem('')}}>Editar</Botao>
+          <Botao variante="destrutivo" type="button" className="secundario" disabled={bloqueado} onClick={()=>{if(window.confirm('Remover este item do portfólio?'))executar(signal=>removerItemPortfolio({token,item:i,signal}))}}>Remover</Botao></div>}
       </article>)}</div>}
-      <div className="portfolioPaginacao"><button type="button" className="secundario" disabled={pagina<=1 || salvando} onClick={()=>setPagina(p=>p-1)}>Anterior</button>
-        <span>Página {lista.pagina} de {lista.totalPaginas} — {lista.total} itens</span><button type="button" className="secundario" disabled={pagina>=lista.totalPaginas || salvando} onClick={()=>setPagina(p=>p+1)}>Próxima</button></div>
+      <div className="portfolioPaginacao"><Botao variante="secundario" type="button" className="secundario" disabled={pagina<=1 || salvando} onClick={()=>setPagina(p=>p-1)}>Anterior</Botao>
+        <span>Página {lista.pagina} de {lista.totalPaginas} — {lista.total} itens</span><Botao variante="secundario" type="button" className="secundario" disabled={pagina>=lista.totalPaginas || salvando} onClick={()=>setPagina(p=>p+1)}>Próxima</Botao></div>
     </>}
   </section>
 }
 export function PortfolioFornecedor() {
   const {perfil,erro,recarregar}=usePerfil()
-  return perfil ? <Portfolio key={perfil.id} donoId={perfil.id} editar /> : <section className="perfilCartao"><p role={erro?'alert':'status'}>{erro || 'Carregando sua conta...'}</p>{erro && <button type="button" onClick={recarregar}>Tentar novamente</button>}</section>
+  return perfil ? <Portfolio key={perfil.id} donoId={perfil.id} editar /> : <section className="perfilCartao">{erro ? <Alerta variante="erro">{erro}</Alerta> : <Skeleton tipo="card" rotulo="Carregando sua conta..." />}{erro && <Botao variante="secundario" type="button" onClick={recarregar}>Tentar novamente</Botao>}</section>
 }
 function DiretorioPortfolio() {
   const token=sessionStorage.getItem('token')
@@ -85,14 +87,14 @@ function DiretorioPortfolio() {
     }
     carregar();return()=>c.abort()
   },[token,pagina,tentativa])
-  return <div>{erro ? <div role="alert"><p>{erro}</p><button type="button" className="secundario" onClick={()=>setTentativa(n=>n+1)}>Tentar novamente</button></div> : !lista ? <p role="status">Carregando fornecedores...</p> : <>
-    {lista.itens.length===0 && <p>Nenhum fornecedor encontrado.</p>}
-    <div className="portfolioGrade">{lista.itens.map(u=><button type="button" className="secundario" key={u.id} onClick={()=>setId(u.id)}>{u.nome} — Ver portfólio</button>)}</div>
-    <div className="portfolioPaginacao"><button type="button" className="secundario" disabled={pagina===1} onClick={()=>setPagina(p=>p-1)}>Anterior</button><span>Página {lista.pagina} de {lista.totalPaginas}</span><button type="button" className="secundario" disabled={pagina>=lista.totalPaginas} onClick={()=>setPagina(p=>p+1)}>Próxima</button></div>
+  return <div>{erro ? <Alerta variante="erro"><p>{erro}</p><Botao variante="secundario" type="button" className="secundario" onClick={()=>setTentativa(n=>n+1)}>Tentar novamente</Botao></Alerta> : !lista ? <Skeleton tipo="card" rotulo="Carregando fornecedores..." /> : <>
+    {lista.itens.length===0 && <EstadoVazio titulo="Nenhum fornecedor encontrado." />}
+    <div className="portfolioGrade">{lista.itens.map(u=><Botao variante="secundario" type="button" className="secundario" key={u.id} onClick={()=>setId(u.id)}>{u.nome} — Ver portfólio</Botao>)}</div>
+    <div className="portfolioPaginacao"><Botao variante="secundario" type="button" className="secundario" disabled={pagina===1} onClick={()=>setPagina(p=>p-1)}>Anterior</Botao><span>Página {lista.pagina} de {lista.totalPaginas}</span><Botao variante="secundario" type="button" className="secundario" disabled={pagina>=lista.totalPaginas} onClick={()=>setPagina(p=>p+1)}>Próxima</Botao></div>
   </>}{id && <Portfolio key={`${token}:${id}`} donoId={id} />}</div>
 }
 export function ConsultaPortfolios({ fornecedorId }) {
   const [aberto,setAberto]=useState(false)
-  return <section className="portfolioConsulta"><button type="button" className="secundario" aria-expanded={aberto} onClick={()=>setAberto(v=>!v)}>{aberto?'Fechar portfólio':'Consultar portfólio de fornecedores'}</button>
+  return <section className="portfolioConsulta"><Botao variante="secundario" type="button" className="secundario" aria-expanded={aberto} onClick={()=>setAberto(v=>!v)}>{aberto?'Fechar portfólio':'Consultar portfólio de fornecedores'}</Botao>
     {aberto && (fornecedorId ? <Portfolio key={fornecedorId} donoId={fornecedorId} /> : <DiretorioPortfolio />)}</section>
 }

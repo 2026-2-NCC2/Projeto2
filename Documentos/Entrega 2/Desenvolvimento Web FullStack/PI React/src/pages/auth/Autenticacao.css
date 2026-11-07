@@ -1,0 +1,13 @@
+.autenticacaoPagina .caixaLogin form { display: grid; gap: 18px; }
+.autenticacaoPagina .ttCampo > label { margin: 0; font-size: .875rem; }
+.autenticacaoPagina .ttCampoErro, .autenticacaoPagina .ttCampoDica { margin: 0; }
+.autenticacaoPagina .caixaLogin form > .ttBotao { width: 100%; }
+.autenticacaoPagina .rotuloSenha { justify-content: flex-end; }
+.autenticacaoPagina .caixaLogin .ttAlerta { margin-block: 18px; }
+.autenticacaoPagina .ttAlerta:focus { outline: 3px solid var(--foco-cor); outline-offset: 3px; }
+.autenticacaoPagina .cadastro .ttBotao { padding: 8px; }
+.autenticacaoPagina .cabecalhoLogin { flex-wrap: wrap; gap: 16px; }
+@media (max-width: 600px) {
+  .autenticacaoPagina .cabecalhoLogin { padding: 20px 18px; }
+  .autenticacaoPagina .caixaLogin { padding: 22px 18px; }
+}

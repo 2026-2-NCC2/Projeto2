@@ -1,10 +1,11 @@
+import { primitivasFixture, jsxPrimitivas } from './helpers/primitivasFixture.js'
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
 import { transformSync } from 'rolldown/utils'
 
-const jsx = (type, props, ...children) => ({ type, props: props || {}, children: children.flat(Infinity) })
+const jsx = jsxPrimitivas
 const nodes = v => v && typeof v === 'object' ? [v, ...(v.children || []).flatMap(nodes)] : []
 const text = v => v && typeof v === 'object' ? (v.children || []).map(text).join(' ') : String(v ?? '')
 function renderizador(file, name, props, extra = {}) {
@@ -15,7 +16,7 @@ function renderizador(file, name, props, extra = {}) {
   const result = transformSync(file, source, { jsx: { runtime: 'classic', pragma: 'jsx' } })
   assert.equal(result.errors.length, 0)
   const fn = vm.runInNewContext(result.code + '\n' + name, {
-    jsx, VagasEvento: 'vagas', MidiaEvento: 'section', CapaEvento: 'capa', Icone: 'svg', useMemo: fn => fn(),
+    ...primitivasFixture, jsx, VagasEvento: 'vagas', MidiaEvento: 'section', CapaEvento: 'capa', Icone: 'svg', useMemo: fn => fn(),
     useState(initial) {
       const i = cursor++
       if (!(i in states)) states[i] = initial
@@ -60,7 +61,7 @@ test('ticket soma valores reais, lista todos os custos e permite ajustar o acré
 test('salvamento aguarda resposta e não navega por conta própria', async () => {
   let resolver, calls = 0
   const render = ticket(10, [{ id: 1, valor: 100 }], () => { calls++; return new Promise(resolve => { resolver = resolve }) })
-  const pendente = nodes(render()).find(n => n.type === 'button' && n.props.className === 'principal').props.onClick()
+  const pendente = nodes(render()).find(n => n.type === 'button' && n.props.className.split(' ').includes('principal')).props.onClick()
   assert.equal(calls, 1)
   assert.ok(nodes(render()).some(n => n.type === 'button' && n.props.disabled))
   resolver()

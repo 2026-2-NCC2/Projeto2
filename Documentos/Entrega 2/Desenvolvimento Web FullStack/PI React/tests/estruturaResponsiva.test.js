@@ -11,7 +11,7 @@ function carregar(file, nomes, hooks = {}) {
     .replace(/^import .*\r?\n/gm, '').replaceAll('export function ', 'function ')
   const result = transformSync(file, source, { jsx: { runtime: 'classic', pragma: 'jsx', pragmaFrag: 'Fragment' } })
   assert.equal(result.errors.length, 0)
-  return vm.runInNewContext(result.code + '\n({' + nomes.join(',') + '})', { jsx, Fragment: 'fragment', Icone: 'svg', IdentidadeConta: () => null, ...hooks })
+  return vm.runInNewContext(result.code + '\n({' + nomes.join(',') + '})', { jsx, Fragment: 'fragment', Marca: 'marca', Icone: 'svg', IdentidadeConta: () => null, ...hooks })
 }
 function disclosure() {
   let open = false, focused = 0
@@ -105,5 +105,5 @@ for (const width of [1920, 1366, 768, 390, 360]) test(`estrutura compartilhada e
 })
 test('sem mascaramento global de overflow ou alteracao de tokens visuais', () => {
   for (const s of ['body', '#root', 'html']) assert.equal(estilo([s], 360)['overflow-x'], undefined)
-  assert.equal(estilo([':root'], 1920)['--cor-primaria'], '#3427b8')
+  assert.equal(estilo([':root'], 1920)['--cor-primaria'], 'var(--marca-coral)')
 })

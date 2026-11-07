@@ -59,7 +59,7 @@ test('overlay duplicado consolidado preserva a cor que ja prevalecia', () => {
   css.walkRules(r => { if (r.selector === '.adminModalOverlay' && r.parent.type === 'root') count++ })
   assert.equal(count, 1)
   assert.equal(estilo(['.adminModalOverlay'], 1366).background, 'rgba(15, 23, 42, 0.65)')
-  assert.equal(estilo([':root'], 1366)['--cor-primaria'], '#3427b8')
+  assert.equal(estilo([':root'], 1366)['--cor-primaria'], 'var(--marca-coral)')
 })
 test('regiao de custos possui foco de teclado e nome acessivel', () => {
   const ast = parse(readFileSync(new URL('../src/pages/organizador/Custos.jsx', import.meta.url), 'utf8'), { sourceType: 'module', plugins: ['jsx'] })
