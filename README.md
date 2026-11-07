@@ -125,11 +125,6 @@ A API utiliza **http://localhost:3001**. Abra o endereço informado pelo Vite pa
 
 O comando `npm start` usa `node --use-system-ca server.js`, requer Node.js 24 e mantém a verificação TLS. A instalação normal usa Supabase e não exige executar migrações ou scripts SQL. Preserve `PI Backend/config/ativacao-supabase.json`; o startup recusa projeto divergente, MySQL ou ausência de `DB_PROVIDER=supabase`. Variáveis já definidas no terminal prevalecem sobre o `.env`.
 
-<a id="arquitetura"></a>
-## Arquitetura e funcionalidades
-
-A implementação integrada fica em `Documentos/Entrega 2/Desenvolvimento Web FullStack`:
-
 
 ## Declaração de Uso de Inteligência Artificial
 
