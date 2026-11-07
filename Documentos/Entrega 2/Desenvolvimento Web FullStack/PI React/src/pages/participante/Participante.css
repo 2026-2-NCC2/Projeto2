@@ -1,29 +1,35 @@
-/* Descoberta de eventos: regras limitadas ao portal participante. */
+/* Estrutura propria; componentes compartilhados e outros portais ficam intactos. */
+.participantePagina { min-height: 100vh; min-width: 0; background: var(--superficie-pagina); color: var(--texto-principal); }
+.participantePagina .ppCabecalho { height: auto; min-height: 80px; display: block; padding: 0; background: var(--superficie-cartao); border-bottom: 1px solid var(--borda-superficie); }
+.participantePagina .ppCabecalhoInterno { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 24px; width: 100%; max-width: 1328px; min-width: 0; margin-inline: auto; padding: 20px 24px; }
+.participantePagina .ppMarca { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; min-width: 0; }
+.participantePagina .ppMarca small { font-size: .6875rem; font-weight: 600; letter-spacing: .07em; color: var(--texto-secundario); }
+.participantePagina .ppNavegacao { display: flex; flex: 1 1 auto; width: 100%; min-width: 0; border: 0; background: transparent; }
+.participantePagina .ppNavegacao .alternarNavegacao { display: none; margin: 0; border-color: var(--borda-controle); border-radius: var(--raio-controle); }
+.participantePagina .ppNavegacao .painelNavegacao, .participantePagina .ppNavegacao .painelNavegacao[data-aberto='false'] { display: flex; min-width: 0; width: 100%; }
+.participantePagina .ppMenu { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px 20px; width: 100%; min-width: 0; }
+.participantePagina .ppSecoes { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
+.participantePagina .ppSecoes .ttBotao:enabled { background: transparent; color: var(--texto-secundario); }
+.participantePagina .ppSecoes .ttBotao.ativo:enabled, .participantePagina .ppSecoes .ttBotao:hover:enabled { background: var(--marca-coral-suave); color: var(--link-cor); }
+.participantePagina .ppContaAcoes { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; min-width: 0; }
+.participantePagina .ppMenu .ttBotao { margin: 0; min-height: 44px; }
+.participantePagina .ppNavegacao button:focus-visible { outline: 3px solid var(--foco-cor); outline-offset: 3px; }
+.participantePagina .ppEstrutura { min-width: 0; }
+.participantePagina .ppTrilha { margin-bottom: 16px; font-size: .75rem; line-height: 1.6; color: var(--texto-secundario); overflow-wrap: anywhere; }
+.participantePagina .ppCabecalhoPagina { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; min-width: 0; }
+.participantePagina .ppCabecalhoPagina h1 { font-size: clamp(1.65rem, 3vw, 2.25rem); margin-block: 0 10px; }
+.participantePagina .ppCabecalhoPagina p { margin: 0; color: var(--texto-secundario); }
+/* Conteudo do participante; blocos do dashboard ainda reutilizam estilos legados. */
 .participantePagina .ttCampo { margin-block: 18px; }
 .participantePagina .ttCampo > label { margin: 0; font-size: .875rem; }
 .participantePagina .fornLista > .ttAlerta, .participantePagina .fornLista > .ttSkeleton, .participantePagina .fornLista > .ttVazio { grid-column: 1 / -1; }
 .participantePagina .ttAlerta { margin-block: 16px; }
 .participantePagina .ttAlerta p { color: inherit; }
 .participantePagina .ttBotao { max-width: 100%; white-space: normal; }
-.participantePagina .fornMenu nav .ttBotao:enabled { background: transparent; color: var(--texto-secundario); }
-.participantePagina .fornMenu nav .ttBotao.ativo:enabled { background: var(--marca-coral-suave); color: var(--link-cor); }
 .participantePagina .fornIndicadores .ttSkeleton { min-height: 38px; }
 .participantePagina .ttCampoControle:focus-visible, .participantePagina .ttBotao:focus-visible { outline-color: var(--foco-cor); }
-.participantePagina .fornTopo { padding: 20px max(24px, calc((100% - 1280px) / 2)); gap: 20px; background: var(--superficie-cartao); }
-.participantePagina .fornTopo .logo { gap: 18px; }
-.participantePagina .fornTopo .logo small { font-weight: 600; letter-spacing: .07em; color: var(--texto-secundario); background: transparent; }
-.participantePagina .fornSelo { margin-left: auto; background: var(--marca-coral-suave); color: var(--link-cor); }
-.participantePagina .fornCorpo { display: block; }
-.participantePagina .fornMenu { width: 100%; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 12px; padding: 16px max(24px, calc((100% - 1280px) / 2)); border-right: 0; border-bottom: 1px solid var(--borda-superficie); }
-.participantePagina .fornMenu > .novo { width: auto; }
-.participantePagina .fornMenu nav { display: flex; flex-direction: row; flex-wrap: wrap; flex: 1 1 auto; gap: 6px; }
-.participantePagina .fornMenu .fornSair { margin: 0; }
-.participantePagina .fornMenu nav .ttBotao:hover:enabled { background: var(--marca-coral-suave); color: var(--link-cor); }
-.participantePagina .ppConteudo { max-width: 1328px; margin-inline: auto; padding: 32px 24px 64px; }
-.participantePagina .fornTrilha { margin-bottom: 16px; }
-.participantePagina .fornTitulo { margin-bottom: 28px; }
-.participantePagina .fornTitulo h1 { font-size: clamp(1.65rem, 3vw, 2.25rem); margin-block: 0 10px; }
-.participantePagina .fornTitulo p { margin: 0; }
+.participantePagina .ppTitulo:focus { outline: 3px solid var(--foco-cor); outline-offset: 6px; border-radius: var(--raio-controle); }
+.participantePagina .ppConteudo { width: 100%; min-width: 0; max-width: 1328px; margin-inline: auto; padding: 32px 24px 64px; }
 .participantePagina .fornHero { padding: clamp(24px, 4vw, 48px); border-radius: 24px; background: linear-gradient(115deg, var(--marca-coral-suave), var(--superficie-cartao)); border: 1px solid var(--borda-superficie); box-shadow: none; margin-bottom: 28px; }
 .participantePagina .fornHero h2 { max-width: 720px; font-size: clamp(1.75rem, 4vw, 3rem); line-height: 1.15; letter-spacing: -.04em; color: var(--texto-principal); margin: 12px 0 16px; }
 .participantePagina .fornHero p { max-width: 620px; font-size: 1rem; margin: 0; }
@@ -31,36 +37,93 @@
 .participantePagina .fornIndicadores { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-block: 28px; }
 .participantePagina .fornIndicadores > div { border-radius: 18px; }
 .participantePagina .ppBuscaBarra { display: flex; align-items: center; gap: 18px; padding: 20px 24px; background: var(--superficie-cartao); border: 1px solid var(--borda-superficie); border-radius: 20px; box-shadow: var(--sombra-cartao); margin-block: 28px; min-width: 0; }
+.participantePagina .ppBuscaBarra:focus-within { border-color: var(--foco-cor); }
 .participantePagina .ppBuscaBarra .ttCampo { flex: 1 1 400px; margin: 0; min-width: 0; }
 .participantePagina .ppBuscaBarra .ttCampoControle { border-radius: 12px; }
 .participantePagina .ppBuscaBarra > p { flex: 0 1 230px; margin: 0; color: var(--texto-secundario); font-size: .875rem; line-height: 1.6; }
-.participantePagina .ppBuscaIcone { color: var(--link-cor); flex-shrink: 0; }
+.participantePagina .ppBuscaIcone { display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--raio-controle); background: var(--marca-coral-suave); color: var(--link-cor); flex-shrink: 0; }
 .participantePagina .ppGradeEventos, .participantePagina .ppGradeInscricoes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; align-items: stretch; }
-.participantePagina .eventoCartao { display: flex; flex-direction: column; padding: 0; border: 1px solid var(--borda-superficie); border-radius: 20px; margin: 0; box-shadow: var(--sombra-cartao); min-width: 0; }
+.participantePagina .ppEventoCartao { display: flex; flex-direction: column; padding: 0; background: var(--superficie-cartao); border: 1px solid var(--borda-superficie); border-radius: 20px; margin: 0; box-shadow: var(--sombra-cartao); min-width: 0; overflow-wrap: anywhere; }
+.participantePagina .ppEventoCartao:focus-within { border-color: var(--foco-cor); }
 .participantePagina .ppEventoCapa { aspect-ratio: 16 / 10; width: 100%; border-radius: 19px 19px 0 0; background: var(--marca-coral-suave); }
 .participantePagina .ppEventoCapa > .eventoCapaLista, .participantePagina .ppEventoCapa > .eventoIdentidade { width: 100%; height: 100%; max-width: 100%; border-radius: inherit; margin: 0; object-fit: cover; }
 .participantePagina .ppEventoCapa > .eventoIdentidade { background: linear-gradient(135deg, var(--marca-coral-suave), var(--superficie-neutra)); color: var(--link-cor); }
 .participantePagina .ppEventoCapa > .eventoIdentidade .icone { width: 48px; height: 48px; }
+.participantePagina .ppEventoCapa > .eventoImagemFalha { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; margin: 0; padding: 20px; border-radius: inherit; background: var(--superficie-neutra); color: var(--texto-secundario); overflow-wrap: anywhere; }
 .participantePagina .ppEventoConteudo { padding: 24px; display: flex; flex-direction: column; flex: 1; min-width: 0; overflow-wrap: anywhere; }
-.participantePagina .ppEventoConteudo > .ttBadge { align-self: flex-start; }
-.participantePagina .ppEventoConteudo h3 { font-size: 1.3rem; line-height: 1.35; margin-block: 18px 12px; }
+.participantePagina .ppEventoEtiquetas { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.participantePagina .ppEventoConteudo h3 { font-size: 1.35rem; line-height: 1.35; margin-block: 16px; color: var(--texto-principal); overflow-wrap: anywhere; }
+.participantePagina .ppEventoMetadados { display: flex; flex-wrap: wrap; gap: 4px 16px; color: var(--texto-secundario); font-size: .875rem; }
 .participantePagina .ppEventoConteudo p { margin-block: 5px; line-height: 1.65; }
-.participantePagina .ppEventoConteudo > p[role="status"] { padding-block: 12px; margin-block: 10px; border-block: 1px solid var(--borda-superficie); }
+.participantePagina .ppEventoLocal { color: var(--texto-secundario); font-size: .9375rem; overflow-wrap: anywhere; }
+.participantePagina .ppEventoDisponibilidade { padding-block: 12px; margin-block: 12px 0; border-block: 1px solid var(--borda-superficie); font-size: .875rem; color: var(--texto-principal); }
 .participantePagina .ppEventoAcoes { display: flex; flex-wrap: wrap; gap: 10px; padding-top: 24px; margin-top: auto; }
-.participantePagina .ppEventoAcoes > .ttBotao { flex: 1 1 140px; margin: 0; }
-.participantePagina .ppDetalhes { padding: clamp(20px, 4vw, 40px); border-radius: 24px; max-width: 960px; }
+.participantePagina .ppEventoAcoes > .ttBotao { flex: 1 1 140px; min-height: 44px; margin: 0; }
+.participantePagina .ppCarregamentoEventos { grid-column: 1 / -1; min-width: 0; }
+.participantePagina .ppEsqueletos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.participantePagina .ppSkeletonEvento { padding: 0 0 24px; border-radius: 20px; min-width: 0; }
+.participantePagina .ppSkeletonEvento .ttSkeletonVisual { gap: 16px; }
+.participantePagina .ppSkeletonEvento .ttSkeletonCapa { height: auto; aspect-ratio: 16 / 10; border-radius: 19px 19px 0 0; }
+.participantePagina .ppSkeletonEvento .ttSkeletonTexto { width: calc(100% - 48px); margin-inline: 24px; }
+.participantePagina .ppSkeletonEvento .ttSkeletonTexto:nth-child(2) { height: 28px; }
+.participantePagina .ppSkeletonEvento .ttSkeletonTexto:last-child { height: 44px; }
+.participantePagina .ppDetalhes { width: 100%; min-width: 0; max-width: 1180px; padding: clamp(20px, 3vw, 32px); border: 1px solid var(--borda-superficie); border-radius: 24px; background: var(--superficie-cartao); box-shadow: var(--sombra-cartao); overflow-wrap: anywhere; }
+.participantePagina .ppDetalhesTopo { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+.participantePagina .ppDetalhesTopo .ttBotao { min-height: 44px; margin: 0; }
+.participantePagina .ppDetalhesCabecalho { margin-bottom: 28px; }
+.participantePagina .ppDetalhesCabecalho h2 { margin-block: 16px 12px; font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.25; overflow-wrap: anywhere; }
+.participantePagina .ppDetalhesCabecalho p { margin: 0; }
+.participantePagina .ppDetalhesGrade { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, .65fr); align-items: start; gap: 32px; }
+.participantePagina .ppDetalhesInformacoes { min-width: 0; }
+.participantePagina .ppDetalhesMidia { min-width: 0; margin-bottom: 24px; }
+.participantePagina .ppDetalhesMidia .eventoMidia { margin: 0; }
+.participantePagina .ppDetalhesMidia summary { min-height: 44px; padding: 12px; color: var(--link-cor); cursor: pointer; border-radius: var(--raio-controle); }
+.participantePagina .ppDetalhesMidia summary:focus-visible { outline: 3px solid var(--foco-cor); outline-offset: 3px; }
+.participantePagina .ppDetalhesMidia .eventoCapa { width: 100%; height: auto; max-height: none; aspect-ratio: 16 / 9; object-fit: cover; }
+.participantePagina .ppDetalhesMidia img { max-width: 100%; }
+.participantePagina .ppDetalhesDados { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 0 0 28px; }
+.participantePagina .ppDetalhesDados > div { min-width: 0; padding: 16px; border: 1px solid var(--borda-superficie); border-radius: var(--raio-controle); background: var(--superficie-pagina); }
+.participantePagina .ppDadoAmplo { grid-column: 1 / -1; }
+.participantePagina .ppDetalhesDados dt, .participantePagina .ppIngressoDados dt { margin-bottom: 6px; font-size: .8125rem; color: var(--texto-secundario); }
+.participantePagina .ppDetalhesDados dd, .participantePagina .ppIngressoDados dd { margin: 0; line-height: 1.65; overflow-wrap: anywhere; }
+.participantePagina .ppDetalhesDescricao h3 { margin-top: 0; font-size: 1.125rem; }
+.participantePagina .ppDetalhesDescricao p { white-space: pre-wrap; line-height: 1.75; overflow-wrap: anywhere; }
+.participantePagina .ppDetalhesInscricao { min-width: 0; padding: 24px; border: 1px solid var(--borda-superficie); border-radius: var(--raio-cartao); background: var(--superficie-pagina); overflow-wrap: anywhere; }
+.participantePagina .ppDetalhesInscricao h3 { margin-top: 0; font-size: 1.125rem; }
+.participantePagina .ppDetalhesInscricao > p { line-height: 1.65; }
+.participantePagina .ppDetalhesInscricao > .ttBotao { min-height: 44px; width: 100%; margin: 16px 0 0; }
 .participantePagina .ppInscricoes > h2 { margin-top: 0; font-size: 1.5rem; }
 .participantePagina .ppInscricoes > p { color: var(--texto-secundario); margin-bottom: 28px; }
-.participantePagina .ppIngresso { border-radius: 20px; border-top: 4px solid var(--marca-coral); padding: 24px; margin: 0; min-width: 0; overflow-wrap: anywhere; }
-.participantePagina .ppIngresso h3 { font-size: 1.25rem; margin-top: 0; }
+.participantePagina .ppIngresso { display: flex; flex-direction: column; gap: 20px; border: 1px solid var(--borda-superficie); border-top: 4px solid var(--marca-coral); border-radius: 20px; background: var(--superficie-cartao); box-shadow: var(--sombra-cartao); padding: 24px; margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.participantePagina .ppIngressoTopo { min-width: 0; }
+.participantePagina .ppIngressoNumero { margin: 0 0 8px; font-size: .8125rem; color: var(--texto-secundario); }
+.participantePagina .ppIngresso h3 { font-size: 1.25rem; line-height: 1.4; margin: 0; }
+.participantePagina .ppIngressoDados { display: grid; gap: 12px; margin: 0; }
+.participantePagina .ppIngressoDados > div { min-width: 0; }
+.participantePagina .ppIngressoEstados { display: grid; gap: 12px; margin-top: auto; padding-top: 16px; border-top: 1px solid var(--borda-superficie); }
+.participantePagina .ppIngressoEstados p { margin: 0; line-height: 1.65; }
 @media (max-width: 1100px) {
   .participantePagina .ppGradeEventos, .participantePagina .ppGradeInscricoes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .participantePagina .ppEsqueletos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .participantePagina .ppSkeletonEvento:nth-child(3) { display: none; }
+}
+@media (max-width: 900px) {
+  .participantePagina .ppDetalhesGrade { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .participantePagina .ppCabecalhoInterno { grid-template-columns: minmax(0, 1fr) auto; gap: 16px; padding: 16px 18px; }
+  .participantePagina .ppNavegacao { display: contents; }
+  .participantePagina .ppNavegacao .alternarNavegacao { display: flex; grid-column: 2; grid-row: 1; align-self: center; }
+  .participantePagina .ppNavegacao .painelNavegacao { grid-column: 1 / -1; display: flex; }
+  .participantePagina .ppNavegacao .painelNavegacao[data-aberto='false'] { display: none; }
+  .participantePagina .ppMenu { flex-direction: column; align-items: stretch; gap: 16px; padding-top: 16px; border-top: 1px solid var(--borda-superficie); }
+  .participantePagina .ppSecoes { flex-direction: column; align-items: stretch; }
+  .participantePagina .ppSecoes .ttBotao { justify-content: flex-start; }
+  .participantePagina .ppContaAcoes { justify-content: flex-start; }
+  .participantePagina .ppMarca .ttMarcaNome { font-size: clamp(1rem, 4vw, 1.375rem); }
 }
 @media (max-width: 700px) {
-  .participantePagina .fornTopo { padding: 18px; }
-  .participantePagina .fornMenu { padding: 14px 18px; }
-  .participantePagina .fornMenu nav { flex-basis: 100%; order: -1; }
-  .participantePagina .fornMenu nav .ttBotao { flex: 1 1 130px; }
+  .participantePagina .ppDetalhesDados { grid-template-columns: minmax(0, 1fr); }
+  .participantePagina .ppDetalhesInscricao { padding: 20px; }
+  .participantePagina .ppIngresso { padding: 20px; }
   .participantePagina .ppConteudo { padding: 24px 18px 48px; }
   .participantePagina .ppGradeEventos, .participantePagina .ppGradeInscricoes { grid-template-columns: minmax(0, 1fr); gap: 20px; }
   .participantePagina .ppBuscaBarra { flex-wrap: wrap; gap: 12px; padding: 20px; }
@@ -68,4 +131,13 @@
   .participantePagina .ppBuscaBarra > p { flex-basis: 100%; }
   .participantePagina .fornIndicadores { grid-template-columns: minmax(0, 1fr); }
   .participantePagina .ppEventoConteudo { padding: 20px; }
+  .participantePagina .ppEsqueletos { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .participantePagina .ppSkeletonEvento:nth-child(2) { display: none; }
+  .participantePagina .ppSkeletonEvento { padding-bottom: 20px; }
+  .participantePagina .ppSkeletonEvento .ttSkeletonTexto { width: calc(100% - 40px); margin-inline: 20px; }
+}
+/* Refluxo em larguras extremas, inclusive apos ampliar o navegador. */
+@media (max-width: 340px) {
+  .participantePagina .ppCabecalhoInterno { grid-template-columns: minmax(0, 1fr); }
+  .participantePagina .ppNavegacao .alternarNavegacao { grid-column: 1; grid-row: auto; justify-self: start; }
 }

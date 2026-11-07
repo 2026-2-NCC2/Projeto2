@@ -76,7 +76,7 @@ test('atividades vazias são diferentes de consulta indisponível e limitação 
 test('cadastro, perfil e contagens são legíveis; campos internos e ações futuras não são renderizados', () => {
   const d = fixture(); d.categorias.cadastro.dados.senha = 'HASH_PROIBIDO'
   const html = render(d)
-  for (const s of ['Pessoa sintética', 'Eventos organizados', 'Inscrições', 'Não informado', 'Exportação, exclusão e protocolos']) assert.ok(html.includes(s))
+  for (const s of ['Pessoa sintética', 'Eventos organizados', 'Inscrições', 'Não informado', 'Exportação integral, exclusão e protocolos']) assert.ok(html.includes(s))
   assert.doesNotMatch(html, /HASH_PROIBIDO|<form|<input|<button/)
   assert.match(html, /href="\/contato-privacidade"/)
 })

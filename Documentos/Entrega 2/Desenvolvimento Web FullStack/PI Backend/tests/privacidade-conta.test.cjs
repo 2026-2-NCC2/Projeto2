@@ -4,6 +4,7 @@ const fs = require('node:fs'), path = require('node:path'), vm = require('node:v
 const http = require('node:http'), express = require('express'), jwt = require('jsonwebtoken');
 const { criarRepositorioPrivacidade } = require('../repositories/supabase/privacidade-conta.cjs');
 const { consultarDadosPessoais, instalarPrivacidadeConta } = require('../privacidade-conta.cjs');
+const { gerarExportacao, LIMITE_BYTES } = require('../exportacao-privacidade.cjs');
 const segredo = 'segredo-sintetico-exclusivo-dos-testes-de-privacidade';
 
 function fixture({ portfolioAtivo = true } = {}) {
@@ -110,7 +111,7 @@ test('aceites são paginados sem truncar registros no limite REST', async () => 
   assert.equal((await consultarDadosPessoais(f.usuarios[0], f.repositorios)).categorias.aceites.dados.length, 101);
 });
 
-async function iniciar(t) {
+async function iniciar(t, exportacaoHabilitada = false) {
   const f = fixture(), app = express(); app.use(express.json());
   // Executa o middleware EXISTENTE, com JWT real e somente repositório sintético.
   const fonte = fs.readFileSync(path.join(__dirname, '../server.js'), 'utf8');
@@ -119,7 +120,7 @@ async function iniciar(t) {
     jwt, process: { env: { JWT_SECRET: segredo } }, usuariosRepository: f.repositorios.usuarios,
     console: { error() { throw Error('Log inesperado'); } },
   });
-  instalarPrivacidadeConta(app, { autenticar, repositorios: f.repositorios });
+  instalarPrivacidadeConta(app, { autenticar, repositorios: f.repositorios, exportacaoHabilitada });
   const server = app.listen(0, '127.0.0.1');
   await new Promise(r => server.once('listening', r));
   t.after(() => new Promise(r => server.close(r)));
@@ -163,4 +164,134 @@ test('HTTP real: falha tardia não devolve cadastro ou resumo parcial', async t 
   assert.equal(r.status, 503); assert.deepEqual(Object.keys(r.body), ['erro']);
   assert.equal(r.headers['cache-control'], 'no-store');
   assert.ok(!JSON.stringify(r).includes('SEGREDO_PROIBIDO'));
+});
+
+for (const [id, papel] of [[7, 'organizador'], [8, 'fornecedor'], [9, 'participante'], [10, 'admin']]) {
+  test(`exportação ${papel}: própria conta, headers, projeção fechada e mesmas leituras D.3`, async t => {
+    const f = await iniciar(t, true);
+    const pessoa = f.usuarios.find(u => u.id === id);
+    pessoa.nome = 'NOME_LIVRE_TERCEIRO'; pessoa.email = 'CONTATO_TERCEIRO';
+    pessoa.biografia = 'BIO_TERCEIRO'; pessoa.telefone = '123';
+    pessoa.dados_comerciais = papel === 'organizador' || papel === 'fornecedor' ? { descricao: 'DESCRICAO_TERCEIRO' } : null;
+    pessoa.redes_sociais = { site_pessoal: 'https://privado.example.invalid/' };
+    const r = await f.request('/minha-privacidade/exportacao', token(id));
+    assert.equal(r.status, 200);
+    assert.equal(r.headers['content-disposition'], 'attachment; filename="dados-privacidade.json"');
+    assert.equal(r.headers['access-control-expose-headers'], 'Content-Disposition');
+    assert.match(r.headers['content-type'], /^application\/json/);
+    assert.equal(r.headers['cache-control'], 'no-store'); assert.equal(r.headers.pragma, 'no-cache');
+    assert.equal(r.body.escopo, 'copia_limitada'); assert.equal(r.body.snapshot_transacional_unico, false);
+    assert.deepEqual(r.body.categorias.cadastro.dados, { id, perfil: papel });
+    assert.equal(r.body.categorias.aceites.dados.length, 1);
+    assert.deepEqual(Object.keys(r.body.categorias.aceites.dados[0]), ['documento', 'versao', 'aceito_em', 'fluxo']);
+    const json = JSON.stringify(r.body);
+    for (const valor of ['NOME_LIVRE_TERCEIRO', 'CONTATO_TERCEIRO', 'BIO_TERCEIRO', 'DESCRICAO_TERCEIRO', 'privado.example', 'hash', 'JWT_PROIBIDO', 'SEGREDO_PROIBIDO', 'TERCEIRO_PROIBIDO', 'PROPOSTA_PRIVADA']) {
+      // As limitações explicam a exclusão de hashes, mas nenhum campo/hash é exportado.
+      if (valor === 'hash') { assert.equal(r.body.categorias.aceites.dados[0].hash_documento, undefined); continue; }
+      assert.ok(!json.includes(valor), valor);
+    }
+    const chamadas = structuredClone(f.calls); f.calls.length = 0;
+    await consultarDadosPessoais(pessoa, f.repositorios);
+    assert.deepEqual(f.calls, chamadas);
+  });
+}
+
+test('exportação: bloqueada por padrão e por valores não booleanos, sem consultar ou anexar arquivo', async t => {
+  for (const habilitada of [false, 'true']) {
+    const f = await iniciar(t, habilitada);
+    const r = await f.request('/minha-privacidade/exportacao', token(7));
+    assert.equal(r.status, 503); assert.equal(r.headers['content-disposition'], undefined);
+    assert.equal(f.calls.length, 0); assert.match(r.body.erro, /quota distribuída/);
+  }
+});
+
+test('exportação: JWT ausente/inválido/expirado e usuário inexistente não consultam dados', async t => {
+  const f = await iniciar(t, true);
+  for (const tok of [undefined, 'invalido', token(7, -1), token(999)]) {
+    const r = await f.request('/minha-privacidade/exportacao', tok);
+    assert.equal(r.status, 401); assert.equal(r.headers['cache-control'], 'no-store');
+    assert.equal(r.headers['content-disposition'], undefined);
+  }
+  assert.equal(f.calls.length, 0);
+});
+
+test('exportação: qualquer query ou corpo é recusado antes da consulta, inclusive objeto vazio', async t => {
+  const f = await iniciar(t, true);
+  for (const url of ['/minha-privacidade/exportacao?id=8', '/minha-privacidade/exportacao?usuario_id=8', '/minha-privacidade/exportacao?formato=json']) {
+    assert.equal((await f.request(url, token(7))).status, 400);
+  }
+  for (const body of [{}, { usuario_id: 8 }, { token: 'outro' }]) assert.equal((await f.request('/minha-privacidade/exportacao', token(7), body)).status, 400);
+  assert.equal(f.calls.length, 0);
+});
+
+test('exportação: indisponibilidade opcional é preservada, nunca convertida em ausência', async t => {
+  const f = await iniciar(t, true); f.falhas.termos_aceites = '42P01';
+  f.repositorios.usuarios.buscarProfissional = async () => { throw Object.assign(Error(), { code: 'PROFISSIONAL_MIGRACAO_PENDENTE' }); };
+  const r = await f.request('/minha-privacidade/exportacao', token(7));
+  assert.equal(r.status, 200); assert.equal(r.body.situacao_consulta, 'limitada');
+  assert.deepEqual(r.body.categorias.aceites, { estado: 'infraestrutura_pendente', dados: null });
+  assert.equal(r.body.categorias.perfil_profissional.estado, 'infraestrutura_pendente');
+  const g = fixture({ portfolioAtivo: false });
+  const d = JSON.parse(gerarExportacao(await consultarDadosPessoais(g.usuarios[0], g.repositorios), g.usuarios[0]));
+  assert.deepEqual(d.categorias.portfolio, { estado: 'nao_habilitado', dados: null });
+});
+
+test('exportação: falha tardia, permissão e identidade divergente não geram anexo nem conteúdo parcial', async t => {
+  for (const code of ['ETIMEDOUT', '42501', '42703']) {
+    const f = await iniciar(t, true); f.falhas.termos_aceites = code;
+    const r = await f.request('/minha-privacidade/exportacao', token(7));
+    assert.equal(r.status, 503); assert.equal(r.headers['content-disposition'], undefined);
+    assert.deepEqual(Object.keys(r.body), ['erro']);
+  }
+  const f = await iniciar(t, true); f.repositorios.usuarios.buscarPerfil = async () => f.usuarios[1];
+  assert.equal((await f.request('/minha-privacidade/exportacao', token(7))).status, 503);
+});
+
+test('exportação: valida contagens, estados, aceites e tamanho UTF-8 integral sem truncamento', async () => {
+  const f = fixture(), u = f.usuarios[0], consulta = await consultarDadosPessoais(u, f.repositorios);
+  for (const alterar of [d => { d.categorias.atividades.dados.inscricoes = -1 },
+    d => { d.categorias.cadastro.dados.id = 8 }, d => { d.categorias.cadastro.dados.perfil = 'admin' },
+    d => { d.categorias.portfolio.estado = 'desconhecido' }, d => { d.situacao = 'limitada' },
+    d => { d.categorias.aceites.dados[0].versao = 'texto livre com terceiros' },
+    d => { d.categorias.aceites.dados[0].aceito_em = 'ontem' },
+    d => { d.categorias.aceites.dados.push(d.categorias.aceites.dados[0]) }]) {
+    const d = structuredClone(consulta); alterar(d); assert.throws(() => gerarExportacao(d, u));
+  }
+  assert.equal(LIMITE_BYTES, 5_000_000);
+  const gerar = n => ({ ...consulta, categorias: { ...consulta.categorias, aceites: { estado: 'disponivel', dados: Array.from({ length: n }, (_, i) => ({ ...consulta.categorias.aceites.dados[0], versao: `v${i}` })) } } });
+  assert.ok(Buffer.byteLength(gerarExportacao(gerar(1000), u), 'utf8') < LIMITE_BYTES);
+  assert.throws(() => gerarExportacao(gerar(60000), u));
+});
+
+test('exportação: aceita exatamente 5 MB UTF-8 e recusa um byte adicional', async () => {
+  const f = fixture(), u = f.usuarios[0], d = await consultarDadosPessoais(u, f.repositorios);
+  const item = { documento: 'termos-uso', versao: 'v00000', aceito_em: '2030-01-01T00:00:00.000Z', fluxo: 'cadastro' };
+  d.categorias.aceites.dados = [];
+  const base = Buffer.byteLength(gerarExportacao(d, u), 'utf8');
+  const tamanhoItem = Buffer.byteLength(JSON.stringify(item), 'utf8');
+  const n = Math.floor((LIMITE_BYTES - base + 1) / (tamanhoItem + 1));
+  const itens = Array.from({ length: n }, (_, i) => ({ ...item, versao: 'v' + String(i).padStart(5, '0') }));
+  let sobra = LIMITE_BYTES - (base + n * tamanhoItem + n - 1);
+  for (const a of itens) {
+    const incremento = Math.min(sobra, 80 - a.versao.length);
+    a.versao += 'x'.repeat(incremento); sobra -= incremento;
+    if (!sobra) break;
+  }
+  d.categorias.aceites.dados = itens;
+  assert.equal(Buffer.byteLength(gerarExportacao(d, u), 'utf8'), LIMITE_BYTES);
+  itens.at(-1).versao += 'x';
+  assert.throws(() => gerarExportacao(d, u));
+});
+
+test('exportação HTTP: documento acima de 5 MB não recebe attachment nem resposta parcial', async t => {
+  const f = await iniciar(t, true);
+  const original = f.repositorios.privacidade.listarPorUsuario;
+  f.repositorios.privacidade.listarPorUsuario = async id => {
+    const resumo = await original(id);
+    resumo.aceites.dados = Array.from({ length: 60000 }, (_, i) => ({ ...resumo.aceites.dados[0], versao: `v${i}` }));
+    return resumo;
+  };
+  const r = await f.request('/minha-privacidade/exportacao', token(7));
+  assert.equal(r.status, 503); assert.equal(r.headers['content-disposition'], undefined);
+  assert.deepEqual(Object.keys(r.body), ['erro']);
 });

@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Alerta, Botao, EstadoVazio, Skeleton } from '../ui/Primitivas.jsx'
 import { consultarPrivacidadeConta } from '../../services/privacidadeConta.js'
+import { baixarCopiaPrivacidade } from '../../services/exportacaoPrivacidade.js'
 import './PrivacidadeConta.css'
 
 const titulos = { cadastro: 'Cadastro', perfil_pessoal: 'Perfil pessoal', perfil_profissional: 'Perfil profissional',
@@ -41,10 +42,39 @@ export function ConteudoPrivacidadeConta({ dados }) {
     })}
     <section className="privacidadeContaCartao" aria-label="Escopo e limitações"><h3>Escopo e limitações</h3>
       <ul>{dados.limitacoes.map((texto, i) => <li key={i}>{texto}</li>)}</ul>
-      <p>Para correções disponíveis, utilize os formulários do perfil. Exportação, exclusão e protocolos de solicitação não estão disponíveis nesta etapa.</p>
+      <p>Para correções disponíveis, utilize os formulários do perfil. Exportação integral, exclusão e protocolos de solicitação não estão disponíveis nesta etapa.</p>
       <p><a href="/contato-privacidade">Contato de Privacidade</a> · <a href="/privacidade">Política de Privacidade</a> · <a href="/preferencias-privacidade">Preferências de privacidade</a></p>
     </section>
   </>
+}
+
+export function DownloadPrivacidade({ token, id }) {
+  const requisicao = useRef(null)
+  const [estado, setEstado] = useState({ token, id, ocupado: false, erro: '' })
+  useEffect(() => () => { requisicao.current?.abort(); requisicao.current = null }, [token, id])
+  const atual = estado.token === token && estado.id === id ? estado : { ocupado: false, erro: '' }
+  async function baixar() {
+    if (requisicao.current) return
+    const controle = new AbortController()
+    requisicao.current = controle
+    setEstado({ token, id, ocupado: true, erro: '' })
+    try { await baixarCopiaPrivacidade(token, id, controle.signal) }
+    catch { if (!controle.signal.aborted) setEstado({ token, id, ocupado: false, erro: 'Não foi possível baixar a cópia limitada. A exportação pode estar indisponível ou sua sessão pode ter mudado. Nenhum sucesso foi confirmado.' }) }
+    finally {
+      if (requisicao.current === controle) {
+        requisicao.current = null
+        if (!controle.signal.aborted) setEstado(e => ({ ...e, ocupado: false }))
+      }
+    }
+  }
+  return <section className="privacidadeContaCartao" aria-label="Cópia limitada dos dados" aria-busy={atual.ocupado}>
+    <h3>Cópia limitada dos dados</h3>
+    <p>Não é uma exportação completa. Inclui identificador e perfil, contagens próprias e metadados limitados de aceites. Textos livres, contatos, links e hashes ficam de fora.</p>
+    <p>O arquivo ficará no seu dispositivo. Evite baixá-lo em computadores compartilhados.</p>
+    <p>A operação real permanece desabilitada enquanto aguarda aprovação explícita do risco de ausência de quota distribuída. Limite de tamanho: 5 MB.</p>
+    <Botao variante="secundario" ocupado={atual.ocupado} disabled={atual.ocupado} onClick={baixar}>Baixar cópia limitada dos meus dados</Botao>
+    {atual.erro && <Alerta variante="erro" titulo="Download não confirmado">{atual.erro}</Alerta>}
+  </section>
 }
 
 export function PrivacidadeConta({ token, id }) {
@@ -65,6 +95,6 @@ export function PrivacidadeConta({ token, id }) {
     {atual.carregando && <Skeleton tipo="card" rotulo="Carregando dados de privacidade" />}
     {atual.erro && <Alerta variante="erro" titulo="Não foi possível consultar seus dados"><p>{atual.erro}</p>
       <Botao variante="secundario" onClick={() => setTentativa(v => v + 1)}>Tentar novamente</Botao></Alerta>}
-    {atual.dados && <ConteudoPrivacidadeConta dados={atual.dados} />}
+    {atual.dados && <><ConteudoPrivacidadeConta dados={atual.dados} /><DownloadPrivacidade token={token} id={id} /></>}
   </section>
 }

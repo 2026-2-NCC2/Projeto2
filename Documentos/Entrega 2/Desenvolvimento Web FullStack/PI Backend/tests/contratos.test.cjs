@@ -5,6 +5,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
+const { createHash } = require("node:crypto");
 const jwt = require("jsonwebtoken");
 const fonte = fs.readFileSync(path.join(__dirname, "../server.js"), "utf8");
 const segredo = "segredo-ficticio-exclusivo-dos-contratos-12345";
@@ -15,8 +16,18 @@ const usuario = { id: 7, nome: "Pessoa", email: "pessoa@example.invalid", perfil
 // dotenv, drivers, adaptadores, isolamento real ou qualquer dependencia extra.
 // A fila SQL e estrita: consultas inesperadas e passos omitidos falham no fim,
 // inclusive quando o catch da rota transforma uma falha da simulacao em 500.
-function ambiente(perfil = "organizador", passos = []) {
+function ambiente(perfil = "organizador", passos = [], { termosSinteticos = false } = {}) {
   const rotas = new Map(), chamadas = [], transacao = [], falhas = [], hashes = [];
+  // Somente esta fixture pode aprovar uma copia em memoria. O artefato real e
+  // o provedor MySQL continuam sem publicacao/suporte a cadastro com aceite.
+  const documento = termosSinteticos ? {
+    ...require("../../PI React/src/pages/publicas/termosUso.json"),
+    estado: "aprovado", aprovacao: "somente-fixture-sintetica-de-contratos",
+  } : null;
+  const conteudo = documento && JSON.stringify(documento);
+  const hash = conteudo && createHash("sha256").update(conteudo).digest("hex");
+  const aceite = documento && { documento: documento.id, versao: documento.versao, hash };
+  const aceites = [];
   let indice = 0;
   async function executar(tipo, sql, params = []) {
     const texto = sql.replace(/\s+/g, " ").trim();
@@ -81,7 +92,27 @@ function ambiente(perfil = "organizador", passos = []) {
       static now() { return Date.parse("2030-01-01T12:00:00Z"); }
     },
     process: { env: { JWT_SECRET: segredo } }, console: { log() {}, error() {} },
-    require(nome) { const nova = require("./helpers/persistencia.cjs").dependencia(nome, db, { agora: () => new Date("2030-01-01T12:00:00Z") }); if (nova) return nova;
+    require(nome) {
+      if (termosSinteticos && nome === "./termos-cadastro.cjs") {
+        const real = require("../termos-cadastro.cjs");
+        return { ...real, criarTermosCadastro: repo => real.criarTermosCadastro(repo, documento) };
+      }
+      if (termosSinteticos && nome === "./repositories/index.cjs") {
+        return { criarPersistencia() {
+          const persistencia = require("./helpers/persistencia.cjs").criar(db);
+          const repo = persistencia.repositorios.usuarios;
+          repo.termoVigente = async () => ({ documento_id: documento.id, versao: documento.versao,
+            hash, conteudo, ativo: true, aprovado_em: "2030-01-01T00:00:00Z" });
+          // Adaptador sintetico, sem banco: a fila SQL original continua estrita.
+          repo.criarComAceite = async dados => {
+            assert.deepEqual(json(dados.aceite), aceite);
+            aceites.push(json(dados.aceite));
+            return repo.criar(dados);
+          };
+          return persistencia;
+        } };
+      }
+      const nova = require("./helpers/persistencia.cjs").dependencia(nome, db, { agora: () => new Date("2030-01-01T12:00:00Z") }); if (nova) return nova;
       if (!Object.hasOwn(dependencias, nome)) throw Error("Dependencia proibida: " + nome);
       return dependencias[nome];
     },
@@ -106,7 +137,8 @@ function ambiente(perfil = "organizador", passos = []) {
     assert.deepEqual(falhas, []);
     assert.equal(indice, passos.length, "Todos os passos SQL devem ser consumidos");
   }
-  return { rotas, requisitar, verificar, chamadas, transacao, hashes, locals: app.locals };
+  return { rotas, requisitar, verificar, chamadas, transacao, hashes, locals: app.locals,
+    aceite: aceite && { aceito: true, ...aceite }, aceites };
 }
 
 // null = qualquer perfil autenticado; publico = sem autenticacao.
@@ -128,7 +160,7 @@ const contratos = [
   ["post /fornecedor/propostas", "fornecedor"],
   ["get /eventos/imagens/capacidades", null],
   ["get /admin/eventos/:id/painel", "admin"], ["get /admin/cotacoes/:id", "admin"],
-  ["get /termos/vigente", "publico"], ["get /minha-privacidade/dados", null],
+  ["get /termos/vigente", "publico"], ["get /minha-privacidade/dados", null], ["get /minha-privacidade/exportacao", null],
   ["get /eventos/capacidades", null],
   ["patch /eventos/:id/cancelar", "organizador"], ["patch /eventos/:id/encerrar", "organizador"],
   ["get /portfolio", "fornecedor"], ["post /portfolio", "fornecedor"],
@@ -136,8 +168,8 @@ const contratos = [
   ["get /fornecedores", null], ["get /fornecedores/:id/portfolio", null],
 ];
 
-test("inventario fixa exatamente os 46 pares metodo/caminho registrados no app", () => {
-  assert.equal(contratos.length, 46);
+test("inventario fixa exatamente os 47 pares metodo/caminho registrados no app", () => {
+  assert.equal(contratos.length, 47);
   assert.deepEqual([...ambiente().rotas.keys()].sort(), contratos.map(([rota]) => rota).sort());
 });
 
@@ -523,34 +555,57 @@ test("perfil: consulta adicional sem perfil e 404 se usuario desaparecer depois 
     assert.deepEqual(r.body, linhas[0] ? { ...linhas[0], telefone: null, biografia: null, edicao_disponivel: false } : { erro: "Usuário não encontrado." }); a.verificar();
   }
 });
-test("publicas: raiz, cadastro normalizado sem hash e login sem senha na resposta", async () => {
+test("publicas: raiz, cadastro sintetico aprovado normalizado sem hash e login sem senha", async () => {
   const a = ambiente("participante", [
     { sql: "SELECT id FROM usuarios WHERE email = ?", params: ["pessoa@example.invalid"] },
     { sql: /^INSERT INTO usuarios/, params: ["Pessoa", "pessoa@example.invalid", "hash-simulado", "participante"], retorno: { insertId: 7 } },
     { sql: "SELECT id, nome, email, senha, perfil FROM usuarios WHERE email = ?", params: ["pessoa@example.invalid"], retorno: [{ ...usuario, perfil: "participante", senha: "hash-simulado" }] },
-  ]);
+  ], { termosSinteticos: true });
   assert.deepEqual((await a.requisitar("get /", {}, { semToken: true })).body, { mensagem: "Backend do TrocaTicket funcionando!" });
-  const r = await a.requisitar("post /usuarios", { nome: " Pessoa ", email: " PESSOA@example.invalid ", senha: "senha-valida", perfil: "participante" });
+  const r = await a.requisitar("post /usuarios", { nome: " Pessoa ", email: " PESSOA@example.invalid ", senha: "senha-valida", perfil: "participante", aceite_termos: a.aceite });
   assert.equal(r.statusCode, 201); assert.deepEqual(r.body, { mensagem: "Usuário cadastrado com sucesso!", usuario: { ...usuario, perfil: "participante" } });
   const login = await a.requisitar("post /login", { email: " PESSOA@example.invalid ", senha: "senha-valida" });
   assert.equal(login.statusCode, 200); assert.deepEqual(Object.keys(login.body).sort(), ["mensagem", "token", "usuario"]);
   assert.deepEqual(login.body.usuario, { ...usuario, perfil: "participante" });
   assert.equal(jwt.verify(login.body.token, segredo).id, 7);
+  assert.equal(a.aceites.length, 1);
   assert.deepEqual(a.hashes, [["senha-valida", 12], ["senha-valida", "hash-simulado"]]); a.verificar();
 });
 
-test("cadastro via repositorio preserva 409 para email existente e corrida no INSERT", async () => {
+test("cadastro sintetico aprovado preserva 409 para email existente e corrida no INSERT", async () => {
   const busca = { sql: "SELECT id FROM usuarios WHERE email = ?", params: [usuario.email] };
   for (const passos of [
     [{ ...busca, retorno: [{ id: 7 }] }],
     [busca, { sql: /^INSERT INTO usuarios/, params: ["Pessoa", usuario.email, "hash-simulado", "participante"],
       erro: Object.assign(new Error("duplicidade simulada"), { code: "ER_DUP_ENTRY" }) }],
   ]) {
-    const a = ambiente("participante", passos);
-    const r = await a.requisitar("post /usuarios", { nome: "Pessoa", email: usuario.email, senha: "senha-valida", perfil: "participante" });
+    const a = ambiente("participante", passos, { termosSinteticos: true });
+    const r = await a.requisitar("post /usuarios", { nome: "Pessoa", email: usuario.email, senha: "senha-valida", perfil: "participante", aceite_termos: a.aceite });
     assert.equal(r.statusCode, 409);
     assert.deepEqual(r.body, { erro: "Email já cadastrado!" });
     assert.equal(a.hashes.length, passos.length === 1 ? 0 : 1);
+    assert.equal(a.aceites.length, passos.length === 1 ? 0 : 1);
+    a.verificar();
+  }
+});
+
+test("cadastro real: aceite ausente/invalido e Termos em minuta bloqueiam antes de consultar ou criar usuario", async () => {
+  const documento = require("../../PI React/src/pages/publicas/termosUso.json");
+  assert.equal(documento.estado, "minuta");
+  assert.equal(documento.aprovacao, null);
+  const aceite = { aceito: true, documento: documento.id, versao: documento.versao,
+    hash: createHash("sha256").update(JSON.stringify(documento)).digest("hex") };
+  for (const [aceite_termos, status] of [[undefined, 400], [null, 400], [{}, 400],
+    [{ ...aceite, aceito: false }, 400], [{ ...aceite, extra: true }, 400], [aceite, 503]]) {
+    const a = ambiente("participante");
+    const r = await a.requisitar("post /usuarios", { nome: "Pessoa", email: usuario.email,
+      senha: "senha-valida", perfil: "participante", aceite_termos }, { semToken: true });
+    assert.equal(r.statusCode, status);
+    assert.deepEqual(Object.keys(r.body), ["erro"]);
+    assert.match(r.body.erro, status === 400 ? /aceitar os Termos/ : /Termos de Uso aprovados/);
+    assert.deepEqual(a.chamadas, []);
+    assert.deepEqual(a.hashes, []);
+    assert.deepEqual(a.aceites, []);
     a.verificar();
   }
 });

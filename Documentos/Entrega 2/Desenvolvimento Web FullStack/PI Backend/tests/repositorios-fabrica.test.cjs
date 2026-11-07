@@ -13,6 +13,7 @@ const dominios = [
   ["inscricoes", "inscricoes", "criarRepositorioInscricoes"],
   ["solicitacoesAcesso", "solicitacoes-acesso", "criarRepositorioSolicitacoesAcesso"],
 ];
+const privacidade = ["privacidade", "privacidade-conta", "criarRepositorioPrivacidade"];
 const supabase = () => ({ DB_PROVIDER: "supabase", SUPABASE_URL: "https://projeto.invalid",
   SUPABASE_SECRET_KEY: "sb_secret_ficticia_exclusiva_de_teste" });
 
@@ -51,13 +52,16 @@ function carregar(env = {}, opcoes = {}) {
         return require('../repositories/supabase/portfolio.cjs').criarRepositorioPortfolio(received);
       } };
     }
-    const dominio = dominios.find(([, arquivo]) => name === `./${provider}/${arquivo}.cjs`);
+    const permitidos = provider === "supabase" ? [...dominios, privacidade] : dominios;
+    const dominio = permitidos.find(([, arquivo]) => name === `./${provider}/${arquivo}.cjs`);
     assert.ok(dominio, `Importacao inesperada: ${name}`);
     if (opcoes.falhaRepositorio) throw opcoes.falhaRepositorio;
     const real = require(path.join(__dirname, "../repositories", provider, dominio[1] + ".cjs"));
-    return { [dominio[2]](received) {
+    return { [dominio[2]](received, options) {
       assert.equal(received, adapter);
-      const repo = real[dominio[2]](received);
+      if (dominio === privacidade) assert.deepEqual(JSON.parse(JSON.stringify(options)),
+        { portfolioAtivo: env.PORTFOLIO_FORNECEDOR_ATIVO === 'true' });
+      const repo = real[dominio[2]](received, options);
       construidos.push({ dominio: dominio[0], repo, real });
       return repo;
     } };
@@ -103,12 +107,14 @@ for (const provider of [undefined, "mysql"]) {
 test("Supabase explicito: cliente unico compartilhado, contratos reais e nenhum MySQL/db.js", () => {
   const env = supabase(), before = { ...env }, a = carregar(env), bundle = a.criar();
   assert.equal(bundle.provider, "supabase"); assert.equal(a.clientes(), 1);
-  assert.equal(a.construidos.length, 7);
+  assert.equal(a.construidos.length, 8);
+  assert.deepEqual(a.construidos.map(c => c.dominio), [...dominios.map(d => d[0]), "privacidade"]);
+  assert.deepEqual(Object.keys(bundle), ["provider", ...dominios.map(d => d[0]), "privacidade"]);
   assert.equal(a.imports.some(n => n === "../db" || n.includes("/mysql/")), false);
   assert.deepEqual(env, before);
   for (const { dominio, repo, real } of a.construidos) {
     assert.equal(bundle[dominio], repo);
-    const fabrica = dominios.find(d => d[0] === dominio)[2];
+    const fabrica = [...dominios, privacidade].find(d => d[0] === dominio)[2];
     assert.deepEqual(Object.keys(repo), Object.keys(real[fabrica](a.adapter)));
   }
   assert.equal(bundle.custos.excluirPorEvento, undefined); // nao fingir transacao REST

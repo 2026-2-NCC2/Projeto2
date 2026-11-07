@@ -423,7 +423,11 @@ test("entrada autorizada carrega server.js e fabrica reais, sem dotenv.config, d
   assert.equal(a.appLoaded(), 1); assert.equal(a.validacoesNormais(), 0);
   assert.equal(a.imports.includes("../db"), false);
   assert.equal(a.imports.some(n => n.includes("/mysql/")), false);
-  assert.equal(a.imports.filter(n => n.startsWith("./supabase/")).length, 7);
+  assert.deepEqual(a.imports.filter(n => n.startsWith("./supabase/")), [
+    "./supabase/usuarios.cjs", "./supabase/eventos.cjs", "./supabase/custos.cjs",
+    "./supabase/cotacoes.cjs", "./supabase/propostas.cjs", "./supabase/inscricoes.cjs",
+    "./supabase/solicitacoes-acesso.cjs", "./supabase/privacidade-conta.cjs",
+  ]);
   assert.equal(a.eventos.filter(e => Array.isArray(e) && e[0] === "listen").length, 1);
   await controle.fechar();
 });

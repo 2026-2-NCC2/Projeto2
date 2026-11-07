@@ -41,8 +41,8 @@ test('participante bloqueia inscrição lotada na lista e nos detalhes',()=>{
    let i=0
    const estado={0:[lotado,livre],1:[],2:false,5:aba,7:true,8:lotado,9:false}
    const Portal=vm.runInNewContext(transformSync(file,fonte,{jsx:{runtime:'classic',pragma:'jsx'}}).code+'\nPortalParticipante',{
-     ...primitivasFixture, jsx,React:{Fragment:'fragment'},VagasEvento:'vagas',Icone:'icone',CapaEvento:'capa',MidiaEvento:'midia',PerfilPessoal:'perfil',
-     useEffect(){},useState:v=>[Object.hasOwn(estado,i)?estado[i++]:((i++),v),()=>{}],
+     ...primitivasFixture, jsx,React:{Fragment:'fragment'},VagasEvento:'vagas',Icone:'icone',CapaEvento:'capa',MidiaEvento:'midia',PerfilPessoal:'perfil',NavegacaoRecolhivel:'recolhivel',
+     useEffect(){},useRef:v=>({current:v}),useState:v=>[Object.hasOwn(estado,i)?estado[i++]:((i++),v),()=>{}],
    })
    const view=Portal({setPagina(){},aoSair(){}})
    const botoes=nodes(view).filter(n=>n.type==='button')

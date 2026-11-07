@@ -40,3 +40,20 @@ retenção por finalidade, critérios de conservação e comprovação de identi
 Nenhum prazo, fundamento ou responsável é aprovado por este contrato.
 Exportação, exclusão, anonimização e protocolos não fazem parte de D.3.
 Cadastro continua bloqueado e os Termos permanecem minuta. Nenhuma migração.
+
+D.4.1 — Cópia JSON limitada (não altera o escopo da consulta D.3)
+GET /minha-privacidade/exportacao. JWT existente; identidade somente da sessão.
+Recusa qualquer query/corpo (400). Sem sessão válida: 401; infraestrutura da
+autenticação mantém seu 500 atual. Geração/validação indisponível: 503.
+No-store/no-cache inclusive nas recusas. Anexo só depois da geração integral,
+application/json; attachment; filename="dados-privacidade.json".
+Limite: 5.000.000 bytes UTF-8, sem truncamento. Não há arquivos no servidor.
+Inclui ID/perfil próprios, contagens e documento/versão/instante/fluxo dos aceites.
+Exclui nomes, contatos, textos livres, links, hashes, imagens, logs e backups.
+Estados de infraestrutura pendente/não habilitada são preservados. Seções de
+perfil são explicitamente excluídas por minimização, não representadas vazias.
+Versão do formato 1, escopo copia_limitada, sem snapshot transacional único.
+Quota distribuída 3/h por titular NÃO implementada: não substituída por Map/IP.
+exportacaoHabilitada=false por padrão; o servidor real não habilita a opção.
+Ativação real exige avaliação e aprovação explícita do risco da ausência de quota.
+Habilitação nesta etapa somente em testes sintéticos isolados.

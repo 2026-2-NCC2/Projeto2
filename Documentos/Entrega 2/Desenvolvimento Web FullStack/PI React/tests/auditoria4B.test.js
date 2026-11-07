@@ -108,6 +108,7 @@ test('App ignora resposta anterior quando uma nova consulta já terminou', async
 
 function participante(fetch) {
   return runtime('pages/participante/PortalParticipante.jsx', 'PortalParticipante', {
+    NavegacaoRecolhivel: 'recolhivel',
     fetch, window: { confirm: () => true }, alert() {},
   })
 }

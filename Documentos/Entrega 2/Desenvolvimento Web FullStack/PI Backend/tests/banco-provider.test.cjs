@@ -274,10 +274,10 @@ test("isolado usa so adaptador validado, sem dotenv, pool principal ou importaca
   assert.equal(a.estado.dotenv, 0);
   assert.deepEqual(a.estado.pools, []);
   assert.deepEqual(a.estado.escutas, []);
-  assert.equal(a.estado.rotas.length, 46);
+  assert.equal(a.estado.rotas.length, 47);
   assert.equal(new Set(a.estado.rotas).size, a.estado.rotas.length);
   for (const rota of ['get /admin/eventos/:id/painel', 'get /admin/cotacoes/:id',
-    'get /termos/vigente', 'get /minha-privacidade/dados']) {
+    'get /termos/vigente', 'get /minha-privacidade/dados', 'get /minha-privacidade/exportacao']) {
     assert.ok(a.estado.rotas.includes(rota), rota);
   }
   assert.ok(a.estado.rotas.includes("get /eventos/imagens/capacidades"));

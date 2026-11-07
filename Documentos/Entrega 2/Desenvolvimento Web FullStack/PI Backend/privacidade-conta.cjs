@@ -39,7 +39,34 @@ async function consultarDadosPessoais(usuario, repositorios) {
     ] };
 }
 
-function instalarPrivacidadeConta(app, { autenticar, repositorios }) {
+function instalarPrivacidadeConta(app, { autenticar, repositorios, exportacaoHabilitada = false }) {
+  // Fechado por padrao, inclusive em producao. Sem quota distribuida, nao ativar
+  // no servidor real sem avaliacao e aprovacao explicita do risco operacional.
+  app.get('/minha-privacidade/exportacao', (req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('Pragma', 'no-cache');
+    next();
+  }, autenticar, async (req, res) => {
+    if (Object.keys(req.query || {}).length || req.originalUrl?.includes('?') ||
+        req.body !== undefined || req.headers?.['transfer-encoding'] ||
+        (req.headers?.['content-length'] && req.headers['content-length'] !== '0')) {
+      return res.status(400).json({ erro: 'A exportação não aceita parâmetros ou corpo.' });
+    }
+    if (exportacaoHabilitada !== true) return res.status(503).json({ erro: 'Exportação em validação. A operação real aguarda aprovação do risco de ausência de quota distribuída.' });
+    try {
+      const consulta = await consultarDadosPessoais(req.usuario, repositorios);
+      const { gerarExportacao } = require('./exportacao-privacidade.cjs');
+      const json = gerarExportacao(consulta, req.usuario);
+      res.setHeader('Content-Type', 'application/json');
+      // O frontend principal usa outra porta; expor somente o nome fixo do anexo,
+      // sem mudar origens, credenciais ou permissoes CORS existentes.
+      res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
+      res.setHeader('Content-Disposition', 'attachment; filename="dados-privacidade.json"');
+      return res.send(json);
+    } catch {
+      return res.status(503).json({ erro: 'Não foi possível gerar uma cópia limitada confirmada de até 5 MB. Nenhum arquivo foi disponibilizado.' });
+    }
+  });
   app.get('/minha-privacidade/dados', (req, res, next) => {
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('Pragma', 'no-cache');

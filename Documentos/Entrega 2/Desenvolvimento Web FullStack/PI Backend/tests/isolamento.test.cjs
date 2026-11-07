@@ -546,7 +546,7 @@ test("MySQL principal e recusado; isolado preserva rotas sem iniciar HTTP na imp
     'patch /eventos/:id/publicar', 'patch /eventos/:id/cancelar', 'patch /eventos/:id/encerrar',
     'get /eventos/capacidades', 'get /eventos/imagens/capacidades', 'get /eventos/:id/custos', 'put /eventos/:id/custos',
     'get /perfil', 'patch /perfil', 'get /perfil/profissional', 'patch /perfil/profissional',
-    'get /minha-privacidade/dados', 'get /participante/eventos', 'get /participante/inscricoes', 'post /participante/inscricoes',
+    'get /minha-privacidade/exportacao', 'get /minha-privacidade/dados', 'get /participante/eventos', 'get /participante/inscricoes', 'post /participante/inscricoes',
     'get /cotacoes', 'post /cotacoes', 'get /fornecedor/cotacoes', 'get /fornecedor/propostas', 'post /fornecedor/propostas',
     'get /organizador/propostas', 'patch /organizador/propostas/:id/status',
     'get /usuarios', 'get /admin/eventos', 'get /admin/eventos/:id/painel', 'get /admin/cotacoes', 'get /admin/cotacoes/:id', 'get /admin/propostas',
@@ -554,8 +554,8 @@ test("MySQL principal e recusado; isolado preserva rotas sem iniciar HTTP na imp
     'get /portfolio', 'post /portfolio', 'patch /portfolio/:id', 'delete /portfolio/:id',
     'get /fornecedores', 'get /fornecedores/:id/portfolio',
   ];
-  assert.equal(esperadas.length, 46);
-  assert.equal(isolado.estado.rotas.length, 46);
+  assert.equal(esperadas.length, 47);
+  assert.equal(isolado.estado.rotas.length, 47);
   assert.deepEqual(isolado.estado.rotas.map(([metodo, rota]) => `${metodo} ${rota}`).sort(), esperadas.sort());
   assert.equal(isolado.app.locals.imagensDisponiveis(), false);
   assert.ok(isolado.estado.rotas.some(([metodo, rota]) => metodo === "put" && rota === "/eventos/:id/custos"));
