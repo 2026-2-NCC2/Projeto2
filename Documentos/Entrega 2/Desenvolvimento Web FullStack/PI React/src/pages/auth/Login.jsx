@@ -1,3 +1,4 @@
+import '../publicas/Transparencia.css'
 import { Marca } from '../../components/ui/Marca.jsx'
 import { Icone } from '../../components/ui/Icone.jsx'
 import { useEffect, useRef, useState } from 'react'
@@ -100,6 +101,11 @@ const aoAutenticar = async (eventoDisparado) => {
         <p className="cadastro">Ainda não tem uma conta?{' '}
           <Botao variante="discreto" disabled={entrando} onClick={() => setPagina('cadastro')}>Criar conta</Botao>
         </p>
+        <nav className="transparenciaLinks" aria-label="Privacidade e transparência">
+          <a href="/privacidade">Política de Privacidade</a>
+          <a href="/termos">Termos de Uso</a>
+          <a href="/contato-privacidade">Contato de Privacidade</a>
+        </nav>
       </main>
     </div>
   )

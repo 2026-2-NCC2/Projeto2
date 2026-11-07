@@ -5,10 +5,11 @@ import { createElement, Fragment, useEffect, useRef, useState, useId } from 'rea
 import { renderToStaticMarkup } from 'react-dom/server'
 import { carregarAdmin, hooksAdmin, nodes, text } from './helpers/adminRuntime.js'
 
+const termosFixture = { documento: 'termos-uso', versao: 'teste-aprovado', hash: 'a'.repeat(64) }
 const avisos = carregarAdmin('pages/auth/avisoCadastro.js', ['guardarAvisoCadastro', 'lerAvisoCadastro', 'limparAvisoCadastro'])
 function pagina(nome, fetch, extras = {}) {
   const destinos = [], sessao = [], h = hooksAdmin({
-    ...avisos, fetch, apiUrl: p => p, Campo: 'Campo', Botao: 'Botao', Alerta: 'Alerta', Icone: 'svg', console: { error() {} },
+    ...avisos, AbortController, consultarTermosCadastro: extras.consultarTermosCadastro || (async () => termosFixture), fetch, apiUrl: p => p, Campo: 'Campo', Botao: 'Botao', Alerta: 'Alerta', Icone: 'svg', console: { error() {} },
   })
   const fn = carregarAdmin(`pages/auth/${nome}.jsx`, [nome], h.env)[nome]
   const props = { setPagina: p => destinos.push(p), aoAutenticarSessao: (...args) => sessao.push(args), ...extras }
@@ -18,8 +19,10 @@ function pagina(nome, fetch, extras = {}) {
   return { render, alterar, enviar, destinos, sessao, props }
 }
 const resposta = (ok, dados) => ({ ok, json: async () => dados })
-function preencherCadastro(p) {
+async function preencherCadastro(p) {
   for (const [id, valor] of Object.entries({ 'cadastro-nome': 'Pessoa sintética', 'cadastro-email': 'p@example.invalid', 'cadastro-senha': 'senha-sintetica', 'cadastro-confirmar': 'senha-sintetica' })) p.alterar(id, valor)
+  nodes(p.render()).find(n => n.props.id === 'cadastro-aceite').props.onChange({ target: { checked: true } })
+  await Promise.resolve()
 }
 
 test('login preserva POST, payload e autoridade do perfil retornado pelo servidor', async () => {
@@ -78,9 +81,9 @@ test('cadastro preserva validacao de confirmacao sem chamar API', async () => {
 
 test('cadastro preserva payload participante e redireciona imediatamente com aviso em memoria', async () => {
   const chamadas = [], p = pagina('Cadastro', async (...args) => { chamadas.push(args); return resposta(true, {}) })
-  preencherCadastro(p); await p.enviar()
+  await preencherCadastro(p); await p.enviar()
   assert.equal(chamadas[0][0], '/usuarios'); assert.equal(chamadas[0][1].method, 'POST')
-  assert.deepEqual(JSON.parse(chamadas[0][1].body), { nome: 'Pessoa sintética', email: 'p@example.invalid', senha: 'senha-sintetica', perfil: 'participante' })
+  assert.deepEqual(JSON.parse(chamadas[0][1].body), { nome: 'Pessoa sintética', email: 'p@example.invalid', senha: 'senha-sintetica', perfil: 'participante', aceite_termos: { aceito: true, ...termosFixture } })
   assert.deepEqual(p.destinos, ['login'])
   const login = pagina('Login', async () => { throw Error('Consulta inesperada') })
   assert.match(text(login.render()), /Conta criada com sucesso! Faça login/)
@@ -90,7 +93,7 @@ test('cadastro preserva payload participante e redireciona imediatamente com avi
 
 test('falha conhecida de cadastro preserva mensagem do servidor sem redirecionar', async () => {
   const p = pagina('Cadastro', async () => resposta(false, { erro: 'Cadastro recusado' }))
-  preencherCadastro(p); await p.enviar()
+  await preencherCadastro(p); await p.enviar()
   assert.match(text(p.render()), /Cadastro recusado/); assert.deepEqual(p.destinos, [])
   assert.equal(avisos.lerAvisoCadastro(), '')
 })
@@ -98,7 +101,7 @@ test('falha conhecida de cadastro preserva mensagem do servidor sem redirecionar
 test('cadastro com resultado incerto mantem orientacao e nao repete automaticamente', async () => {
   let chamadas = 0
   const p = pagina('Cadastro', async () => { chamadas++; return { ok: true, json: async () => { throw Error('Resposta perdida') } } })
-  preencherCadastro(p); await p.enviar()
+  await preencherCadastro(p); await p.enviar()
   for (let i = 0; i < 3; i++) assert.match(text(p.render()), /cadastro pode ter sido recebido.*antes de reenviar/)
   assert.equal(chamadas, 1); assert.deepEqual(p.destinos, []); assert.equal(avisos.lerAvisoCadastro(), '')
 })
@@ -106,7 +109,7 @@ test('cadastro com resultado incerto mantem orientacao e nao repete automaticame
 test('cadastro trava submissao simultanea sem mudar valores enviados', async () => {
   let chamadas = 0, concluir
   const p = pagina('Cadastro', () => { chamadas++; return new Promise(resolve => { concluir = resolve }) })
-  preencherCadastro(p); const pendente = p.enviar(); await p.enviar()
+  await preencherCadastro(p); const pendente = p.enviar(); await p.enviar()
   assert.equal(chamadas, 1); assert.ok(nodes(p.render()).filter(n => n.type === 'Campo').every(n => n.props.ocupado))
   concluir(resposta(false, {})); await pendente
 })
@@ -118,7 +121,7 @@ test('renderizacao React real associa campos, preserva required e funcionalidade
     const Component = carregarAdmin(`pages/auth/${nome}.jsx`, [nome], { ...env, ...prim })[nome]
     const html = renderToStaticMarkup(createElement(Component, { setPagina() {} }))
     const labels = Array.from(html.matchAll(/<label for="([^"]+)"/g), m => m[1])
-    assert.equal(labels.length, nome === 'Login' ? 2 : 4)
+    assert.equal(labels.length, nome === 'Login' ? 2 : 5)
     for (const id of labels) assert.ok(html.includes(`id="${id}"`))
     assert.equal((html.match(/required=""/g) || []).length, labels.length)
     assert.match(html, /autoComplete="/); assert.doesNotMatch(html, /noValidate/)
@@ -134,4 +137,37 @@ test('estilos sao locais e feedback nao depende de alert, timer ou storage', () 
     const source = readFileSync(new URL(`../src/pages/auth/${arquivo}`, import.meta.url), 'utf8')
     assert.doesNotMatch(source, /\balert\(|setTimeout|localStorage|sessionStorage/)
   }
+})
+
+test('aceite inicia desmarcado, com documentos acessíveis em nova aba e sem consentimento de marketing', async () => {
+  const p = pagina('Cadastro', async () => resposta(true, {}))
+  p.render(); await Promise.resolve()
+  const v = p.render(), campo = nodes(v).find(n => n.props.id === 'cadastro-aceite')
+  assert.equal(campo.props.checked, false); assert.equal(campo.props.required, true)
+  assert.equal(campo.props.disabled, false)
+  assert.ok(nodes(v).some(n => n.type === 'label' && n.props.htmlFor === campo.props.id))
+  const link = nodes(v).find(n => n.type === 'a' && n.props.href === '/termos' && n.props.target === '_blank')
+  assert.equal(link.props.rel, 'noopener noreferrer')
+  assert.match(text(v), /não é consentimento geral/)
+})
+
+test('cadastro sem aceite é bloqueado antes do POST com mensagem persistente', async () => {
+  let n = 0
+  const p = pagina('Cadastro', async () => { n++; return resposta(true, {}) })
+  p.render(); await Promise.resolve(); await p.enviar()
+  assert.equal(n, 0); assert.deepEqual(p.destinos, [])
+  assert.match(text(p.render()), /É necessário ler e aceitar os Termos/)
+  assert.match(text(p.render()), /É necessário ler e aceitar os Termos/)
+})
+
+test('sem publicação confirmada o cadastro permanece indisponível mesmo com checkbox adulterado', async () => {
+  let n = 0
+  const p = pagina('Cadastro', async () => { n++; return resposta(true, {}) }, { consultarTermosCadastro: async () => { throw Error('Minuta') } })
+  p.render(); await Promise.resolve(); await Promise.resolve()
+  const checkbox = nodes(p.render()).find(n => n.props.id === 'cadastro-aceite')
+  assert.equal(checkbox.props.disabled, true)
+  checkbox.props.onChange({ target: { checked: true } })
+  await p.enviar()
+  assert.equal(n, 0); assert.deepEqual(p.destinos, [])
+  assert.match(text(p.render()), /Cadastro indisponível/)
 })

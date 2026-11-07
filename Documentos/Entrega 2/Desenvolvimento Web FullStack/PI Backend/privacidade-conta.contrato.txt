@@ -1,0 +1,42 @@
+TrocaTicket — D.2 / D.3 — Contrato técnico de consulta, versão 1
+
+GET /minha-privacidade/dados. Somente leitura. JWT e identidade validados pelo
+middleware existente. Não aceita parâmetros de seleção nem corpo com campos.
+Não cria pools, não muda provedor nem modifica autenticação. No provedor sem
+repositório de privacidade, retorna 503, sem fallback para outro banco.
+
+Resposta: versao=1; situacao=disponivel|limitada; categorias; limitacoes.
+Cada categoria: estado=disponivel|infraestrutura_pendente|nao_habilitado; dados.
+Dados são null quando a consulta da categoria não está disponível.
+Disponível significa disponível no escopo declarado, não inventário integral.
+
+Categorias:
+- cadastro: id, nome, email, perfil atual;
+- perfil_pessoal: telefone, biografia, se o schema suportar;
+- perfil_profissional: redes_sociais e dados_comerciais permitidos ao perfil;
+- atividades: contagens de eventos próprios, inscrições próprias, propostas
+  enviadas pelo próprio titular e solicitações de acesso próprias;
+- portfolio: contagem própria, apenas quando a funcionalidade está habilitada;
+- aceites: documento, versao, hash_documento, aceito_em, fluxo, se tabela existir.
+
+Atividades de papéis anteriores podem existir e não são eliminadas da consulta
+por mudança do papel atual. Não se consultam propostas recebidas/concorrentes,
+dados de participantes de eventos próprios, textos comerciais compartilhados,
+URLs assinadas, arquivos, diários internos, logs ou backups.
+Hash de documento não é hash de senha. Nenhuma credencial é retornada.
+
+Faltas de tabela opcional reconhecidas são explícitas. Falhas de permissão,
+rede ou dados inválidos abortam com 503 genérico, sem resposta parcial ou logs
+com valores pessoais. Contagens REST não compartilham snapshot: o contrato
+não oferece totais transacionais ou prova de exportação integral.
+
+Interface: Meu perfil > Privacidade da Conta nos três portais, no componente
+compartilhado. Consulta sob demanda, cancelável ao fechar ou trocar sessão.
+Não adiciona rota pública, não altera a lista de páginas/permissões e não
+desmonta formulários de edição ao abrir a consulta.
+
+Pendências humanas/jurídicas: controlador, canal operacional, bases legais,
+retenção por finalidade, critérios de conservação e comprovação de identidade.
+Nenhum prazo, fundamento ou responsável é aprovado por este contrato.
+Exportação, exclusão, anonimização e protocolos não fazem parte de D.3.
+Cadastro continua bloqueado e os Termos permanecem minuta. Nenhuma migração.

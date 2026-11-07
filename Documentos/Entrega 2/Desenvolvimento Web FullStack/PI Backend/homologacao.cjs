@@ -58,6 +58,9 @@ function filtroLeitura(req, res, next) {
 function protegerFetch(config, original) {
   const pendentes = new Set();
   const tabelas = new Set(["usuarios", "eventos", "cotacoes", "custos_evento", "itens_cotacao", "propostas", "inscricoes", "solicitacoes_acesso"]);
+  // Recusa permanente da política, não falha transitória de rede. O SDK
+  // reconhece AbortError e não repete uma operação deliberadamente bloqueada.
+  const recusa = (code = 'HOMOLOG_TRANSPORT') => Object.assign(falha(code), { name: 'AbortError' });
   const fetchSeguro = async (input, options = {}) => {
     const u = new URL(typeof input === "string" ? input : input.url ?? input.toString());
     const method = (options.method ?? input.method ?? "GET").toUpperCase();
@@ -65,15 +68,27 @@ function protegerFetch(config, original) {
     const tabela = u.pathname.slice("/rest/v1/".length);
     const leitura = ["GET", "HEAD"].includes(method) &&
       u.pathname.startsWith("/rest/v1/") && tabelas.has(tabela);
+    const idContaTeste = u.searchParams.get('usuario_id');
+    const leituraContaTeste = method === 'GET' && u.pathname === '/rest/v1/contas_teste_imagens' &&
+      [...u.searchParams].length === 2 && u.searchParams.getAll('select').length === 1 &&
+      u.searchParams.get('select') === 'estado' && u.searchParams.getAll('usuario_id').length === 1 &&
+      /^eq\.[1-9]\d*$/.test(idContaTeste || '') && Number.isSafeInteger(Number(idContaTeste.slice(3))) &&
+      Number(idContaTeste.slice(3)) <= 2147483647 && options.body == null && input.body == null &&
+      !['prefer', 'range', 'range-unit'].some(k => headers.has(k));
     const rpcLeitura = method === "POST" && u.pathname === "/rest/v1/rpc/listar_propostas_por_fornecedor";
-    if (u.origin !== config.SUPABASE_URL || u.username || u.password || u.hash || (!leitura && !rpcLeitura) ||
+    // SQL versionado: função sem argumentos, SECURITY INVOKER, corpo SELECT 1/3.
+    // Não admite filtros PostgREST, contagem, paginação ou parâmetros de escrita.
+    const rpcCapacidades = method === 'POST' && u.pathname === '/rest/v1/rpc/eventos_capacidades_v1' &&
+      u.search === '' && options.body === '{}' && input.body == null &&
+      !['prefer', 'range', 'range-unit'].some(k => headers.has(k));
+    if (u.origin !== config.SUPABASE_URL || u.username || u.password || u.hash || (!leitura && !leituraContaTeste && !rpcLeitura && !rpcCapacidades) ||
         headers.get("apikey") !== config.SUPABASE_SECRET_KEY ||
         headers.get("authorization") !== "Bearer " + config.SUPABASE_SECRET_KEY ||
-        ["accept-profile", "content-profile"].some(k => headers.has(k) && headers.get(k) !== "public")) throw falha("HOMOLOG_TRANSPORT");
+        ["accept-profile", "content-profile"].some(k => headers.has(k) && headers.get(k) !== "public")) throw recusa();
     if (rpcLeitura) {
       let args;
-      try { args = JSON.parse(options.body); } catch { throw falha("HOMOLOG_TRANSPORT"); }
-      if (!args || Object.keys(args).length !== 1 || !Number.isSafeInteger(args.p_fornecedor_id) || args.p_fornecedor_id <= 0) throw falha("HOMOLOG_TRANSPORT");
+      try { args = JSON.parse(options.body); } catch { throw recusa(); }
+      if (!args || Object.keys(args).length !== 1 || !Number.isSafeInteger(args.p_fornecedor_id) || args.p_fornecedor_id <= 0) throw recusa();
     }
     const controle = new AbortController(); pendentes.add(controle);
     const signal = AbortSignal.any([controle.signal, AbortSignal.timeout(15000), ...(options.signal ? [options.signal] : [])]);
@@ -82,7 +97,7 @@ function protegerFetch(config, original) {
     if (signal.aborted) liberar();
     try {
       const response = await original(input, { ...options, signal, redirect: "error" });
-      if (response.headers.get("sb-project-ref") !== PROJECT_REF) throw falha("HOMOLOG_PROJECT");
+      if (response.headers.get("sb-project-ref") !== PROJECT_REF) throw recusa('HOMOLOG_PROJECT');
       // Fetch resolve nos headers, nao no fim do corpo. Manter o controle ate
       // aborto/timeout (no maximo 15s) preserva a Response e seu streaming nativos.
       if (!response.body) { liberar(); signal.removeEventListener("abort", liberar); }

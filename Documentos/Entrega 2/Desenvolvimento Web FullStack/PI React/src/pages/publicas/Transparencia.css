@@ -1,0 +1,31 @@
+.transparenciaPagina { min-height: 100vh; background: var(--superficie-pagina); color: var(--texto-principal); }
+.transparenciaPagina a, .transparenciaLinks a { color: var(--link-cor); text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
+.transparenciaPagina a:focus-visible, .transparenciaLinks a:focus-visible, .transparenciaPagina main:focus { outline: 3px solid var(--foco-cor); outline-offset: 4px; }
+.transparenciaPagina .transparenciaCabecalho { height: auto; min-height: 80px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; padding: 20px max(24px, calc((100% - 1040px) / 2)); background: var(--superficie-cartao); border-bottom: 1px solid var(--borda-superficie); }
+.transparenciaCabecalho > a:first-child { text-decoration: none; }
+.transparenciaPagina main { width: min(100% - 40px, 960px); margin: 36px auto; padding: clamp(20px, 4vw, 48px); background: var(--superficie-cartao); border: 1px solid var(--borda-superficie); border-radius: var(--raio-cartao); box-shadow: var(--sombra-cartao); min-width: 0; overflow-wrap: anywhere; }
+.transparenciaPagina h1 { margin: 12px 0 20px; font-size: clamp(1.8rem, 5vw, 2.6rem); line-height: 1.2; }
+.transparenciaPagina h2 { font-size: 1.2rem; line-height: 1.4; }
+.transparenciaPagina p, .transparenciaPagina li { line-height: 1.8; }
+.transparenciaPagina .transparenciaSobretitulo { color: var(--link-cor); font-size: .75rem; font-weight: 700; letter-spacing: .08em; }
+.transparenciaPagina .transparenciaIntroducao { color: var(--texto-secundario); margin-bottom: 28px; }
+.transparenciaPagina section { margin-top: 32px; scroll-margin-top: 24px; }
+.transparenciaPagina .transparenciaSumario { margin-block: 28px; padding: 20px; background: var(--superficie-pagina); border-radius: var(--raio-controle); }
+.transparenciaSumario h2 { margin-top: 0; }
+.transparenciaSumario ul { padding-left: 22px; margin-bottom: 0; }
+.transparenciaSumario a { display: inline-block; padding-block: 7px; }
+.transparenciaLinks { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-block: 16px; font-size: .875rem; line-height: 1.6; }
+.transparenciaLinks a { display: inline-flex; align-items: center; min-height: 44px; }
+.transparenciaRodape { max-width: 1040px; margin: auto; padding: 0 24px 36px; }
+.transparenciaRodape > p { color: var(--texto-secundario); }
+.transparenciaInventario { margin: 20px 0; }
+.transparenciaInventario > div { padding: 20px; margin-block: 16px; border: 1px solid var(--borda-superficie); border-radius: var(--raio-controle); }
+.transparenciaInventario dt { font-weight: 700; }
+.transparenciaInventario dd { margin: 12px 0 0; line-height: 1.8; }
+.transparenciaPular { position: absolute; left: 16px; top: 12px; padding: 12px; background: var(--superficie-cartao); border: 2px solid var(--foco-cor); z-index: 10; transform: translateY(-200%); }
+.transparenciaPular:focus { transform: translateY(0); }
+@media (max-width: 540px) {
+  .transparenciaPagina .transparenciaCabecalho { padding: 18px 20px; }
+  .transparenciaPagina main { margin-block: 20px; }
+  .transparenciaLinks { flex-direction: column; gap: 4px; }
+}

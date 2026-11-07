@@ -61,12 +61,29 @@ test("avaliar: resposta malformada indica resultado incerto sem repetir UPDATE",
   }
 });
 
+function extrairDeclaracao(source, marcador) {
+  const encontrados = [...source.matchAll(new RegExp(marcador.source, 'gm'))];
+  assert.equal(encontrados.length, 1, 'Declaração ausente ou ambígua');
+  const inicio = encontrados[0].index;
+  const finais = /[});]/g;
+  finais.lastIndex = inicio + encontrados[0][0].length;
+  let fim;
+  // O parser nativo encontra a primeira declaração sintaticamente completa.
+  // Compilar não executa código e respeita strings, comentários, regex e templates.
+  while ((fim = finais.exec(source))) {
+    const trecho = source.slice(inicio, fim.index + 1);
+    try { new vm.Script(trecho); return trecho; }
+    catch (e) { if (!(e instanceof SyntaxError)) throw e; }
+  }
+  assert.fail('Declaração incompleta');
+}
+const marcadorGuard = /^\s*function\s+permitirPerfis\s*\(/;
+const marcadorRota = /^\s*app\s*\.\s*patch\s*\(\s*(["'])\/organizador\/propostas\/:id\/status\1\s*,/;
+
 function harness(repo) {
   const source = fs.readFileSync(path.join(__dirname, "../server.js"), "utf8");
-  const start = source.indexOf("function permitirPerfis(");
-  const guard = source.slice(start, source.indexOf("const eventos = []", start));
-  const routeStart = source.indexOf('app.patch("/organizador/propostas/:id/status",');
-  const route = source.slice(routeStart, source.indexOf("\napp.", routeStart + 1));
+  const guard = extrairDeclaracao(source, marcadorGuard);
+  const route = extrairDeclaracao(source, marcadorRota);
   let authorize, action;
   vm.runInNewContext(guard + "\n" + route, {
     app: { patch(name, ...args) { assert.equal(name, "/organizador/propostas/:id/status");
@@ -82,6 +99,31 @@ function harness(repo) {
     return res;
   };
 }
+
+test('extração compila somente declarações completas, sem instalações ou código adjacente', () => {
+  const source = [
+    'function permitirPerfis(...perfis) {',
+    '  const delimitadores = "});"; // } );',
+    '  return (req, res, next) => { return next(); };',
+    '}',
+    'require("modulo-proibido");',
+    'app.patch(',
+    '  "/organizador/propostas/:id/status", autenticar, permitirPerfis("organizador"),',
+    '  async (req, res) => { const regex = /[});]/; const t = `texto ${"}"}`; /* }); */ return res.json({ ok: true }); }',
+    ');',
+    'require("modulo-proibido");',
+    'app.get("/outra", () => {});',
+  ].join('\n');
+  const guard = extrairDeclaracao(source, marcadorGuard), route = extrairDeclaracao(source, marcadorRota);
+  let registros = 0;
+  vm.runInNewContext(guard + '\n' + route, { autenticar() {}, app: { patch(rota, ...handlers) {
+    assert.equal(rota, '/organizador/propostas/:id/status'); assert.equal(handlers.length, 3); registros++;
+  } }, require() { assert.fail('Código externo ao handler foi executado'); } });
+  assert.equal(registros, 1); assert.doesNotMatch(guard + route, /require\(|app\.get/);
+  assert.throws(() => extrairDeclaracao('', marcadorGuard), /ausente ou ambígua/);
+  assert.throws(() => extrairDeclaracao(source + '\nfunction permitirPerfis() {}', marcadorGuard), /ausente ou ambígua/);
+  assert.throws(() => extrairDeclaracao('function permitirPerfis() {', marcadorGuard), /incompleta/);
+});
 const request = status => ({ params: { id: "21" }, usuario: { id: 7, perfil: "organizador" },
   body: { status, organizador_id: 999, usuario_id: 999 } });
 

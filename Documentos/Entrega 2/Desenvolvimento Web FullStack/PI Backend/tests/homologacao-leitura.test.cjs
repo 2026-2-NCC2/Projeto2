@@ -63,6 +63,7 @@ test("transporte: apenas tabelas de leitura e RPC STABLE conhecida, sempre com c
     ["/rest/v1/rpc/publicar_cotacao", { method: "POST", body: "{}" }],
     ["/rest/v1/rpc/substituir_custos_evento", { method: "POST", body: "{}" }],
     ["/rest/v1/rpc/decidir_solicitacao_acesso", { method: "POST", body: "{}" }],
+    ["/rest/v1/rpc/eventos_capacidades_v1", { method: "POST", body: '{"usuario_id":3}' }],
     ["/rest/v1/rpc/listar_propostas_por_fornecedor", { method: "POST", body: '{"p_fornecedor_id":3,"extra":true}' }],
     ["/auth/v1/token", { method: "POST" }],
     ["/rest/v1/usuarios", { headers: { ...headers(), Authorization: "Bearer JWT-DO-USUARIO" } }],
@@ -80,6 +81,153 @@ test("transporte: identidade divergente falha fechada e shutdown aborta consulta
   }));
   const request = pendente.fetch(config().SUPABASE_URL + "/rest/v1/usuarios", { headers: headers() });
   pendente.abortar(); await assert.rejects(request); assert.equal(signal.aborted, true);
+});
+
+test('contas de teste: permite exclusivamente GET de estado por um usuario_id inteiro', async () => {
+  const calls = [];
+  const transporte = homolog.protegerFetch(config(), async (url, options) => {
+    calls.push({ url, options });
+    return new Response('[]', { headers: { 'sb-project-ref': projeto } });
+  });
+  const base = config().SUPABASE_URL + '/rest/v1/contas_teste_imagens';
+  for (const id of [1, 7, 2147483647]) {
+    await transporte.fetch(base + '?select=estado&usuario_id=eq.' + id, { headers: headers() });
+  }
+  assert.equal(calls.length, 3);
+  const invalidas = [
+    '', '?select=estado', '?usuario_id=eq.7', '?select=*&usuario_id=eq.7',
+    '?select=estado,email&usuario_id=eq.7', '?select=estado&usuario_id=eq.0',
+    '?select=estado&usuario_id=eq.-1', '?select=estado&usuario_id=eq.01',
+    '?select=estado&usuario_id=eq.2147483648', '?select=estado&usuario_id=eq.9007199254740992',
+    '?select=estado&usuario_id=in.(7,8)', '?select=estado&usuario_id=gt.0',
+    '?select=estado&usuario_id=eq.7&usuario_id=eq.8', '?select=estado&select=email&usuario_id=eq.7',
+    '?select=estado&usuario_id=eq.7&or=(usuario_id.eq.8)', '?select=estado&usuario_id=eq.7&limit=1',
+    '?select=estado&usuario_id=eq.7&offset=1', '?select=estado&usuario_id=eq.7&order=usuario_id',
+    '?select=estado&usuario_id=eq.7&on_conflict=usuario_id',
+  ];
+  for (const query of invalidas) await assert.rejects(transporte.fetch(base + query, { headers: headers() }), e => e.code === 'HOMOLOG_TRANSPORT');
+  const url = base + '?select=estado&usuario_id=eq.7';
+  for (const method of ['HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'TRACE']) {
+    await assert.rejects(transporte.fetch(url, { method, headers: headers() }), e => e.code === 'HOMOLOG_TRANSPORT');
+  }
+  for (const extra of [{ body: '{}' }, { headers: { ...headers(), Prefer: 'count=exact' } },
+    { headers: { ...headers(), Range: '0-1' } }, { headers: { ...headers(), 'Range-Unit': 'items' } },
+    { headers: { ...headers(), 'Accept-Profile': 'auth' } }, { headers: { ...headers(), Authorization: 'Bearer JWT-USUARIO' } }]) {
+    await assert.rejects(transporte.fetch(url, { headers: headers(), ...extra }), e => e.code === 'HOMOLOG_TRANSPORT');
+  }
+  for (const tabela of ['contas_teste_imagens_extra', 'termos_aceites', 'pg_roles', 'contas_teste_imagens/7']) {
+    await assert.rejects(transporte.fetch(config().SUPABASE_URL + '/rest/v1/' + tabela + '?select=estado&usuario_id=eq.7', { headers: headers() }), e => e.code === 'HOMOLOG_TRANSPORT');
+  }
+  assert.equal(calls.length, 3); transporte.abortar();
+});
+
+test('SDK real: recusas permanentes de transporte e projeto não provocam retries', { timeout: 3000 }, async () => {
+  const { createClient } = require('@supabase/supabase-js');
+  for (const caso of ['parametro', 'tabela', 'escrita', 'projeto', 'permissao']) {
+    let tentativas = 0, rede = 0;
+    const transporte = homolog.protegerFetch(config(), async () => {
+      rede++;
+      return new Response(caso === 'permissao' ? JSON.stringify({ code: '42501', message: 'Recusa sintética' }) : '[]',
+        { status: caso === 'permissao' ? 403 : 200, headers: { 'sb-project-ref': caso === 'projeto' ? 'outro' : projeto } });
+    });
+    const client = createClient(config().SUPABASE_URL, config().SUPABASE_SECRET_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+      global: { fetch: (...args) => { tentativas++; return transporte.fetch(...args); } },
+    });
+    let query = client.schema('public').from(caso === 'tabela' ? 'tabela_proibida' : 'contas_teste_imagens');
+    query = caso === 'escrita' ? query.insert({ usuario_id: 7, estado: 'ativa' }) : query.select(caso === 'parametro' ? '*' : 'estado').eq('usuario_id', 7).maybeSingle();
+    const r = await query;
+    assert.ok(r.error); assert.equal(tentativas, 1);
+    assert.equal(rede, ['projeto', 'permissao'].includes(caso) ? 1 : 0);
+    // O SDK serializa AbortError com code vazio. Os códigos HOMOLOG_* são
+    // verificados nos testes diretos do transporte; aqui verificamos o aborto
+    // reconhecido pelo SDK, o número de tentativas e a ausência de rede indevida.
+    if (caso === 'permissao') assert.equal(r.error.code, '42501');
+    else { assert.equal(r.error.code, ''); assert.match(r.error.message, /^AbortError: Homologação recusada/); }
+    transporte.abortar();
+  }
+});
+
+test('capacidades: SQL versionado tem corpo constante, sem argumentos ou efeitos colaterais', () => {
+  for (const [arquivo, versao] of [['eventos_gestao.incremental.sql', 1], ['eventos_capacidade.incremental.sql', 3]]) {
+    const sql = fs.readFileSync(path.join(raiz, '../Banco de dados', arquivo), 'utf8');
+    const declaracao = sql.match(/CREATE(?: OR REPLACE)? FUNCTION public\.eventos_capacidades_v1\(\) RETURNS integer LANGUAGE sql STABLE\s+SECURITY INVOKER\s+SET search_path=pg_catalog AS \$\$ SELECT ([13]) \$\$;/);
+    assert.ok(declaracao, arquivo); assert.equal(Number(declaracao[1]), versao);
+    if (versao === 1) {
+      assert.match(sql, /REVOKE ALL ON FUNCTION[^;]*public\.eventos_capacidades_v1\(\) FROM PUBLIC,anon,authenticated;/);
+      assert.match(sql, /GRANT EXECUTE ON FUNCTION[^;]*public\.eventos_capacidades_v1\(\) TO service_role;/);
+    }
+  }
+});
+
+test('capacidades: somente POST no caminho exato, corpo literal vazio e sem parâmetros', async () => {
+  const calls = [], base = config().SUPABASE_URL;
+  const transporte = homolog.protegerFetch(config(), async (url, options) => {
+    calls.push({ url, options }); return new Response('3', { headers: { 'sb-project-ref': projeto } });
+  });
+  const rota = '/rest/v1/rpc/eventos_capacidades_v1';
+  const permitido = { method: 'POST', body: '{}', headers: { ...headers(), 'Content-Profile': 'public', 'Content-Type': 'application/json' } };
+  await transporte.fetch(base + rota, permitido); assert.equal(calls.length, 1);
+  for (const method of ['GET', 'HEAD', 'PUT', 'PATCH', 'DELETE', 'OPTIONS']) {
+    await assert.rejects(transporte.fetch(base + rota, { ...permitido, method }), e => e.code === 'HOMOLOG_TRANSPORT');
+  }
+  for (const body of [undefined, '', 'null', '[]', '{ }', '{"p_usuario":7}', '{"acao":"criar"}', '{}{}']) {
+    await assert.rejects(transporte.fetch(base + rota, { ...permitido, body }), e => e.code === 'HOMOLOG_TRANSPORT');
+  }
+  for (const extra of ['?select=*', '?p_usuario=7', '?limit=1', '?on_conflict=id', '/']) {
+    await assert.rejects(transporte.fetch(base + rota + extra, permitido), e => e.code === 'HOMOLOG_TRANSPORT');
+  }
+  for (const patch of [{ Prefer: 'count=exact' }, { Prefer: 'tx=commit' }, { Range: '0-1' }, { 'Range-Unit': 'items' },
+    { 'Content-Profile': 'auth' }, { Authorization: 'Bearer JWT-USUARIO' }, { apikey: 'chave-incorreta' }]) {
+    await assert.rejects(transporte.fetch(base + rota, { ...permitido, headers: { ...permitido.headers, ...patch } }), e => e.code === 'HOMOLOG_TRANSPORT');
+  }
+  for (const rpc of ['gerir_evento_v1', 'inscrever_evento_v1', 'eventos_vagas_v3', 'rpc_desconhecida', 'eventos_capacidades_v1_extra']) {
+    await assert.rejects(transporte.fetch(base + '/rest/v1/rpc/' + rpc, permitido), e => e.code === 'HOMOLOG_TRANSPORT');
+  }
+  await assert.rejects(transporte.fetch('https://outro.supabase.co' + rota, permitido), e => e.code === 'HOMOLOG_TRANSPORT');
+  assert.equal(calls.length, 1); assert.equal(calls[0].options.redirect, 'error'); transporte.abortar();
+  for (const ref of [null, 'outro']) {
+    const incorreto = homolog.protegerFetch(config(), async () => new Response('3', { headers: ref ? { 'sb-project-ref': ref } : {} }));
+    await assert.rejects(incorreto.fetch(base + rota, permitido), e => e.code === 'HOMOLOG_PROJECT');
+    incorreto.abortar();
+  }
+});
+
+test('capacidades: SDK e repositório reais preservam marcadores, ausência da função e falha fechada', async () => {
+  const { createClient } = require('@supabase/supabase-js');
+  const { criarRepositorioEventos } = require('../repositories/supabase/eventos.cjs');
+  for (const caso of [1, 3, 'PGRST202', '42883', '42501', 99]) {
+    let tentativas = 0;
+    const transporte = homolog.protegerFetch(config(), async (url, options) => {
+      tentativas++; assert.equal(url, config().SUPABASE_URL + '/rest/v1/rpc/eventos_capacidades_v1');
+      assert.equal(options.method, 'POST'); assert.equal(options.body, '{}');
+      return new Response(typeof caso === 'string' ? JSON.stringify({ code: caso, message: 'Falha sintética' }) : JSON.stringify(caso),
+        { status: typeof caso === 'string' ? caso === '42501' ? 403 : 404 : 200, headers: { 'sb-project-ref': projeto } });
+    });
+    const client = createClient(config().SUPABASE_URL, config().SUPABASE_SECRET_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }, global: { fetch: transporte.fetch },
+    });
+    const repo = criarRepositorioEventos(client, { gestaoSegura: true });
+    if (caso === '42501' || caso === 99) await assert.rejects(repo.capacidades(), e => e.respostaStatus === 503);
+    else {
+      const caps = await repo.capacidades();
+      assert.equal(caps.controleVersao, [1, 3].includes(caso)); assert.equal(caps.controleCapacidade === true, caso === 3);
+      assert.equal(caps.excluir, false);
+    }
+    assert.equal(tentativas, 1); transporte.abortar();
+  }
+});
+
+test('capacidades: SDK não repete RPC bloqueada por argumentos inesperados', { timeout: 3000 }, async () => {
+  const { createClient } = require('@supabase/supabase-js'); let tentativas = 0, rede = 0;
+  const transporte = homolog.protegerFetch(config(), async () => { rede++; throw Error('Transporte não deveria executar'); });
+  const client = createClient(config().SUPABASE_URL, config().SUPABASE_SECRET_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    global: { fetch: (...args) => { tentativas++; return transporte.fetch(...args); } },
+  });
+  const r = await client.schema('public').rpc('eventos_capacidades_v1', { p_usuario: 7 });
+  assert.ok(r.error); assert.match(r.error.message, /^AbortError:/);
+  assert.equal(tentativas, 1); assert.equal(rede, 0); transporte.abortar();
 });
 
 // Respostas em streaming inteiramente locais: nenhum fetch ou socket real.

@@ -48,9 +48,13 @@ function ambiente(perfil = "organizador", passos = []) {
     query: (sql, params) => executar("query", sql, params),
     async getConnection() { transacao.push("getConnection"); return conexao; },
   };
-  const app = { use() {} };
+  const app = { locals: {}, use() {} };
   for (const metodo of ["get", "post", "put", "patch", "delete"]) {
-    app[metodo] = (rota, ...handlers) => rotas.set(`${metodo} ${rota}`, handlers);
+    app[metodo] = (rota, ...handlers) => {
+      const chave = `${metodo} ${rota}`;
+      assert.equal(rotas.has(chave), false, `Rota duplicada: ${chave}`);
+      rotas.set(chave, handlers);
+    };
   }
   const express = Object.assign(() => app, { json: () => () => {} });
   const dependencias = {
@@ -102,7 +106,7 @@ function ambiente(perfil = "organizador", passos = []) {
     assert.deepEqual(falhas, []);
     assert.equal(indice, passos.length, "Todos os passos SQL devem ser consumidos");
   }
-  return { rotas, requisitar, verificar, chamadas, transacao, hashes };
+  return { rotas, requisitar, verificar, chamadas, transacao, hashes, locals: app.locals };
 }
 
 // null = qualquer perfil autenticado; publico = sem autenticacao.
@@ -122,10 +126,37 @@ const contratos = [
   ["get /organizador/propostas", "organizador"], ["patch /organizador/propostas/:id/status", "organizador"],
   ["get /fornecedor/cotacoes", "fornecedor"], ["get /fornecedor/propostas", "fornecedor"],
   ["post /fornecedor/propostas", "fornecedor"],
+  ["get /eventos/imagens/capacidades", null],
+  ["get /admin/eventos/:id/painel", "admin"], ["get /admin/cotacoes/:id", "admin"],
+  ["get /termos/vigente", "publico"], ["get /minha-privacidade/dados", null],
+  ["get /eventos/capacidades", null],
+  ["patch /eventos/:id/cancelar", "organizador"], ["patch /eventos/:id/encerrar", "organizador"],
+  ["get /portfolio", "fornecedor"], ["post /portfolio", "fornecedor"],
+  ["patch /portfolio/:id", "fornecedor"], ["delete /portfolio/:id", "fornecedor"],
+  ["get /fornecedores", null], ["get /fornecedores/:id/portfolio", null],
 ];
 
-test("inventario fixa exatamente os 32 pares metodo/caminho", () => {
+test("inventario fixa exatamente os 46 pares metodo/caminho registrados no app", () => {
+  assert.equal(contratos.length, 46);
   assert.deepEqual([...ambiente().rotas.keys()].sort(), contratos.map(([rota]) => rota).sort());
+});
+
+test('composição da fixture é fechada e não inicializa imagens, drivers ou banco', () => {
+  const helper = require('./helpers/persistencia.cjs');
+  const cacheAntes = new Set(Object.keys(require.cache));
+  for (const nome of ['./services/eventos.cjs', './config/encerramento-gracioso.cjs', './imagens/http-binario.cjs',
+    './eventos-imagens-http.cjs', './painel-evento-admin-http.cjs', './admin-consultas-http.cjs',
+    './termos-cadastro.cjs', './privacidade-conta.cjs']) assert.ok(helper.dependenciaPura(nome), nome);
+  for (const nome of ['./db', './db-supabase.cjs', './db-postgres.js', 'pg', 'mysql2/promise', '@supabase/supabase-js',
+    'dotenv', './imagens/inicializacao.cjs', './config/estado-supervisor.cjs', './modulo-desconhecido.cjs', '__proto__']) {
+    assert.equal(helper.dependenciaPura(nome), undefined, nome);
+  }
+  const a = ambiente();
+  assert.deepEqual(a.chamadas, []); assert.deepEqual(a.transacao, []); assert.deepEqual(a.hashes, []);
+  assert.equal(a.locals.imagensDisponiveis(), false);
+  assert.equal(typeof a.locals.prepararImagens, 'function');
+  const novos = Object.keys(require.cache).filter(p => !cacheAntes.has(p));
+  assert.ok(!novos.some(p => /[\\/]node_modules[\\/](?:pg|mysql2|dotenv|@supabase)[\\/]/.test(p)));
 });
 for (const [rota, perfil] of contratos.filter(([, p]) => p !== "publico")) {
   test(`${rota}: exige Bearer antes de consultar banco`, async () => {

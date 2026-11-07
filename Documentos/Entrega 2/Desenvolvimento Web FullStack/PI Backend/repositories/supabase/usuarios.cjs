@@ -32,6 +32,26 @@ function criarRepositorioUsuarios(
     return true;
   }
   return {
+    async termoVigente() {
+      const { data, error } = await cliente.schema('public').from('termos_documentos')
+        .select('documento_id,versao,hash,conteudo,ativo,aprovado_em').eq('ativo', true).maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    async criarComAceite({ nome, email, senhaHash, perfil, aceite }) {
+      if (perfil !== 'participante') throw new Error('Perfil de cadastro inválido.');
+      const { data, error } = await cliente.schema('public').rpc('cadastrar_usuario_termos_v1', {
+        p_nome: nome, p_email: email, p_senha_hash: senhaHash,
+        p_documento: aceite.documento, p_versao: aceite.versao, p_hash: aceite.hash,
+      }).retry(false);
+      if (error) {
+        if (error.code === '23505') throw Object.assign(new Error('Conflito de cadastro.'), { code: 'ER_DUP_ENTRY' });
+        if (error.code === 'PT409') throw Object.assign(new Error('A versão dos Termos mudou. Reabra o cadastro.'), { termosStatus: 409 });
+        throw error;
+      }
+      if (!Number.isSafeInteger(data) || data <= 0) throw new Error('Cadastro não confirmado.');
+      return data;
+    },
     ...require("./perfil-profissional.cjs").criarRepositorioProfissional(cliente),
     async criar({ nome, email, senhaHash, perfil }) {
       // Normalizacao, validacao e bcrypt continuam no handler existente.

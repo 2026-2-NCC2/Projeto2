@@ -41,11 +41,11 @@ test('handler atual com criar Supabase preserva 201, 409 e 500 sem expor hash',a
   const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
   const source=fs.readFileSync(path.join(__dirname,'../server.js'),'utf8');
   const handlerSource=source.slice(source.indexOf('app.post("/usuarios",'),source.indexOf('// Login'));
-  for(const [response,status] of [[{data:{id:8}},201],[{error:{code:'23505'}},409],[{error:{code:'42501'}},500]]){
+  for(const [response,status] of [[{data:8},201],[{error:{code:'23505'}},409],[{error:{code:'42501'}},500]]){
     const m=mock(response);let handler;
-    vm.runInNewContext(handlerSource,{app:{post(route,...args){assert.equal(route,'/usuarios');handler=args.at(-1);}},limitarFrequencia:()=>()=>{},usuariosRepository:{async buscarIdPorEmail(email){assert.equal(email,'pessoa@example.invalid');return undefined;},criar:criar(m.client).criar},bcrypt:{async hash(password,cost){assert.equal(password,'12345678');assert.equal(cost,12);return input.senhaHash;}},Buffer,console:{error(){}}});
+    vm.runInNewContext(handlerSource,{app:{post(route,...args){assert.equal(route,'/usuarios');handler=args.at(-1);}},limitarFrequencia:()=>()=>{},ErroTermos:require('../termos-cadastro.cjs').ErroTermos,termosCadastro:{async validar(){return {documento:'termos-uso',versao:'sintetica',hash:'a'.repeat(64)}}},usuariosRepository:{async buscarIdPorEmail(email){assert.equal(email,'pessoa@example.invalid');return undefined;},criarComAceite:criar({schema(){return {rpc(){return {retry(){return Promise.resolve(response)}}}}}}).criarComAceite},bcrypt:{async hash(password,cost){assert.equal(password,'12345678');assert.equal(cost,12);return input.senhaHash;}},Buffer,console:{error(){}}});
     const res={status(n){this.code=n;return this;},json(body){this.body=JSON.parse(JSON.stringify(body));return this;}};
-    await handler({body:{nome:' Pessoa ficticia ',email:' PESSOA@example.invalid ',senha:'12345678',perfil:'participante'}},res);
+    await handler({body:{nome:' Pessoa ficticia ',email:' PESSOA@example.invalid ',senha:'12345678',perfil:'participante',aceite_termos:{aceito:true}}},res);
     assert.equal(res.code,status);
     if(status===201)assert.deepEqual(res.body,{mensagem:'Usuário cadastrado com sucesso!',usuario:{id:8,nome:'Pessoa ficticia',email:'pessoa@example.invalid',perfil:'participante'}});
     else assert.deepEqual(res.body,{erro:status===409?'Email já cadastrado!':'Erro interno no cadastro.'});

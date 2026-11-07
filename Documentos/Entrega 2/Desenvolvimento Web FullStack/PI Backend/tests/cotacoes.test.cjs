@@ -82,7 +82,7 @@ function ambiente(opcoes = {}) {
       return c;
     },
   };
-  const app = { use() {} };
+  const app = { locals: {}, use() {} };
   for (const metodo of ["get", "post", "put", "patch", "delete"]) {
     app[metodo] = (rota, ...handlers) => rotas.set(`${metodo} ${rota}`, handlers);
   }

@@ -1,0 +1,11 @@
+.privacidadeConta { min-width: 0; color: var(--texto-principal); }
+.privacidadeContaCartao { margin-block: 16px; padding: clamp(16px, 3vw, 24px); background: var(--superficie-cartao); border: 1px solid var(--borda-superficie); border-radius: var(--raio-cartao); overflow-wrap: anywhere; }
+.privacidadeContaCartao h3 { margin-top: 0; }
+.privacidadeContaCartao p, .privacidadeContaCartao li { line-height: 1.7; }
+.privacidadeContaDados { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 20px; }
+.privacidadeContaDados dt { color: var(--texto-secundario); font-size: .875rem; }
+.privacidadeContaDados dd { margin: 6px 0 0; white-space: pre-wrap; }
+.privacidadeContaAceites { padding-left: 20px; }
+.privacidadeConta a { color: var(--link-cor); text-decoration: underline; }
+.privacidadeConta a:focus-visible { outline: 3px solid var(--foco-cor); outline-offset: 4px; }
+.privacidadeContaAcesso { margin-block: 24px; }

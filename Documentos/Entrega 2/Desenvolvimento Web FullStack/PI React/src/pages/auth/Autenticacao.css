@@ -11,3 +11,8 @@
   .autenticacaoPagina .cabecalhoLogin { padding: 20px 18px; }
   .autenticacaoPagina .caixaLogin { padding: 22px 18px; }
 }
+
+.autenticacaoPagina .cadastroAceite label { display: flex; align-items: flex-start; gap: 12px; line-height: 1.6; min-height: 44px; }
+.autenticacaoPagina .cadastroAceite input { width: 22px; height: 22px; flex: 0 0 22px; margin-top: 3px; accent-color: var(--link-cor); }
+.autenticacaoPagina .cadastroAceite p { font-size: .875rem; line-height: 1.7; }
+.autenticacaoPagina .cadastroAceite a { color: var(--link-cor); text-decoration: underline; }

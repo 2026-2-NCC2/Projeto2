@@ -1,3 +1,5 @@
+import { consultarTermosCadastro } from '../../services/termosCadastro.js'
+import '../publicas/Transparencia.css'
 import { Marca } from '../../components/ui/Marca.jsx'
 import { Icone } from '../../components/ui/Icone.jsx'
 import { useEffect, useRef, useState } from 'react'
@@ -14,6 +16,15 @@ export function Cadastro({ setPagina }) {
   const [cadastrando, setCadastrando] = useState(false)
   const [feedback, setFeedback] = useState(null)
   const [erroConfirmacao, setErroConfirmacao] = useState('')
+  const [aceitouTermos, setAceitouTermos] = useState(false)
+  const [termos, setTermos] = useState(null)
+  const [erroTermos, setErroTermos] = useState('')
+  useEffect(() => {
+    const c = new AbortController()
+    consultarTermosCadastro(c.signal).then(d => { if (!c.signal.aborted) setTermos(d) })
+      .catch(() => { if (!c.signal.aborted) setErroTermos('Cadastro indisponível: os Termos de Uso ainda são minutas ou a publicação não pôde ser confirmada.') })
+    return () => c.abort()
+  }, [])
   const envio = useRef(false)
   const mensagemRef = useRef(null)
   useEffect(() => { if (feedback) mensagemRef.current?.focus() }, [feedback])
@@ -29,6 +40,14 @@ export function Cadastro({ setPagina }) {
       return
     }
 
+    if (!aceitouTermos) {
+      setFeedback({ tipo: 'erro', mensagem: 'É necessário ler e aceitar os Termos de Uso para cadastrar a conta.' })
+      return
+    }
+    if (!termos || erroTermos) {
+      setFeedback({ tipo: 'erro', mensagem: erroTermos || 'Aguarde a consulta da versão dos Termos de Uso.' })
+      return
+    }
     envio.current = true
     setCadastrando(true)
     setFeedback(null)
@@ -43,7 +62,8 @@ export function Cadastro({ setPagina }) {
           nome,
           email,
           senha,
-          perfil: 'participante'
+          perfil: 'participante',
+          aceite_termos: { aceito: true, ...termos }
         })
       })
 
@@ -92,13 +112,25 @@ export function Cadastro({ setPagina }) {
           <Campo id="cadastro-confirmar" label="Confirmar senha" type="password" autoComplete="new-password"
             value={confirmarSenha} onChange={e => setConfirmarSenha(e.target.value)} placeholder="Digite a senha novamente"
             erro={erroConfirmacao} obrigatorio ocupado={cadastrando} />
-          <Botao type="submit" ocupado={cadastrando}>{cadastrando ? 'Criando conta...' : 'Criar conta'}</Botao>
+          {erroTermos ? <Alerta variante="aviso">{erroTermos}</Alerta> : !termos && <p role="status">Consultando a publicação dos Termos de Uso...</p>}
+          <div className="cadastroAceite">
+            <label htmlFor="cadastro-aceite"><input id="cadastro-aceite" type="checkbox" required checked={aceitouTermos}
+              disabled={cadastrando || !termos || Boolean(erroTermos)} onChange={e => setAceitouTermos(e.target.checked)}
+              aria-describedby="cadastro-aceite-dica" /> Li e aceito os Termos de Uso do TrocaTicket.</label>
+            <p id="cadastro-aceite-dica"><a href="/termos" target="_blank" rel="noopener noreferrer">Ler Termos de Uso (nova aba)</a>. Consulte também a <a href="/privacidade" target="_blank" rel="noopener noreferrer">Política de Privacidade (nova aba)</a>. O aceite contratual não é consentimento geral para tratamento de dados ou marketing.</p>
+          </div>
+          <Botao type="submit" disabled={!termos || Boolean(erroTermos)} ocupado={cadastrando}>{cadastrando ? 'Criando conta...' : 'Criar conta'}</Botao>
         </form>
 
         <p className="cadastro">
           Já tem uma conta?{' '}
           <Botao variante="discreto" disabled={cadastrando} onClick={() => setPagina('login')}>Entrar</Botao>
         </p>
+        <nav className="transparenciaLinks" aria-label="Privacidade e transparência">
+          <a href="/privacidade">Política de Privacidade</a>
+          <a href="/termos">Termos de Uso</a>
+          <a href="/contato-privacidade">Contato de Privacidade</a>
+        </nav>
       </main>
     </div>
   )

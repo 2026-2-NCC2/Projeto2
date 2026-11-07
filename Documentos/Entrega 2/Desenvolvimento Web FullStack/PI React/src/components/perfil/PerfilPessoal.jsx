@@ -6,6 +6,18 @@ import { salvarPerfil } from '../../services/perfil.js'
 import { PerfilProfissional } from './PerfilProfissional.jsx'
 import { ImagensPerfil } from './ImagensPerfil.jsx'
 import { ConsultaPortfolios } from '../portfolio/Portfolio.jsx'
+import { PrivacidadeConta } from './PrivacidadeConta.jsx'
+
+export function AcessoPrivacidadeConta({ token, id }) {
+  const [aberta, setAberta] = useState(false)
+  return <section className="privacidadeContaAcesso" aria-label="Privacidade da Conta">
+    <h2>Privacidade da Conta</h2>
+    <Botao variante="secundario" aria-expanded={aberta} aria-controls="privacidade-conta-conteudo" onClick={() => setAberta(v => !v)}>
+      {aberta ? 'Fechar consulta de privacidade' : 'Consultar meus dados pessoais'}
+    </Botao>
+    <div id="privacidade-conta-conteudo">{aberta && <PrivacidadeConta token={token} id={id} />}</div>
+  </section>
+}
 
 const editarCampos = perfil => ({ nome: perfil.nome, telefone: perfil.telefone || '', biografia: perfil.biografia || '' })
 
@@ -70,6 +82,7 @@ export function PerfilPessoal({ contexto = 'Minha conta', children, indicadores 
       <ImagensPerfil key={`imagens:${token}:${perfil.id}`} perfil={perfil} indicadores={indicadores} habilitado={perfil.imagens_disponiveis === true} />
       <div className="perfilGrade perfilGradePessoal"><FormularioPerfil key={`${token}:${perfil.id}`} perfil={perfil} token={token} /><PerfilProfissional key={`profissional:${token}:${perfil.id}`} token={token} id={perfil.id} /></div>
       <ConsultaPortfolios key={`portfolios:${token}:${perfil.id}`} />
+      <AcessoPrivacidadeConta key={`privacidade:${token}:${perfil.id}`} token={token} id={perfil.id} />
     </>}
     {children}
   </div>

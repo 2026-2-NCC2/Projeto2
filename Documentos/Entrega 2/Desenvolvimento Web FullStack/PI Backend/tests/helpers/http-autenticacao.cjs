@@ -115,7 +115,8 @@ async function iniciar(t, provider, op = {}) {
   } };
   function selecionar(tabela, u) {
     const eq = (key, value) => u.searchParams.get(key) === "eq." + value;
-    if (tabela === "contas_teste_imagens") return []; // Contas comuns da fixture.
+    if (tabela === "contas_teste_imagens") return (state.contasTeste || [])
+      .filter(c => eq('usuario_id', c.usuario_id)).map(c => ({ estado: c.estado }));
     if (tabela === "usuarios") {
       let rows = state.usuarios.filter(r => (u.searchParams.has("email") ? eq("email", r.email) : eq("id", r.id)) &&
         (!u.searchParams.has("perfil") || eq("perfil", r.perfil)));
@@ -143,7 +144,9 @@ async function iniciar(t, provider, op = {}) {
     let data, count;
     if (u.pathname.includes("/rpc/")) {
       const name = u.pathname.split("/").at(-1), args = JSON.parse(options.body);
-      if(name==='eventos_capacidades_v1')return new Response(JSON.stringify({code:'PGRST202'}),{status:404});
+      if(name==='eventos_capacidades_v1')return new Response(JSON.stringify({code:'PGRST202'}),{
+        status:404, headers:{'content-type':'application/json','sb-project-ref':'gnwybroqfvwosiqzsfla'},
+      });
       rpcCalls.push({ name, args });
       if (op.rpcPendente) return new Promise((resolve, reject) => {
         options.signal.addEventListener("abort", () => reject(Object.assign(Error(privado), { name: "AbortError" })), { once: true });

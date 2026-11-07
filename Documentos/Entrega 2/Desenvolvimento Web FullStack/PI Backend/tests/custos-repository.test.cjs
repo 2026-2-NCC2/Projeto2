@@ -83,7 +83,7 @@ function ambiente(opcoes = {}) {
     },
     async getConnection() { ordem.push("getConnection"); falha("getConnection"); return conexao; },
   };
-  const app = { use() {} };
+  const app = { locals: {}, use() {} };
   for (const m of ["get", "post", "put", "patch", "delete"]) app[m] = (p, ...handlers) => rotas.set(`${m} ${p}`, handlers);
   const dependencias = {
     express: Object.assign(() => app, { json: () => () => {} }), cors: () => () => {},

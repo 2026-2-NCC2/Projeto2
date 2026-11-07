@@ -7,7 +7,7 @@ const segredo = "segredo-ficticio-exclusivo-do-teste-de-integracao-333";
 const item = () => ({ categoria: "Som", descricao: "PA", valor_estimado: "0.10" });
 const rotas = { custos: "put /eventos/:id/custos", cotacoes: "post /cotacoes", acesso: "patch /solicitacoes-acesso/:id" };
 function ambiente(provider, caso, op = {}) {
-  const imports = [], transacao = [], rpcs = [], writes = [], routes = new Map();
+  const imports = [], transacao = [], rpcs = [], writes = [], routes = new Map(), consultasContas = [], logs = [];
   const perfil = op.perfil ?? (caso === "acesso" ? "admin" : "organizador");
   const usuario = { id: 7, nome: "Teste", email: "teste@example.invalid", perfil };
   const env = { JWT_SECRET: segredo, ...(provider === undefined ? {} : { DB_PROVIDER: provider }),
@@ -43,6 +43,27 @@ function ambiente(provider, caso, op = {}) {
     assert.equal(schema, "public");
     return {
       from(tabela) {
+        if (tabela === 'contas_teste_imagens') {
+          let selecionado = false, filtrado = false, executado = false;
+          const consulta = {
+            select(campos) {
+              assert.equal(selecionado, false); assert.equal(campos, 'estado');
+              selecionado = true; return consulta;
+            },
+            eq(campo, id) {
+              assert.equal(selecionado, true); assert.equal(filtrado, false);
+              assert.equal(campo, 'usuario_id'); assert.equal(id, usuario.id);
+              filtrado = true; return consulta;
+            },
+            async maybeSingle() {
+              assert.equal(selecionado, true); assert.equal(filtrado, true); assert.equal(executado, false);
+              executado = true; consultasContas.push({ tabela, campos: 'estado', usuario_id: usuario.id });
+              if (op.erroContaTeste) return { data: null, error: { code: op.erroContaTeste, message: 'senha privada SQL privado' } };
+              return { data: op.contaTeste ? { estado: op.contaTeste.estado } : null, error: null };
+            },
+          };
+          return consulta;
+        }
         assert.equal(tabela, "usuarios");
         const q = { select() { return q; }, eq(campo, id) { assert.equal(campo, "id"); assert.equal(id, 7); return q; },
           async maybeSingle() { return { data: op.usuarioAusente ? null : usuario }; } };
@@ -111,12 +132,13 @@ function ambiente(provider, caso, op = {}) {
       return require(destino);
     };
     vm.runInNewContext(fs.readFileSync(path.join(raiz, arquivo), "utf8"), {
-      module, require: req, process: { env }, Buffer, console: { error() {}, log() {} },
+      module, require: req, process: { env }, Buffer, console: { error: (...args) => logs.push(args), log() {} },
     });
     cache.set(arquivo, module.exports); return module.exports;
   }
   carregar("server.js");
   return { imports, rpcs, writes, transacao, clientCount: () => clientCount, signals,
+    consultasContas, logs, clienteSimulado: client,
     late() { resolveLate?.({ data: {} }); },
     async request(body, token = "valido") {
       if (body === undefined) body = caso === "custos" ? { custos: [item()] }
@@ -166,6 +188,7 @@ for (const provider of ["mysql", "supabase"]) {
       ]) {
         const a = ambiente(provider, caso, opcoes), res = await a.request(body, token);
         assert.equal(res.statusCode, esperado); assert.deepEqual(a.writes, []); assert.deepEqual(a.rpcs, []);
+        if (provider === 'supabase' && (token === null || token === 'invalido' || opcoes.usuarioAusente)) assert.deepEqual(a.consultasContas, []);
       }
     }
   });
@@ -206,4 +229,38 @@ test("handlers nao confiam em status ou mensagem forjados por erros de integraca
     assert.equal(res.statusCode, 500); assert.doesNotMatch(JSON.stringify(res.body), /privad/);
     assert.deepEqual(a.writes, []); assert.deepEqual(a.rpcs, []);
   }
+});
+
+for (const [nome, op, esperado] of [
+  ['conta comum', {}, null],
+  ['registro ausente', { contaTeste: null }, null],
+  ['conta de teste ativa', { contaTeste: { estado: 'ativa' } }, null],
+  ['conta em encerramento', { contaTeste: { estado: 'encerrando' } }, 401],
+  ['conta excluída', { contaTeste: { estado: 'excluida' } }, 401],
+  ['falha de consulta', { erroContaTeste: '42501' }, 500],
+]) test(`autenticação Supabase na fixture: ${nome}`, async () => {
+  for (const caso of Object.keys(rotas)) {
+    const a = ambiente('supabase', caso, op), r = await a.request();
+    assert.equal(r.statusCode, esperado ?? (caso === 'cotacoes' ? 201 : 200));
+    assert.deepEqual(a.consultasContas, [{ tabela: 'contas_teste_imagens', campos: 'estado', usuario_id: 7 }]);
+    if (esperado !== null) {
+      assert.deepEqual(a.rpcs, []); assert.deepEqual(a.writes, []); assert.deepEqual(a.transacao, []);
+      assert.deepEqual(r.body, { erro: esperado === 401 ? 'Usuário não encontrado.' : 'Erro interno ao autenticar usuário.' });
+    } else assert.equal(a.rpcs.length, 1);
+    assert.doesNotMatch(JSON.stringify([r.body, a.logs]), /senha privada|SQL privado/);
+  }
+});
+
+test('cliente falso mantém contrato fechado para tabela, seleção, filtro e operações', async () => {
+  const a = ambiente('supabase', 'custos'), banco = a.clienteSimulado.schema('public');
+  assert.throws(() => a.clienteSimulado.schema('auth'));
+  assert.throws(() => banco.from('tabela_desconhecida'));
+  assert.throws(() => banco.from('contas_teste_imagens').select('*'));
+  assert.throws(() => banco.from('contas_teste_imagens').select('email'));
+  assert.throws(() => banco.from('contas_teste_imagens').select('estado').eq('id', 7));
+  assert.throws(() => banco.from('contas_teste_imagens').select('estado').eq('usuario_id', 8));
+  await assert.rejects(banco.from('contas_teste_imagens').select('estado').maybeSingle());
+  const q = banco.from('contas_teste_imagens');
+  for (const escrita of ['insert', 'update', 'upsert', 'delete']) assert.equal(q[escrita], undefined);
+  assert.deepEqual(a.consultasContas, []); assert.deepEqual(a.rpcs, []); assert.deepEqual(a.writes, []);
 });

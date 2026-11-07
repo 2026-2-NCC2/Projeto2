@@ -30,6 +30,10 @@ function prepararRepositorios() {
       .criarRepositorioSolicitacoesAcesso(conexao),
   };
   // Usa o cliente já selecionado; não cria conexão extra nem recorre ao MySQL.
+  if (provider === 'supabase') {
+    repositorios.privacidade = require('./supabase/privacidade-conta.cjs').criarRepositorioPrivacidade(conexao,
+      { portfolioAtivo: process.env.PORTFOLIO_FORNECEDOR_ATIVO === 'true' });
+  }
   if(provider==='supabase' && process.env.PORTFOLIO_FORNECEDOR_ATIVO==='true') {
     repositorios.portfolio=require('./supabase/portfolio.cjs').criarRepositorioPortfolio(conexao);
   }

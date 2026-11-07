@@ -180,6 +180,10 @@ function iniciarSimulado({ env = {}, modo = "principal", dotenv = {} } = {}) {
     "./imagens/http-binario.cjs": require("../imagens/http-binario.cjs"),
     "./perfil.cjs": require("../perfil.cjs"),
     "./portfolio.cjs": require("../portfolio.cjs"),
+    "./painel-evento-admin-http.cjs": require("../painel-evento-admin-http.cjs"),
+    "./admin-consultas-http.cjs": require("../admin-consultas-http.cjs"),
+    "./termos-cadastro.cjs": require("../termos-cadastro.cjs"),
+    "./privacidade-conta.cjs": require("../privacidade-conta.cjs"),
     "./imagens/rotas.cjs": require("../imagens/rotas.cjs"),
     "./config/startup-controlado.cjs": { validarEntrada: (e, m) => require('../config/startup-controlado.cjs').validarEntrada(e, m,
       { estado: { ler: () => ({ versao: 1, congelado: false, selado: false, instancias: [] }) } }) },
@@ -270,7 +274,12 @@ test("isolado usa so adaptador validado, sem dotenv, pool principal ou importaca
   assert.equal(a.estado.dotenv, 0);
   assert.deepEqual(a.estado.pools, []);
   assert.deepEqual(a.estado.escutas, []);
-  assert.equal(a.estado.rotas.length, 42);
+  assert.equal(a.estado.rotas.length, 46);
+  assert.equal(new Set(a.estado.rotas).size, a.estado.rotas.length);
+  for (const rota of ['get /admin/eventos/:id/painel', 'get /admin/cotacoes/:id',
+    'get /termos/vigente', 'get /minha-privacidade/dados']) {
+    assert.ok(a.estado.rotas.includes(rota), rota);
+  }
   assert.ok(a.estado.rotas.includes("get /eventos/imagens/capacidades"));
   assert.ok(a.estado.middlewares.some(([rota]) => rota === "/perfil/imagens"));
   assert.equal(a.app.locals.imagensDisponiveis(), false);

@@ -1,0 +1,59 @@
+{
+  "id": "termos-uso",
+  "versao": "A.1",
+  "estado": "minuta",
+  "aprovacao": null,
+  "secoes": [
+    {
+      "id": "apresentacao",
+      "titulo": "Apresentação e situação desta minuta",
+      "textos": [
+        "O TrocaTicket é um projeto acadêmico com funcionalidades de organização, descoberta e inscrição em eventos. A identidade do responsável pela operação e as condições jurídicas definitivas ainda dependem de aprovação. Esta minuta não constitui termos finais aprovados."
+      ]
+    },
+    {
+      "id": "funcionalidades",
+      "titulo": "Funcionalidades e perfis",
+      "textos": [
+        "Participantes consultam eventos, realizam inscrições quando autorizadas e acompanham suas inscrições. Organizadores gerenciam eventos, capacidade, custos estimados, cotações e propostas conforme as regras e estados disponíveis.",
+        "Fornecedores consultam oportunidades, enviam propostas e mantêm informações profissionais e portfólio, conforme disponibilidade. O acesso aos perfis de organizador e fornecedor depende do fluxo de solicitação e análise administrativa existente.",
+        "A administração possui consultas e análise de solicitações de acesso. Recursos identificados como indisponíveis não devem ser interpretados como serviços já oferecidos."
+      ]
+    },
+    {
+      "id": "contas",
+      "titulo": "Contas e credenciais",
+      "textos": [
+        "Mantenha seus dados atualizados e proteja sua senha. Não compartilhe credenciais nem utilize contas de terceiros. Use a opção de sair ao encerrar o acesso em dispositivos compartilhados.",
+        "Os mecanismos de autenticação e permissões permanecem sujeitos aos controles existentes. Esta minuta não cria novos direitos de acesso ou altera as regras de cadastro."
+      ]
+    },
+    {
+      "id": "uso",
+      "titulo": "Responsabilidades e utilização",
+      "textos": [
+        "Cadastre informações verdadeiras e compatíveis com a finalidade dos campos. Respeite direitos sobre textos, imagens, marcas e dados de terceiros. Não utilize a plataforma para fraudes, acesso indevido ou tentativa de contornar permissões.",
+        "Informações de eventos, serviços e propostas são fornecidas pelos respectivos usuários. Condições de responsabilidade, moderação e resolução de conflitos precisam de revisão e aprovação; esta minuta não estabelece exonerações de responsabilidade."
+      ]
+    },
+    {
+      "id": "condicoes",
+      "titulo": "Eventos, inscrições e valores",
+      "textos": [
+        "A disponibilidade de inscrição depende das regras de capacidade, estado do evento e autorização da aplicação. O histórico de inscrição e o estado do evento são apresentados separadamente.",
+        "O sistema auditado não implementa checkout, cobrança, assinaturas ou renovação automática. Custos estimados, preço sugerido e valores de propostas não comprovam venda, pagamento, contratação ou garantia de execução de serviços.",
+        "Não são estabelecidas aqui regras de reembolso, garantias comerciais ou serviços ainda não implementados. Condições futuras dependerão de definição e aprovação específicas."
+      ]
+    },
+    {
+      "id": "privacidade",
+      "titulo": "Privacidade, contato e atualizações",
+      "textos": [
+        "Consulte também a minuta de Política de Privacidade. O canal institucional de contato ainda precisa ser criado e validado antes de permitir operação com usuários reais.",
+        "Esta é a minuta A.1, pendente de aprovação e sem registro de aceite nesta etapa. Atualizações dos termos deverão ser revisadas e versionadas. A política sobre menores, retenção e bases legais também permanece pendente."
+      ]
+    }
+  ],
+  "titulo": "Termos de Uso",
+  "descricao": "Minuta das condições de utilização das funcionalidades atualmente implementadas."
+}

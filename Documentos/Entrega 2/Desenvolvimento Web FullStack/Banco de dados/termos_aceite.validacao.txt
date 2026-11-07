@@ -1,0 +1,53 @@
+ETAPA B.1 — PREPARAÇÃO LOCAL. NÃO É AUTORIZAÇÃO PARA PRODUÇÃO.
+
+Estado: cadastro bloqueado, artefato A.1 em minuta, versão inicial inativa.
+Não há publicação, aceite retroativo ou limpeza automática de aceites.
+
+Integração PostgreSQL real:
+1. Disponibilizar Docker com imagem postgres:17 já instalada, ou solicitar
+   autorização separada caso seja necessário instalar/baixar ferramentas.
+2. No diretório PI Backend executar:
+   node --test tests/termos-postgres.test.cjs
+3. Exigir teste aprovado, sem skip. O runner cria somente contêiner sintético
+   trocaticket-termos-<UUID>, sem rede/portas/montagens de diretórios pessoais,
+   com dados em tmpfs. Nunca utiliza .env, credenciais ou dados reais.
+4. O runner verifica migração, reaplicação recusada, RLS/FORCE RLS, permissões,
+   versão/hash inválidos, cadastro/aceite vinculados, relógio do banco, unicidade,
+   rollback por falha no INSERT do aceite, concorrência e preservação do legado.
+5. O finally verifica a etiqueta do contêiner antes de removê-lo. Se o processo
+   inteiro for encerrado externamente, conferir manualmente eventual contêiner
+   remanescente pelo nome e etiqueta; não apagar contêineres desconhecidos.
+
+Arquitetura e privilégios:
+- Principal SECURITY INVOKER: usuário novo + aceite na mesma chamada/transação.
+- Auxiliar SECURITY DEFINER, de propriedade do executor postgres com bypass RLS:
+  somente SELECT FOR SHARE sobre o documento exato, sem escrita/SQL dinâmico,
+  search_path fixo, role original service_role exigida e EXECUTE restrito.
+- A auxiliar evita conceder UPDATE nos documentos à service_role, exigência que
+  SELECT FOR SHARE teria na função invoker. Seu lock dura até a transação acabar.
+- Documento é somente leitura para service_role; aceites permitem SELECT/INSERT,
+  sem UPDATE/DELETE/TRUNCATE. Não são credenciais de usuário final.
+- O frontend calcula SHA-256 do JSON canônico completo, incluindo título,
+  introdução e seções exibidas. Backend e SQL usam os mesmos bytes canônicos.
+- Backend requer o artefato PI React/src/pages/publicas/termosUso.json na entrega;
+  empacotar frontend/backend coordenadamente, sem cópias divergentes.
+
+Antes de eventual aplicação remota, com autorização nova:
+- Revisar publicação jurídica/operacional e retenção. Não mudar A.1 para aprovado
+  automaticamente. Publicar uma nova versão revisada com referência de aprovação.
+- Confirmar projeto, backup recuperável, escritores e janela de manutenção.
+- Rodar preflight somente leitura; salvar contagem/hash dos usuários, schema,
+  triggers e privilégios. Confirmar ausência de TODOS os objetos novos.
+- Aplicar incremental completo uma vez como postgres. Em erro, interromper,
+  confirmar ROLLBACK e comparar snapshot. Não corrigir dados automaticamente.
+- Após sucesso: zero aceites iniciais, zero documentos ativos, versão minuta,
+  hashes/contagens legados iguais, RLS/FORCE RLS e duas funções conferidas.
+- Reaplicação aborta em objetos existentes; não é script idempotente de reparo.
+- DDL/FKs podem aguardar locks em usuarios, limitados por lock_timeout de 5s.
+  Pausar escritores para os snapshots. Se houver timeout, não insistir em fila.
+- Depois do COMMIT, não executar DROP automático como rollback: pode destruir
+  evidências. Conservar tabelas e bloquear cadastro enquanto se avalia recuperação.
+- Validar em ambiente descartável a publicação, retirada concorrente de versão,
+  falhas de resposta HTTP e operação via PostgREST/service_role antes de liberar.
+
+Sem integração real aprovada, a migração permanece NÃO VALIDADA para produção.

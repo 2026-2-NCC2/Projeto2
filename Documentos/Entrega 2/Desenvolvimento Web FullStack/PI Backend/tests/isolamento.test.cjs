@@ -540,7 +540,23 @@ test("MySQL principal e recusado; isolado preserva rotas sem iniciar HTTP na imp
   assert.equal(isolado.modulo, isolado.app);
   assert.equal(isolado.estado.dotenv, 0);
   assert.equal(isolado.estado.escutas.length, 0);
-  assert.equal(isolado.estado.rotas.length, 42);
+  const esperadas = [
+    'get /', 'post /usuarios', 'post /login', 'get /termos/vigente',
+    'get /eventos', 'get /eventos/:id', 'post /eventos', 'put /eventos/:id', 'delete /eventos/:id',
+    'patch /eventos/:id/publicar', 'patch /eventos/:id/cancelar', 'patch /eventos/:id/encerrar',
+    'get /eventos/capacidades', 'get /eventos/imagens/capacidades', 'get /eventos/:id/custos', 'put /eventos/:id/custos',
+    'get /perfil', 'patch /perfil', 'get /perfil/profissional', 'patch /perfil/profissional',
+    'get /minha-privacidade/dados', 'get /participante/eventos', 'get /participante/inscricoes', 'post /participante/inscricoes',
+    'get /cotacoes', 'post /cotacoes', 'get /fornecedor/cotacoes', 'get /fornecedor/propostas', 'post /fornecedor/propostas',
+    'get /organizador/propostas', 'patch /organizador/propostas/:id/status',
+    'get /usuarios', 'get /admin/eventos', 'get /admin/eventos/:id/painel', 'get /admin/cotacoes', 'get /admin/cotacoes/:id', 'get /admin/propostas',
+    'post /solicitacoes-acesso', 'get /solicitacoes-acesso', 'patch /solicitacoes-acesso/:id',
+    'get /portfolio', 'post /portfolio', 'patch /portfolio/:id', 'delete /portfolio/:id',
+    'get /fornecedores', 'get /fornecedores/:id/portfolio',
+  ];
+  assert.equal(esperadas.length, 46);
+  assert.equal(isolado.estado.rotas.length, 46);
+  assert.deepEqual(isolado.estado.rotas.map(([metodo, rota]) => `${metodo} ${rota}`).sort(), esperadas.sort());
   assert.equal(isolado.app.locals.imagensDisponiveis(), false);
   assert.ok(isolado.estado.rotas.some(([metodo, rota]) => metodo === "put" && rota === "/eventos/:id/custos"));
 })

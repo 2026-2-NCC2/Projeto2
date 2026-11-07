@@ -32,7 +32,7 @@ test("HTTP homologacao: todas as escritas bloqueadas antes de JSON, JWT ou banco
   assert.equal(malformado.status, 405);
   assert.deepEqual(a.calls, []); assert.deepEqual(a.rpcCalls, []); assert.deepEqual(a.state, antes);
 });
-test("HTTP homologacao: GET conserva autorizacao e permite somente a RPC de leitura conhecida", async t => {
+test("HTTP homologacao: GET conserva autorizacao e usa somente as RPCs de leitura liberadas", async t => {
   const a = await iniciar(t, "supabase", options);
   assert.equal((await a.request("GET", "/eventos/13", undefined, a.token(7))).status, 200);
   assert.equal((await a.request("GET", "/eventos/14", undefined, a.token(7))).status, 404);
@@ -40,5 +40,33 @@ test("HTTP homologacao: GET conserva autorizacao e permite somente a RPC de leit
   const r = await a.request("GET", "/fornecedor/propostas", undefined, a.token(8));
   assert.equal(r.status, 200); assert.deepEqual(r.body.map(p => p.id), [31]);
   assert.equal(a.rpcCalls.length, 1); assert.equal(a.rpcCalls[0].name, "listar_propostas_por_fornecedor");
+  const rpcsHttp = a.calls.filter(c => c.path.startsWith('/rest/v1/rpc/'));
+  assert.ok(rpcsHttp.some(c => c.path === '/rest/v1/rpc/eventos_capacidades_v1'));
+  assert.ok(rpcsHttp.every(c => c.method === 'POST' && [
+    '/rest/v1/rpc/eventos_capacidades_v1', '/rest/v1/rpc/listar_propostas_por_fornecedor',
+  ].includes(c.path)));
   assert.equal(a.state.propostas[0].status, "Em avaliação");
+});
+
+test('HTTP homologacao: verificação de contas de teste permanece ativa no login e no JWT existente', async t => {
+  const a = await iniciar(t, 'supabase', options);
+  const usuariosAntes = structuredClone(a.state.usuarios);
+  a.state.contasTeste = [{ usuario_id: 7, estado: 'ativa' }];
+  const login = await a.login(); assert.equal(login.status, 200);
+  for (const estado of ['encerrando', 'excluida']) {
+    a.state.contasTeste[0].estado = estado;
+    assert.equal((await a.login()).status, 401);
+    assert.deepEqual(await a.request('GET', '/perfil', undefined, login.body.token),
+      { status: 401, body: { erro: 'Usuário não encontrado.' } });
+  }
+  const consultas = a.calls.filter(c => c.path === '/rest/v1/contas_teste_imagens');
+  assert.ok(consultas.length > 0);
+  for (const c of consultas) {
+    assert.equal(c.method, 'GET');
+    const params = new URLSearchParams(c.query);
+    assert.equal(params.get('select'), 'estado'); assert.equal(params.get('usuario_id'), 'eq.7');
+    assert.equal([...params].length, 2);
+  }
+  assert.deepEqual(a.state.usuarios, usuariosAntes);
+  assert.ok(a.calls.every(c => c.method === 'GET'));
 });

@@ -258,6 +258,14 @@ app.get('/usuarios', autenticar, permitirPerfis('admin'), async (req, res) => {
 
 // Cadastrar usuário
 
+const { criarTermosCadastro, ErroTermos } = require('./termos-cadastro.cjs');
+const termosCadastro = criarTermosCadastro(usuariosRepository);
+app.get('/termos/vigente', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  try { return res.json({ disponivel: true, documento: await termosCadastro.vigente() }); }
+  catch { return res.status(503).json({ disponivel: false, erro: 'Cadastro indisponível: Termos de Uso ainda não publicados ou infraestrutura não validada.' }); }
+});
+
 app.post("/usuarios", limitarFrequencia(5, 60 * 60 * 1000), async (req, res) => {
   try {
     const { nome, email, senha, perfil } = req.body || {};
@@ -281,6 +289,8 @@ app.post("/usuarios", limitarFrequencia(5, 60 * 60 * 1000), async (req, res) => 
       });
     }
 
+    const aceite = await termosCadastro.validar(req.body.aceite_termos);
+    if (!usuariosRepository.criarComAceite) throw new ErroTermos(503, 'Cadastro com aceite indisponível neste provedor.');
     const emailNormalizado = email.trim().toLowerCase();
 
     // Verificar se o email já existe
@@ -296,8 +306,8 @@ app.post("/usuarios", limitarFrequencia(5, 60 * 60 * 1000), async (req, res) => 
     const senhaHash = await bcrypt.hash(senha, 12);
 
     // Salvar usuário com o perfil escolhido
-    const usuarioId = await usuariosRepository.criar({
-      nome: nome.trim(), email: emailNormalizado, senhaHash, perfil
+    const usuarioId = await usuariosRepository.criarComAceite({
+      nome: nome.trim(), email: emailNormalizado, senhaHash, perfil, aceite
     });
 
     return res.status(201).json({
@@ -312,6 +322,8 @@ app.post("/usuarios", limitarFrequencia(5, 60 * 60 * 1000), async (req, res) => 
 
   } catch (erro) {
     console.error("Falha em POST /usuarios.");
+    if (erro instanceof ErroTermos) return res.status(erro.status).json({ erro: erro.message });
+    if (erro.termosStatus === 409) return res.status(409).json({ erro: erro.message });
 
     if (erro.code === "ER_DUP_ENTRY") {
       return res.status(409).json({
@@ -645,6 +657,7 @@ async function autenticar(req, res, next) {
 }
 
 require('./portfolio.cjs').instalarPortfolio(app, { autenticar, permitirPerfis, repo: repositorios.portfolio, limitarFrequencia });
+require('./privacidade-conta.cjs').instalarPrivacidadeConta(app, { autenticar, repositorios });
 
 // Rota protegida
 app.get("/perfil", autenticar, async (req, res) => {

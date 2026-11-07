@@ -1,11 +1,47 @@
 "use strict";
 const test = require("node:test"), assert = require("node:assert/strict");
 const jwt = require("jsonwebtoken"), bcrypt = require("bcryptjs");
+const fs = require('node:fs'), path = require('node:path'), vm = require('node:vm');
+const { createHash } = require('node:crypto');
+const { criarTermosCadastro, ErroTermos } = require('../termos-cadastro.cjs');
 const { iniciar } = require("./helpers/http-autenticacao.cjs");
 const response = (status, erro) => ({ status, body: { erro } });
 function semSegredos(a, r) {
   const texto = JSON.stringify([r, a.logs]);
   for (const privado of [a.segredo, a.hash, a.privado, "sb_secret_sintetica_exclusiva_do_backend"]) assert.equal(texto.includes(privado), false);
+}
+
+// Cenário de aprovação apenas em memória: nunca publica o artefato real nem
+// altera o cadastro do servidor em teste. Executa o handler e bcrypt reais.
+async function cadastrarComTermosSinteticos(a, body) {
+  const documento = { ...require('../../PI React/src/pages/publicas/termosUso.json'),
+    estado: 'aprovado', aprovacao: 'somente-fixture-sintetica' };
+  const conteudo = JSON.stringify(documento), hash = createHash('sha256').update(conteudo).digest('hex');
+  let criacoes = 0;
+  const repo = {
+    async termoVigente() { return { documento_id: documento.id, versao: documento.versao, hash, conteudo, ativo: true, aprovado_em: '2030-01-01T00:00:00Z' }; },
+    async buscarIdPorEmail(email) { return a.state.usuarios.find(u => u.email === email); },
+    async criarComAceite(dados) {
+      criacoes++;
+      assert.deepEqual(JSON.parse(JSON.stringify(dados.aceite)), { documento: documento.id, versao: documento.versao, hash });
+      a.state.usuarios.push({ id: 33, nome: dados.nome, email: dados.email, senha: dados.senhaHash, perfil: dados.perfil });
+      return 33;
+    },
+  };
+  const fonte = fs.readFileSync(path.join(__dirname, '../server.js'), 'utf8');
+  let handler;
+  vm.runInNewContext(fonte.slice(fonte.indexOf('app.post("/usuarios",'), fonte.indexOf('// Login')), {
+    app: { post(rota, ...args) { assert.equal(rota, '/usuarios'); handler = args.at(-1); } },
+    limitarFrequencia: () => () => {}, termosCadastro: criarTermosCadastro(repo, documento), ErroTermos,
+    usuariosRepository: repo, bcrypt, Buffer, console: { error() {} },
+  });
+  const aceite_termos = { aceito: true, documento: documento.id, versao: documento.versao, hash };
+  async function request() {
+    const res = { statusCode: 200, status(n) { this.statusCode = n; return this; }, json(d) { this.body = JSON.parse(JSON.stringify(d)); } };
+    await handler({ body: { ...body, aceite_termos } }, res);
+    return { status: res.statusCode, body: res.body };
+  }
+  return { resposta: await request(), repetir: request, criacoes: () => criacoes };
 }
 for (const provider of [undefined, "mysql", "supabase"]) {
   const nome = provider ?? "padrao";
@@ -95,16 +131,26 @@ for (const provider of ["mysql", "supabase"]) {
     assert.deepEqual(await a.request("PATCH", "/solicitacoes-acesso/41", { status: "rejeitado" }, a.token(10)), response(409, "Esta solicitação já foi analisada."));
     assert.deepEqual(await a.request("PATCH", "/solicitacoes-acesso/999", { status: "aprovado" }, a.token(10)), response(404, "Solicitação não encontrada."));
   });
-  test(`HTTP ${provider}: cadastro usa bcrypt custo 12, sem hash no JSON, e permite login`, async t => {
+  test(`HTTP ${provider}: cadastro fechado; aprovação sintética preserva bcrypt, unicidade e login`, async t => {
     const a = await iniciar(t, provider);
     const body = { nome: " Teste Novo ", email: " TESTE33@EXAMPLE.INVALID ", senha: a.senha, perfil: "participante" };
     assert.deepEqual(await a.request("POST", "/usuarios", { ...body, perfil: "admin" }), response(400, "Informe nome, email válido, senha de 8 a 72 bytes e um perfil permitido."));
-    const r = await a.request("POST", "/usuarios", body);
+    const consultasAntes = a.calls.length, usuariosAntes = a.state.usuarios.length;
+    assert.deepEqual(await a.request('POST', '/usuarios', body), response(400, 'É necessário aceitar os Termos de Uso apresentados para cadastrar a conta.'));
+    const documento = require('../../PI React/src/pages/publicas/termosUso.json');
+    assert.equal(documento.estado, 'minuta'); assert.equal(documento.aprovacao, null);
+    const aceite = { aceito: true, documento: documento.id, versao: documento.versao,
+      hash: createHash('sha256').update(JSON.stringify(documento)).digest('hex') };
+    assert.deepEqual(await a.request('POST', '/usuarios', { ...body, aceite_termos: aceite }),
+      response(503, 'Cadastro indisponível: não há Termos de Uso aprovados e publicados.'));
+    assert.equal(a.calls.length, consultasAntes); assert.equal(a.state.usuarios.length, usuariosAntes);
+    const sintetico = await cadastrarComTermosSinteticos(a, body), r = sintetico.resposta;
     assert.deepEqual(r, { status: 201, body: { mensagem: "Usuário cadastrado com sucesso!", usuario: { id: 33, nome: "Teste Novo", email: "teste33@example.invalid", perfil: "participante" } } });
     const armazenado = a.state.usuarios.find(u => u.id === 33);
     assert.equal(bcrypt.getRounds(armazenado.senha), 12); assert.equal(await bcrypt.compare(a.senha, armazenado.senha), true);
     assert.equal((await a.login(33)).status, 200); semSegredos(a, r);
-    assert.deepEqual(await a.request("POST", "/usuarios", body), response(409, "Email já cadastrado!"));
+    assert.deepEqual(await sintetico.repetir(), response(409, "Email já cadastrado!"));
+    assert.equal(sintetico.criacoes(), 1);
   });
   test(`HTTP ${provider}: falha e timeout de leitura nao expoem credenciais nem mudam provedor`, async t => {
     const a = await iniciar(t, provider);

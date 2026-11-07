@@ -26,7 +26,7 @@ function ambiente() {
     if (/WHERE email/.test(sql)) return [/SELECT id FROM/.test(sql) ? [] : [{ ...usuario, senha: privado }]];
     return [estado.inexistente ? [] : [usuario]];
   } };
-  const app = { use: (...args) => middlewares.push(...args) };
+  const app = { locals: {}, use: (...args) => middlewares.push(...args) };
   for (const metodo of ["get", "post", "put", "patch", "delete"]) {
     app[metodo] = (rota, ...handlers) => rotas.set(`${metodo} ${rota}`, handlers);
   }
@@ -36,7 +36,10 @@ function ambiente() {
     Date: class extends Date { static now() { return estado.agora; } },
     process: { env: { JWT_SECRET: segredo } },
     console: { log: (...args) => logs.push(args), error: (...args) => logs.push(args) },
-    require(nome) { const nova = require("./helpers/persistencia.cjs").dependencia(nome, db); if (nova) return nova;
+    require(nome) {
+      if (new Set(['./services/eventos.cjs', './config/encerramento-gracioso.cjs', './imagens/http-binario.cjs',
+        './eventos-imagens-http.cjs', './painel-evento-admin-http.cjs', './admin-consultas-http.cjs', './termos-cadastro.cjs', './privacidade-conta.cjs']).has(nome)) return require('../' + nome.slice(2));
+      const nova = require("./helpers/persistencia.cjs").dependencia(nome, db); if (nova) return nova;
       if (nome === "express") return express;
       if (nome === "jsonwebtoken") return jwt;
       if (nome === "bcryptjs") return {
@@ -54,7 +57,7 @@ function ambiente() {
       if (nome === "./repositories/mysql/custos.cjs") return require("../repositories/mysql/custos.cjs");
       if (nome === "./isolamento.cjs") return { modoExecucao: () => "isolado" };
       if (nome === "dotenv") return { config() {} };
-      throw new Error("Dependencia inesperada");
+      throw new Error("Dependencia inesperada: " + nome);
     },
   };
   vm.runInNewContext(fonte, sandbox);
@@ -105,18 +108,18 @@ test("login limita antes do SQL/bcrypt, ignora X-Forwarded-For e libera no fim d
 test("cadastro tem limite independente por IP e janela, antes de SQL/hash", async () => {
   const a = ambiente();
   const body = { nome: "Teste", email: "a@b.com", senha: "senha-segura", perfil: "participante" };
-  for (let i = 0; i < 5; i++) assert.equal((await a.requisitar("post /usuarios", body)).statusCode, 201);
-  assert.equal(a.estado.hashes, 5);
+  for (let i = 0; i < 5; i++) assert.equal((await a.requisitar("post /usuarios", body)).statusCode, 400);
+  assert.equal(a.estado.hashes, 0);
   const consultas = a.chamadas.length;
   const r = await a.requisitar("post /usuarios", body);
   assert.equal(r.statusCode, 429);
   assert.equal(r.headers["Retry-After"], "3600");
   assert.equal(a.chamadas.length, consultas);
-  assert.equal(a.estado.hashes, 5);
+  assert.equal(a.estado.hashes, 0);
   assert.equal((await a.requisitar("post /login")).statusCode, 400);
-  assert.equal((await a.requisitar("post /usuarios", body, { ip: "127.0.0.2" })).statusCode, 201);
+  assert.equal((await a.requisitar("post /usuarios", body, { ip: "127.0.0.2" })).statusCode, 400);
   a.estado.agora = 3600000;
-  assert.equal((await a.requisitar("post /usuarios", body)).statusCode, 201);
+  assert.equal((await a.requisitar("post /usuarios", body)).statusCode, 400);
 });
 
 test("requisicoes invalidas e concorrentes tambem consomem a cota", async () => {
@@ -179,17 +182,21 @@ test("erros de driver nao expoem dados privados em logs ou respostas", async () 
   const a = ambiente();
   a.estado.falhar = true;
   for (const [rota, body] of [["post /login", { email: "a@b.com", senha: privado }],
-    ["post /usuarios", { nome: "Teste", email: "a@b.com", senha: privado, perfil: "participante" }],
+
     ["get /perfil", {}]]) {
     const r = await a.requisitar(rota, body);
     assert.equal(r.statusCode, 500);
     assert.ok(!JSON.stringify(r.body).includes(privado));
   }
+  // Sem aceite, o contrato atual recusa antes de qualquer consulta ao driver.
+  const cadastro = await a.requisitar('post /usuarios', { nome: 'Teste', email: 'a@b.com', senha: privado, perfil: 'participante' });
+  assert.equal(cadastro.statusCode, 400);
+  assert.ok(!JSON.stringify(cadastro.body).includes(privado));
   assert.equal(a.logs.length, 3);
   assert.ok(!JSON.stringify(a.logs).includes(privado));
   // Todos os logs de erro das rotas devem usar apenas mensagens literais fixas.
   const logs = fonte.match(/console\.error\([^\n]+/g);
-  for (const log of logs) assert.match(log, /^console\.error\("[^"\n]*"\);/);
+  for (const log of logs) assert.match(log, /^console\.error\((?:"[^"\\\n]*"|'[^'\\\n]*')\)/);
 });
 
 test("handler final sanitiza JSON invalido, tamanho excedido e erros inesperados", () => {
