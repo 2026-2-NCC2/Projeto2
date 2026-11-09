@@ -12,7 +12,7 @@ const cotacao = { id: 8, evento_id: 4, evento_nome: 'Evento sintético', evento_
   itens: [{ categoria: 'Áudio' }], prazo: '2030-05-01', observacoes: 'Condições sintéticas', status: 'Aberta' }
 const proposta = { id: 10, evento_nome: 'Proposta sintética', valor: '12.34', status: 'Em avaliação', categoria: 'Áudio' }
 
-function fornecedor({ cotacoes = [cotacao], propostas = [], fetch, pagina = 'fornecedor-mural' } = {}) {
+function fornecedor({ cotacoes = [cotacao], propostas = [], fetch, pagina = 'fornecedor-mural', navegacao } = {}) {
   const chamadas = [], destinos = [], avisos = []
   let saidas = 0
   const h = hooksAdmin({ ...primitivasFixture, jsx: jsxPrimitivas, Icone: 'svg', IdentidadeConta: 'identidade',
@@ -21,7 +21,7 @@ function fornecedor({ cotacoes = [cotacao], propostas = [], fetch, pagina = 'for
     fetch: async (url, opcoes) => { chamadas.push([url, opcoes]); return fetch ? fetch(url, opcoes) : ok(url.endsWith('/cotacoes') ? cotacoes : propostas) },
   })
   const fn = carregarAdmin('pages/fornecedor/PortalFornecedor.jsx', ['PortalFornecedor'], h.env).PortalFornecedor
-  const props = { pagina, setPagina: p => { destinos.push(p); props.pagina = p }, aoSair: () => saidas++, PerfilFornecedor: 'perfil' }
+  const props = { pagina, setPagina: p => { destinos.push(p); props.pagina = p }, aoSair: () => saidas++, PerfilFornecedor: 'perfil', navegacao }
   const render = () => h.render(fn, props)
   const ir = pagina => { props.pagina = pagina; return render() }
   const alterar = (id, value) => nodes(render()).find(n => n.props.id === id).props.onChange({ target: { value } })
@@ -29,6 +29,34 @@ function fornecedor({ cotacoes = [cotacao], propostas = [], fetch, pagina = 'for
 }
 const botao = (v, nome) => nodes(v).find(n => n.type === 'button' && text(n).trim() === nome)
 const linhas = v => nodes(v).filter(n => n.props.className === 'fornTabelaLinha')
+
+test('URL da proposta aguarda cotação da consulta autorizada e não mistura rascunhos entre IDs', async () => {
+  const nav = { estado: { cotacaoId: 8 }, mudar(d) { this.estado = d } }
+  const p = fornecedor({ pagina: 'fornecedor-proposta', navegacao: nav, cotacoes: [cotacao, { ...cotacao, id: 9, evento_nome: 'Outro evento sintético' }] })
+  const inicial = p.render()
+  assert.match(text(inicial), /Restaurando cotação/)
+  assert.equal(nodes(inicial).some(n => n.type === 'form'), false)
+  await tick()
+  assert.match(text(p.render()), /Evento sintético/)
+  p.alterar('fornecedor-proposta-1', '123.45')
+  nav.estado = { cotacaoId: 9 }; p.render()
+  const novo = p.render()
+  assert.match(text(novo), /Outro evento sintético/)
+  assert.equal(nodes(novo).find(n => n.props.id === 'fornecedor-proposta-1').props.value, '')
+  nav.estado = { cotacaoId: 8 }; p.render()
+  assert.match(text(p.render()), /Evento sintético/)
+  assert.ok(p.chamadas.every(([, opts]) => !opts.method || opts.method === 'GET'))
+  p.close()
+})
+
+test('cotação de URL não disponível para a conta nunca renderiza formulário nem mantém ID inválido', async () => {
+  const nav = { estado: { cotacaoId: 999 }, mudar(d) { this.estado = d } }
+  const p = fornecedor({ pagina: 'fornecedor-proposta', navegacao: nav })
+  p.render(); await tick(); p.render()
+  assert.equal(nodes(p.render()).some(n => n.type === 'form'), false)
+  assert.equal(nav.estado.cotacaoId, null)
+  assert.ok(p.destinos.includes('fornecedor-mural')); p.close()
+})
 
 test('skeletons de consultas e indicadores nao apresentam ausencias ou contagens ficticias', () => {
   const p = fornecedor({ fetch: () => new Promise(() => {}) })

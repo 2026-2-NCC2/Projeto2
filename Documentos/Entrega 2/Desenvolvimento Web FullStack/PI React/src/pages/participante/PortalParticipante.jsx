@@ -10,13 +10,21 @@ import { apiUrl } from '../../services/api.js'
 import { capacidadesEventos } from '../../services/eventos.js'
 import { NavegacaoRecolhivel } from '../../components/layout/NavegacaoRecolhivel.jsx'
 
-export function PortalParticipante({ setPagina, aoSair }) {
+export function PortalParticipante({ setPagina, aoSair, navegacao }) {
   const [eventosDisponiveis, setEventosDisponiveis] = useState([])
   const [meusIngressos, setMeusIngressos] = useState([])
   const [carregandoIngressos, setCarregandoIngressos] = useState(true)
   const [erroIngressos, setErroIngressos] = useState('')
   const [tentativaIngressos, setTentativaIngressos] = useState(0)
-  const [abaParticipante, setAbaParticipante] = useState('inicio')
+  const [abaLocal, setAbaLocal] = useState('inicio')
+  const abaParticipante = navegacao ? navegacao.estado.aba : abaLocal
+  function setAbaParticipante(valor) {
+    if (navegacao) navegacao.mudar(atual => {
+      const aba = typeof valor === 'function' ? valor(atual.aba) : valor
+      return { aba, eventoId: aba === 'detalhes' ? atual.eventoId : null }
+    })
+    else setAbaLocal(valor)
+  }
   const tituloRef = useRef(null)
   const secaoAnteriorRef = useRef(abaParticipante)
   useEffect(() => {
@@ -38,10 +46,17 @@ export function PortalParticipante({ setPagina, aoSair }) {
   const idsEventosInscritos = new Set(
   meusIngressos.map((ingresso) => Number(ingresso.evento_id))
   )
-  const [eventoSelecionado, setEventoSelecionado] = useState(null)
+  const [eventoLocal, setEventoSelecionado] = useState(null)
+  const eventoSelecionado = navegacao && abaParticipante === 'detalhes'
+    ? eventosDisponiveis.find(evento => evento.id === navegacao.estado.eventoId) || null : eventoLocal
   const [carregandoEventos, setCarregandoEventos] = useState(true)
   const [erroEventos, setErroEventos] = useState('')
   const [revisaoVagas,setRevisaoVagas]=useState(0)
+  useEffect(() => {
+    if (navegacao && abaParticipante === 'detalhes' && !carregandoEventos && !eventoSelecionado) {
+      navegacao.mudar({ aba: 'eventos', eventoId: null }, true)
+    }
+  }, [navegacao, abaParticipante, carregandoEventos, eventoSelecionado])
   
   useEffect(() => {
   let ativo = true
@@ -196,6 +211,8 @@ const aoInscreverEvento = async (evento) => {
     perfil: 'Meu perfil'
   }
   const tituloAtual = titulos[abaParticipante]
+  // No perfil, o h1 pertence ao PerfilPessoal. O rótulo externo identifica o contexto e recebe foco.
+  const TituloContexto = abaParticipante === 'perfil' ? 'p' : 'h1'
   const secaoAtual = abaParticipante === 'detalhes' ? 'eventos' : abaParticipante
   useEffect(() => {
     if (typeof document === 'undefined') return
@@ -286,7 +303,8 @@ const aoInscreverEvento = async (evento) => {
   type="button"
   onClick={() => {
     setEventoSelecionado(evento)
-    setAbaParticipante('detalhes')
+    if (navegacao) navegacao.mudar({ aba: 'detalhes', eventoId: evento.id })
+    else setAbaParticipante('detalhes')
   }}
   aria-label={`Ver detalhes de ${evento.nome || 'evento sem nome informado'}`}
   variante="primario" className="acaoEvento"
@@ -375,7 +393,7 @@ const aoInscreverEvento = async (evento) => {
 
           <div className="ppCabecalhoPagina">
             <div>
-              <h1 id="participante-titulo" className="ppTitulo" ref={tituloRef} tabIndex={-1}>{tituloAtual}</h1>
+              <TituloContexto id="participante-titulo" className="ppTitulo" ref={tituloRef} tabIndex={-1}>{tituloAtual}</TituloContexto>
               <p>
                 Descubra eventos e acompanhe sua participação
                 no TrocaTicket.
@@ -580,9 +598,11 @@ const aoInscreverEvento = async (evento) => {
           )}
 
           {abaParticipante === 'perfil' && (
+            <div className="ppPerfil">
             <PerfilPessoal contexto="Participante">
               <div className="perfilAcoes"><Botao type="button" variante="secundario" className="secundario" onClick={() => setPagina('solicitar-acesso')}>Solicitar acesso como organizador ou fornecedor</Botao></div>
             </PerfilPessoal>
+            </div>
           )}
         </main>
       </div>

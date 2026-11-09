@@ -71,6 +71,7 @@ test('recarregar elaboração sem cotação não renderiza formulário e retorna
   const inicial = r.render()
   assert.equal(nodes(inicial).filter(n => n.type === 'form').length, 0)
   await tick()
+  r.render() // Aguarda a consulta antes de decidir que não há cotação acessível.
   const view = r.render()
   assert.ok(nodes(view).some(n => n.type === 'input' && n.props['aria-label'] === 'Buscar oportunidades'))
   assert.equal(nodes(view).filter(n => n.type === 'form').length, 0)

@@ -2,11 +2,13 @@ import { PerfilPessoal } from './components/perfil/PerfilPessoal.jsx'
 import { useSessao } from './hooks/useSessao.js'
 import { useAutenticacao } from './hooks/useAutenticacao.js'
 import { paginaAutorizada, paginasPorPerfil } from './services/autenticacao.js'
-import { useNavegacao } from './hooks/useNavegacao.js'
+import { useNavegacao, useHistoricoNavegacao, lerDestinoNavegacao } from './hooks/useNavegacao.js'
 import { PortalParticipante } from './pages/participante/PortalParticipante.jsx'
 import { PortalFornecedor } from './pages/fornecedor/PortalFornecedor.jsx'
 import { SolicitarAcesso } from './pages/auth/SolicitarAcesso.jsx'
 import { Login } from './pages/auth/Login.jsx'
+import { EntradaPublica } from './pages/publicas/EntradaPublica.jsx'
+import { Skeleton } from './components/ui/Primitivas.jsx'
 import { Cadastro } from './pages/auth/Cadastro.jsx'
 import { Cotacao } from './pages/organizador/Cotacao.jsx'
 import { Ticket } from './pages/organizador/Ticket.jsx'
@@ -23,6 +25,7 @@ import { criarRascunhoCustos, rascunhoCustosTemAlteracoes, usarBasePersistida } 
 import { useCustosPersistidos } from './hooks/useCustosPersistidos.js'
 import { usePublicacaoCotacao } from './hooks/usePublicacaoCotacao.js'
 import './App.css'
+import './SessaoSkeleton.css'
 import { AdminPortal } from './components/admin/AdminPortal'
 import { ProvedorImagensEvento } from './components/eventos/ProvedorImagensEvento.jsx'
 
@@ -47,13 +50,19 @@ function PerfilFornecedor({ propostas = [] }) {
 
 function App() {
   const [paginaSolicitada, definirPagina] = useState(() => {
+  const destino = lerDestinoNavegacao()
+  if (destino) return destino.pagina
   const token = sessionStorage.getItem('token')
   const paginaSalva = sessionStorage.getItem('paginaAtual')
 
   return token && paginaSalva ? paginaSalva : 'login'
 })
   const autenticacao = useAutenticacao(paginaSolicitada)
-  const pagina = paginaAutorizada(paginaSolicitada, autenticacao.sessao?.perfil)
+  const pagina = paginaAutorizada(
+    autenticacao.sessao && ['login', 'cadastro'].includes(paginaSolicitada) && !['login', 'cadastro'].includes(lerDestinoNavegacao()?.pagina)
+      ? paginasPorPerfil[autenticacao.sessao.perfil][0] : paginaSolicitada,
+    autenticacao.sessao?.perfil,
+  )
   const [eventos, setEventos] = useState([])
   const [carregandoEventos, setCarregandoEventos] = useState(true)
   const [erroEventos, setErroEventos] = useState('')
@@ -503,22 +512,57 @@ alert(
   }
 }
 
+  const navegacaoHistorica = useHistoricoNavegacao(pagina, {
+    ativo: !autenticacao.verificando, chaveSessao: autenticacao.sessao?.token || '',
+    contextoEvento: chaveEvento, iniciarNoLogin: Boolean(autenticacao.erro),
+    aoRestaurar(destino, contexto, signal) {
+      const permitidas = ['login', 'cadastro', ...(autenticacao.sessao ? paginasPorPerfil[autenticacao.sessao.perfil] : [])]
+      if (!permitidas.includes(destino)) {
+        const seguro = autenticacao.sessao ? paginasPorPerfil[autenticacao.sessao.perfil][0] : 'login'
+        return setPagina(seguro) ? seguro : false
+      }
+      if (['criar', 'custos', 'cotacao', 'ticket'].includes(destino) && contexto !== chaveEvento && /^evento:[1-9]\d*$/.test(contexto)) {
+        const token = autenticacao.sessao?.token, id = Number(contexto.slice(7))
+        return (async () => {
+          try {
+            const resposta = await consultarEvento(id, token)
+            const dados = resposta.ok ? await resposta.json() : null
+            if (signal.aborted || sessionStorage.getItem('token') !== token) return false
+            if (!dados || Number(dados.id) !== id) return setPagina('eventos') ? 'eventos' : false
+            aoSelecionarEvento(dados)
+            return setPagina(destino) ? destino : false
+          } catch {
+            if (signal.aborted || sessionStorage.getItem('token') !== token) return false
+            return setPagina('eventos') ? 'eventos' : false
+          }
+        })()
+      }
+      if (['criar', 'custos', 'cotacao', 'ticket'].includes(destino) && contexto === 'novo:0' && chaveEvento.startsWith('evento:')) {
+        aoCriarNovoEvento()
+        return setPagina(destino) ? destino : false
+      }
+      if (destino === pagina) return destino
+      return setPagina(destino) ? destino : false
+    },
+  })
   const comImagens=conteudo=><ProvedorImagensEvento key={autenticacao.sessao?.token||''} token={autenticacao.sessao?.token}>{conteudo}</ProvedorImagensEvento>
-  if (autenticacao.verificando) return <p role="status">Validando sessão...</p>
+  if (autenticacao.verificando || navegacaoHistorica.restaurando) return <Skeleton tipo="card" linhas={5} rotulo="Validando sessão..." className="sessaoSkeleton" />
   if (pagina === 'admin') {
-    return comImagens(<AdminPortal aoSair={aoSair} />)
+    return comImagens(<AdminPortal aoSair={aoSair} navegacao={navegacaoHistorica} />)
   }
   if (pagina.startsWith('fornecedor-')) {
-    return comImagens(<PortalFornecedor pagina={pagina} setPagina={setPagina} aoSair={aoSair} PerfilFornecedor={PerfilFornecedor} />)
+    return comImagens(<PortalFornecedor pagina={pagina} setPagina={setPagina} aoSair={aoSair} PerfilFornecedor={PerfilFornecedor} navegacao={navegacaoHistorica} />)
   }
   if (pagina === 'login') {
-    return <Login setPagina={setPagina} aoAutenticarSessao={aoAutenticar} erroSessao={autenticacao.erro} />
+    return <EntradaPublica iniciarNoLogin={Boolean(autenticacao.erro)} navegacao={navegacaoHistorica}>
+      <Login setPagina={setPagina} aoAutenticarSessao={aoAutenticar} erroSessao={autenticacao.erro} />
+    </EntradaPublica>
   }
   if (pagina === 'cadastro') {
   return <Cadastro setPagina={setPagina} />
   }
   if (pagina === 'participante') {
-  return comImagens(<PortalParticipante setPagina={setPagina} aoSair={aoSair} />)
+  return comImagens(<PortalParticipante setPagina={setPagina} aoSair={aoSair} navegacao={navegacaoHistorica} />)
   }
   if (pagina === 'solicitar-acesso') {
   return <SolicitarAcesso setPagina={setPagina} />

@@ -2,13 +2,15 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import postcss from 'postcss'
+import { createElement, Fragment, useEffect, useId, useRef, useState } from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
 import { carregarAdmin, hooksAdmin, nodes, text } from './helpers/adminRuntime.js'
 import { primitivasFixture, jsxPrimitivas } from './helpers/primitivasFixture.js'
 
 const ok = dados => ({ ok: true, json: async () => dados })
 const tick = () => new Promise(resolve => setTimeout(resolve, 0))
 const evento = { id: 4, nome: 'Evento sintético', categoria: 'Workshop', local: 'Local sintético', status: 'Ativo', lotado: false }
-function participante({ eventos = [evento], ingressos = [], fetch, capacidades = { inscrever: true }, confirmar = true, documento } = {}) {
+function participante({ eventos = [evento], ingressos = [], fetch, capacidades = { inscrever: true }, confirmar = true, documento, navegacao } = {}) {
   const chamadas = [], confirmacoes = [], avisos = [], destinos = [], focos = []
   let saidas = 0
   const h = hooksAdmin({ ...primitivasFixture, jsx: jsxPrimitivas, Icone: 'svg', PerfilPessoal: 'perfil', NavegacaoRecolhivel: 'recolhivel',
@@ -29,8 +31,8 @@ function participante({ eventos = [evento], ingressos = [], fetch, capacidades =
   }, deps)
   const fn = carregarAdmin('pages/participante/PortalParticipante.jsx', ['PortalParticipante'], h.env).PortalParticipante
   const render = () => {
-    const v = h.render(fn, { setPagina: p => destinos.push(p), aoSair: () => saidas++ })
-    for (const n of nodes(v)) if (n.props.ref && n.type === 'h1') {
+    const v = h.render(fn, { setPagina: p => destinos.push(p), aoSair: () => saidas++, navegacao })
+    for (const n of nodes(v)) if (n.props.ref && n.props.id === 'participante-titulo') {
       n.props.ref.current = { focus: () => focos.push({ id: n.props.id, titulo: text(n).trim() }) }
     }
     efeitos.splice(0).forEach(efeito => efeito())
@@ -40,6 +42,86 @@ function participante({ eventos = [evento], ingressos = [], fetch, capacidades =
   return { render, navegar, chamadas, confirmacoes, avisos, destinos, focos, close: h.close, saidas: () => saidas }
 }
 function botao(v, nome) { return nodes(v).find(n => n.type === 'button' && text(n).trim() === nome) }
+
+function navegacaoControlada(inicial = { aba: 'inicio', eventoId: null }) {
+  let estado = inicial
+  const substituicoes = []
+  return { get estado() { return estado }, substituicoes, mudar(valor, substituir = false) {
+    estado = typeof valor === 'function' ? valor(estado) : valor
+    substituicoes.push(substituir)
+  } }
+}
+
+test('participante controlado restaura seção e detalhes por ID da consulta atual sem novas requisições', async () => {
+  const nav = navegacaoControlada(), p = participante({ navegacao: nav })
+  p.render(); await tick(); p.navegar('Explorar eventos')
+  const total = p.chamadas.length
+  botao(p.render(), 'Ver detalhes').props.onClick()
+  assert.equal(nav.estado.aba, 'detalhes'); assert.equal(nav.estado.eventoId, evento.id)
+  assert.equal(nodes(p.render()).find(n => n.type === 'midia').props.eventoId, evento.id)
+  p.navegar('Meu perfil')
+  nav.mudar({ aba: 'detalhes', eventoId: evento.id })
+  assert.match(text(p.render()), /Evento sintético/)
+  assert.equal(p.focos.at(-1).titulo, 'Detalhes do evento')
+  botao(p.render(), '← Voltar aos eventos').props.onClick()
+  assert.equal(nav.estado.aba, 'eventos'); assert.equal(p.chamadas.length, total)
+  p.close()
+})
+
+test('detalhes históricos sem evento disponível retornam à consulta por substituição, sem inventar dados', async () => {
+  const nav = navegacaoControlada({ aba: 'detalhes', eventoId: 999 }), p = participante({ navegacao: nav })
+  p.render(); await tick(); p.render()
+  assert.equal(nav.estado.aba, 'eventos')
+  assert.equal(nav.substituicoes.at(-1), true)
+  assert.ok(botao(p.render(), 'Ver detalhes'))
+  assert.equal(p.chamadas.some(([, opts]) => opts.method === 'POST'), false); p.close()
+})
+
+test('navegação controlada preserva inscrição confirmada e updater final sem voltar indevidamente aos eventos', async () => {
+  const nav = navegacaoControlada(), p = participante({ navegacao: nav })
+  p.render(); await tick(); p.navegar('Explorar eventos')
+  botao(p.render(), 'Ver detalhes').props.onClick()
+  await botao(p.render(), 'Inscrever-se').props.onClick()
+  assert.equal(nav.estado.aba, 'ingressos')
+  const posts = p.chamadas.filter(([, options]) => options.method === 'POST')
+  assert.equal(posts.length, 1)
+  assert.equal(posts[0][0], '/participante/inscricoes')
+  assert.deepEqual(JSON.parse(posts[0][1].body), { evento_id: evento.id })
+  p.close()
+})
+
+function renderizarComPerfilReal(view, estado) {
+  const env = { jsx: createElement, Fragment, useEffect, useId, useRef, useState }
+  const primitivas = carregarAdmin('components/ui/Primitivas.jsx', ['Skeleton', 'Botao', 'Campo', 'Alerta'], env)
+  const { PerfilPessoal } = carregarAdmin('components/perfil/PerfilPessoal.jsx', ['PerfilPessoal'], {
+    ...env, ...primitivas, usePerfil: () => ({ ...estado, recarregar() {} }),
+    sessionStorage: { getItem: () => 'sessao-sintetica' },
+    // Não é necessário consultar imagens ou redes sociais para renderizar a hierarquia do perfil.
+    ImagensPerfil: () => null, PerfilProfissional: () => null, ConsultaPortfolios: () => null,
+  })
+  function compor(n) {
+    if (!n || typeof n !== 'object') return n
+    return createElement(n.type === 'perfil' ? PerfilPessoal : n.type, n.props, ...(n.children || []).map(compor))
+  }
+  return renderToStaticMarkup(compor(view))
+}
+
+for (const [estado, dados] of Object.entries({
+  carregando: { perfil: null, erro: '' },
+  erro: { perfil: null, erro: 'Consulta sintética indisponível' },
+  carregado: { perfil: { id: 7, nome: 'Pessoa sintética', email: 'pessoa@example.invalid', edicao_disponivel: false }, erro: '' },
+})) test(`Meu perfil composto com PerfilPessoal real tem um único h1: ${estado}`, () => {
+  const p = participante({ fetch: () => new Promise(() => {}) })
+  p.render()
+  const html = renderizarComPerfilReal(p.navegar('Meu perfil'), dados)
+  assert.equal((html.match(/<h1\b/g) || []).length, 1)
+  assert.match(html, /<h1>Meu perfil<\/h1>/)
+  assert.match(html, /<p[^>]*id="participante-titulo"[^>]*tabindex="-1"[^>]*>Meu perfil<\/p>/)
+  assert.match(html, /<main[^>]*aria-labelledby="participante-titulo"/)
+  if (estado === 'carregado') assert.match(html, /<h2>Informações pessoais<\/h2>/)
+  assert.equal(p.focos.at(-1).titulo, 'Meu perfil')
+  p.close()
+})
 
 test('participante anuncia skeletons sem apresentar ausencias durante consultas pendentes', () => {
   const p = participante({ fetch: () => new Promise(() => {}) })
@@ -171,14 +253,15 @@ test('menu usa botoes nativos com estado atual e preserva saida e solicitacao de
   botao(v, 'Sair').props.onClick(); assert.equal(p.saidas(), 1)
 })
 
-test('todas as seções e detalhes têm h1, localização e nome acessível consistentes', async () => {
+test('seções e detalhes preservam título, localização e nome acessível; perfil delega h1 ao componente real', async () => {
   const p = participante(); p.render(); await tick()
   function conferir(v, titulo) {
-    const h1 = nodes(v).find(n => n.type === 'h1'), main = nodes(v).find(n => n.type === 'main')
+    const tituloContexto = nodes(v).find(n => n.props.id === 'participante-titulo'), main = nodes(v).find(n => n.type === 'main')
     const trilha = nodes(v).find(n => n.type === 'nav' && n.props['aria-label'] === 'Localização no portal')
-    assert.equal(text(h1).trim(), titulo)
-    assert.equal(main.props['aria-labelledby'], h1.props.id)
-    assert.equal(h1.props.tabIndex, -1)
+    assert.equal(text(tituloContexto).trim(), titulo)
+    assert.equal(tituloContexto.type, titulo === 'Meu perfil' ? 'p' : 'h1')
+    assert.equal(main.props['aria-labelledby'], tituloContexto.props.id)
+    assert.equal(tituloContexto.props.tabIndex, -1)
     assert.equal(text(nodes(trilha).find(n => n.props['aria-current'] === 'page')).trim(), titulo)
     assert.ok(nodes(trilha).some(n => n.props['aria-hidden'] === 'true'))
     assert.doesNotMatch(text(trilha), /undefined/)
@@ -649,4 +732,53 @@ test('refluxo extremo mantém marca e botão em linhas próprias sem esconder ov
   assert.equal(estiloParticipante('.participantePagina .ppNavegacao .alternarNavegacao', 320)['grid-column'], '1')
   const css = readFileSync(new URL('../src/pages/participante/Participante.css', import.meta.url), 'utf8')
   assert.doesNotMatch(css, /animation:|transition:|overflow(?:-x)?:\s*hidden/)
+})
+
+test('perfil usa wrapper próprio e componente compartilhado sem mudar ações, foco ou consultas', async () => {
+  const p = participante(); p.render(); await tick()
+  const consultas = p.chamadas.length
+  const v = p.navegar('Meu perfil')
+  const wrapper = nodes(v).find(n => n.props.className === 'ppPerfil')
+  assert.ok(wrapper)
+  const perfis = nodes(wrapper).filter(n => n.type === 'perfil')
+  assert.equal(perfis.length, 1)
+  assert.equal(perfis[0].props.contexto, 'Participante')
+  assert.equal(nodes(wrapper).filter(n => ['form', 'input', 'textarea'].includes(n.type)).length, 0)
+  botao(wrapper, 'Solicitar acesso como organizador ou fornecedor').props.onClick()
+  assert.deepEqual(p.destinos, ['solicitar-acesso'])
+  assert.equal(p.focos.at(-1).titulo, 'Meu perfil')
+  assert.equal(p.chamadas.length, consultas)
+  assert.equal(nodes(p.navegar('Explorar eventos')).some(n => n.props.className === 'ppPerfil'), false)
+  p.close()
+})
+
+test('acabamento de perfil/privacidade é isolado, sem esconder conteúdo ou alterar feedbacks semânticos', () => {
+  const css = readFileSync(new URL('../src/pages/participante/Participante.css', import.meta.url), 'utf8')
+  const regras = []
+  postcss.parse(css).walkRules(regra => {
+    if (!regra.selector.includes('.ppPerfil')) return
+    regras.push(regra)
+    for (const seletor of regra.selectors) assert.ok(seletor.startsWith('.participantePagina .ppPerfil'), seletor)
+    regra.walkDecls(d => {
+      assert.doesNotMatch(d.value, /#[0-9a-f]{3,8}\b|!important/i)
+      assert.ok(!['order', 'animation', 'transition'].includes(d.prop))
+      assert.ok(!(d.prop === 'display' && d.value === 'none'))
+      assert.ok(!d.prop.startsWith('overflow') || d.value !== 'hidden')
+    })
+  })
+  assert.ok(regras.length > 20)
+  assert.ok(regras.every(r => !/ttAlerta|:disabled|:enabled/.test(r.selector)))
+  assert.equal(estiloParticipante('.participantePagina .ppPerfil .privacidadeConta a:focus-visible', 390).outline, '3px solid var(--foco-cor)')
+  assert.equal(estiloParticipante('.participantePagina .ppPerfil .ttCampoControle:focus-visible', 390)['outline-offset'], '3px')
+})
+
+for (const largura of [360, 390, 768, 1024, 1440, 720]) test(`perfil/privacidade: regras de refluxo em ${largura}px${largura === 720 ? ' (1440px/200%)' : ''}`, () => {
+  assert.equal(estiloParticipante('.participantePagina .ppPerfil', largura)['min-width'], '0')
+  assert.equal(estiloParticipante('.participantePagina .ppPerfil', largura)['overflow-wrap'], 'anywhere')
+  assert.equal(estiloParticipante('.participantePagina .ppPerfil .perfilCampos .ttCampo', largura).margin, '0')
+  assert.equal(estiloParticipante('.participantePagina .ppPerfil .perfilCampos .ttCampoControle', largura)['font-size'], '1rem')
+  assert.equal(estiloParticipante('.participantePagina .ppPerfil .ttBotao', largura)['min-height'], '44px')
+  assert.equal(estiloParticipante('.participantePagina .ppPerfil .privacidadeContaDados dd', largura)['overflow-wrap'], 'anywhere')
+  assert.equal(estiloParticipante('.participantePagina .ppPerfil .privacidadeContaCartao', largura).padding, largura <= 700 ? '20px' : '24px')
+  if (largura <= 700) assert.equal(estiloParticipante('.participantePagina .ppPerfil .perfilCampos', largura)['grid-template-columns'], 'minmax(0, 1fr)')
 })

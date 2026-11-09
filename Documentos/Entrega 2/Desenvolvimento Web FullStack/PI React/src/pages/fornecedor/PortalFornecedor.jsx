@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react'
 import { apiUrl } from '../../services/api.js'
 import { formatarMoeda } from '../../utils/formatarMoeda.js'
 
-export function PortalFornecedor({pagina,setPagina,aoSair,PerfilFornecedor}) {
+export function PortalFornecedor({pagina,setPagina,aoSair,PerfilFornecedor,navegacao}) {
  const [busca,setBusca]=useState('')
  const [oportunidades, setOportunidades] = useState([])
   const [carregandoOportunidades, setCarregandoOportunidades] = useState(true)
@@ -67,10 +67,18 @@ setOportunidades(oportunidadesFormatadas)
 
   buscarOportunidades()
 }, [])
- const [selecionada, setSelecionada] = useState(null)
+ const [selecionadaLocal, setSelecionadaLocal] = useState(null)
+ const selecionada = navegacao ? oportunidades.find(item => item.id === navegacao.estado.cotacaoId) || null : selecionadaLocal
+ function setSelecionada(item) {
+  setSelecionadaLocal(item)
+  if (navegacao) navegacao.mudar({ cotacaoId: item?.id ?? null })
+ }
  useEffect(() => {
-  if (pagina === 'fornecedor-proposta' && !selecionada) setPagina('fornecedor-mural')
- }, [pagina, selecionada, setPagina])
+  if (pagina === 'fornecedor-proposta' && !selecionada && !carregandoOportunidades) {
+   if (navegacao) navegacao.mudar({ cotacaoId: null }, true)
+   setPagina('fornecedor-mural')
+  }
+ }, [pagina, selecionada, carregandoOportunidades, setPagina, navegacao])
  const [propostas, setPropostas] = useState([])
  const [carregandoPropostas, setCarregandoPropostas] = useState(true)
  const [erroPropostas, setErroPropostas] = useState('')
@@ -126,6 +134,11 @@ setOportunidades(oportunidadesFormatadas)
  const [valor,setValor]=useState('')
  const [condicoes,setCondicoes]=useState('')
  const [detalhes,setDetalhes]=useState('')
+ const [cotacaoDoFormulario, setCotacaoDoFormulario] = useState(navegacao?.estado.cotacaoId)
+ if (navegacao && cotacaoDoFormulario !== navegacao.estado.cotacaoId) {
+  setCotacaoDoFormulario(navegacao.estado.cotacaoId)
+  setValor(''); setCondicoes(''); setDetalhes('')
+ }
  const [filtro,setFiltro]=useState('Todas')
  const navegar=(destino)=>setPagina('fornecedor-'+destino)
  const titulo={mural:'Mural de oportunidades',cotacoes:'Propostas enviadas',proposta:'Elaborar proposta comercial',enviadas:'Propostas enviadas',contratos:'Contratos ativos',catalogo:'Portfólio profissional',desempenho:'Desempenho',perfil:'Perfil do fornecedor'}[pagina.replace('fornecedor-','')] || 'Portal do Fornecedor'
@@ -194,6 +207,7 @@ setOportunidades(oportunidadesFormatadas)
   <div className="fornCorpo"><aside className="fornMenu"><Botao className="novo" onClick={()=>navegar('mural')}><Icone nome="busca" /> Buscar cotações</Botao><nav>{menu.map(([id,label,indisponivel])=><Botao key={id} variante="discreto" aria-current={(pagina==='fornecedor-'+id || (id==='enviadas' && pagina==='fornecedor-cotacoes')) ? 'page' : undefined} disabled={indisponivel} title={indisponivel ? 'Funcionalidade indisponível' : undefined} className={(pagina==='fornecedor-'+id || (id==='enviadas' && pagina==='fornecedor-cotacoes'))?'ativo':''} onClick={indisponivel ? undefined : ()=>navegar(id)}><Icone nome={({ mural: 'eventos', enviadas: 'documento', contratos: 'documento', catalogo: 'documento', desempenho: 'custos', perfil: 'perfil' })[id]} />{label}{indisponivel && <small> (indisponível)</small>}</Botao>)}</nav><Botao variante="discreto" className="fornSair" onClick={aoSair}><Icone nome="sair" /> Sair</Botao></aside>
   <main className="fornConteudo"><div className="fornTrilha">TrocaTicket Fornecedor › {titulo}</div><div className="fornTitulo"><div><h1>{titulo}</h1><p>Gestão comercial e oportunidades para fornecedores de eventos.</p></div><span className="fornSelo">Conta de fornecedor</span></div>
   {carregandoPropostas && <Skeleton tipo={pagina==='fornecedor-enviadas'||pagina==='fornecedor-cotacoes' ? 'tabela' : 'texto'} rotulo="Carregando propostas..." />}
+  {pagina==='fornecedor-proposta' && carregandoOportunidades && <Skeleton tipo="card" rotulo="Restaurando cotação..." />}
   {erroPropostas && <Alerta variante="erro" titulo="Erro de consulta de propostas"><p>{erroPropostas}</p><Botao type="button" disabled={carregandoPropostas} onClick={()=>setTentativaPropostas(n=>n+1)}>Tentar novamente</Botao></Alerta>}
   {pagina==='fornecedor-mural' && <><div className="fornHero"><div>{carregandoOportunidades ? <Skeleton tipo="texto" linhas={1} rotulo="Consultando oportunidades" /> : <h2>{erroOportunidades ? '—' : oportunidades.length} EVENTOS AGUARDANDO SUA PROPOSTA</h2>}<p>Encontre demandas compatíveis com seus serviços e envie sua oferta comercial.</p></div><span className="fornSelo">Oportunidades disponíveis</span></div><div className="fornIndicadores"><div><small>OPORTUNIDADES COMPATÍVEIS</small>{carregandoOportunidades ? <Skeleton tipo="texto" linhas={1} rotulo="Consultando quantidade de oportunidades" /> : <strong>{erroOportunidades ? '—' : oportunidades.length}</strong>}<span>Demandas abertas</span></div><div><small>PROPOSTAS EM ANÁLISE</small>{carregandoPropostas ? <Skeleton tipo="texto" linhas={1} rotulo="Consultando indicador de propostas" /> : <strong>{erroPropostas ? '—' : propostas.filter(p=>p.status==='Em avaliação').length}</strong>}<span>Enviadas</span></div><div><small>PROPOSTAS APROVADAS</small>{carregandoPropostas ? <Skeleton tipo="texto" linhas={1} rotulo="Consultando indicador de propostas" /> : <strong>{erroPropostas ? '—' : propostas.filter(p=>p.status==='Aprovada').length}</strong>}<span>Aprovadas</span></div></div><Campo id="fornecedor-busca" label="Buscar oportunidades" aria-label="Buscar oportunidades" placeholder="Buscar eventos, serviços ou cidades..." value={busca} onChange={e=>setBusca(e.target.value)}/><div className="fornLista">
     {carregandoOportunidades && (

@@ -51,6 +51,31 @@ test('formulário bloqueia edição antes da migração e mantém email somente 
   assert.match(text(view), /ainda não está disponível/)
 })
 
+test('campos pessoais preservam labels associados, limites, valores e semântica durante edição', () => {
+  const r = runtime('components/perfil/PerfilPessoal.jsx', 'FormularioPerfil')
+  const props = { perfil: { ...identity, telefone: '11999999999', biografia: 'Apresentação sintética' }, token: 'token-a' }
+  for (const editar of [false, true]) {
+    if (editar) findButton(r.render(props), 'Editar dados').props.onClick()
+    const view = r.render(props)
+    const campos = nodes(view).filter(n => ['input', 'textarea'].includes(n.type))
+    assert.equal(campos.length, 4)
+    const labels = nodes(view).filter(n => n.type === 'label')
+    assert.deepEqual(labels.map(l => text(l).replace(/\s+/g, ' ').trim()), ['Nome completo *', 'E-mail', 'Telefone', 'Biografia'])
+    campos.forEach(c => assert.ok(labels.some(l => l.props.htmlFor === c.props.id)))
+    assert.equal(campos[0].props.required, true)
+    assert.equal(campos[0].props.maxLength, 100)
+    assert.equal(campos[1].props.readOnly, true)
+    assert.equal(campos[1].props.value, identity.email)
+    assert.equal(campos[2].props.maxLength, 30)
+    assert.equal(campos[2].props.value, props.perfil.telefone)
+    assert.equal(campos[3].props.maxLength, 1000)
+    assert.equal(campos[3].props.value, props.perfil.biografia)
+    assert.equal(campos[0].props.disabled, !editar)
+    assert.equal(view.props['aria-busy'], false)
+  }
+  r.unmount()
+})
+
 test('salvamento aguarda servidor, bloqueia envio duplo e mostra resposta persistida', async () => {
   let resolve, calls = 0
   const props = { perfil: identity, token: 'token-a' }

@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs'
 // Executa o hook real com useEffect simulado; sem navegador, rede ou storage real.
 function montar() {
   const fonte = readFileSync(new URL('../src/hooks/useNavegacao.js', import.meta.url), 'utf8')
-    .replace(/^import .*\r?\n/u, '').replace('export function', 'function')
+    .replace(/^import .*\r?\n/u, '').replaceAll('export function', 'function')
   const escritas = []
   let dependencias
   let efeito

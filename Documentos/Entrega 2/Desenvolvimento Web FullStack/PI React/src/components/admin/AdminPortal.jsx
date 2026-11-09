@@ -51,13 +51,26 @@ function PaginaPainelAdmin({ eventoId, aoSelecionar, aoSair }) {
   return <PainelEventoAdmin eventos={consulta.dados} carregando={consulta.carregando} erro={consulta.erro?.message || ''} eventoId={eventoId} aoSelecionar={aoSelecionar} aoSair={aoSair} />
 }
 
-export function AdminPortal({ aoSair }) {
-  const [secao, setSecao] = useState('contas')
-  const [eventoId, setEventoId] = useState(null)
-  const [cotacaoId, setCotacaoId] = useState(null)
-  function navegar(destino) { setCotacaoId(null); setSecao(destino) }
-  function abrirPainel(id) { setEventoId(id); setSecao('painel') }
-  function abrirCotacao(id) { setCotacaoId(id); setSecao('cotacoes') }
+export function AdminPortal({ aoSair, navegacao }) {
+  const [secaoLocal, setSecao] = useState('contas')
+  const [eventoLocal, setEventoLocal] = useState(null)
+  const [cotacaoLocal, setCotacaoId] = useState(null)
+  const secao = navegacao ? navegacao.estado.secao : secaoLocal
+  const eventoId = navegacao ? navegacao.estado.eventoId : eventoLocal
+  const cotacaoId = navegacao ? navegacao.estado.cotacaoId : cotacaoLocal
+  function setEventoId(id) {
+    setEventoLocal(id)
+    if (navegacao) navegacao.mudar({ secao: 'painel', eventoId: id, cotacaoId: null })
+  }
+  function navegar(destino) {
+    if (navegacao) navegacao.mudar({ secao: destino, eventoId: destino === 'painel' ? eventoLocal : null, cotacaoId: null })
+    else { setCotacaoId(null); setSecao(destino) }
+  }
+  function abrirPainel(id) { setEventoId(id); if (!navegacao) setSecao('painel') }
+  function abrirCotacao(id) {
+    if (navegacao) navegacao.mudar({ secao: 'cotacoes', eventoId: null, cotacaoId: id })
+    else { setCotacaoId(id); setSecao('cotacoes') }
+  }
   let conteudo
   if (secao === 'painel') conteudo = <PaginaPainelAdmin eventoId={eventoId} aoSelecionar={setEventoId} aoSair={aoSair} />
   else if (secao === 'perfil') conteudo = <PerfilPessoal contexto="Administração" />

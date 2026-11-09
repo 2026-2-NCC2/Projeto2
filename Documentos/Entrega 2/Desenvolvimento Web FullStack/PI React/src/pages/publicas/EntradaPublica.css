@@ -1,0 +1,7 @@
+.entradaPublica { width: 100%; min-width: 0; }
+.entradaPublica .entradaPublicaRetorno { padding: 12px 24px; background: var(--superficie-cartao); border-bottom: 1px solid var(--borda-superficie); }
+.entradaPublica .entradaPublicaRetorno .ttBotao { min-height: 44px; max-width: 100%; white-space: normal; }
+.entradaPublica .entradaPublicaRetorno .ttBotao:focus-visible { outline: 3px solid var(--foco-cor); outline-offset: 3px; }
+@media (max-width: 540px) {
+  .entradaPublica .entradaPublicaRetorno { padding-inline: 20px; }
+}

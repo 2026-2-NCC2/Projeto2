@@ -1,0 +1,100 @@
+/* Somente apresentação pública; sem efeitos sobre a entrada ou os portais. */
+.lpPagina { min-width: 0; width: 100%; background: var(--superficie-pagina); color: var(--texto-principal); font-family: var(--fonte-padrao); font-size: 1rem; line-height: 1.7; overflow-wrap: anywhere; }
+.lpPagina .lpLimite { width: 100%; max-width: 1280px; min-width: 0; margin-inline: auto; padding-inline: 32px; }
+.lpPagina a { color: var(--link-cor); text-underline-offset: 5px; }
+.lpPagina a:focus-visible, .lpPagina [tabindex='-1']:focus { outline: 3px solid var(--foco-cor); outline-offset: 5px; border-radius: var(--raio-controle); }
+.lpPagina .lpPular { position: absolute; top: 12px; left: 16px; z-index: 2; padding: 12px 20px; background: var(--superficie-cartao); border: 1px solid var(--borda-controle); border-radius: var(--raio-controle); transform: translateY(-200%); }
+.lpPagina .lpPular:focus { transform: none; }
+.lpPagina .lpCabecalho { display: block; height: auto; padding: 0; background: var(--superficie-cartao); border-bottom: 1px solid var(--borda-superficie); }
+.lpPagina .lpCabecalhoInterno { width: 100%; max-width: 1280px; min-width: 0; margin-inline: auto; padding: 22px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px 32px; }
+.lpPagina .lpMarca { display: inline-flex; align-items: center; min-height: 44px; text-decoration: none; }
+.lpPagina .lpNavegacao { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; }
+.lpPagina .lpNavegacao a { display: inline-flex; align-items: center; min-height: 44px; padding-block: 8px; color: var(--texto-secundario); text-decoration: none; font-size: .875rem; font-weight: 600; }
+.lpPagina .lpNavegacao a:hover { color: var(--link-cor); text-decoration: underline; }
+.lpPagina .lpAcessoFuturo { margin: 0; padding: 8px 16px; border: 1px solid var(--borda-superficie); border-radius: var(--raio-controle); font-size: .875rem; line-height: 1.5; color: var(--texto-secundario); }
+.lpPagina .lpAcessoFuturo span { display: block; font-size: .75rem; }
+.lpPagina .lpAcessar { min-height: 44px; max-width: 100%; white-space: normal; }
+.lpPagina .lpAcessar:focus-visible { outline: 3px solid var(--foco-cor); outline-offset: 3px; }
+.lpPagina .lpHero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: center; gap: 56px; padding-block: 80px 96px; }
+.lpPagina .lpHeroTexto { min-width: 0; }
+.lpPagina .lpSobretitulo { font-size: .75rem; font-weight: 750; letter-spacing: .1em; line-height: 1.7; color: var(--marca-coral-escuro); margin: 0 0 20px; }
+.lpPagina h1 { margin: 0; font-size: clamp(2.25rem, 4.3vw, 3.75rem); line-height: 1.12; letter-spacing: -.045em; font-weight: 750; color: var(--texto-principal); }
+.lpPagina h1 span { color: var(--marca-coral-escuro); }
+.lpPagina .lpIntroducao { max-width: 550px; font-size: 1.125rem; color: var(--texto-secundario); margin: 28px 0; }
+.lpPagina .lpHeroAcoes { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+.lpPagina .lpLinkDestaque, .lpPagina .lpLinkSecundario { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 12px 20px; border: 1px solid var(--borda-controle); border-radius: var(--raio-controle); font-size: .9375rem; font-weight: 650; text-decoration: none; }
+.lpPagina .lpLinkDestaque { background: var(--acao-primaria-fundo); color: var(--acao-primaria-texto); border-color: var(--marca-coral-escuro); }
+.lpPagina .lpLinkDestaque:hover { background: var(--acao-hover-fundo); color: var(--acao-hover-texto); }
+.lpPagina .lpLinkSecundario { background: var(--superficie-cartao); color: var(--link-cor); }
+.lpPagina .lpLinkSecundario:hover { background: var(--marca-coral-suave); }
+.lpPagina .lpNota { font-size: .8125rem; color: var(--texto-secundario); line-height: 1.7; margin-block: 16px 0; }
+.lpPagina .lpComposicao { position: relative; min-width: 0; padding: 40px 20px 40px 36px; isolation: isolate; }
+.lpPagina .lpOrbita { position: absolute; inset: 5% 0; z-index: -1; border: 1px solid var(--marca-coral); border-radius: 50%; }
+.lpPagina .lpPoster { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 28px; padding: 36px; border: 1px solid var(--borda-superficie); border-radius: 28px; background: var(--marca-coral-suave); box-shadow: var(--sombra-cartao); }
+.lpPagina .lpPosterRotulo { color: var(--marca-coral-escuro); font-size: .6875rem; letter-spacing: .12em; font-weight: 700; }
+.lpPagina .lpPoster > .icone { color: var(--marca-coral-escuro); }
+.lpPagina .lpPoster > strong { font-size: clamp(2rem, 4vw, 3.5rem); line-height: 1.1; letter-spacing: -.04em; }
+.lpPagina .lpPosterRodape { width: 100%; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding-top: 20px; border-top: 1px solid var(--borda-superficie); font-size: .8125rem; font-weight: 650; }
+.lpPagina .lpPosterRodape > span { color: var(--texto-secundario); font-weight: 400; }
+.lpPagina .lpSelo { position: relative; display: flex; align-items: center; gap: 12px; width: fit-content; max-width: 100%; margin: -30px 0 0 -20px; padding: 16px 24px; border: 1px solid var(--borda-superficie); border-radius: 16px; background: var(--superficie-cartao); box-shadow: var(--sombra-cartao); font-size: .875rem; line-height: 1.5; }
+.lpPagina .lpSelo .icone { flex-shrink: 0; color: var(--marca-coral-escuro); }
+.lpPagina .lpSecao { padding-block: 80px; scroll-margin-top: 24px; }
+.lpPagina .lpTituloSecao { max-width: 640px; margin-bottom: 40px; }
+.lpPagina h2 { font-size: clamp(1.75rem, 3vw, 2.5rem); line-height: 1.2; letter-spacing: -.035em; color: var(--texto-principal); margin: 0 0 20px; }
+.lpPagina .lpTituloSecao > p:last-child { margin: 0; color: var(--texto-secundario); }
+.lpPagina .lpComo { background: var(--superficie-cartao); border-block: 1px solid var(--borda-superficie); }
+.lpPagina .lpPerfis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+.lpPagina .lpCard { min-width: 0; padding: 32px; border: 1px solid var(--borda-superficie); border-radius: 20px; background: var(--superficie-cartao); box-shadow: var(--sombra-cartao); }
+.lpPagina .lpIcone { display: inline-grid; place-items: center; width: 56px; height: 56px; flex-shrink: 0; border-radius: 16px; background: var(--marca-coral-suave); color: var(--marca-coral-escuro); }
+.lpPagina h3 { font-size: 1.25rem; line-height: 1.4; margin: 24px 0 12px; }
+.lpPagina .lpCard > p { color: var(--texto-secundario); font-size: .9375rem; margin: 0; }
+.lpPagina .lpCard .lpCardResumo { color: var(--texto-principal); font-size: 1rem; font-weight: 600; margin-bottom: 16px; }
+.lpPagina .lpBeneficiosGrade { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 48px; }
+.lpPagina .lpBeneficio { display: flex; align-items: flex-start; gap: 20px; min-width: 0; }
+.lpPagina .lpBeneficio > div { min-width: 0; }
+.lpPagina .lpBeneficio h3 { margin-top: 0; }
+.lpPagina .lpBeneficio p { color: var(--texto-secundario); margin: 0; }
+.lpPagina .lpProjeto { background: var(--marca-coral-suave); border-block: 1px solid var(--borda-superficie); }
+.lpPagina .lpProjetoInterno { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 64px; align-items: start; }
+.lpPagina .lpProjetoInterno > div { min-width: 0; }
+.lpPagina .lpProjetoInterno p { margin-top: 0; }
+.lpPagina .lpRodape { background: var(--superficie-cartao); padding-block: 48px 32px; }
+.lpPagina .lpRodapeTopo { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 24px; }
+.lpPagina .lpRodapeTopo p { font-size: .875rem; color: var(--texto-secundario); margin: 16px 0 0; }
+.lpPagina .lpTransparencia { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--borda-superficie); }
+.lpPagina .lpTransparencia > p { margin: 0 0 8px; font-size: .875rem; font-weight: 650; }
+.lpPagina .transparenciaLinks { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 0; }
+.lpPagina .transparenciaLinks a { display: inline-flex; align-items: center; min-height: 44px; padding-block: 8px; font-size: .875rem; }
+@media (max-width: 1000px) {
+  .lpPagina .lpCabecalhoInterno { gap: 16px 24px; }
+  .lpPagina .lpHero { gap: 24px; padding-block: 56px 64px; }
+  .lpPagina .lpCard { padding: 24px; }
+  .lpPagina .lpProjetoInterno { gap: 32px; }
+}
+@media (max-width: 800px) {
+  .lpPagina .lpCabecalhoInterno { justify-content: space-between; }
+  .lpPagina .lpCabecalhoInterno > .lpNavegacao { flex-basis: 100%; }
+  .lpPagina .lpAcessoFuturo { order: -1; }
+  .lpPagina .lpAcessar { order: -1; }
+  .lpPagina .lpCabecalhoInterno > .lpMarca { order: -2; }
+  .lpPagina .lpHero { grid-template-columns: minmax(0, 1fr); }
+  .lpPagina .lpComposicao { width: 100%; max-width: 520px; justify-self: center; }
+  .lpPagina .lpPerfis { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .lpPagina .lpBeneficiosGrade { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .lpPagina .lpProjetoInterno { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+}
+@media (max-width: 540px) {
+  .lpPagina .lpLimite { padding-inline: 20px; }
+  .lpPagina .lpCabecalhoInterno { padding: 20px; }
+  .lpPagina .lpNavegacao { gap: 4px 20px; }
+  .lpPagina .lpAcessoFuturo { padding: 0; border: 0; flex-basis: 100%; }
+  .lpPagina .lpHero { padding-block: 40px 48px; }
+  .lpPagina .lpHeroAcoes { flex-direction: column; align-items: stretch; }
+  .lpPagina .lpSecao { padding-block: 48px; }
+  .lpPagina .lpTituloSecao { margin-bottom: 28px; }
+  .lpPagina .lpComposicao { padding: 24px 12px; }
+  .lpPagina .lpPoster { padding: 28px; gap: 20px; }
+  .lpPagina .lpSelo { margin-left: 0; padding: 16px; }
+  .lpPagina .lpBeneficio { gap: 16px; }
+  .lpPagina .lpRodape { padding-block: 40px 24px; }
+}
