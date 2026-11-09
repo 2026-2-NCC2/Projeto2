@@ -1,5 +1,6 @@
-import { Botao, Campo, Alerta } from '../../components/ui/Primitivas.jsx'
+import { Botao, Campo, Alerta, Badge } from '../../components/ui/Primitivas.jsx'
 import './Organizador.css'
+import './OrganizadorGerenciamento.css'
 import { VagasEvento } from '../../components/eventos/VagasEvento.jsx'
 import { MidiaEvento } from '../../components/eventos/MidiaEvento.jsx'
 
@@ -23,12 +24,14 @@ export function CriarEvento({
   await aoAvancarParaCustos()
   }
   return (
-    <div className="organizadorPagina">
+    <div className="organizadorPagina orgEventoFormulario">
       <Botao className="voltar" variante="discreto" onClick={() => setPagina('eventos')}>
         ← Voltar para Meus Eventos
       </Botao>
-      <h1>{evento.id?'Dados do evento':'Criar evento'}</h1>
-      {evento.status && <p>Estado: <strong>{evento.status}</strong></p>}
+      <div className="orgFormularioTitulo">
+        <h1>{evento.id?'Dados do evento':'Criar evento'}</h1>
+        {evento.status && <p>Estado: <Badge variante={({ Ativo: 'sucesso', Cancelado: 'erro', Encerrado: 'neutro', 'Em planejamento': 'neutro' })[evento.status] || 'neutro'}>{evento.status}</Badge></p>}
+      </div>
       {publicado && <Alerta variante="informacao">O evento já foi publicado. A descrição e a capacidade podem ser editadas quando disponíveis.</Alerta>}
       {!podeSalvar && <Alerta variante="informacao">Dados disponíveis para consulta. O salvamento está indisponível.</Alerta>}
       <p>Comece pelos dados básicos para planejar o evento e as cotações.</p>
@@ -38,8 +41,12 @@ export function CriarEvento({
         <span>2 &nbsp; Custos e Cotações</span>
         <span>3 &nbsp; Ticket e Viabilidade</span>
       </div>
-      <form onSubmit={aoEnviarFormulario} className="cartaoFormulario">
-        <fieldset disabled={!podeSalvar||salvando} style={{border:0,padding:0,margin:0,minWidth:0}}>
+      <form onSubmit={aoEnviarFormulario} className="cartaoFormulario" aria-label="Dados do evento" aria-busy={salvando}>
+        <fieldset disabled={!podeSalvar||salvando} className="orgFormularioCampos">
+        <legend className="ttSrOnly">Dados básicos do evento</legend>
+        <section className="orgFormularioGrupo" aria-labelledby="org-identificacao-evento">
+        <h2 id="org-identificacao-evento">Identificação</h2>
+        <p>Defina o nome que identifica este evento.</p>
         <Campo id="criarevento-campo-1" label="Nome do evento"
           value={evento.nome}
           maxLength={100}
@@ -48,6 +55,10 @@ export function CriarEvento({
           placeholder="Ex: Summit Corporativo de Inovação & Tecnologia 2026"
           obrigatorio
          />
+        </section>
+        <section className="orgFormularioGrupo" aria-labelledby="org-agenda-evento">
+        <h2 id="org-agenda-evento">Data e local</h2>
+        <p>Datas e horários seguem o fuso de Brasília.</p>
         <div className="duasColunas">
           <div>
             <Campo id="criarevento-campo-2" label="Data do evento"
@@ -70,8 +81,6 @@ export function CriarEvento({
              />
           </div>
         </div>
-        <div className="duasColunas">
-          <div>
             <Campo id="criarevento-campo-4" label="Local do evento"
               value={evento.local}
               maxLength={200}
@@ -80,8 +89,10 @@ export function CriarEvento({
               placeholder="Ex: Centro de Convenções Rebouças, SP"
               obrigatorio
              />
-          </div>
-          <div>
+        </section>
+        <section className="orgFormularioGrupo" aria-labelledby="org-publico-evento">
+        <h2 id="org-publico-evento">Público e capacidade</h2>
+        <p>O público previsto é uma estimativa; a capacidade limita as inscrições quando disponível.</p>
             <Campo id="criarevento-campo-5" label="Público previsto (participantes)"
               type="number"
               min="1"
@@ -92,16 +103,16 @@ export function CriarEvento({
               onChange={(eventoDisparado) => aoAlterarCampo('publico', Number(eventoDisparado.target.value))}
               obrigatorio
              />
-          </div>
-        </div>
         <VagasEvento evento={evento} />
         {controleCapacidade && <>
           <Campo id="capacidade-evento" label="Capacidade máxima de inscrições"  type="number" min="1" max="2147483647" step="1"
+            dica="Deixe vazio para manter sem limite configurado. Público previsto é uma estimativa independente. A capacidade deve comportar todos os inscritos confirmados."
             value={evento.capacidade_maxima ?? ''}
             onChange={e=>aoAlterarCampo('capacidade_maxima',e.target.value===''?null:Number(e.target.value))}  />
-          <p>Deixe vazio para manter sem limite configurado. Público previsto é uma estimativa independente.
-          A capacidade deve comportar todos os inscritos confirmados.</p>
         </>}
+        </section>
+        <section className="orgFormularioGrupo" aria-labelledby="org-descricao-evento">
+        <h2 id="org-descricao-evento">Categoria e descrição</h2>
         <p className="categoriasTitulo" id="categoria-evento-titulo">Categoria do evento</p>
         <div className="categorias" role="group" aria-labelledby="categoria-evento-titulo">
           {categorias.map((itemCategoria) => (
@@ -124,6 +135,7 @@ export function CriarEvento({
           onChange={(eventoDisparado) => aoAlterarCampo('descricao', eventoDisparado.target.value)}
           placeholder="Descreva os objetivos, perfil do público e necessidades gerais..."
          />
+        </section>
         <div className="acoes">
           <Botao variante="secundario"
             type="button"
@@ -138,7 +150,10 @@ export function CriarEvento({
         </div>
         </fieldset>
       </form>
-      <MidiaEvento eventoId={evento.id} estado={evento.status} editar />
+      <section className="orgFormularioImagens" aria-labelledby="org-imagens-evento">
+        <h2 id="org-imagens-evento">Imagens do evento</h2>
+        <MidiaEvento eventoId={evento.id} estado={evento.status} editar />
+      </section>
     </div>
   )
 }

@@ -1,0 +1,65 @@
+/* O3: estilos exclusivos da listagem e do formulário de eventos do organizador. */
+.orgDashboard .orgGerenciamento .listaEventos { display: grid; gap: 16px; overflow: visible; border: 0; background: transparent; border-radius: 0; }
+.orgDashboard .orgGerenciamento .orgEvento { display: flex; flex-direction: column; align-items: stretch; min-width: 0; gap: 0; padding: 24px; border: 1px solid var(--borda-superficie); border-radius: var(--raio-cartao); background: var(--superficie-cartao); }
+.orgDashboard .orgGerenciamento .orgEvento:last-child { border-bottom: 1px solid var(--borda-superficie); }
+.orgDashboard .orgGerenciamento .orgEventoCabecalho { display: grid; grid-template-columns: 72px minmax(0, 1fr); align-items: start; gap: 18px; min-width: 0; }
+.orgDashboard .orgGerenciamento .orgEventoCabecalho > * { min-width: 0; overflow-wrap: anywhere; }
+.orgDashboard .orgGerenciamento .orgEventoCabecalho .eventoCapaLista, .orgDashboard .orgGerenciamento .orgEventoCabecalho .eventoIdentidade { width: 72px; height: 72px; min-width: 0; border-radius: var(--raio-controle); object-fit: cover; }
+.orgDashboard .orgGerenciamento .orgEvento .eventoInfo { min-width: 0; }
+.orgDashboard .orgGerenciamento .orgEvento .eventoInfo h3 { display: block; margin: 0 0 8px; font-size: 1.125rem; line-height: 1.4; overflow-wrap: anywhere; }
+.orgDashboard .orgGerenciamento .orgEvento .eventoMetadados { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 12px 0 0; color: var(--texto-secundario); font-size: .8125rem; line-height: 1.6; }
+.orgDashboard .orgGerenciamento .orgEvento .eventoMetadados > span { display: flex; align-items: flex-start; gap: 8px; min-width: 0; overflow-wrap: anywhere; }
+.orgDashboard .orgGerenciamento .orgEvento .eventoMetadados .icone { flex-shrink: 0; margin-top: 2px; }
+.orgDashboard .orgGerenciamento .orgEventoNumeros { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 24px 0 0; padding: 18px; border-radius: var(--raio-controle); background: var(--superficie-pagina); }
+.orgDashboard .orgGerenciamento .orgEventoNumeros > div { min-width: 0; overflow-wrap: anywhere; }
+.orgDashboard .orgGerenciamento .orgEventoNumeros dt { margin: 0 0 6px; color: var(--texto-secundario); font-size: .75rem; line-height: 1.6; }
+.orgDashboard .orgGerenciamento .orgEventoNumeros dd { margin: 0; color: var(--texto-principal); font-size: .875rem; font-weight: 650; font-variant-numeric: tabular-nums; line-height: 1.6; }
+.orgDashboard .orgGerenciamento .orgEventoDisponibilidade { margin-top: 16px; padding: 12px 16px; border: 1px solid var(--borda-superficie); border-radius: var(--raio-controle); color: var(--texto-principal); font-size: .8125rem; line-height: 1.7; overflow-wrap: anywhere; }
+.orgDashboard .orgGerenciamento .orgEventoDisponibilidade:empty { display: none; }
+.orgDashboard .orgGerenciamento .orgEventoDisponibilidade p { margin: 0; }
+.orgDashboard .orgGerenciamento .orgEventoMidia { min-width: 0; margin-top: 16px; }
+.orgDashboard .orgGerenciamento .orgEventoAcoes { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--borda-superficie); }
+.orgDashboard .orgGerenciamento .orgEventoAcoes .ttBotao { min-height: 44px; min-width: 0; max-width: 100%; padding: 10px 16px; font-size: .8125rem; line-height: 1.5; white-space: normal; overflow-wrap: anywhere; }
+.orgDashboard .orgGerenciamento .orgEventoAcoes .orgEventoAcessar { margin-left: auto; }
+.orgDashboard .orgGerenciamento .filtros input { border-color: var(--borda-controle); border-radius: var(--raio-controle); font-size: .875rem; }
+.orgDashboard .orgGerenciamento .filtros .ttBotao { min-height: 44px; }
+.orgEventoFormulario { min-width: 0; color: var(--texto-principal); }
+.orgEventoFormulario .voltar { margin: 0 0 16px; min-height: 44px; padding: 10px 0; }
+.orgEventoFormulario .orgFormularioTitulo { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; margin-bottom: 12px; }
+.orgEventoFormulario .orgFormularioTitulo h1 { margin: 0; font-size: clamp(1.5rem, 2.4vw, 2rem); line-height: 1.3; }
+.orgEventoFormulario .orgFormularioTitulo p { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; color: var(--texto-secundario); font-size: .8125rem; }
+.orgEventoFormulario > p { margin: 8px 0; color: var(--texto-secundario); font-size: .875rem; line-height: 1.7; }
+.orgEventoFormulario .etapas { margin: 24px 0; padding: 20px 24px; gap: 16px; background: var(--superficie-cartao); border-color: var(--borda-superficie); }
+.orgEventoFormulario .cartaoFormulario { padding: 28px; border-color: var(--borda-superficie); border-radius: var(--raio-cartao); box-shadow: var(--sombra-cartao); }
+.orgEventoFormulario .orgFormularioCampos { border: 0; padding: 0; margin: 0; min-width: 0; }
+.orgEventoFormulario .orgFormularioGrupo { min-width: 0; padding-block: 24px; border-bottom: 1px solid var(--borda-superficie); }
+.orgEventoFormulario .orgFormularioGrupo:first-of-type { padding-top: 0; }
+.orgEventoFormulario .orgFormularioGrupo:last-of-type { padding-bottom: 0; border-bottom: 0; }
+.orgEventoFormulario .orgFormularioGrupo h2, .orgEventoFormulario .orgFormularioImagens h2 { margin: 0 0 8px; font-size: 1.0625rem; line-height: 1.5; color: var(--texto-principal); }
+.orgEventoFormulario .orgFormularioGrupo > p { margin: 0 0 20px; font-size: .8125rem; line-height: 1.7; color: var(--texto-secundario); }
+.orgEventoFormulario .orgFormularioGrupo .ttCampo { margin: 20px 0 0; }
+.orgEventoFormulario .orgFormularioGrupo .ttCampo > label { margin: 0; font-size: .875rem; line-height: 1.5; }
+.orgEventoFormulario .orgFormularioGrupo .ttCampoControle { min-width: 0; min-height: 44px; font-size: 1rem; }
+.orgEventoFormulario .duasColunas { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.orgEventoFormulario .duasColunas .ttCampo { margin: 0; }
+.orgEventoFormulario .orgFormularioGrupo .categoriasTitulo { margin: 20px 0 10px; color: var(--texto-principal); font-weight: 600; }
+.orgEventoFormulario .categorias { gap: 10px; }
+.orgEventoFormulario .categorias .ttBotao { min-height: 44px; padding: 10px 16px; font-size: .875rem; }
+.orgEventoFormulario .acoes { gap: 12px; margin-top: 28px; padding-top: 24px; border-color: var(--borda-superficie); }
+.orgEventoFormulario .acoes .ttBotao { min-height: 44px; min-width: 0; overflow-wrap: anywhere; }
+.orgEventoFormulario .orgFormularioImagens { min-width: 0; margin-top: 24px; padding: 24px; border: 1px solid var(--borda-superficie); border-radius: var(--raio-cartao); background: var(--superficie-cartao); box-shadow: var(--sombra-cartao); }
+.orgEventoFormulario button:focus-visible, .orgEventoFormulario input:focus-visible, .orgEventoFormulario textarea:focus-visible { outline: 3px solid var(--foco-cor); outline-offset: 3px; }
+@media (max-width: 700px) {
+  .orgEventoFormulario .duasColunas { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+}
+@media (max-width: 600px) {
+  .orgDashboard .orgGerenciamento .orgEvento { padding: 18px; }
+  .orgDashboard .orgGerenciamento .orgEventoCabecalho { grid-template-columns: 56px minmax(0, 1fr); gap: 12px; }
+  .orgDashboard .orgGerenciamento .orgEventoCabecalho .eventoCapaLista, .orgDashboard .orgGerenciamento .orgEventoCabecalho .eventoIdentidade { width: 56px; height: 56px; }
+  .orgDashboard .orgGerenciamento .orgEventoNumeros { grid-template-columns: minmax(0, 1fr); gap: 14px; padding: 16px; }
+  .orgDashboard .orgGerenciamento .orgEventoAcoes .ttBotao { flex: 1 1 100%; width: 100%; }
+  .orgDashboard .orgGerenciamento .orgEventoAcoes .orgEventoAcessar { margin-left: 0; }
+  .orgEventoFormulario .cartaoFormulario, .orgEventoFormulario .orgFormularioImagens { padding: 18px; }
+  .orgEventoFormulario .etapas { padding: 18px; }
+  .orgEventoFormulario .acoes .ttBotao { flex: 1 1 100%; }
+}

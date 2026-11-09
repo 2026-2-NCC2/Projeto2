@@ -1,5 +1,6 @@
 import { Skeleton, Botao, Campo, Badge, Alerta, EstadoVazio } from '../../components/ui/Primitivas.jsx'
 import './Organizador.css'
+import './OrganizadorAcabamento.css'
 import { Icone } from '../../components/ui/Icone.jsx'
 import { useState, useMemo, useEffect } from 'react'
 import { ConsultaPortfolios } from '../../components/portfolio/Portfolio.jsx'
@@ -137,7 +138,7 @@ const aoPublicarCotacao = async () => {
 }
 
   return (
-    <div className="organizadorPagina">
+    <div className="organizadorPagina orgPaginaSecundaria">
       <Botao className="voltar" variante="discreto" onClick={() => setPagina('custos')}>
         ← Voltar para Itens de Custo
       </Botao>

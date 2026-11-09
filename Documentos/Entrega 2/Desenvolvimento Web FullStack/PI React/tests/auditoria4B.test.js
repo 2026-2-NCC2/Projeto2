@@ -164,7 +164,7 @@ for (const response of [{ ok: false }, ok({ invalido: true })]) test('falha de e
 test('fornecedor abre cada proposta com campos vazios e exemplos apenas nos placeholders', async () => {
   let pagina = 'fornecedor-mural'
   const r = runtime('pages/fornecedor/PortalFornecedor.jsx', 'PortalFornecedor', {
-    AbortController, IdentidadeConta: 'IdentidadeConta', formatarMoeda: String,
+    AbortController, IdentidadeConta: 'IdentidadeConta', NavegacaoRecolhivel: 'navegacao-recolhivel', formatarMoeda: String,
     fetch: async url => ok(url.endsWith('/cotacoes') ? [{ id: 1, evento_nome: 'Cotação', prazo: '2027-01-01', itens: [] }] : []),
   })
   const props = () => ({ pagina, setPagina: p => { pagina = p }, PerfilFornecedor: 'PerfilFornecedor' })

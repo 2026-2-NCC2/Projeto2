@@ -19,6 +19,7 @@ function runtime(file, name, fetch) {
   const states = [], effects = [], cleanups = []
   let cursor = 0, effectCursor = 0, token = 'token-a'
   const env = {
+    useRef: initial => ({ current: initial }), NavegacaoRecolhivel: 'navegacao-recolhivel',
     useState(initial) { const i = cursor++; if (!(i in states)) states[i] = typeof initial === 'function' ? initial() : initial; return [states[i], value => { states[i] = typeof value === 'function' ? value(states[i]) : value }] },
     useEffect(effect, deps) { const i = effectCursor++; if (!effects[i] || deps.some((v, j) => v !== effects[i][j])) { cleanups[i]?.(); effects[i] = deps; cleanups[i] = effect() } },
     apiUrl: x => 'http://localhost:3001' + x, sessionStorage: { getItem: () => token }, fetch, AbortController,

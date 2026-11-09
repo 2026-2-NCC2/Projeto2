@@ -1,0 +1,55 @@
+/* F1: estrutura exclusiva do fornecedor; conteúdo interno preservado. */
+.fornEstrutura { display: grid; grid-template-columns: 264px minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); min-width: 0; width: 100%; background: var(--superficie-pagina); }
+.fornEstrutura .fornPular { position: absolute; top: 12px; left: 16px; z-index: 3; transform: translateY(-200%); padding: 12px 18px; border: 1px solid var(--borda-controle); border-radius: var(--raio-controle); background: var(--superficie-cartao); color: var(--link-cor); }
+.fornEstrutura .fornPular:focus { transform: none; }
+.fornEstrutura .fornSidebar { grid-column: 1; grid-row: 1 / 3; display: flex; flex-direction: column; position: sticky; top: 0; align-self: start; min-width: 0; height: 100vh; height: 100dvh; overflow-y: auto; background: var(--superficie-cartao); border-right: 1px solid var(--borda-superficie); }
+.fornEstrutura .fornMarca { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; min-width: 0; padding: 28px 24px 24px; }
+.fornEstrutura .fornMarca > small { color: var(--texto-secundario); font-size: .6875rem; font-weight: 650; letter-spacing: .08em; }
+.fornEstrutura .fornNavegacao { display: flex; flex-direction: column; flex: 1; width: 100%; min-width: 0; }
+.fornEstrutura .fornNavegacao .alternarNavegacao { display: none; }
+.fornEstrutura .fornNavegacao .painelNavegacao, .fornEstrutura .fornNavegacao .painelNavegacao[data-aberto='false'] { display: flex; flex: 1; min-width: 0; }
+.fornEstrutura .fornSidebar .fornMenu { width: 100%; min-width: 0; gap: 24px; padding: 0 16px 24px; border: 0; background: transparent; }
+.fornEstrutura .fornSidebar .fornMenu nav { display: flex; flex-direction: column; gap: 6px; }
+.fornEstrutura .fornSidebar .fornMenu button { display: flex; align-items: center; gap: 12px; min-height: 48px; min-width: 0; max-width: 100%; padding: 12px 16px; border: 1px solid transparent; border-radius: 12px; font-size: .875rem; line-height: 1.5; white-space: normal; overflow-wrap: anywhere; }
+.fornEstrutura .fornSidebar .fornMenu nav button:enabled { background: transparent; color: var(--texto-secundario); }
+.fornEstrutura .fornSidebar .fornMenu nav button[aria-current='page']:enabled { background: var(--marca-coral-suave); color: var(--marca-coral-escuro); font-weight: 700; }
+.fornEstrutura .fornSidebar .fornMenu nav button:hover:enabled { background: var(--marca-coral-suave); color: var(--link-cor); }
+.fornEstrutura .fornSidebar .fornMenu > .novo { justify-content: center; background: var(--acao-primaria-fundo); color: var(--acao-primaria-texto); border-color: var(--marca-coral-escuro); }
+.fornEstrutura .fornSidebar .fornMenu > .novo:hover:enabled { background: var(--acao-hover-fundo); color: var(--acao-hover-texto); }
+.fornEstrutura .fornSidebar .fornSair { margin-top: auto; border-top: 1px solid var(--borda-superficie); border-radius: 0; color: var(--estado-erro-texto); }
+.fornEstrutura .fornTopo { grid-column: 2; grid-row: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 260px); align-items: center; gap: 24px; min-height: 104px; padding: 24px 32px; background: var(--superficie-cartao); box-shadow: none; }
+.fornEstrutura .fornContexto, .fornEstrutura .fornEmpresa { min-width: 0; overflow-wrap: anywhere; }
+.fornEstrutura .fornContexto > p { margin: 0 0 6px; color: var(--texto-secundario); font-size: .75rem; }
+.fornEstrutura #fornecedor-titulo-secao { margin: 0; color: var(--texto-principal); font-size: 1.375rem; line-height: 1.35; font-weight: 700; }
+.fornEstrutura .fornEmpresa { display: block; justify-self: end; max-width: 100%; margin: 0; }
+.fornEstrutura .fornEmpresa .identidadeConta { align-items: flex-end; text-align: right; max-width: 100%; }
+.fornEstrutura .fornEmpresa .identidadeConta strong { font-size: .875rem; line-height: 1.5; }
+.fornEstrutura .fornEmpresa .identidadeConta small { font-size: .8125rem; line-height: 1.6; }
+.fornEstrutura .fornConteudo { grid-column: 2; grid-row: 2; width: 100%; min-width: 0; max-width: 1440px; margin-inline: auto; padding: 32px 32px 64px; }
+.fornEstrutura .fornPular:focus-visible, .fornEstrutura .fornConteudo:focus, .fornEstrutura .fornNavegacao button:focus-visible { outline: 3px solid var(--foco-cor); outline-offset: 3px; }
+@media (max-width: 1000px) {
+  .fornEstrutura { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto minmax(0, 1fr); }
+  .fornEstrutura .fornSidebar { grid-column: 1; grid-row: 1; display: grid; grid-template-columns: minmax(0, 1fr) auto; position: static; height: auto; overflow-y: visible; border-right: 0; border-bottom: 1px solid var(--borda-superficie); }
+  .fornEstrutura .fornMarca { padding: 20px 24px; }
+  .fornEstrutura .fornNavegacao { display: contents; }
+  .fornEstrutura .fornNavegacao .alternarNavegacao { display: flex; grid-column: 2; grid-row: 1; align-self: center; margin: 16px 24px 16px 0; border-color: var(--borda-controle); }
+  .fornEstrutura .fornNavegacao .painelNavegacao { grid-column: 1 / -1; }
+  .fornEstrutura .fornNavegacao .painelNavegacao[data-aberto='false'] { display: none; }
+  .fornEstrutura .fornSidebar .fornMenu { padding-inline: 24px; }
+  .fornEstrutura .fornTopo { grid-column: 1; grid-row: 2; }
+  .fornEstrutura .fornConteudo { grid-column: 1; grid-row: 3; }
+}
+@media (max-width: 540px) {
+  .fornEstrutura .fornMarca { padding: 20px 18px; }
+  .fornEstrutura .fornMarca .ttMarcaNome { font-size: 1.125rem; }
+  .fornEstrutura .fornNavegacao .alternarNavegacao { margin-right: 18px; padding-inline: 12px; gap: 8px; }
+  .fornEstrutura .fornSidebar .fornMenu { padding-inline: 18px; }
+  .fornEstrutura .fornTopo { grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 20px 18px; }
+  .fornEstrutura .fornEmpresa { justify-self: start; }
+  .fornEstrutura .fornEmpresa .identidadeConta { align-items: flex-start; text-align: left; }
+  .fornEstrutura .fornConteudo { padding: 24px 18px 48px; }
+}
+@media (max-width: 340px) {
+  .fornEstrutura .fornSidebar { grid-template-columns: minmax(0, 1fr); }
+  .fornEstrutura .fornNavegacao .alternarNavegacao { grid-column: 1; grid-row: 2; justify-self: start; margin: 0 18px 20px; }
+}

@@ -1,5 +1,6 @@
 import { Botao } from '../../components/ui/Primitivas.jsx'
 import './Organizador.css'
+import './OrganizadorAcabamento.css'
 import { useState, useMemo } from 'react'
 import { formatarMoeda } from '../../utils/formatarMoeda.js'
 
@@ -22,7 +23,7 @@ export function Ticket({
   const margemOperacional = custoTotal * (margemPercentual / 100)
   const ticketSugerido = (custoTotal + margemOperacional) / publico
   if (!podeCalcular) return (
-    <section className="cartaoTicket">
+    <section className="cartaoTicket orgPaginaSecundaria">
       <h1>Estimativa de ticket indisponível</h1>
       <p>{!Number.isFinite(publico) || publico <= 0
         ? 'Cadastre um público previsto válido para calcular o ticket.'
@@ -31,7 +32,7 @@ export function Ticket({
     </section>
   )
   return (
-    <div className="organizadorPagina">
+    <div className="organizadorPagina orgPaginaSecundaria">
       <Botao className="voltar" variante="discreto" onClick={() => setPagina('cotacao')}>
         ← Voltar às Cotações
       </Botao>
@@ -54,7 +55,7 @@ export function Ticket({
             Estimativa por ingresso para cobrir custos, com acréscimo de{' '}
             {margemPercentual}% sobre os custos. A estimativa não confirma cotações ou propostas.
           </p>
-          <hr style={{ margin: '20px 0', border: '0', borderTop: '1px solid #e2e4eb' }} />
+          <hr className="orgDivisorTicket" />
           <div className="itemResumo">
             <span>Custo total estimado</span>
             <b>{formatarMoeda(custoTotal)}</b>

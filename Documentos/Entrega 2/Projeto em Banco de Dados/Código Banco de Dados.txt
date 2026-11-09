@@ -1,0 +1,69 @@
+CREATE DATABASE `Banco de Dados`
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
+
+USE `Banco de Dados`;
+
+CREATE TABLE usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    perfil VARCHAR(30) NOT NULL
+);
+
+CREATE TABLE eventos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    data DATE NOT NULL,
+    horario TIME NOT NULL,
+    local VARCHAR(200) NOT NULL,
+    capacidade INT NOT NULL,
+    status VARCHAR(30) DEFAULT 'Em planejamento',
+    usuario_id INT NOT NULL,
+
+    CONSTRAINT fk_evento_usuario
+        FOREIGN KEY (usuario_id)
+        REFERENCES usuarios(id)
+);
+
+CREATE TABLE inscricoes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT NOT NULL,
+    evento_id INT NOT NULL,
+    data_inscricao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(30) DEFAULT 'Confirmada',
+
+    CONSTRAINT fk_inscricao_usuario
+        FOREIGN KEY (usuario_id)
+        REFERENCES usuarios(id),
+
+    CONSTRAINT fk_inscricao_evento
+        FOREIGN KEY (evento_id)
+        REFERENCES eventos(id),
+
+    CONSTRAINT uq_inscricao_usuario_evento
+        UNIQUE (usuario_id, evento_id)
+);
+
+CREATE TABLE cotacoes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    evento_id INT NOT NULL,
+    prazo DATE NOT NULL,
+    modalidade VARCHAR(50) NOT NULL DEFAULT 'Fechada',
+    observacoes TEXT,
+    status VARCHAR(30) NOT NULL DEFAULT 'Aberta',
+    criada_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_cotacao_evento
+        FOREIGN KEY (evento_id)
+        REFERENCES eventos(id)
+);
+
+
+INSERT INTO usuarios (nome, email, perfil)VALUES
+('Carlos Silva', 'carlos@exemplo.com', 'organizador'),
+('Ana Oliveira', 'ana@exemplo.com', 'participante'),
+('Lucas Santos', 'lucas@exemplo.com', 'participante'),
+('Mariana Costa', 'mariana@exemplo.com', 'fornecedor');
+
+SELECT * FROM usuarios;

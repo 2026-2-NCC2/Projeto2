@@ -1,0 +1,22 @@
+/* O4: apenas custos, cotações e ticket. O1, dashboard, gerenciamento e perfil mantêm seus estilos. */
+.orgPaginaSecundaria { min-width: 0; color: var(--texto-principal); overflow-wrap: anywhere; }
+.orgPaginaSecundaria h1 { margin-block: 0 12px; font-size: clamp(1.5rem, 2.4vw, 2rem); line-height: 1.3; }
+.orgPaginaSecundaria > p { color: var(--texto-secundario); font-size: .875rem; line-height: 1.7; }
+.orgPaginaSecundaria .cartaoFormulario h2, .orgPaginaSecundaria .cartaoTicket h2 { font-size: 1.0625rem; line-height: 1.5; }
+.orgPaginaSecundaria .cartaoFormulario h2 > .icone { vertical-align: middle; }
+.orgPaginaSecundaria .ttCampoControle { font-size: 1rem; }
+.orgPaginaSecundaria .ttBotao { min-height: 44px; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+.orgPaginaSecundaria .ttBotao--secundario:enabled { color: var(--link-cor); }
+.orgPaginaSecundaria .ttBotao--secundario:hover:enabled { background: var(--marca-coral-suave); }
+.orgPaginaSecundaria .cartaoFormulario .cartaoFormulario { box-shadow: none; }
+.orgPaginaSecundaria .cartaoFormulario > .ttSkeleton--card { border: 0; padding: 0; box-shadow: none; }
+.orgPaginaSecundaria .ttAlerta { line-height: 1.7; }
+.orgPaginaSecundaria .ttAlerta p { color: inherit; }
+.orgPaginaSecundaria .tabela { min-width: 0; }
+.orgPaginaSecundaria .orgDivisorTicket { margin: 20px 0; border: 0; border-top: 1px solid var(--borda-superficie); }
+.orgPaginaSecundaria input[type='range'] { min-height: 44px; padding-inline: 0; }
+.orgPaginaSecundaria button:focus-visible, .orgPaginaSecundaria input:focus-visible, .orgPaginaSecundaria textarea:focus-visible, .orgPaginaSecundaria summary:focus-visible { outline: 3px solid var(--foco-cor); outline-offset: 3px; }
+/* O1 reserva 264px para a sidebar acima de 1000px. Evitar painéis comprimidos nesse intervalo. */
+@media (max-width: 1200px) {
+  .orgPaginaSecundaria .gradeCotacao, .orgPaginaSecundaria .gradeTicket { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+}

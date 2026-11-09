@@ -15,7 +15,7 @@ const proposta = { id: 10, evento_nome: 'Proposta sintética', valor: '12.34', s
 function fornecedor({ cotacoes = [cotacao], propostas = [], fetch, pagina = 'fornecedor-mural', navegacao } = {}) {
   const chamadas = [], destinos = [], avisos = []
   let saidas = 0
-  const h = hooksAdmin({ ...primitivasFixture, jsx: jsxPrimitivas, Icone: 'svg', IdentidadeConta: 'identidade',
+  const h = hooksAdmin({ ...primitivasFixture, jsx: jsxPrimitivas, Icone: 'svg', IdentidadeConta: 'identidade', NavegacaoRecolhivel: 'navegacao-recolhivel',
     CapaEvento: 'capa', MidiaEvento: 'midia', PortfolioFornecedor: 'portfolio', formatarMoeda, AbortController,
     apiUrl: p => p, sessionStorage: { getItem: () => 'token-sintetico' }, console: { error() {} }, alert: m => avisos.push(m),
     fetch: async (url, opcoes) => { chamadas.push([url, opcoes]); return fetch ? fetch(url, opcoes) : ok(url.endsWith('/cotacoes') ? cotacoes : propostas) },

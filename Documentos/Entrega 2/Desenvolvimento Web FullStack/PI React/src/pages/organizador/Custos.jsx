@@ -1,5 +1,6 @@
 import { Skeleton, Botao, Campo, Alerta, EstadoVazio } from '../../components/ui/Primitivas.jsx'
 import './Organizador.css'
+import './OrganizadorAcabamento.css'
 import { useEffect, useMemo, useState } from 'react'
 import { formatarMoeda } from '../../utils/formatarMoeda.js'
 import { rascunhoCustosTemAlteracoes } from '../../utils/rascunhosCustos.js'
@@ -142,7 +143,7 @@ export function Custos({
   }
 
   return (
-    <div className="organizadorPagina">
+    <div className="organizadorPagina orgPaginaSecundaria">
       <Botao className="voltar" variante="discreto" onClick={() => setPagina('criar')}>
         ← Voltar para Dados Básicos
       </Botao>

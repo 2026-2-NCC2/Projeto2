@@ -1,11 +1,13 @@
 import { Marca } from '../../components/ui/Marca.jsx'
 import { Skeleton, Botao, Campo, Badge, Alerta, EstadoVazio } from '../../components/ui/Primitivas.jsx'
 import './Fornecedor.css'
+import './FornecedorLayout.css'
+import { NavegacaoRecolhivel } from '../../components/layout/NavegacaoRecolhivel.jsx'
 import { Icone } from '../../components/ui/Icone.jsx'
 import { IdentidadeConta } from '../../components/layout/IdentidadeConta.jsx'
 import { MidiaEvento, CapaEvento } from '../../components/eventos/MidiaEvento.jsx'
 import { PortfolioFornecedor } from '../../components/portfolio/Portfolio.jsx'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { apiUrl } from '../../services/api.js'
 import { formatarMoeda } from '../../utils/formatarMoeda.js'
 
@@ -202,10 +204,17 @@ setOportunidades(oportunidadesFormatadas)
     .includes(busca.toLowerCase())
 )
  const menu=[['mural','Mural de oportunidades'],['enviadas','Propostas enviadas'],['contratos','Contratos ativos',true],['catalogo','Portfólio profissional'],['desempenho','Desempenho'],['perfil','Perfil fornecedor']]
- return <div className="portalFornecedor fornecedorPagina">
-  <div className="fornTopo"><div className="logo"><Marca /><small>PORTAL FORNECEDOR</small></div><span className="fornSelo">Portal do fornecedor</span><span className="fornEmpresa"><IdentidadeConta /></span></div>
-  <div className="fornCorpo"><aside className="fornMenu"><Botao className="novo" onClick={()=>navegar('mural')}><Icone nome="busca" /> Buscar cotações</Botao><nav>{menu.map(([id,label,indisponivel])=><Botao key={id} variante="discreto" aria-current={(pagina==='fornecedor-'+id || (id==='enviadas' && pagina==='fornecedor-cotacoes')) ? 'page' : undefined} disabled={indisponivel} title={indisponivel ? 'Funcionalidade indisponível' : undefined} className={(pagina==='fornecedor-'+id || (id==='enviadas' && pagina==='fornecedor-cotacoes'))?'ativo':''} onClick={indisponivel ? undefined : ()=>navegar(id)}><Icone nome={({ mural: 'eventos', enviadas: 'documento', contratos: 'documento', catalogo: 'documento', desempenho: 'custos', perfil: 'perfil' })[id]} />{label}{indisponivel && <small> (indisponível)</small>}</Botao>)}</nav><Botao variante="discreto" className="fornSair" onClick={aoSair}><Icone nome="sair" /> Sair</Botao></aside>
-  <main className="fornConteudo"><div className="fornTrilha">TrocaTicket Fornecedor › {titulo}</div><div className="fornTitulo"><div><h1>{titulo}</h1><p>Gestão comercial e oportunidades para fornecedores de eventos.</p></div><span className="fornSelo">Conta de fornecedor</span></div>
+ const conteudoRef = useRef(null)
+ return <div className="portalFornecedor fornecedorPagina fornEstrutura">
+  <a className="fornPular" href="#fornecedor-conteudo" onClick={e=>{e.preventDefault();conteudoRef.current?.focus()}}>Ir para o conteúdo</a>
+  <aside className="fornSidebar">
+  <div className="fornMarca"><Marca /><small>PORTAL DO FORNECEDOR</small></div>
+  <NavegacaoRecolhivel id="menu-fornecedor" rotulo="Menu do fornecedor" className="fornNavegacao">
+  <div className="fornMenu"><Botao className="novo" onClick={()=>navegar('mural')}><Icone nome="busca" /> Buscar cotações</Botao><nav aria-label="Seções do fornecedor">{menu.map(([id,label,indisponivel])=><Botao key={id} variante="discreto" aria-current={(pagina==='fornecedor-'+id || (id==='enviadas' && pagina==='fornecedor-cotacoes')) ? 'page' : undefined} disabled={indisponivel} title={indisponivel ? 'Funcionalidade indisponível' : undefined} className={(pagina==='fornecedor-'+id || (id==='enviadas' && pagina==='fornecedor-cotacoes'))?'ativo':''} onClick={indisponivel ? undefined : ()=>navegar(id)}><Icone nome={({ mural: 'eventos', enviadas: 'documento', contratos: 'documento', catalogo: 'documento', desempenho: 'custos', perfil: 'perfil' })[id]} />{label}{indisponivel && <small> (indisponível)</small>}</Botao>)}</nav><Botao variante="discreto" className="fornSair" onClick={aoSair}><Icone nome="sair" /> Sair</Botao></div>
+  </NavegacaoRecolhivel>
+  </aside>
+  <header className="fornTopo"><div className="fornContexto"><p>Portal do fornecedor</p><p id="fornecedor-titulo-secao">{titulo}</p></div><div className="fornEmpresa"><IdentidadeConta /></div></header>
+  <main className="fornConteudo" id="fornecedor-conteudo" ref={conteudoRef} tabIndex={-1} aria-labelledby="fornecedor-titulo-secao"><div className="fornTrilha">TrocaTicket Fornecedor › {titulo}</div><div className="fornTitulo"><div><h1>{titulo}</h1><p>Gestão comercial e oportunidades para fornecedores de eventos.</p></div><span className="fornSelo">Conta de fornecedor</span></div>
   {carregandoPropostas && <Skeleton tipo={pagina==='fornecedor-enviadas'||pagina==='fornecedor-cotacoes' ? 'tabela' : 'texto'} rotulo="Carregando propostas..." />}
   {pagina==='fornecedor-proposta' && carregandoOportunidades && <Skeleton tipo="card" rotulo="Restaurando cotação..." />}
   {erroPropostas && <Alerta variante="erro" titulo="Erro de consulta de propostas"><p>{erroPropostas}</p><Botao type="button" disabled={carregandoPropostas} onClick={()=>setTentativaPropostas(n=>n+1)}>Tentar novamente</Botao></Alerta>}
@@ -230,7 +239,7 @@ setOportunidades(oportunidadesFormatadas)
   {pagina==='fornecedor-desempenho' && <div className="fornIndicadores"><div><small>PROPOSTAS ENVIADAS</small>{carregandoPropostas ? <Skeleton tipo="texto" linhas={1} rotulo="Consultando indicador de propostas" /> : <strong>{erroPropostas ? '—' : propostas.length}</strong>}</div><div><small>APROVADAS</small>{carregandoPropostas ? <Skeleton tipo="texto" linhas={1} rotulo="Consultando indicador de propostas" /> : <strong>{erroPropostas ? '—' : propostas.filter(p=>p.status==='Aprovada').length}</strong>}</div><div><small>VOLUME PROPOSTO</small>{carregandoPropostas ? <Skeleton tipo="texto" linhas={1} rotulo="Consultando indicador de propostas" /> : <strong>{erroPropostas ? '—' : formatarMoeda(propostas.reduce((s,p)=>s+p.valor,0))}</strong>}</div></div>}
   {pagina==='fornecedor-catalogo' && <PortfolioFornecedor />}
   {pagina==='fornecedor-perfil' && <PerfilFornecedor propostas={propostas} />}
-  </main></div></div>
+  </main></div>
 }
 
 

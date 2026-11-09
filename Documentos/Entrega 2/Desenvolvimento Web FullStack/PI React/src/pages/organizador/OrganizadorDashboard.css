@@ -1,0 +1,65 @@
+/* Somente o conteúdo de Meus eventos. A estrutura e a navegação do O1 permanecem independentes. */
+.orgDashboard { display: flex; flex-direction: column; gap: 28px; min-width: 0; }
+.orgDashboard .orgDashboardIntroducao { margin: 0; gap: 24px; align-items: center; }
+.orgDashboard .orgDashboardIntroducao h1 { margin: 6px 0 10px; font-size: clamp(1.5rem, 2.4vw, 2rem); line-height: 1.25; color: var(--texto-principal); }
+.orgDashboard .orgDashboardIntroducao p { margin: 0; max-width: 65ch; color: var(--texto-secundario); }
+.orgDashboard .orgDashboardIntroducao .orgDashboardContexto { color: var(--marca-coral-escuro); font-size: .6875rem; font-weight: 700; letter-spacing: .08em; }
+.orgDashboard .orgDashboardIntroducao > .ttBotao { flex-shrink: 0; min-height: 44px; }
+.orgDashboard .orgIndicadores { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 0; }
+.orgDashboard .orgIndicador { min-width: 0; padding: 22px; border: 1px solid var(--borda-superficie); border-radius: var(--raio-cartao); background: var(--superficie-cartao); box-shadow: var(--sombra-cartao); overflow-wrap: anywhere; }
+.orgDashboard .orgIndicador dt { display: flex; align-items: center; gap: 10px; color: var(--texto-secundario); font-size: .8125rem; line-height: 1.5; }
+.orgDashboard .orgIndicador dt .icone { flex-shrink: 0; color: var(--marca-coral-escuro); }
+.orgDashboard .orgIndicador dd { margin: 18px 0 0; }
+.orgDashboard .orgIndicador dd strong { display: block; color: var(--texto-principal); font-size: 2.25rem; font-variant-numeric: tabular-nums; font-weight: 700; line-height: 1.2; }
+.orgDashboard .orgIndicador dd span { display: block; margin-top: 10px; color: var(--texto-secundario); font-size: .75rem; line-height: 1.6; }
+.orgDashboard .orgIndicadorDestaque { background: var(--texto-principal); border-color: var(--texto-principal); }
+.orgDashboard .orgIndicadorDestaque dt, .orgDashboard .orgIndicadorDestaque dd strong, .orgDashboard .orgIndicadorDestaque dd span { color: var(--superficie-cartao); }
+.orgDashboard .orgIndicadorDestaque dt .icone { color: var(--marca-coral); }
+.orgDashboard .orgDashboardEscopo { margin: 12px 0 0; font-size: .75rem; line-height: 1.6; color: var(--texto-secundario); }
+.orgDashboard .orgPaineis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.orgDashboard .orgPainel { min-width: 0; padding: 24px; border: 1px solid var(--borda-superficie); border-radius: var(--raio-cartao); background: var(--superficie-cartao); box-shadow: var(--sombra-cartao); overflow-wrap: anywhere; }
+.orgDashboard .orgPainelCabecalho { display: flex; align-items: center; gap: 10px; }
+.orgDashboard .orgPainelCabecalho > .icone { flex-shrink: 0; color: var(--marca-coral-escuro); }
+.orgDashboard .orgPainel h2, .orgDashboard .orgGerenciamento h2 { margin: 0; color: var(--texto-principal); font-size: 1.0625rem; line-height: 1.5; }
+.orgDashboard .orgPainel > p, .orgDashboard .orgGerenciamentoCabecalho > p { margin: 8px 0 0; font-size: .8125rem; line-height: 1.6; color: var(--texto-secundario); }
+.orgDashboard .orgDistribuicao { margin: 20px 0 0; }
+.orgDashboard .orgDistribuicao > div { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 48px; padding-block: 10px; border-bottom: 1px solid var(--borda-superficie); }
+.orgDashboard .orgDistribuicao > div:last-child { border-bottom: 0; }
+.orgDashboard .orgDistribuicao dt { min-width: 0; }
+.orgDashboard .orgDistribuicao dd { margin: 0; font-size: 1.125rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--texto-principal); }
+.orgDashboard .orgAtivosResumo { list-style: none; padding: 0; margin: 20px 0 0; }
+.orgDashboard .orgAtivosResumo li { padding-block: 14px; border-bottom: 1px solid var(--borda-superficie); }
+.orgDashboard .orgAtivosResumo li:first-child { padding-top: 0; }
+.orgDashboard .orgAtivosResumo li:last-child { padding-bottom: 0; border-bottom: 0; }
+.orgDashboard .orgAtivosResumo h3 { margin: 0 0 6px; font-size: .9375rem; line-height: 1.5; color: var(--texto-principal); }
+.orgDashboard .orgAtivosResumo p { margin: 2px 0 0; font-size: .8125rem; line-height: 1.6; color: var(--texto-secundario); }
+.orgDashboard .orgGerenciamento { min-width: 0; padding: 24px; border: 1px solid var(--borda-superficie); border-radius: var(--raio-cartao); background: var(--superficie-cartao); box-shadow: var(--sombra-cartao); }
+.orgDashboard .orgGerenciamento > p { margin: 18px 0; font-size: .8125rem; line-height: 1.7; color: var(--texto-secundario); }
+.orgDashboard .orgGerenciamento .filtros { margin-top: 24px; flex-wrap: wrap; }
+.orgDashboard .orgGerenciamento .filtros input { min-width: 0; flex: 1 1 220px; min-height: 44px; }
+.orgDashboard .orgGerenciamento .listaEventos { margin-top: 20px; box-shadow: none; }
+.orgDashboard .orgGerenciamento .eventoInfo h3 { margin: 0 10px 8px 0; font-size: 1rem; line-height: 1.5; color: var(--texto-principal); }
+.orgDashboard .orgGerenciamento .evento { padding: 20px; gap: 16px; }
+.orgDashboard .orgGerenciamento .evento:last-child { border-bottom: 0; }
+.orgDashboard .orgDashboardCarregando, .orgDashboard .orgDashboardResumo { display: grid; gap: 28px; min-width: 0; }
+.orgDashboard .orgIndicadorSkeleton { min-width: 0; min-height: 178px; padding: 24px; border-radius: var(--raio-cartao); background: var(--superficie-cartao); }
+.orgDashboard .orgPainelSkeleton { min-width: 0; min-height: 300px; padding: 24px; border-radius: var(--raio-cartao); background: var(--superficie-cartao); }
+.orgDashboard button:focus-visible, .orgDashboard input:focus-visible { outline: 3px solid var(--foco-cor); outline-offset: 3px; }
+/* Com a sidebar, 1024px deixa cerca de 696px úteis: duas métricas por linha. */
+@media (max-width: 1200px) {
+  .orgDashboard .orgIndicadores { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .orgDashboard .orgPaineis { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  .orgDashboard { gap: 24px; }
+  .orgDashboard .orgIndicadores { gap: 12px; }
+  .orgDashboard .orgIndicador { padding: 18px; }
+  .orgDashboard .orgIndicador dt { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .orgDashboard .orgPainel, .orgDashboard .orgGerenciamento { padding: 18px; }
+  .orgDashboard .orgDashboardIntroducao { align-items: stretch; }
+  .orgDashboard .orgGerenciamento .evento { padding: 16px; }
+  .orgDashboard .orgGerenciamento .evento > .ttBotao { min-height: 44px; }
+}
+@media (max-width: 380px) {
+  .orgDashboard .orgIndicadores { grid-template-columns: minmax(0, 1fr); }
+}
