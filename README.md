@@ -171,10 +171,6 @@ Os testes importam diretamente `rolldown/utils` e `postcss`; ambos estão declar
 
 No PowerShell, se `npm.ps1` estiver bloqueado, use `npm.cmd` nos mesmos comandos, sem alterar a política de execução. Suítes opcionais de banco, Docker ou testes reais possuem requisitos próprios; não as habilite como parte desta verificação local.
 
-
-## Declaração de Uso de Inteligência Artificial
-
-
 ## 📋 Licença/License
 
 [TrocaTicket](https://github.com/2026-2-NCC2/Projeto2) © 2026 por [Carlos Eduardo da Silva](https://github.com/IC4DUI), [Lucas Pelliciotti Cintra Da Silva](https://github.com/lucaspelliciotti), [Guilherme Harada Morato](https://github.com/guilhermehmorato-glitch) e [Guilherme Fernandes Alexandre de Carvalho](https://github.com/GuilhermeF420) está licenciado sob [Creative Commons Atribuição 4.0 Internacional](https://creativecommons.org/licenses/by/4.0/).
