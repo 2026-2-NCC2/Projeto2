@@ -64,8 +64,10 @@ test('menu e topo administrativos conservam destinos e saida', () => {
     assert.equal(button.props.onClick, undefined)
     assert.match(button.props.title, /Funcionalidade (em desenvolvimento|indisponível)/)
   }
-  const logout = nodes(AdminTopo({ aoSair: () => actions.push('sair-topo') })).find(x => x.props['aria-label'] === 'Sair da conta de administrador')
-  logout.props.onClick(); assert.equal(actions.at(-1), 'sair-topo')
+  const topo = nodes(AdminTopo({ secao: 'eventos', aoAbrirPerfil: () => actions.push('perfil-topo') }))
+  const perfil = topo.find(x => x.props['aria-label'] === 'Abrir meu perfil de administrador')
+  perfil.props.onClick(); assert.equal(actions.at(-1), 'perfil-topo')
+  assert.equal(topo.some(x => x.type === 'input' || x.props.className === 'adminIcone'), false)
 })
 
 const css = postcss.parse(readFileSync(new URL('../src/App.css', import.meta.url), 'utf8'))

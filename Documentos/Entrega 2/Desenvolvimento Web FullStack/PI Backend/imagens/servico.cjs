@@ -3,7 +3,7 @@ const { contexto, novoArquivo, conferirReferencia, falha } = require("./politica
 const { processarImagem } = require("./processar.cjs");
 
 // Recebe repositório PostgreSQL transacional e Storage exclusivos do servidor.
-// O servidor principal mantém as rotas bloqueadas nesta entrega.
+// A montagem das rotas e o preflight pertencem ao inicializador de imagens.
 function criarServicoImagens({ repositorio, storage, processar = processarImagem }) {
   return Object.freeze({
     async consultar(usuario, tipo) {

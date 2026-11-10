@@ -40,16 +40,134 @@ export function AdminSolicitacoes({ aoSair }) {
   }
   const pendentes = consulta.dados.filter(s => s.status === 'pendente')
   return <section className="admPagina" aria-labelledby="adm-solicitacoes-titulo">
-    <header className="admPaginaTopo"><div><p className="admSobretitulo">ADMINISTRAÇÃO · ACESSO</p><h1 id="adm-solicitacoes-titulo">Solicitações de acesso</h1><p>Analise os pedidos pendentes e consulte o histórico de decisões.</p></div><button className="admAcao" disabled={consulta.carregando || processando.size > 0} onClick={atualizar}>Atualizar lista</button></header>
+    <header className="admPaginaTopo">
+      <div>
+        <p className="admSobretitulo">ADMINISTRAÇÃO · ACESSO</p>
+        <h1 id="adm-solicitacoes-titulo">Solicitações de acesso</h1>
+        <p>Analise os pedidos pendentes e consulte o histórico de decisões.</p>
+      </div>
+      <button
+        className="admAcao"
+        disabled={consulta.carregando || processando.size > 0}
+        onClick={atualizar}>Atualizar lista</button>
+    </header>
     {consulta.carregando ? <SkeletonAdmin rotulo="Carregando solicitações e indicadores" /> : consulta.erro ? <ErroAdmin erro={consulta.erro} aoAtualizar={atualizar} aoSair={aoSair} /> : <>
-      <div className="admMetricas">{[['Pendentes', pendentes.length], ['Organizadores pendentes', pendentes.filter(s => s.perfil_solicitado === 'organizador').length], ['Fornecedores pendentes', pendentes.filter(s => s.perfil_solicitado === 'fornecedor').length]].map(([nome, valor]) => <article key={nome}><span>{nome}</span><strong>{valor}</strong></article>)}</div>
-      <div className="admFiltros"><FiltroAdmin titulo="Estado" valor={filtros.estado} aoAlterar={v => filtrar('estado', v)} todos="Todos os estados" opcoes={[['pendente', 'Pendentes'], ['aprovado', 'Aprovadas'], ['rejeitado', 'Rejeitadas']].map(([valor, nome]) => ({ valor, nome }))} /><FiltroAdmin titulo="Tipo de acesso" valor={filtros.tipo} aoAlterar={v => filtrar('tipo', v)} todos="Todos os tipos" opcoes={[{ valor: 'organizador', nome: 'Organizador' }, { valor: 'fornecedor', nome: 'Fornecedor' }]} /><label>Solicitada a partir de<input type="date" value={filtros.inicio} onChange={e => filtrar('inicio', e.target.value)} aria-invalid={Boolean(intervaloInvalido)} /></label><label>Solicitada até<input type="date" value={filtros.fim} onChange={e => filtrar('fim', e.target.value)} aria-invalid={Boolean(intervaloInvalido)} /></label><label>Ordenar por<select value={filtros.ordem} onChange={e => filtrar('ordem', e.target.value)}><option value="recentes">Mais recentes</option><option value="antigas">Mais antigas</option><option value="nome">Nome do solicitante</option></select></label><button className="admAcao admAcao--secundaria" onClick={() => setFiltros(filtrosIniciais)}>Limpar filtros</button></div>
+      <div className="admMetricas">
+        {[['Pendentes', pendentes.length], ['Organizadores pendentes', pendentes.filter(s => s.perfil_solicitado === 'organizador').length], ['Fornecedores pendentes', pendentes.filter(s => s.perfil_solicitado === 'fornecedor').length]].map(([nome, valor]) => <article key={nome}>
+          <span>
+            {nome}
+          </span>
+          <strong>
+            {valor}
+          </strong>
+        </article>)}
+      </div>
+      <div className="admFiltros">
+        <FiltroAdmin
+          titulo="Estado"
+          valor={filtros.estado}
+          aoAlterar={v => filtrar('estado', v)}
+          todos="Todos os estados"
+          opcoes={[['pendente', 'Pendentes'], ['aprovado', 'Aprovadas'], ['rejeitado', 'Rejeitadas']].map(([valor, nome]) => ({ valor, nome }))} />
+        <FiltroAdmin
+          titulo="Tipo de acesso"
+          valor={filtros.tipo}
+          aoAlterar={v => filtrar('tipo', v)}
+          todos="Todos os tipos"
+          opcoes={[{ valor: 'organizador', nome: 'Organizador' }, { valor: 'fornecedor', nome: 'Fornecedor' }]} />
+        <label>Solicitada a partir de<input
+            type="date"
+            value={filtros.inicio}
+            onChange={e => filtrar('inicio', e.target.value)}
+            aria-invalid={Boolean(intervaloInvalido)} />
+        </label>
+        <label>Solicitada até<input
+            type="date"
+            value={filtros.fim}
+            onChange={e => filtrar('fim', e.target.value)}
+            aria-invalid={Boolean(intervaloInvalido)} />
+        </label>
+        <label>Ordenar por<select value={filtros.ordem} onChange={e => filtrar('ordem', e.target.value)}>
+            <option value="recentes">Mais recentes</option>
+            <option value="antigas">Mais antigas</option>
+            <option value="nome">Nome do solicitante</option>
+          </select>
+        </label>
+        <button className="admAcao admAcao--secundaria" onClick={() => setFiltros(filtrosIniciais)}>Limpar filtros</button>
+      </div>
       <p className="admNota">O período considera a data da solicitação no horário de São Paulo. A data e o responsável pela decisão não estão disponíveis nos dados atuais.</p>
       {intervaloInvalido && <p className="admMensagem admMensagem--alerta" role="alert">A data inicial deve ser anterior ou igual à data final.</p>}
-      {mensagem && <div className={`admMensagem admMensagem--${mensagem.tom}`} role={mensagem.tom === 'sucesso' ? 'status' : 'alert'}><p>{mensagem.texto}</p>{mensagem.status === 401 ? <button onClick={aoSair}>Entrar novamente</button> : mensagem.tom !== 'sucesso' && <button onClick={atualizar} disabled={processando.size > 0}>Atualizar lista</button>}</div>}
+      {mensagem && <div
+        className={`admMensagem admMensagem--${mensagem.tom}`}
+        role={mensagem.tom === 'sucesso' ? 'status' : 'alert'}>
+        <p>
+          {mensagem.texto}
+        </p>
+        {mensagem.status === 401 ? <button onClick={aoSair}>Entrar novamente</button> : mensagem.tom !== 'sucesso' && <button onClick={atualizar} disabled={processando.size > 0}>Atualizar lista</button>}
+      </div>}
       <p className="admContagem" role="status">Exibindo {lista.length} de {consulta.dados.length} solicitações</p>
-      {!lista.length ? <div className="admVazio"><h2>Nenhuma solicitação neste filtro</h2><p>Selecione outro estado, tipo ou período para consultar o histórico.</p></div> : <div className="admTabela" role="region" aria-label="Solicitações de acesso" tabIndex={0}><table><thead><tr>{['Protocolo / solicitação', 'Solicitante', 'Acesso solicitado', 'Estado', 'Justificativa', 'Ações'].map(t => <th scope="col" key={t}>{t}</th>)}</tr></thead><tbody>{lista.map(item => <tr key={item.id} aria-busy={processando.has(item.id)}><td><strong>#{item.id}</strong><small>{item.criada_em && Number.isFinite(Date.parse(item.criada_em)) ? new Date(item.criada_em).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) : 'Data não informada'}</small></td><td><strong>{item.nome}</strong><small>{item.email}</small></td><td>{nomesPerfis[item.perfil_solicitado] || item.perfil_solicitado}</td><td><BadgeAdmin valor={item.status} /></td><td className="admTextoLongo">{item.justificativa || 'Não informada'}</td><td>{item.status === 'pendente' ? <div className="admAcoes"><button className="admAcao admAcao--sucesso" disabled={processando.has(item.id) || incertas.has(item.id)} onClick={() => tomarDecisao(item, 'aprovado')}>{processando.has(item.id) ? 'Processando…' : 'Aprovar'}</button><button className="admAcao admAcao--erro" disabled={processando.has(item.id) || incertas.has(item.id)} onClick={() => tomarDecisao(item, 'rejeitado')}>Recusar</button>{incertas.has(item.id) && <small>Atualize a lista antes de decidir novamente.</small>}</div> : <span className="admNota">Decisão registrada</span>}</td></tr>)}</tbody></table></div>}
+      {!lista.length ? <div className="admVazio">
+        <h2>Nenhuma solicitação neste filtro</h2>
+        <p>Selecione outro estado, tipo ou período para consultar o histórico.</p>
+      </div> : <div className="admTabela" role="region" aria-label="Solicitações de acesso" tabIndex={0}>
+        <table>
+          <thead>
+            <tr>
+              {['Protocolo / solicitação', 'Solicitante', 'Acesso solicitado', 'Estado', 'Justificativa', 'Ações'].map(t => <th scope="col" key={t}>
+                {t}
+              </th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {lista.map(item => <tr key={item.id} aria-busy={processando.has(item.id)}>
+              <td>
+                <strong>#{item.id}
+                </strong>
+                <small>
+                  {item.criada_em && Number.isFinite(Date.parse(item.criada_em)) ? new Date(item.criada_em).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }) : 'Data não informada'}
+                </small>
+              </td>
+              <td>
+                <strong>
+                  {item.nome}
+                </strong>
+                <small>
+                  {item.email}
+                </small>
+              </td>
+              <td>
+                {nomesPerfis[item.perfil_solicitado] || item.perfil_solicitado}
+              </td>
+              <td>
+                <BadgeAdmin valor={item.status} />
+              </td>
+              <td className="admTextoLongo">
+                {item.justificativa || 'Não informada'}
+              </td>
+              <td>
+                {item.status === 'pendente' ? <div className="admAcoes">
+                  <button
+                    className="admAcao admAcao--sucesso"
+                    disabled={processando.has(item.id) || incertas.has(item.id)}
+                    onClick={() => tomarDecisao(item, 'aprovado')}>
+                    {processando.has(item.id) ? 'Processando…' : 'Aprovar'}
+                  </button>
+                  <button
+                    className="admAcao admAcao--erro"
+                    disabled={processando.has(item.id) || incertas.has(item.id)}
+                    onClick={() => tomarDecisao(item, 'rejeitado')}>Recusar</button>
+                  {incertas.has(item.id) && <small>Atualize a lista antes de decidir novamente.</small>}
+                </div> : <span className="admNota">Decisão registrada</span>}
+              </td>
+            </tr>)}
+          </tbody>
+        </table>
+      </div>}
     </>}
-    <div className="admLote"><span>Ações em lote indisponíveis. Analise cada solicitação individualmente.</span><button disabled title="Funcionalidade em desenvolvimento">Aprovar em lote</button><button disabled title="Funcionalidade em desenvolvimento">Reprovar em lote</button></div>
+    <div className="admLote">
+      <span>Ações em lote indisponíveis. Analise cada solicitação individualmente.</span>
+      <button disabled title="Funcionalidade em desenvolvimento">Aprovar em lote</button>
+      <button disabled title="Funcionalidade em desenvolvimento">Reprovar em lote</button>
+    </div>
   </section>
 }

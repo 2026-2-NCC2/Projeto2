@@ -3,21 +3,29 @@ import { useConsultaAdmin } from '../../hooks/useConsultaAdmin.js'
 import { AdminCatalogo } from './AdminCatalogos.jsx'
 import { AdminSolicitacoes } from './AdminSolicitacoes.jsx'
 import './AdminPaginas.css'
+import './AdminLayout.css'
 import { PerfilPessoal } from '../perfil/PerfilPessoal.jsx'
 import { Icone } from '../ui/Icone.jsx'
 import { IdentidadeConta } from '../layout/IdentidadeConta.jsx'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NavegacaoRecolhivel } from '../layout/NavegacaoRecolhivel.jsx'
 import { PainelEventoAdmin } from './PainelEventoAdmin.jsx'
 
-export function AdminTopo({ aoSair }) {
+const titulosSecoes = {
+  painel: 'Painel de evento', eventos: 'Eventos', usuarios: 'Usuários',
+  cotacoes: 'Cotações', propostas: 'Propostas', contas: 'Solicitações de acesso', perfil: 'Meu perfil',
+}
+
+export function AdminTopo({ secao, aoAbrirPerfil }) {
   return (
     <header className="adminTopo">
-      <div className="adminMarca marcaAdmin"><Marca compacto /><small>Gestão Corporativa</small></div>
-      <div className="adminSeguro">Administração</div>
-      <label className="adminBusca"><Icone nome="busca" tamanho={16} /><input aria-label="Busca geral indisponível" placeholder="Busca geral indisponível" disabled /></label>
-      <button className="adminIcone" aria-label="Notificações indisponíveis" title="Notificações indisponíveis" disabled>●</button>
-      <button className="adminUsuario" aria-label="Sair da conta de administrador" onClick={aoSair}><Icone nome="perfil" /><IdentidadeConta /></button>
+      <div className="adminContexto">
+        <p className="adminSobretitulo">Portal do administrador</p>
+        <p className="adminTituloSecao" id="admin-titulo-secao">{titulosSecoes[secao] || 'Administração'}</p>
+      </div>
+      <button type="button" className="adminUsuario" aria-label="Abrir meu perfil de administrador" onClick={aoAbrirPerfil}>
+        <Icone nome="perfil" /><IdentidadeConta />
+      </button>
     </header>
   )
 }
@@ -58,6 +66,14 @@ export function AdminPortal({ aoSair, navegacao }) {
   const secao = navegacao ? navegacao.estado.secao : secaoLocal
   const eventoId = navegacao ? navegacao.estado.eventoId : eventoLocal
   const cotacaoId = navegacao ? navegacao.estado.cotacaoId : cotacaoLocal
+  const conteudoRef = useRef(null)
+  const secaoAnteriorRef = useRef(secao)
+  useEffect(() => {
+    // Consultas e montagem inicial não devem deslocar o foco do usuário.
+    if (secaoAnteriorRef.current === secao) return
+    secaoAnteriorRef.current = secao
+    conteudoRef.current?.focus()
+  }, [secao])
   function setEventoId(id) {
     setEventoLocal(id)
     if (navegacao) navegacao.mudar({ secao: 'painel', eventoId: id, cotacaoId: null })
@@ -77,5 +93,20 @@ export function AdminPortal({ aoSair, navegacao }) {
   else if (secao === 'contas') conteudo = <AdminSolicitacoes aoSair={aoSair} />
   else if (['eventos', 'usuarios', 'cotacoes', 'propostas'].includes(secao)) conteudo = <AdminCatalogo key={secao + '-' + (cotacaoId || 'lista')} tipo={secao} cotacaoInicial={cotacaoId} aoAbrirPainel={abrirPainel} aoAbrirCotacao={abrirCotacao} aoSair={aoSair} />
   else conteudo = <p role="status">Funcionalidade em desenvolvimento.</p>
-  return <div className="adminApp"><AdminTopo aoSair={aoSair} /><div className="adminEstrutura"><NavegacaoRecolhivel id="menu-administrador" rotulo="Menu do administrador" className="adminNavegacao"><AdminMenu secao={secao} setSecao={navegar} aoSair={aoSair} /></NavegacaoRecolhivel><main className="adminConteudo">{conteudo}</main></div></div>
+  return <div className="adminApp adminLayout">
+    <a className="adminPular" href="#admin-conteudo" onClick={evento => {
+      evento.preventDefault()
+      conteudoRef.current?.focus()
+    }}>Ir para o conteúdo</a>
+    <div className="adminSidebar">
+      <div className="adminMarcaLateral"><Marca /><small>PORTAL DO ADMINISTRADOR</small></div>
+      <NavegacaoRecolhivel id="menu-administrador" rotulo="Menu do administrador" className="adminNavegacao">
+        <AdminMenu secao={secao} setSecao={navegar} aoSair={aoSair} />
+      </NavegacaoRecolhivel>
+    </div>
+    <AdminTopo secao={secao} aoAbrirPerfil={() => navegar('perfil')} />
+    <main className="adminConteudo" id="admin-conteudo" ref={conteudoRef} tabIndex={-1} aria-labelledby="admin-titulo-secao">
+      {conteudo}
+    </main>
+  </div>
 }

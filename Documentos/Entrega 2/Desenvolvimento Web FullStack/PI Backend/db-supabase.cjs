@@ -2,7 +2,8 @@
 
 const { lerConfiguracaoBanco } = require("./config/banco.cjs");
 
-// Fabrica inerte e exclusiva do backend. Nenhuma rota a utiliza nesta etapa.
+// Importar a fabrica nao cria cliente. Os repositorios do backend a utilizam
+// quando a configuracao seleciona Supabase.
 // Nao recebe request, JWT de usuario, headers ou opcoes de autenticacao externas.
 function criarClienteSupabase(env = process.env) {
   if (typeof window !== "undefined") {

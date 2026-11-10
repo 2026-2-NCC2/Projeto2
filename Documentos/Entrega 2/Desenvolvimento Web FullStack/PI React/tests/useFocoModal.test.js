@@ -76,7 +76,7 @@ const source = readFileSync(new URL('../src/components/admin/AdminPortal.jsx', i
 function admin(section) {
   const js = transformSync('AdminPortal.jsx', source.replace(/^import .*\r?\n/gm, '').replaceAll('export function ', 'function '), { jsx: { runtime: 'classic', pragma: 'jsx', pragmaFrag: 'Fragment' } })
   assert.equal(js.errors.length, 0)
-  const component = vm.runInNewContext(js.code + '\nAdminPortal', { jsx: (type, props, ...children) => ({ type, props: props || {}, children: children.flat() }), Fragment: 'fragment', AdminCatalogo: 'catalogo', AdminSolicitacoes: 'solicitacoes', useState: value => [value === 'contas' ? section : value, () => {}], NavegacaoRecolhivel: 'nav' })
+  const component = vm.runInNewContext(js.code + '\nAdminPortal', { jsx: (type, props, ...children) => ({ type, props: props || {}, children: children.flat() }), Fragment: 'fragment', Marca: 'marca', AdminCatalogo: 'catalogo', AdminSolicitacoes: 'solicitacoes', useRef: value => ({ current: value }), useEffect() {}, useState: value => [value === 'contas' ? section : value, () => {}], NavegacaoRecolhivel: 'nav' })
   return component({ aoSair() {} })
 }
 function nodes(view) { return [view, ...view.children.filter(x => x && typeof x === 'object').flatMap(nodes)] }
@@ -92,8 +92,8 @@ test('Painel possui componente proprio e Relatorios continua indisponivel', () =
     assert.equal(view.some(n => n.props.className === 'adminFila'), false)
   }
 })
-test('espaco inferior e removido somente quando o rodape fica no fluxo', () => {
-  const css = postcss.parse(readFileSync(new URL('../src/App.css', import.meta.url), 'utf8'))
+test('layout administrativo não reserva espaço para a antiga barra fixa em nenhuma seção', () => {
+  const css = postcss.parse(readFileSync(new URL('../src/components/admin/AdminLayout.css', import.meta.url), 'utf8'))
   function styles(selector, width) {
     const out = {}
     css.walkRules(rule => {
@@ -104,9 +104,7 @@ test('espaco inferior e removido somente quando o rodape fica no fluxo', () => {
     return out
   }
   for (const width of [1920, 1366, 768, 390, 360]) {
-    const mobile = width <= 720
-    assert.equal(styles('.adminBarraLote', width).position, mobile ? 'static' : 'fixed')
-    assert.equal(styles('.adminApp', width)['padding-bottom'], mobile ? '0' : '76px')
-    assert.ok(styles('.adminConteudo', width).padding.endsWith(mobile ? '24px' : '100px'))
+    assert.equal(styles('.adminApp.adminLayout', width)['padding-bottom'], '0')
+    assert.ok(styles('.adminLayout .adminConteudo', width).padding.endsWith(width <= 540 ? '48px' : '64px'))
   }
 })

@@ -3,7 +3,7 @@
 // O chamador prepara process.env. Este modulo nao carrega .env nem altera o
 // provedor ativo. Importa-lo nao cria pools, clientes ou repositorios.
 // A fabrica prepara dependencias; NAO autoriza iniciar o servidor Supabase.
-// O bloqueio de startup em config/banco.cjs continua independente e intacto.
+// A autorizacao de startup e validada separadamente em startup-controlado.cjs.
 function prepararRepositorios() {
   const { modoExecucao } = require("../isolamento.cjs");
   const { lerConfiguracaoBanco } = require("../config/banco.cjs");

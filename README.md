@@ -126,21 +126,42 @@ A API utiliza **http://localhost:3001**. Abra o endereço informado pelo Vite pa
 O comando `npm start` usa `node --use-system-ca server.js`, requer Node.js 24 e mantém a verificação TLS. A instalação normal usa Supabase e não exige executar migrações ou scripts SQL. Preserve `PI Backend/config/ativacao-supabase.json`; o startup recusa projeto divergente, MySQL ou ausência de `DB_PROVIDER=supabase`. Variáveis já definidas no terminal prevalecem sobre o `.env`.
 
 
+### Verificações locais
+
+Na pasta **PI Backend**, `npm test` executa `node --test tests/*.test.cjs`. Para validar somente a seleção do provedor e a fábrica, sem iniciar o servidor ou acessar bancos:
+
+```sh
+node --test --test-isolation=none tests/banco-provider.test.cjs tests/repositorios-fabrica.test.cjs
+```
+
+Na pasta **PI React**, não há script `npm test`. Os testes usam o executor nativo do Node.js; um conjunto local direcionado pode ser executado assim:
+
+```sh
+node --test --test-isolation=none tests/estruturaResponsiva.test.js tests/imagensPerfil.test.js tests/perfilEdicao.test.js
+npm run lint
+npm run build
+```
+
+Os testes importam diretamente `rolldown/utils` e `postcss`; ambos estão declarados em `devDependencies`, nas versões já fixadas pelo lockfile. Após baixar alterações de dependências, execute `npm install` na pasta correspondente. Instale as dependências nas pastas PI React e PI Backend; a pasta intermediária Desenvolvimento Web FullStack não possui pacote npm próprio.
+
+No PowerShell, se `npm.ps1` estiver bloqueado, use `npm.cmd` nos mesmos comandos, sem alterar a política de execução. Suítes opcionais de banco, Docker ou testes reais possuem requisitos próprios; não as habilite como parte desta verificação local.
+
+
 ## Declaração de Uso de Inteligência Artificial
 
 
 ### Disciplina 1 — Desenvolvimento Web Full Stack
 | Campo | Declaração |
 |---|---|
-| **Aluno(s) Responsável(veis)** | Lucas Pelliciotti Cintra da Silva. ||
-| **Ferramenta utilizada** | ChatGPT (OpenAI) |
-| **Versão/modelo** | GPT Sol 6.1 |
+| **Aluno(s) Responsável(veis)** | Lucas Pelliciotti Cintra da Silva. |
+| **Ferramenta utilizada** | ChatGPT e assistência de programação via Codex (OpenAI), conforme os registros de desenvolvimento desta etapa. |
+| **Versão/modelo** | Identificação exata pendente de confirmação pelos responsáveis. O registro anterior informava “GPT Sol 6.1”; esta revisão não confirmou essa denominação nem a correspondência com todas as sessões utilizadas. |
 | **Disciplina / Trabalho** | Desenvolvimento Web Full Stack |
-| **Finalidade de uso** | Auxiliar na compreensão e no planejamento da migração do banco de dados do projeto para o Supabase, por meio de orientações técnicas, esclarecimento de dúvidas e sugestões de procedimentos. A ferramenta também foi consultada para auxiliar na avaliação de possíveis melhorias visuais da plataforma, apresentando algumas sugestões de alterações na interface. |
-| **Prompts principais utilizados** | Solicitações de orientações para a migração do banco de dados para o Supabase, esclarecimento de dúvidas sobre configuração e conexão e sugestões de melhorias na aparência visual do TrocaTicket. |
-| **Trechos ou entregas afetadas** | Planejamento e orientações técnicas relacionadas à migração do banco de dados para o Supabase e sugestões de alterações visuais da plataforma. |
+| **Finalidade de uso** | Apoiar o planejamento técnico e a migração MySQL → Supabase; auxiliar na implementação, revisão e correção de código; preparar e executar testes e verificações autorizadas; sugerir e implementar ajustes visuais e de responsividade; apoiar a documentação técnica. Esses usos estão registrados nas solicitações e nos resultados da assistência de desenvolvimento. |
+| **Prompts principais utilizados** | Solicitações de análise e planejamento da migração; implementação e correção de integrações React/Express/Supabase, perfis, portfólio e imagens; criação e execução de testes direcionados; ajustes de responsividade e revisão documental. Esta é uma síntese dos pedidos registrados, não uma transcrição literal dos prompts. |
+| **Trechos ou entregas afetadas** | Entrega 2 de Desenvolvimento Web FullStack: partes do frontend React, backend Express, scripts SQL preparados para revisão/aplicação autorizada, testes e documentação técnica. O registro desta revisão não permite atribuir à ferramenta todos os arquivos ou todo o código do projeto. |
 
-A inteligência artificial foi utilizada como ferramenta auxiliar de consulta e orientação. A análise das sugestões, as decisões sobre sua utilização e a responsabilidade pelo conteúdo final permanecem com os integrantes do projeto.
+A inteligência artificial foi utilizada como ferramenta auxiliar de consulta, planejamento e desenvolvimento, incluindo apoio à implementação, às correções e aos testes descritos acima. As decisões sobre sua utilização, a revisão das entregas e a responsabilidade pelo conteúdo final permanecem com os integrantes do projeto. Esta declaração não altera a autoria ou as atribuições existentes.
 
 
 ## 📋 Licença/License
@@ -151,6 +172,14 @@ A inteligência artificial foi utilizada como ferramenta auxiliar de consulta e 
   <img src="https://mirrors.creativecommons.org/presskit/icons/cc.svg" alt="Creative Commons" width="32">
   <img src="https://mirrors.creativecommons.org/presskit/icons/by.svg" alt="Atribuição" width="32">
 </a>
+
+### Escopo das licenças — confirmação pendente
+
+O [package.json do backend](Documentos/Entrega%202/Desenvolvimento%20Web%20FullStack/PI%20Backend/package.json) declara ISC; a declaração acima apresenta CC BY 4.0 para o projeto. A revisão documental não resolve essa divergência nem altera qualquer licença ou atribuição.
+
+**Proposta para decisão dos autores:** distinguir o código-fonte próprio, sob ISC caso essa seja a intenção confirmada, da documentação e dos materiais acadêmicos próprios, sob CC BY 4.0. Dependências e materiais de terceiros manteriam suas licenças e atribuições específicas. Essa divisão ainda não está aprovada e não deve ser tratada como licença já concedida para cada pasta.
+
+Os responsáveis devem confirmar essa distinção ou definir outro escopo explícito antes de modificar os metadados e textos de licença.
 
 ## 🎓 Reference
 
