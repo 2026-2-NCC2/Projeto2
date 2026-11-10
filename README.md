@@ -13,7 +13,8 @@
 
 ## 📌 Descrição
 
-<a<img src="blob:https://web.whatsapp.com/b0eb852b-c65c-48f0-a7ca-31b36fee96ad"></a>
+<p align="center">
+  <img src="imagens/trocaticket.png" alt="TrocaTicket" width="700">
 </p>
 
 O **TrocaTicket** é uma plataforma web que conecta organizadores de eventos e fornecedores de serviços. Seu objetivo é centralizar o cadastro de eventos, o planejamento de custos, a publicação de cotações e o acompanhamento de propostas, tornando a organização mais prática e transparente.
