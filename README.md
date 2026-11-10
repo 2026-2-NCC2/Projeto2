@@ -126,6 +126,7 @@ A API utiliza **http://localhost:3001**. Abra o endereço informado pelo Vite pa
 O comando `npm start` usa `node --use-system-ca server.js`, requer Node.js 24 e mantém a verificação TLS. A instalação normal usa Supabase e não exige executar migrações ou scripts SQL. Preserve `PI Backend/config/ativacao-supabase.json`; o startup recusa projeto divergente, MySQL ou ausência de `DB_PROVIDER=supabase`. Variáveis já definidas no terminal prevalecem sobre o `.env`.
 
 
+<<<<<<< HEAD
 ### Verificações locais
 
 Na pasta **PI Backend**, `npm test` executa `node --test tests/*.test.cjs`. Para validar somente a seleção do provedor e a fábrica, sem iniciar o servidor ou acessar bancos:
@@ -148,20 +149,6 @@ No PowerShell, se `npm.ps1` estiver bloqueado, use `npm.cmd` nos mesmos comandos
 
 
 ## Declaração de Uso de Inteligência Artificial
-
-
-### Disciplina 1 — Desenvolvimento Web Full Stack
-| Campo | Declaração |
-|---|---|
-| **Aluno(s) Responsável(veis)** | Lucas Pelliciotti Cintra da Silva. |
-| **Ferramenta utilizada** | ChatGPT e assistência de programação via Codex (OpenAI), conforme os registros de desenvolvimento desta etapa. |
-| **Versão/modelo** | Identificação exata pendente de confirmação pelos responsáveis. O registro anterior informava “GPT Sol 6.1”; esta revisão não confirmou essa denominação nem a correspondência com todas as sessões utilizadas. |
-| **Disciplina / Trabalho** | Desenvolvimento Web Full Stack |
-| **Finalidade de uso** | Apoiar o planejamento técnico e a migração MySQL → Supabase; auxiliar na implementação, revisão e correção de código; preparar e executar testes e verificações autorizadas; sugerir e implementar ajustes visuais e de responsividade; apoiar a documentação técnica. Esses usos estão registrados nas solicitações e nos resultados da assistência de desenvolvimento. |
-| **Prompts principais utilizados** | Solicitações de análise e planejamento da migração; implementação e correção de integrações React/Express/Supabase, perfis, portfólio e imagens; criação e execução de testes direcionados; ajustes de responsividade e revisão documental. Esta é uma síntese dos pedidos registrados, não uma transcrição literal dos prompts. |
-| **Trechos ou entregas afetadas** | Entrega 2 de Desenvolvimento Web FullStack: partes do frontend React, backend Express, scripts SQL preparados para revisão/aplicação autorizada, testes e documentação técnica. O registro desta revisão não permite atribuir à ferramenta todos os arquivos ou todo o código do projeto. |
-
-A inteligência artificial foi utilizada como ferramenta auxiliar de consulta, planejamento e desenvolvimento, incluindo apoio à implementação, às correções e aos testes descritos acima. As decisões sobre sua utilização, a revisão das entregas e a responsabilidade pelo conteúdo final permanecem com os integrantes do projeto. Esta declaração não altera a autoria ou as atribuições existentes.
 
 
 ## 📋 Licença/License
