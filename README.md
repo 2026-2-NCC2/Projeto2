@@ -15,7 +15,7 @@
 
 <p align="center">
   <a href="https://github.com/2026-2-NCC2/Projeto2">
-    <img src="(https://raw.githubusercontent.com/2026-2-NCC2/Projeto2/main/imagens/landing.png)" alt="TrocaTicket" width="900">
+    <img src="https://ibb.co/B57qFhrx" alt="TrocaTicket" width="900">
   </a>
 </p>
 
