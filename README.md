@@ -14,7 +14,9 @@
 ## 📌 Descrição
 
 <p align="center">
-  <img src="./imagens/landing.png" alt="Página inicial do TrocaTicket" width="900">
+  <a href="https://github.com/2026-2-NCC2/Projeto2">
+    <img src="LINK_DIRETO_DA_IMAGEM" alt="TrocaTicket" width="900">
+  </a>
 </p>
 
 O **TrocaTicket** é uma plataforma web que conecta organizadores de eventos e fornecedores de serviços. Seu objetivo é centralizar o cadastro de eventos, o planejamento de custos, a publicação de cotações e o acompanhamento de propostas, tornando a organização mais prática e transparente.
