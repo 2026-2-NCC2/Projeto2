@@ -62,7 +62,7 @@ O projeto reúne áreas para **organizadores, fornecedores, participantes e admi
 | 2 | Desenvolvimento Web FullStack | [Frontend](Documentos/Entrega%202/Desenvolvimento%20Web%20FullStack/PI%20React) · [Backend](Documentos/Entrega%202/Desenvolvimento%20Web%20FullStack/PI%20Backend) · [Banco de dados](Documentos/Entrega%202/Desenvolvimento%20Web%20FullStack/Banco%20de%20dados) |
 | 2 | Gestão Empresarial e Dinâmicas das Organizações | [Mapa de processos — PDF](Documentos/Entrega%202/Gest%C3%A3o%20Empresarial%20e%20Din%C3%A2micas%20das%20Organiza%C3%A7%C3%B5es/TrocaTicket_Mapa_de_Processos.pdf) |
 | 2 | Projeto Interdisciplinar Programação Web | [Documentação](https://github.com/2026-2-NCC2/Projeto2/blob/main/Documentos/Entrega%202/Projeto%20Interdisciplinar%20Programa%C3%A7%C3%A3o%20Web/Documento%20-%20Projeto%20de%20Extens%C3%A3o%20-%20COM%20Empresa%20-%202026_1.docx) |
-| 2 | Projeto em Banco de Dados | [Diagrama de modelagem — PDF](Documentos/Entrega%202/Projeto%20em%20Banco%20de%20Dados/Diagrama%20modelagem.pdf) |
+| 2 | Projeto em Banco de Dados | [Tabelas e README](https://github.com/2026-2-NCC2/Projeto2/tree/main/Documentos/Entrega%202/Projeto%20em%20Banco%20de%20Dados) |
 
 ## 🔧 Instalação
 
