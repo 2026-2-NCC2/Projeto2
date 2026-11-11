@@ -12,6 +12,7 @@ export function CriarEvento({
   podeSalvar = false,
   controleCapacidade = false,
   salvando = false,
+  administrativo = false,
 }) {
   const publicado=evento.status==='Ativo'
   const categorias = ['Corporativo', 'Confraternização', 'Workshop', 'Social']
@@ -26,21 +27,21 @@ export function CriarEvento({
   return (
     <div className="organizadorPagina orgEventoFormulario">
       <Botao className="voltar" variante="discreto" onClick={() => setPagina('eventos')}>
-        ← Voltar para Meus Eventos
+        {administrativo ? '← Voltar para Eventos' : '← Voltar para Meus Eventos'}
       </Botao>
       <div className="orgFormularioTitulo">
-        <h1>{evento.id?'Dados do evento':'Criar evento'}</h1>
+        <h1 className={administrativo ? 'ttSrOnly' : undefined}>{administrativo ? 'Novo evento' : evento.id?'Dados do evento':'Criar evento'}</h1>
         {evento.status && <p>Estado: <Badge variante={({ Ativo: 'sucesso', Cancelado: 'erro', Encerrado: 'neutro', 'Em planejamento': 'neutro' })[evento.status] || 'neutro'}>{evento.status}</Badge></p>}
       </div>
       {publicado && <Alerta variante="informacao">O evento já foi publicado. A descrição e a capacidade podem ser editadas quando disponíveis.</Alerta>}
       {!podeSalvar && <Alerta variante="informacao">Dados disponíveis para consulta. O salvamento está indisponível.</Alerta>}
-      <p>Comece pelos dados básicos para planejar o evento e as cotações.</p>
+      <p>{administrativo ? 'Cadastre os dados básicos. O organizador responsável continuará o planejamento.' : 'Comece pelos dados básicos para planejar o evento e as cotações.'}</p>
       <p>Datas e horários seguem o fuso de Brasília. Novas inscrições terminam no horário de início.</p>
-      <div className="etapas">
+      {!administrativo && <div className="etapas">
         <b>1 &nbsp; Dados Básicos</b>
         <span>2 &nbsp; Custos e Cotações</span>
         <span>3 &nbsp; Ticket e Viabilidade</span>
-      </div>
+      </div>}
       <form onSubmit={aoEnviarFormulario} className="cartaoFormulario" aria-label="Dados do evento" aria-busy={salvando}>
         <fieldset disabled={!podeSalvar||salvando} className="orgFormularioCampos">
         <legend className="ttSrOnly">Dados básicos do evento</legend>
@@ -145,15 +146,15 @@ export function CriarEvento({
             Voltar sem salvar
           </Botao>
           <Botao type="submit" className="principal" disabled={!podeSalvar||salvando} ocupado={salvando}>
-            {salvando?'Salvando...':'Salvar para Custos & Cotações →'}
+            {salvando?'Salvando...':administrativo ? 'Criar evento em planejamento' : 'Salvar para Custos & Cotações →'}
           </Botao>
         </div>
         </fieldset>
       </form>
-      <section className="orgFormularioImagens" aria-labelledby="org-imagens-evento">
+      {!administrativo && <section className="orgFormularioImagens" aria-labelledby="org-imagens-evento">
         <h2 id="org-imagens-evento">Imagens do evento</h2>
         <MidiaEvento eventoId={evento.id} estado={evento.status} editar />
-      </section>
+      </section>}
     </div>
   )
 }

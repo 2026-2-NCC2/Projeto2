@@ -410,6 +410,10 @@
   outline-color: var(--foco-cor);
   box-shadow: 0 0 0 2px var(--foco-separacao);
 }
+.peaSecao:focus, .peaCotacao:focus {
+  outline: 3px solid var(--foco-cor);
+  outline-offset: 3px;
+}
 
 .peaPainel button:disabled {
   background: var(--desabilitado-fundo);

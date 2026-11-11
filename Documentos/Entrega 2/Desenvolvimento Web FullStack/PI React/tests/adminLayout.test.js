@@ -15,17 +15,19 @@ const { AdminPortal } = carregarAdmin('components/admin/AdminPortal.jsx', ['Admi
   IdentidadeConta: () => createElement('span', { className: 'identidadeConta' }, 'Identidade sintética'),
   AdminCatalogo: () => createElement('h1', null, 'Consulta existente'),
   AdminSolicitacoes: () => createElement('h1', null, 'Solicitações existentes'),
+  AdminVisaoGeral: () => createElement('h1', null, 'Visão geral'),
+  AdminRelatorios: () => createElement('h1', null, 'Relatórios'),
   PerfilPessoal: () => createElement('h1', null, 'Perfil existente'),
   useConsultaAdmin: () => ({ dados: [] }),
   PainelEventoAdmin: () => createElement('h1', null, 'Painel existente'),
 })
-const titulos = { contas: 'Solicitações de acesso', eventos: 'Eventos', usuarios: 'Usuários', cotacoes: 'Cotações', propostas: 'Propostas', painel: 'Painel de evento', perfil: 'Meu perfil' }
+const titulos = { relatorios: 'Relatórios', inicio: 'Visão geral', contas: 'Solicitações de acesso', eventos: 'Eventos', usuarios: 'Usuários', cotacoes: 'Cotações', propostas: 'Propostas', painel: 'Painel de evento', perfil: 'Meu perfil' }
 
 for (const [secao, titulo] of Object.entries(titulos)) test('estrutura e contexto administrativo: ' + secao, () => {
   const html = renderToStaticMarkup(createElement(AdminPortal, {
     aoSair() {}, navegacao: { estado: { secao, eventoId: null, cotacaoId: null }, mudar() {} },
   }))
-  assert.match(html, /class="adminApp adminLayout"/)
+  assert.match(html, /class="adminApp adminLayout(?: adminLayout--inicio)?"/)
   assert.match(html, /class="adminSidebar"/)
   assert.match(html, /aria-label="TrocaTicket"/)
   assert.ok(html.includes('id="admin-titulo-secao">' + titulo + '</p>'))
@@ -36,7 +38,7 @@ for (const [secao, titulo] of Object.entries(titulos)) test('estrutura e context
   assert.equal((html.match(/<h1\b/g) || []).length, 1)
   assert.doesNotMatch(html, /Busca geral|Notificações|adminBusca|adminIcone/)
   assert.match(html, /Relatórios/)
-  assert.match(html, /Em desenvolvimento/)
+  assert.match(html, /Novo evento \(indisponível\)/)
 })
 
 test('identidade abre perfil via navegação existente; Sair é uma ação independente', () => {
@@ -104,9 +106,55 @@ for (const largura of [1920, 1366, 1000, 768, 390, 360]) test('regras estruturai
   assert.equal(estilo('.adminLayout .adminUsuario .identidadeConta strong', largura).display, 'block')
 })
 test('CSS administrativo é isolado e preserva tokens e componentes internos', () => {
-  css.walkRules(r => r.selectors.forEach(s => assert.ok(s.startsWith('.adminLayout ') || s.startsWith('.adminApp.adminLayout'), s)))
-  assert.doesNotMatch(css.toString(), /#[\da-f]{3,8}\b|overflow(?:-x)?:\s*hidden|!important/)
+  css.walkRules(r => r.selectors.forEach(s => assert.ok(s.startsWith('.adminLayout ') || s.startsWith('.adminLayout--inicio ') || s.startsWith('.adminApp.adminLayout'), s)))
+  assert.doesNotMatch(css.toString(), /#[\da-f]{3,8}\b|!important/)
+  css.walkDecls(/^overflow/, d => {
+    if (d.value === 'hidden') assert.deepEqual(d.parent.selectors, ['.adminLayout .peaCabecalho h1', '.adminLayout .perfilCabecalho h1'])
+  })
   css.walkRules(r => assert.doesNotMatch(r.selector, /\.org|\.pp|\.forn|\.admTabela|\.admModal|input|textarea/))
   assert.equal(estilo(".adminLayout .adminMenu button[aria-current='page']", 1366).color, 'var(--marca-coral-escuro)')
   assert.equal(estilo('.adminLayout .adminNavegacao button:focus-visible', 360).outline, '3px solid var(--foco-cor)')
+})
+
+test('sidebar tem o mesmo acabamento em todas as seções, conservando rolagem e alvos acessíveis', () => {
+  assert.equal(estilo('.adminLayout .adminAuditoria', 1366).display, 'none')
+  assert.equal(estilo('.adminLayout .adminMenu nav', 1366).gap, '4px')
+  assert.equal(estilo('.adminLayout .adminMenu nav', 1366)['margin-top'], '16px')
+  assert.equal(estilo('.adminLayout .adminMarcaLateral', 1366).padding, '20px 24px')
+  assert.equal(estilo('.adminLayout .adminMenuRodape', 1366)['padding-top'], '16px')
+  assert.doesNotMatch(css.toString(), /\.adminLayout--inicio/)
+  assert.equal(estilo('.adminLayout .adminSidebar', 1366)['overflow-y'], 'auto')
+  assert.equal(estilo('.adminLayout .adminSidebar', 390)['overflow-y'], 'visible')
+  assert.equal(estilo('.adminLayout .adminMenu button', 1366)['min-height'], '48px')
+})
+
+for (const largura of [1920, 1366, 768, 390, 360]) test('títulos administrativos não duplicam visualmente e continuam acessíveis em ' + largura + 'px', () => {
+  for (const seletor of ['.adminLayout .peaCabecalho h1', '.adminLayout .perfilCabecalho h1']) {
+    const estiloTitulo = estilo(seletor, largura)
+    assert.equal(estiloTitulo.position, 'absolute')
+    assert.equal(estiloTitulo['clip-path'], 'inset(50%)')
+    assert.equal(estiloTitulo.width, '1px')
+    assert.equal(estiloTitulo.height, '1px')
+    assert.notEqual(estiloTitulo.display, 'none')
+    assert.notEqual(estiloTitulo.visibility, 'hidden')
+  }
+  assert.equal(estilo('.adminLayout .perfilCabecalho', largura)['margin-bottom'], '24px')
+})
+
+test('Painel e Perfil reais mantêm um h1, descrições e breadcrumb sem ocultar controles', () => {
+  const { PainelEventoAdmin } = carregarAdmin('components/admin/PainelEventoAdmin.jsx', ['PainelEventoAdmin'], env)
+  const { PerfilPessoal } = carregarAdmin('components/perfil/PerfilPessoal.jsx', ['PerfilPessoal'], {
+    ...env, usePerfil: () => ({ perfil: null, erro: '' }), sessionStorage: { getItem: () => null },
+    Skeleton: () => createElement('div', { role: 'status' }, 'Carregando perfil'),
+  })
+  const painel = renderToStaticMarkup(createElement(PainelEventoAdmin, { eventos: [], carregando: false, eventoId: null }))
+  const perfil = renderToStaticMarkup(createElement(PerfilPessoal, { contexto: 'Administração' }))
+  assert.equal((painel.match(/<h1\b/g) || []).length, 1)
+  assert.equal((perfil.match(/<h1\b/g) || []).length, 1)
+  assert.match(painel, /<h1>Painel de evento<\/h1>/)
+  assert.match(perfil, /<h1>Meu perfil<\/h1>/)
+  assert.match(perfil, /TrocaTicket › Administração › Meu perfil/)
+  assert.match(perfil, /Consulte e atualize suas informações pessoais/)
+  assert.match(painel, /Selecionar evento<select/)
+  assert.doesNotMatch(painel + perfil, /aria-hidden="true"/)
 })

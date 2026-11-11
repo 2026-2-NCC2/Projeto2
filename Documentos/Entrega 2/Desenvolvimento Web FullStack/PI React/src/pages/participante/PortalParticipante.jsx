@@ -599,7 +599,7 @@ const aoInscreverEvento = async (evento) => {
 
           {abaParticipante === 'perfil' && (
             <div className="ppPerfil">
-            <PerfilPessoal contexto="Participante">
+            <PerfilPessoal contexto="Participante" aoSair={aoSair}>
               <div className="perfilAcoes"><Botao type="button" variante="secundario" className="secundario" onClick={() => setPagina('solicitar-acesso')}>Solicitar acesso como organizador ou fornecedor</Botao></div>
             </PerfilPessoal>
             </div>

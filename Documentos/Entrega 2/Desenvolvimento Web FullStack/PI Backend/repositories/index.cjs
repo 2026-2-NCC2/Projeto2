@@ -31,6 +31,9 @@ function prepararRepositorios() {
   };
   // Usa o cliente já selecionado; não cria conexão extra nem recorre ao MySQL.
   if (provider === 'supabase') {
+    if (process.env.ADMIN_EVENTOS_CRIACAO_ATIVA === 'true') {
+      repositorios.adminEventos = require('./supabase/admin-eventos.cjs').criarRepositorioAdminEventos(conexao);
+    }
     repositorios.privacidade = require('./supabase/privacidade-conta.cjs').criarRepositorioPrivacidade(conexao,
       { portfolioAtivo: process.env.PORTFOLIO_FORNECEDOR_ATIVO === 'true' });
   }

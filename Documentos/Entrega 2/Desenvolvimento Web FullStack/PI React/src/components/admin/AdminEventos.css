@@ -1,0 +1,27 @@
+.admEventos .admEventosApresentacao { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; height: auto; gap: 16px 24px; padding: 0; margin-bottom: 24px; background: transparent; border: 0; }
+.admEventos .admEventosApresentacao > div { flex: 1 1 280px; min-width: 0; }
+.admEventos .admEventosApresentacao p { margin: 0; color: var(--texto-secundario); line-height: 1.6; }
+.admEventos .admEventosApresentacao > button { flex-shrink: 0; }
+.admEventos .admFiltros { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto; gap: 18px; padding: 24px; background: var(--superficie-cartao); }
+.admEventos .admFiltros label { line-height: 1.5; }
+.admEventos .admFiltros > button { min-width: 0; white-space: normal; }
+.admEventos .admTabela table { table-layout: fixed; min-width: 780px; }
+.admEventos .admTabela th, .admEventos .admTabela td { padding: 18px 16px; vertical-align: top; line-height: 1.6; }
+.admEventos .admTabela th:nth-child(1) { width: 30%; }
+.admEventos .admTabela th:nth-child(2) { width: 22%; }
+.admEventos .admTabela th:nth-child(3) { width: 15%; }
+.admEventos .admTabela th:nth-child(4) { width: 17%; }
+.admEventos .admTabela th:nth-child(5) { width: 16%; }
+.admEventos .admEventoNome { align-items: flex-start; min-width: 0; }
+.admEventos .admEventoNome > strong { min-width: 0; overflow-wrap: anywhere; }
+.admEventos .admEventoNome > img { flex-shrink: 0; }
+.admEventos .admAcoes { align-items: stretch; }
+.admEventos .admAcoes button { flex: 1 1 100%; min-width: 0; white-space: normal; }
+.admEventos .admContagem { margin-block: 20px 12px; }
+@media (max-width: 900px) {
+  .admEventos .admFiltros { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 540px) {
+  .admEventos .admFiltros { grid-template-columns: minmax(0, 1fr); padding: 18px; }
+  .admEventos .admEventosApresentacao > button { width: 100%; }
+}

@@ -71,12 +71,12 @@ export function FormularioPerfil({ perfil, token }) {
   </form>
 }
 
-export function PerfilPessoal({ contexto = 'Minha conta', children, indicadores }) {
-  const { perfil, erro, recarregar } = usePerfil()
+export function PerfilPessoal({ contexto = 'Minha conta', children, indicadores, aoSair }) {
+  const { perfil, erro, erroStatus, recarregar } = usePerfil()
   const token = sessionStorage.getItem('token')
   return <div className="perfilPagina">
     <div className="perfilCabecalho"><div><p className="trilhaNavegacao">TrocaTicket › {contexto} › Meu perfil</p><h1>Meu perfil</h1><p>Consulte e atualize suas informações pessoais.</p></div></div>
-    {erro && <Alerta variante="erro"><p>{erro}</p><Botao variante="secundario" type="button" className="secundario" onClick={recarregar}>Tentar novamente</Botao></Alerta>}
+    {erro && <Alerta variante="erro"><p>{erro}</p><Botao variante="secundario" type="button" className="secundario" onClick={erroStatus === 401 && aoSair ? aoSair : recarregar}>{erroStatus === 401 && aoSair ? 'Entrar novamente' : 'Tentar novamente'}</Botao></Alerta>}
     {!perfil && !erro && <Skeleton tipo="card" rotulo="Carregando perfil..." />}
     {perfil && <>
       <ImagensPerfil key={`imagens:${token}:${perfil.id}`} perfil={perfil} indicadores={indicadores} habilitado={perfil.imagens_disponiveis === true} />

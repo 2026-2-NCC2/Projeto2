@@ -1,16 +1,19 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useConsultaAdmin } from '../../hooks/useConsultaAdmin.js'
 import { filtrarCatalogo, nomesPerfis } from '../../services/admin.js'
 import { dataPainel, moedaPainel } from '../../services/painelEventoAdmin.js'
 import { CapaEvento, MidiaEvento } from '../eventos/MidiaEvento.jsx'
 import { ResumoEventoAdmin } from './PainelEventoAdmin.jsx'
 import { BadgeAdmin, EstadoAdmin, SkeletonAdmin, ErroAdmin, ModalAdmin, FiltroAdmin } from './AdminUI.jsx'
+import './AdminEventos.css'
+import './AdminUsuarios.css'
+import './AdminComercial.css'
 
 const paginas = {
   eventos: { titulo: 'Eventos', descricao: 'Consulte estados, ocupação e planejamento dos eventos.', rota: '/admin/eventos', colunas: ['Evento', 'Local', 'Estado', 'Organizador', 'Ações'] },
   usuarios: { titulo: 'Usuários', descricao: 'Consulte os dados cadastrais e os perfis de acesso.', rota: '/usuarios', colunas: ['ID', 'Nome', 'E-mail', 'Perfil', 'Ações'] },
-  cotacoes: { titulo: 'Cotações', descricao: 'Acompanhe demandas, itens estimados e seus eventos.', rota: '/admin/cotacoes', colunas: ['Cotação', 'Evento', 'Modalidade', 'Estado', 'Ações'] },
-  propostas: { titulo: 'Propostas', descricao: 'Ofertas comerciais de fornecedores. Os valores não representam pagamentos realizados.', rota: '/admin/propostas', colunas: ['Proposta', 'Evento', 'Fornecedor', 'Valor proposto', 'Estado', 'Ações'] },
+  cotacoes: { titulo: 'Cotações', descricao: 'Acompanhe demandas, itens estimados e seus eventos.', rota: '/admin/cotacoes', colunas: ['ID', 'Evento', 'Modalidade', 'Estado', 'Ações'] },
+  propostas: { titulo: 'Propostas', descricao: 'Ofertas comerciais de fornecedores. Os valores não representam pagamentos realizados.', rota: '/admin/propostas', colunas: ['ID', 'Evento', 'Fornecedor', 'Valor proposto', 'Estado', 'Ações'] },
 }
 const filtrosVazios = { busca: '', estado: '', perfil: '', evento: '', fornecedor: '' }
 function opcoes(dados, chave, nome = chave) {
@@ -27,10 +30,11 @@ export function DetalhesCotacaoAdmin({ id, aoAbrirPainel, aoSair }) {
     aoAtualizar={consulta.recarregar}
     aoSair={aoSair} />
   }
-  return <>
+  return <div className="admComercialDetalhes">
+    <h3>Cotação #{q.id}</h3>
     <div className="admDetalhesTopo">
       <BadgeAdmin valor={q.status} />
-      <button className="admAcao" onClick={() => aoAbrirPainel(q.evento_id)}>Ver painel do evento</button>
+      <button className="admAcao" aria-label={`Ver painel do evento ${q.evento_nome}, ID ${q.evento_id}`} onClick={() => aoAbrirPainel(q.evento_id)}>Ver painel do evento</button>
     </div>
     <dl className="admDados">
       <div>
@@ -64,9 +68,9 @@ export function DetalhesCotacaoAdmin({ id, aoAbrirPainel, aoSair }) {
       <table>
         <thead>
           <tr>
-            <th>Categoria</th>
-            <th>Descrição</th>
-            <th>Valor estimado</th>
+            <th scope="col">Categoria</th>
+            <th scope="col">Descrição</th>
+            <th scope="col">Valor estimado</th>
           </tr>
         </thead>
         <tbody>
@@ -84,23 +88,24 @@ export function DetalhesCotacaoAdmin({ id, aoAbrirPainel, aoSair }) {
         </tbody>
       </table>
     </div>}
-  </>
+  </div>
 }
-export function AdminCatalogo({ tipo, aoAbrirPainel, aoAbrirCotacao, aoSair, cotacaoInicial }) {
+export function AdminCatalogo({ tipo, aoAbrirPainel, aoAbrirCotacao, aoFecharCotacao, aoSair, cotacaoInicial }) {
   const config = paginas[tipo]
   const consulta = useConsultaAdmin(config.rota)
   const [filtros, setFiltros] = useState(filtrosVazios)
   const [selecionado, setSelecionado] = useState(cotacaoInicial ? { id: cotacaoInicial } : null)
-  const fecharModal = useCallback(() => setSelecionado(null), [])
+  const fecharCotacaoRef = useRef(aoFecharCotacao)
+  useEffect(() => { fecharCotacaoRef.current = aoFecharCotacao }, [aoFecharCotacao])
+  const fecharModal = useCallback(() => { setSelecionado(null); fecharCotacaoRef.current?.() }, [])
   const filtrar = (campo, valor) => setFiltros(f => ({ ...f, [campo]: valor }))
   const lista = filtrarCatalogo(tipo, consulta.dados, filtros)
   const estados = tipo === 'eventos' ? ['Ativo', 'Em planejamento', 'Cancelado', 'Encerrado'].map(nome => ({ valor: nome, nome })) : opcoes(consulta.dados, 'status')
   function visualizar(e, item) { e.currentTarget.focus(); setSelecionado(item) }
-  return <section className="admPagina" aria-labelledby={`adm-titulo-${tipo}`}>
-    <header className="admPaginaTopo">
+  return <section className={`admPagina${tipo === 'eventos' ? ' admEventos' : tipo === 'usuarios' ? ' admUsuarios' : ` admComercial ${tipo === 'propostas' ? 'admPropostas' : 'admCotacoes'}`}`} aria-labelledby={`adm-titulo-${tipo}`}>
+    <header className={tipo === 'eventos' ? 'admEventosApresentacao' : tipo === 'usuarios' ? 'admUsuariosApresentacao' : 'admComercialApresentacao'}>
       <div>
-        <p className="admSobretitulo">ADMINISTRAÇÃO · CONSULTA</p>
-        <h1 id={`adm-titulo-${tipo}`}>
+        <h1 className="admSrOnly" id={`adm-titulo-${tipo}`}>
           {config.titulo}
         </h1>
         <p>
@@ -234,8 +239,8 @@ export function AdminCatalogo({ tipo, aoAbrirPainel, aoAbrirCotacao, aoSair, cot
               </>}
               <td>
                 <div className="admAcoes">
-                  <button className="admAcao" onClick={e => visualizar(e, item)}>Visualizar</button>
-                  {tipo === 'eventos' && <button className="admAcao admAcao--secundaria" onClick={() => aoAbrirPainel(item.id)}>Abrir painel</button>}
+                  <button className="admAcao" aria-label={tipo === 'eventos' ? `Visualizar evento ${item.nome}` : tipo === 'usuarios' ? `Visualizar usuário ${item.nome}, ID ${item.id}` : `Visualizar ${tipo === 'cotacoes' ? 'cotação' : 'proposta'} #${item.id}`} onClick={e => visualizar(e, item)}>Visualizar</button>
+                  {tipo === 'eventos' && <button className="admAcao admAcao--secundaria" aria-label={`Abrir painel do evento ${item.nome}`} onClick={() => aoAbrirPainel(item.id)}>Abrir painel</button>}
                 </div>
               </td>
             </tr>)}
@@ -254,14 +259,16 @@ export function AdminCatalogo({ tipo, aoAbrirPainel, aoAbrirCotacao, aoSair, cot
         <MidiaEvento eventoId={selecionado.id} />
         <ResumoEventoAdmin evento={selecionado} />
         <button className="admAcao" onClick={() => aoAbrirPainel(selecionado.id)}>Abrir painel do evento</button>
-      </div> : tipo === 'usuarios' ? <>
-        <div className="admAvatar" aria-hidden="true">
-          {selecionado.nome?.slice(0, 1).toLocaleUpperCase('pt-BR')}
+      </div> : tipo === 'usuarios' ? <div className="admUsuarioDetalhes">
+        <div className="admUsuarioResumo">
+          <div className="admAvatar" aria-hidden="true">
+            {selecionado.nome?.slice(0, 1).toLocaleUpperCase('pt-BR')}
+          </div>
+          <div className="admUsuarioIdentidade">
+            <h3>{selecionado.nome}</h3>
+            <BadgeAdmin valor={selecionado.perfil} perfil />
+          </div>
         </div>
-        <h3>
-          {selecionado.nome}
-        </h3>
-        <BadgeAdmin valor={selecionado.perfil} perfil />
         <dl className="admDados">
           <div>
             <dt>Identificador</dt>
@@ -276,11 +283,12 @@ export function AdminCatalogo({ tipo, aoAbrirPainel, aoAbrirCotacao, aoSair, cot
           </div>
         </dl>
         <p className="admNota">Consulta de dados cadastrais. Alterações de usuários não estão disponíveis nesta seção.</p>
-      </> : tipo === 'cotacoes' ? <DetalhesCotacaoAdmin
+      </div> : tipo === 'cotacoes' ? <DetalhesCotacaoAdmin
         key={selecionado.id}
         id={selecionado.id}
         aoAbrirPainel={aoAbrirPainel}
-        aoSair={aoSair} /> : <>
+        aoSair={aoSair} /> : <div className="admComercialDetalhes">
+        <h3>Proposta #{selecionado.id}</h3>
         <div className="admDetalhesTopo">
           <BadgeAdmin valor={selecionado.status} />
           <strong className="admPropostaValor">
@@ -315,13 +323,14 @@ export function AdminCatalogo({ tipo, aoAbrirPainel, aoAbrirCotacao, aoSair, cot
           </div>
         </dl>
         <div className="admAcoes">
-          <button className="admAcao" onClick={() => aoAbrirCotacao(selecionado.cotacao_id)}>Ver cotação #{selecionado.cotacao_id}
+          <button className="admAcao" aria-label={`Ver cotação #${selecionado.cotacao_id} da proposta #${selecionado.id}`} onClick={() => aoAbrirCotacao(selecionado.cotacao_id)}>Ver cotação #{selecionado.cotacao_id}
           </button>
           <button
             className="admAcao admAcao--secundaria"
+            aria-label={`Ver painel do evento ${selecionado.evento_nome}, ID ${selecionado.evento_id}`}
             onClick={() => aoAbrirPainel(selecionado.evento_id)}>Ver painel do evento</button>
         </div>
-      </>}
+      </div>}
     </ModalAdmin>}
   </section>
 }

@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { carregarAdmin, hooksAdmin } from './helpers/adminRuntime.js'
+import { carregarAdmin, hooksAdmin, nodes } from './helpers/adminRuntime.js'
 import { historicoFixture } from './helpers/historicoFixture.js'
 
 function montar({ pagina = 'login', browser = historicoFixture(), validar = p => p, chave = 'segredo-sessao-a', ativo = true } = {}) {
@@ -38,12 +38,88 @@ test('Landing → Login registra entrada; Back/Forward restaura sem duplicar e p
   r.close()
 })
 
+test('Visão geral, solicitações e painel preservam Voltar/Avançar e restauração por URL', () => {
+  const r = montar({ pagina: 'admin' })
+  assert.equal(r.render().estado.secao, 'inicio')
+  r.render().mudar({ secao: 'contas', eventoId: null, cotacaoId: null }); r.render()
+  r.render().mudar({ secao: 'painel', eventoId: 7, cotacaoId: null }); r.render()
+  r.browser.back(); assert.equal(r.render().estado.secao, 'contas')
+  r.browser.back(); assert.equal(r.render().estado.secao, 'inicio')
+  r.browser.forward(); assert.equal(r.render().estado.secao, 'contas')
+  r.browser.forward(); assert.equal(r.render().estado.eventoId, 7)
+  r.close()
+  const restaurado = montar({ pagina: 'admin', browser: historicoFixture({ hash: '#/admin' }) })
+  assert.equal(restaurado.render().estado.secao, 'inicio')
+  restaurado.close()
+})
+
 test('acesso direto sem histórico anterior não cria entrada extra ou volta forçada', () => {
   const r = montar({ browser: historicoFixture({ externo: false }) })
   r.render(); r.browser.back(); r.render()
   assert.equal(r.browser.entradas.length, 1)
   assert.deepEqual(r.chamadas, [])
   assert.equal(r.render().estado.login, false); r.close()
+})
+
+test('âncora do painel conserva rota/evento para F5 e não interfere em Voltar/Avançar', () => {
+  const r = montar({ pagina: 'admin' })
+  r.render()
+  r.render().mudar({ secao: 'painel', eventoId: 13, cotacaoId: null }); r.render()
+  const hash = r.browser.window.location.hash, tamanho = r.browser.entradas.length
+  let focos = 0
+  const { LinkSecaoPainel } = carregarAdmin('components/admin/PainelEventoAdmin.jsx', ['LinkSecaoPainel'], {
+    document: { getElementById: () => ({ focus() { focos++ }, scrollIntoView() {} }) },
+  })
+  const link = LinkSecaoPainel({ destino: 'pea-custos', eventoId: 13 })
+  link.props.onClick({ preventDefault() {} })
+  assert.equal(focos, 1)
+  assert.equal(r.browser.window.location.hash, hash)
+  assert.equal(r.browser.entradas.length, tamanho)
+  assert.equal(link.props.href, hash)
+  const f5 = montar({ pagina: 'admin', browser: historicoFixture({ hash }) })
+  assert.equal(f5.render().estado.secao, 'painel'); assert.equal(f5.render().estado.eventoId, 13)
+  r.browser.back(); assert.equal(r.render().estado.secao, 'inicio')
+  r.browser.forward(); assert.equal(r.render().estado.eventoId, 13)
+  f5.close(); r.close()
+})
+
+test('fechar cotação substitui URL; F5 não reabre e histórico mantém a seção anterior', () => {
+  const r = montar({ pagina: 'admin' }); r.render()
+  r.render().mudar({ secao: 'propostas', eventoId: null, cotacaoId: null }); r.render()
+  r.render().mudar({ secao: 'cotacoes', eventoId: null, cotacaoId: 21 }); r.render()
+  const tamanho = r.browser.entradas.length
+  const h = hooksAdmin({ AdminCatalogo: 'catalogo', NavegacaoRecolhivel: 'menu' })
+  const { AdminPortal } = carregarAdmin('components/admin/AdminPortal.jsx', ['AdminPortal'], h.env)
+  const v = h.render(AdminPortal, { navegacao: r.render() })
+  nodes(v).find(n => n.type === 'catalogo').props.aoFecharCotacao()
+  r.render()
+  assert.equal(r.browser.escritas.at(-1), 'replace')
+  assert.equal(r.browser.entradas.length, tamanho)
+  assert.equal(r.browser.window.location.hash, '#/admin?secao=cotacoes')
+  const f5 = montar({ pagina: 'admin', browser: historicoFixture({ hash: r.browser.window.location.hash }) })
+  assert.equal(f5.render().estado.cotacaoId, null)
+  r.browser.back(); assert.equal(r.render().estado.secao, 'propostas')
+  r.browser.forward(); assert.equal(r.render().estado.secao, 'cotacoes'); assert.equal(r.render().estado.cotacaoId, null)
+  f5.close(); h.close(); r.close()
+})
+
+test('Relatórios restaura seção por F5 e mantém Voltar/Avançar', () => {
+  const r = montar({ pagina: 'admin', browser: historicoFixture({ hash: '#/admin?secao=relatorios' }) })
+  assert.equal(r.render().estado.secao, 'relatorios')
+  r.render().mudar({ secao: 'usuarios', eventoId: null, cotacaoId: null }); r.render()
+  r.browser.back(); assert.equal(r.render().estado.secao, 'relatorios')
+  r.browser.forward(); assert.equal(r.render().estado.secao, 'usuarios')
+  r.close()
+})
+
+test('Novo evento administrativo preserva F5, Voltar/Avançar e guarda somente a seção', () => {
+  const r = montar({ pagina: 'admin', browser: historicoFixture({ hash: '#/admin?secao=novo-evento' }) })
+  assert.equal(r.render().estado.secao, 'novo-evento')
+  r.render().mudar({ secao: 'eventos', eventoId: null, cotacaoId: null }); r.render()
+  r.browser.back(); assert.equal(r.render().estado.secao, 'novo-evento')
+  r.browser.forward(); assert.equal(r.render().estado.secao, 'eventos')
+  assert.doesNotMatch(JSON.stringify(r.browser.window.history.state), /organizador_id|nome|payload|token|chaveIdempotencia/)
+  r.close()
 })
 
 test('rerenders e valores inválidos não geram entradas; history.state não contém rotas, dados ou credenciais', () => {

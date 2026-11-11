@@ -1,0 +1,33 @@
+.admSolicitacoes .admSolicitacoesApresentacao { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px 24px; margin-bottom: 24px; }
+.admSolicitacoes .admSolicitacoesApresentacao > div { flex: 1 1 280px; min-width: 0; }
+.admSolicitacoes .admSolicitacoesApresentacao p { margin: 0; color: var(--texto-secundario); line-height: 1.6; }
+.admSolicitacoes .admSolicitacoesApresentacao > button { flex-shrink: 0; }
+.admSolicitacoes .admMetricas { gap: 20px; }
+.admSolicitacoes .admMetricas article { background: var(--superficie-cartao); border: 1px solid var(--borda-superficie); padding: 24px; gap: 16px; align-content: start; }
+.admSolicitacoes .admMetricas span { line-height: 1.5; }
+.admSolicitacoes .admMetricas strong { font-size: 2rem; line-height: 1.2; font-variant-numeric: tabular-nums; color: var(--marca-coral-escuro); }
+.admSolicitacoes .admFiltros { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; padding: 24px; background: var(--superficie-cartao); }
+.admSolicitacoes .admFiltros label { width: 100%; line-height: 1.5; }
+.admSolicitacoes .admFiltros > button { min-width: 0; white-space: normal; }
+.admSolicitacoes .admTabela table { min-width: 820px; table-layout: fixed; }
+.admSolicitacoes .admTabela th, .admSolicitacoes .admTabela td { padding: 18px 14px; vertical-align: top; }
+.admSolicitacoes .admTabela th:nth-child(1) { width: 15%; }
+.admSolicitacoes .admTabela th:nth-child(2) { width: 20%; }
+.admSolicitacoes .admTabela th:nth-child(3) { width: 14%; }
+.admSolicitacoes .admTabela th:nth-child(4) { width: 13%; }
+.admSolicitacoes .admTabela th:nth-child(5) { width: 21%; }
+.admSolicitacoes .admTabela th:nth-child(6) { width: 17%; }
+.admSolicitacoes .admTextoLongo { min-width: 0; max-width: none; line-height: 1.6; }
+.admSolicitacoes .admTabela small { line-height: 1.5; }
+.admSolicitacoes .admAcoes { align-items: stretch; }
+.admSolicitacoes .admAcoes button { flex: 1 1 100%; min-width: 0; white-space: normal; }
+.admSolicitacoes .admContagem { margin-block: 20px 12px; }
+@media (max-width: 1100px) {
+  .admSolicitacoes .admFiltros { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 540px) {
+  .admSolicitacoes .admFiltros { grid-template-columns: minmax(0, 1fr); padding: 18px; }
+  .admSolicitacoes .admMetricas { gap: 12px; }
+  .admSolicitacoes .admMetricas article { padding: 18px; }
+  .admSolicitacoes .admSolicitacoesApresentacao > button { width: 100%; }
+}

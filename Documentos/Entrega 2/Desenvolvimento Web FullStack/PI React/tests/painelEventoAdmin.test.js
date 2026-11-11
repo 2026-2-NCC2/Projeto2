@@ -15,14 +15,14 @@ const baseService = service(() => { throw Error('Transporte não injetado') })
 const componentSource = readFileSync(new URL('../src/components/admin/PainelEventoAdmin.jsx', import.meta.url), 'utf8').replace(/^import .*\r?\n/gm, '').replaceAll('export ', '')
 const compiled = transformSync('PainelEventoAdmin.jsx', componentSource, { jsx: { runtime: 'classic', pragma: 'jsx', pragmaFrag: 'Fragment' } })
 assert.equal(compiled.errors.length, 0)
-function runtime(consultar = async () => dados) {
+function runtime(consultar = async () => dados, document = {}) {
   const states = [], effects = [], deps = []; let cursor = 0, ec = 0
-  const context = { jsx, Fragment: 'fragment', ...baseService, consultarPainelEvento: consultar, AbortController,
+  const context = { jsx, Fragment: 'fragment', ...baseService, consultarPainelEvento: consultar, AbortController, document,
     sessionStorage: { getItem: () => 'token-sintetico' },
     useState(initial) { const i = cursor++; if (!(i in states)) states[i] = initial; return [states[i], v => { states[i] = typeof v === 'function' ? v(states[i]) : v }] },
     useEffect(fn, d) { const i = ec++; if (!deps[i] || d.some((v, j) => v !== deps[i][j])) { effects[i]?.(); deps[i] = d; effects[i] = fn() } },
   }
-  const api = vm.runInNewContext(compiled.code + ';({PainelEventoAdmin,ConteudoPainelEvento,ResumoEventoAdmin,EstadoEventoAdmin,SkeletonPainel,ConsultaPainel})', context)
+  const api = vm.runInNewContext(compiled.code + ';({PainelEventoAdmin,ConteudoPainelEvento,ResumoEventoAdmin,EstadoEventoAdmin,SkeletonPainel,ConsultaPainel,LinkSecaoPainel})', context)
   return { ...api, render(props = { eventoId: 13 }) { cursor = 0; ec = 0; return api.ConsultaPainel(props) }, close() { effects.forEach(e => e?.()) } }
 }
 const dados = { evento: { id: 13, nome: 'Evento sintético', data: '2030-01-02', horario: '10:30:00', local: 'Local', status: 'Ativo', publico: 999, organizador_nome: 'Organizador', capacidade_maxima: null, inscritos_confirmados: 5, vagas_restantes: null, lotado: false }, custos: [{ id: 1, categoria: 'Som', descricao: 'Equipamento', valor_estimado: '10.30' }], cotacoes: [{ id: 21, modalidade: 'Fechada', status: 'Aberta', prazo: '2030-01-01', itens: [{ id: 41, categoria: 'Som', descricao: 'Item sintético', valor_estimado: '10.30' }] }], propostas: [{ id: 31, cotacao_id: 21, fornecedor_nome: 'Fornecedor', valor: '20.50', status: 'Em avaliação' }], resumo: { custos: 1, cotacoes: 1, itens: 1, propostas: 1, total_custos_estimados: '10.30' }, consultado_em: '2030-01-01T12:00:00Z', aviso: 'Consultas separadas.' }
@@ -47,9 +47,48 @@ test('resumo distingue capacidade NULL, lotação, zero vagas e estado terminal'
 })
 test('navegação por âncoras resolve seções e relação proposta-cotação; estimativas separadas', () => {
   const r = runtime(), v = r.ConteudoPainelEvento({ dados }), all = [...nodes(v), ...nodes(r.ResumoEventoAdmin({ evento: dados.evento }))], ids = new Set(all.map(x => x.props.id).filter(Boolean))
-  for (const a of all.filter(x => x.type === 'a')) assert.ok(ids.has(a.props.href.slice(1)))
+  const links = all.filter(x => x.type === r.LinkSecaoPainel)
+  assert.equal(links.length, 6)
+  for (const link of links) {
+    assert.ok(ids.has(link.props.destino))
+    assert.equal(r.LinkSecaoPainel(link.props).props.href, '#/admin?secao=painel&evento=13')
+    assert.equal(all.find(x => x.props.id === link.props.destino).props.tabIndex, -1)
+  }
   assert.match(text(v), /não representam contratação ou pagamento/); assert.match(text(v), /não são somados aos custos/)
   assert.equal(all.filter(x => x.props.id === 'pea-cotacao-21').length, 1)
+})
+
+test('links internos impedem troca do fragmento e focam/rolam o destino, inclusive na ativação por teclado', () => {
+  const calls = []
+  const r = runtime(undefined, { getElementById(id) {
+    assert.equal(id, 'pea-custos')
+    return { focus: op => calls.push(['foco', op.preventScroll]), scrollIntoView: op => calls.push(['rolagem', op.block]) }
+  } })
+  const link = r.LinkSecaoPainel({ destino: 'pea-custos', eventoId: 13, children: 'Custos' })
+  link.props.onClick({ preventDefault() { calls.push('impediu') } })
+  assert.deepEqual(calls, ['impediu', ['foco', true], ['rolagem', 'start']])
+  calls.length = 0
+  link.props.onClick({ ctrlKey: true, preventDefault() { throw Error('Não bloquear abertura em nova aba') } })
+  assert.equal(calls.length, 0)
+})
+
+test('lista inicial distingue rede, 401 e 403 de vazio; seleção é preservada na recuperação', () => {
+  const r = runtime(), calls = []
+  const props = { eventos: [], carregando: false, eventoId: 13, aoSelecionar() {}, aoSair: () => calls.push('login'), aoAtualizar: () => calls.push('recarga') }
+  for (const status of [undefined, 401, 403]) {
+    const erro = Object.assign(Error(status === 403 ? 'Você não tem permissão para esta consulta.' : 'Falha na consulta'), { status })
+    const v = r.PainelEventoAdmin({ ...props, erro })
+    assert.ok(!text(v).includes('Nenhum evento cadastrado'))
+    assert.match(text(v), status === 403 ? /não tem permissão/ : /Falha na consulta/)
+    const select = nodes(v).find(n => n.type === 'select')
+    assert.equal(select.props.value, 13); assert.equal(select.props.disabled, true)
+    const botao = nodes(v).find(n => n.type === 'button')
+    assert.equal(text(botao), status === 401 ? 'Entrar novamente' : 'Tentar novamente')
+    botao.props.onClick()
+  }
+  assert.deepEqual(calls, ['recarga', 'login', 'recarga'])
+  const v = r.PainelEventoAdmin({ ...props, eventos: [dados.evento], erro: null })
+  assert.ok(nodes(v).some(n => n.type === r.ConsultaPainel && n.props.eventoId === 13))
 })
 test('relações vazias e seleção sem evento têm mensagens claras', () => {
   const r = runtime(), v = r.ConteudoPainelEvento({ dados: { ...dados, custos: [], cotacoes: [], propostas: [] } })

@@ -14,14 +14,14 @@ const escopo = p => p.startsWith('fornecedor-') ? 'fornecedor' : p
 function subtelaInicial(p, login = false) {
   if (p === 'login') return { login: Boolean(login) }
   if (p === 'participante') return { aba: 'inicio', eventoId: null }
-  if (p === 'admin') return { secao: 'contas', eventoId: null, cotacaoId: null }
+  if (p === 'admin') return { secao: 'inicio', eventoId: null, cotacaoId: null }
   return p.startsWith('fornecedor-') ? { cotacaoId: null } : null
 }
 function subtelaValida(p, d) {
   if (p === 'login') return typeof d?.login === 'boolean' ? { login: d.login } : null
   if (p === 'participante') return d && ['inicio', 'eventos', 'detalhes', 'ingressos', 'perfil'].includes(d.aba) && (d.aba !== 'detalhes' || idValido(d.eventoId))
     ? { aba: d.aba, eventoId: d.aba === 'detalhes' ? d.eventoId : null } : null
-  if (p === 'admin') return d && ['contas', 'eventos', 'usuarios', 'cotacoes', 'propostas', 'perfil', 'painel'].includes(d.secao)
+  if (p === 'admin') return d && ['inicio', 'novo-evento', 'relatorios', 'contas', 'eventos', 'usuarios', 'cotacoes', 'propostas', 'perfil', 'painel'].includes(d.secao)
     && (d.eventoId == null || idValido(d.eventoId)) && (d.cotacaoId == null || idValido(d.cotacaoId))
     ? { secao: d.secao, eventoId: d.secao === 'painel' ? d.eventoId ?? null : null, cotacaoId: d.secao === 'cotacoes' ? d.cotacaoId ?? null : null } : null
   return p.startsWith('fornecedor-') && d && (d.cotacaoId == null || idValido(d.cotacaoId)) ? { cotacaoId: d.cotacaoId ?? null } : null
@@ -42,7 +42,7 @@ export function lerDestinoNavegacao(hash = typeof window === 'undefined' ? '' : 
   const eventoId = q.evento ? Number(q.evento) : null, cotacaoId = q.cotacao ? Number(q.cotacao) : null
   let dados = subtelaInicial(p, m[1] === 'entrar')
   if (p === 'participante') dados = subtelaValida(p, { aba: q.secao || 'inicio', eventoId })
-  if (p === 'admin') dados = subtelaValida(p, { secao: q.secao || 'contas', eventoId, cotacaoId })
+  if (p === 'admin') dados = subtelaValida(p, { secao: q.secao || 'inicio', eventoId, cotacaoId })
   if (p.startsWith('fornecedor-')) dados = { cotacaoId }
   if (['login', 'cadastro'].includes(p) && Object.keys(q).length) return null
   if (q.secao && !['participante', 'admin'].includes(p)) return null
@@ -55,7 +55,7 @@ export function lerDestinoNavegacao(hash = typeof window === 'undefined' ? '' : 
 export function urlDestinoNavegacao({ pagina: p, dados: d, contextoEvento: c }) {
   const q = []
   if (p === 'participante' && d?.aba !== 'inicio') q.push('secao=' + d.aba)
-  if (p === 'admin' && d?.secao !== 'contas') q.push('secao=' + d.secao)
+  if (p === 'admin' && d?.secao !== 'inicio') q.push('secao=' + d.secao)
   if (['participante', 'admin'].includes(p) && d?.eventoId) q.push('evento=' + d.eventoId)
   if (d?.cotacaoId) q.push('cotacao=' + d.cotacaoId)
   if (['criar', 'custos', 'cotacao', 'ticket'].includes(p) && /^evento:[1-9]\d*$/.test(c || '')) q.push('evento=' + c.slice(7))

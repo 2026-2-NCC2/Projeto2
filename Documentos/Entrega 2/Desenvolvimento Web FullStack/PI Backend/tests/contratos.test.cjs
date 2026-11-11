@@ -147,6 +147,7 @@ const contratos = [
   ["get /eventos", null], ["get /eventos/:id", null], ["get /perfil", null], ["patch /perfil", null],
   ["get /perfil/profissional", null], ["patch /perfil/profissional", null],
   ["get /admin/eventos", "admin"], ["get /usuarios", "admin"],
+  ["get /admin/eventos/capacidades", "admin"], ["post /admin/eventos", "admin"],
   ["get /admin/cotacoes", "admin"], ["get /admin/propostas", "admin"],
   ["get /solicitacoes-acesso", "admin"], ["patch /solicitacoes-acesso/:id", "admin"],
   ["get /participante/eventos", "participante"], ["get /participante/inscricoes", "participante"],
@@ -168,8 +169,8 @@ const contratos = [
   ["get /fornecedores", null], ["get /fornecedores/:id/portfolio", null],
 ];
 
-test("inventario fixa exatamente os 47 pares metodo/caminho registrados no app", () => {
-  assert.equal(contratos.length, 47);
+test("inventario fixa exatamente os 49 pares metodo/caminho registrados no app", () => {
+  assert.equal(contratos.length, 49);
   assert.deepEqual([...ambiente().rotas.keys()].sort(), contratos.map(([rota]) => rota).sort());
 });
 

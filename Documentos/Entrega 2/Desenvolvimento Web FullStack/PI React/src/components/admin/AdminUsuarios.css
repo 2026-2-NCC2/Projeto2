@@ -1,0 +1,32 @@
+.admUsuarios .admUsuariosApresentacao { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; height: auto; gap: 16px 24px; padding: 0; margin-bottom: 24px; background: transparent; border: 0; }
+.admUsuarios .admUsuariosApresentacao > div { flex: 1 1 280px; min-width: 0; }
+.admUsuarios .admUsuariosApresentacao p { margin: 0; color: var(--texto-secundario); line-height: 1.6; }
+.admUsuarios .admUsuariosApresentacao > button { flex-shrink: 0; }
+.admUsuarios .admFiltros { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto; gap: 18px; padding: 24px; background: var(--superficie-cartao); }
+.admUsuarios .admFiltros label { line-height: 1.5; }
+.admUsuarios .admFiltros > button { min-width: 0; white-space: normal; }
+.admUsuarios .admTabela table { table-layout: fixed; min-width: 760px; }
+.admUsuarios .admTabela th, .admUsuarios .admTabela td { padding: 18px 16px; vertical-align: top; line-height: 1.6; overflow-wrap: anywhere; }
+.admUsuarios .admTabela th:nth-child(1) { width: 10%; }
+.admUsuarios .admTabela th:nth-child(2) { width: 25%; }
+.admUsuarios .admTabela th:nth-child(3) { width: 33%; }
+.admUsuarios .admTabela th:nth-child(4) { width: 17%; }
+.admUsuarios .admTabela th:nth-child(5) { width: 15%; }
+.admUsuarios .admBadge--perfil { white-space: normal; line-height: 1.5; }
+.admUsuarios .admAcoes button { min-width: 0; max-width: 100%; white-space: normal; }
+.admUsuarios .admContagem { margin-block: 20px 12px; }
+.admUsuarios .admUsuarioResumo { display: flex; align-items: center; gap: 20px; padding-bottom: 24px; border-bottom: 1px solid var(--borda-superficie); }
+.admUsuarios .admUsuarioResumo .admAvatar { flex-shrink: 0; border-radius: 50%; background: var(--marca-coral-suave); color: var(--marca-coral-escuro); }
+.admUsuarios .admUsuarioIdentidade { min-width: 0; overflow-wrap: anywhere; }
+.admUsuarios .admUsuarioIdentidade h3 { margin: 0 0 10px; font-size: 1.25rem; line-height: 1.5; }
+.admUsuarios .admUsuarioDetalhes .admDados { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+.admUsuarios .admUsuarioDetalhes .admDados > div { min-width: 0; padding: 16px; border: 1px solid var(--borda-superficie); border-radius: var(--raio-controle); background: var(--superficie-pagina); }
+@media (max-width: 900px) {
+  .admUsuarios .admFiltros { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 540px) {
+  .admUsuarios .admFiltros { grid-template-columns: minmax(0, 1fr); padding: 18px; }
+  .admUsuarios .admUsuariosApresentacao > button { width: 100%; }
+  .admUsuarios .admUsuarioResumo { align-items: flex-start; gap: 14px; }
+  .admUsuarios .admUsuarioResumo .admAvatar { width: 48px; height: 48px; }
+}

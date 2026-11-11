@@ -10,8 +10,8 @@ export function EstadoAdmin({ estado }) { return <EstadoEventoAdmin estado={esta
 export function SkeletonAdmin({ rotulo = 'Carregando dados' }) {
   return <div className="admSkeleton" role="status" aria-label={rotulo} aria-busy="true"><span className="admSrOnly">{rotulo}…</span><div className="admSkeletonCard" />{[1, 2, 3, 4].map(n => <div key={n} />)}</div>
 }
-export function ErroAdmin({ erro, aoAtualizar, aoSair }) {
-  return <div className="admMensagem admMensagem--erro" role="alert"><p>{erro.message}</p>{erro.status === 401 ? <button onClick={aoSair}>Entrar novamente</button> : <button onClick={aoAtualizar}>Atualizar consulta</button>}</div>
+export function ErroAdmin({ erro, aoAtualizar, aoSair, rotuloAtualizar = 'Atualizar consulta' }) {
+  return <div className="admMensagem admMensagem--erro" role="alert"><p>{erro.message}</p>{erro.status === 401 ? <button onClick={aoSair}>Entrar novamente</button> : <button onClick={aoAtualizar}>{rotuloAtualizar}</button>}</div>
 }
 export function ModalAdmin({ titulo, aoFechar, children }) {
   const ref = useFocoModal(true, aoFechar)

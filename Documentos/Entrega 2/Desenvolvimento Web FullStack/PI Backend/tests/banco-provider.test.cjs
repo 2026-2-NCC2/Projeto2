@@ -182,6 +182,7 @@ function iniciarSimulado({ env = {}, modo = "principal", dotenv = {} } = {}) {
     "./portfolio.cjs": require("../portfolio.cjs"),
     "./painel-evento-admin-http.cjs": require("../painel-evento-admin-http.cjs"),
     "./admin-consultas-http.cjs": require("../admin-consultas-http.cjs"),
+    "./admin-eventos-http.cjs": require("../admin-eventos-http.cjs"),
     "./termos-cadastro.cjs": require("../termos-cadastro.cjs"),
     "./privacidade-conta.cjs": require("../privacidade-conta.cjs"),
     "./imagens/rotas.cjs": require("../imagens/rotas.cjs"),
@@ -274,7 +275,7 @@ test("isolado usa so adaptador validado, sem dotenv, pool principal ou importaca
   assert.equal(a.estado.dotenv, 0);
   assert.deepEqual(a.estado.pools, []);
   assert.deepEqual(a.estado.escutas, []);
-  assert.equal(a.estado.rotas.length, 47);
+  assert.equal(a.estado.rotas.length, 49);
   assert.equal(new Set(a.estado.rotas).size, a.estado.rotas.length);
   for (const rota of ['get /admin/eventos/:id/painel', 'get /admin/cotacoes/:id',
     'get /termos/vigente', 'get /minha-privacidade/dados', 'get /minha-privacidade/exportacao']) {

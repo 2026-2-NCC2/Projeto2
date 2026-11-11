@@ -76,7 +76,7 @@ const source = readFileSync(new URL('../src/components/admin/AdminPortal.jsx', i
 function admin(section) {
   const js = transformSync('AdminPortal.jsx', source.replace(/^import .*\r?\n/gm, '').replaceAll('export function ', 'function '), { jsx: { runtime: 'classic', pragma: 'jsx', pragmaFrag: 'Fragment' } })
   assert.equal(js.errors.length, 0)
-  const component = vm.runInNewContext(js.code + '\nAdminPortal', { jsx: (type, props, ...children) => ({ type, props: props || {}, children: children.flat() }), Fragment: 'fragment', Marca: 'marca', AdminCatalogo: 'catalogo', AdminSolicitacoes: 'solicitacoes', useRef: value => ({ current: value }), useEffect() {}, useState: value => [value === 'contas' ? section : value, () => {}], NavegacaoRecolhivel: 'nav' })
+  const component = vm.runInNewContext(js.code + '\nAdminPortal', { jsx: (type, props, ...children) => ({ type, props: props || {}, children: children.flat() }), Fragment: 'fragment', Marca: 'marca', AdminCatalogo: 'catalogo', AdminSolicitacoes: 'solicitacoes', useRef: value => ({ current: value }), useEffect() {}, useState: value => [value === 'inicio' ? section : value, () => {}], NavegacaoRecolhivel: 'nav' })
   return component({ aoSair() {} })
 }
 function nodes(view) { return [view, ...view.children.filter(x => x && typeof x === 'object').flatMap(nodes)] }
@@ -84,9 +84,9 @@ test('Solicitações possuem componente próprio sem montar outros catálogos', 
   assert.ok(nodes(admin('contas')).some(n => n.type === 'solicitacoes'))
   assert.equal(nodes(admin('contas')).some(n => n.type === 'catalogo'), false)
 })
-test('Painel possui componente proprio e Relatorios continua indisponivel', () => {
+test('Painel possui componente proprio e seção desconhecida não reutiliza outro conteúdo', () => {
   assert.ok(nodes(admin('painel')).some(n => typeof n.type === 'function' && n.type.name === 'PaginaPainelAdmin'))
-  for (const section of ['relatorios']) {
+  for (const section of ['desconhecida']) {
     const view = nodes(admin(section)), status = view.find(n => n.props.role === 'status')
     assert.ok(status.children.includes('Funcionalidade em desenvolvimento.'))
     assert.equal(view.some(n => n.props.className === 'adminFila'), false)

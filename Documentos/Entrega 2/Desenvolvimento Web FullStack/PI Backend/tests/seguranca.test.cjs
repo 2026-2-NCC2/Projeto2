@@ -37,6 +37,7 @@ function ambiente() {
     process: { env: { JWT_SECRET: segredo } },
     console: { log: (...args) => logs.push(args), error: (...args) => logs.push(args) },
     require(nome) {
+      if (nome === './admin-eventos-http.cjs') return require('../admin-eventos-http.cjs');
       if (new Set(['./services/eventos.cjs', './config/encerramento-gracioso.cjs', './imagens/http-binario.cjs',
         './eventos-imagens-http.cjs', './painel-evento-admin-http.cjs', './admin-consultas-http.cjs', './termos-cadastro.cjs', './privacidade-conta.cjs']).has(nome)) return require('../' + nome.slice(2));
       const nova = require("./helpers/persistencia.cjs").dependencia(nome, db); if (nova) return nova;

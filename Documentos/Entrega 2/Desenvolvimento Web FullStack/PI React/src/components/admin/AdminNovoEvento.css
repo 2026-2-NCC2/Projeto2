@@ -1,0 +1,9 @@
+.admNovoEvento { min-width: 0; max-width: 1100px; margin-inline: auto; }
+.admNovoEvento .admNovoOrganizador { display: grid; gap: 8px; padding: 20px; margin-bottom: 24px; border: 1px solid var(--borda-superficie); border-radius: var(--raio-cartao); background: var(--superficie-cartao); color: var(--texto-principal); font-weight: 600; }
+.admNovoEvento .admNovoOrganizador select { width: 100%; min-width: 0; min-height: 44px; padding: 12px; font: inherit; border: 1px solid var(--borda-controle); border-radius: var(--raio-controle); color: var(--texto-principal); background: var(--superficie-cartao); }
+.admNovoEvento :focus-visible { outline: 3px solid var(--foco-cor); outline-offset: 3px; }
+.admNovoEvento .admAcoes { margin-bottom: 20px; }
+@media (max-width: 540px) {
+  .admNovoEvento .admNovoOrganizador { padding: 16px; }
+  .admNovoEvento .admAcoes button { width: 100%; }
+}

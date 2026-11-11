@@ -1,0 +1,41 @@
+/* Consultas de cotações e propostas compartilham o acabamento, sem afetar os demais catálogos. */
+.admComercial .admComercialApresentacao { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; height: auto; gap: 16px 24px; padding: 0; margin-bottom: 24px; background: transparent; border: 0; }
+.admComercial .admComercialApresentacao > div { flex: 1 1 280px; min-width: 0; }
+.admComercial .admComercialApresentacao p { margin: 0; max-width: 680px; color: var(--texto-secundario); line-height: 1.6; }
+.admComercial .admComercialApresentacao > button { flex-shrink: 0; }
+.admComercial .admFiltros { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)) auto; gap: 18px; padding: 24px; background: var(--superficie-cartao); }
+.admComercial.admPropostas .admFiltros { grid-template-columns: repeat(3, minmax(0, 1fr)) auto; }
+.admComercial .admFiltros label { line-height: 1.5; }
+.admComercial .admFiltros select { text-overflow: ellipsis; }
+.admComercial .admFiltros > button { min-width: 0; white-space: normal; }
+.admComercial .admTabela table { table-layout: fixed; min-width: 760px; }
+.admComercial .admTabela th, .admComercial .admTabela td { padding: 18px 16px; vertical-align: top; line-height: 1.6; overflow-wrap: anywhere; }
+.admComercial.admCotacoes > .admTabela th:nth-child(1) { width: 10%; }
+.admComercial.admCotacoes > .admTabela th:nth-child(2) { width: 35%; }
+.admComercial.admCotacoes > .admTabela th:nth-child(3) { width: 20%; }
+.admComercial.admCotacoes > .admTabela th:nth-child(4) { width: 18%; }
+.admComercial.admCotacoes > .admTabela th:nth-child(5) { width: 17%; }
+.admComercial.admPropostas > .admTabela table { min-width: 940px; }
+.admComercial.admPropostas > .admTabela th:nth-child(1) { width: 8%; }
+.admComercial.admPropostas > .admTabela th:nth-child(2) { width: 24%; }
+.admComercial.admPropostas > .admTabela th:nth-child(3) { width: 23%; }
+.admComercial.admPropostas > .admTabela th:nth-child(4) { width: 18%; }
+.admComercial.admPropostas > .admTabela th:nth-child(5) { width: 14%; }
+.admComercial.admPropostas > .admTabela th:nth-child(6) { width: 13%; }
+.admComercial .admBadge { white-space: normal; line-height: 1.5; }
+.admComercial .admValor { white-space: normal; overflow-wrap: anywhere; }
+.admComercial .admAcoes button { min-width: 0; max-width: 100%; white-space: normal; }
+.admComercial .admContagem { margin-block: 20px 12px; }
+.admComercial .admComercialDetalhes h3 { margin-top: 0; font-size: 1.25rem; line-height: 1.5; }
+.admComercial .admComercialDetalhes .admDados > div { min-width: 0; padding: 16px; border: 1px solid var(--borda-superficie); border-radius: var(--raio-controle); background: var(--superficie-pagina); }
+.admComercial .admComercialDetalhes .admDados dd { overflow-wrap: anywhere; }
+.admComercial .admComercialDetalhes .admDetalhesTopo { gap: 16px; }
+.admComercial .admComercialDetalhes .admTabela table { min-width: 540px; }
+@media (max-width: 1100px) {
+  .admComercial .admFiltros, .admComercial.admPropostas .admFiltros { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 540px) {
+  .admComercial .admFiltros, .admComercial.admPropostas .admFiltros { grid-template-columns: minmax(0, 1fr); padding: 18px; }
+  .admComercial .admComercialApresentacao > button, .admComercial .admComercialDetalhes .admAcoes button { width: 100%; }
+  .admComercial .admComercialDetalhes .admPropostaValor { font-size: 1.35rem; overflow-wrap: anywhere; }
+}

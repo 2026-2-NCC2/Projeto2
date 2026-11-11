@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { listarAdmin, requisicaoAdmin } from '../services/admin.js'
 
-export function useConsultaAdmin(caminho, lista = true) {
+export function useConsultaAdmin(caminho, lista = true, manterDadosAoAtualizar = false) {
   const [recurso, setRecurso] = useState({ carregando: true, dados: lista ? [] : null, erro: null })
   const [versao, setVersao] = useState(0)
   useEffect(() => {
@@ -15,7 +15,7 @@ export function useConsultaAdmin(caminho, lista = true) {
     return () => controle.abort()
   }, [caminho, lista, versao])
   function recarregar() {
-    setRecurso({ dados: lista ? [] : null, carregando: true, erro: null })
+    setRecurso(atual => ({ dados: manterDadosAoAtualizar ? atual.dados : lista ? [] : null, carregando: true, erro: null }))
     setVersao(v => v + 1)
   }
   function atualizar(alterar) { setRecurso(atual => ({ ...atual, dados: alterar(atual.dados) })) }

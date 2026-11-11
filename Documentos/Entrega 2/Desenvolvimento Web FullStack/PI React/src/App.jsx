@@ -41,11 +41,11 @@ import { ProvedorImagensEvento } from './components/eventos/ProvedorImagensEvent
 
 
 
-function PerfilFornecedor({ propostas = [] }) {
+function PerfilFornecedor({ propostas = [], aoSair }) {
   const aprovadas = propostas.filter(item => item.status === 'Aprovada').length
   const volume = propostas.reduce((soma, item) => soma + item.valor, 0)
   const indicadores = <div className="perfilResumoNumeros"><div><strong>{propostas.length}</strong><small>Propostas enviadas</small></div><div><strong>{aprovadas}</strong><small>Aprovadas</small></div><div><strong>{formatarMoeda(volume)}</strong><small>Volume proposto</small></div></div>
-  return <PerfilPessoal contexto="Fornecedor" indicadores={indicadores} />
+  return <PerfilPessoal contexto="Fornecedor" indicadores={indicadores} aoSair={aoSair} />
 }
 
 function App() {
@@ -587,7 +587,7 @@ alert(
             : 'Publicação bloqueada: destino da API não permitido.'}
         </p>
       )}
-      {pagina === 'perfil' && <PerfilOrganizador />}
+      {pagina === 'perfil' && <PerfilOrganizador aoSair={aoSair} />}
       {pagina === 'eventos' && (
         <Eventos
           eventos={eventos}

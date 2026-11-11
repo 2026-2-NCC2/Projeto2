@@ -137,6 +137,45 @@ test('página diferencia carregamento/erro, permite repetir e mostra identidade 
   assert.equal(cabecalho.props.perfil.email,'pessoa@example.invalid')
 })
 
+for (const status of [401, 403, 500]) test('perfil preserva status ' + status + ' e distingue sessão/acesso/falha', async () => {
+  const r = runtime('hooks/usePerfil.js', 'usePerfil', { apiUrl: x => x, fetch: async () => ({ ok: false, status }) })
+  r.render(); await tick()
+  assert.equal(r.render().erroStatus, status)
+  assert.equal(r.render().perfil, null)
+  assert.match(r.render().erro, status === 401 ? /Sessão expirada/ : status === 403 ? /não tem permissão/ : /carregar sua identidade/)
+  let saiu = 0, repetiu = 0
+  const pagina = runtime('components/perfil/PerfilPessoal.jsx', 'PerfilPessoal', { usePerfil: () => ({ ...r.render(), recarregar() { repetiu++ } }) })
+  const v = pagina.render({ aoSair() { saiu++ } })
+  findButton(v, status === 401 ? 'Entrar novamente' : 'Tentar novamente').props.onClick()
+  assert.equal(saiu, status === 401 ? 1 : 0)
+  assert.equal(repetiu, status === 401 ? 0 : 1)
+  r.unmount(); pagina.unmount()
+})
+
+test('rede e JSON inválido têm mensagens distintas, sem revelar resposta técnica', async () => {
+  for (const [fetch, esperado] of [[async () => { throw Error('SEGREDO') }, /conectar/],
+    [async () => ({ ok: true, json: async () => { throw Error('SEGREDO') } }), /Resposta de perfil inválida/]]) {
+    const r = runtime('hooks/usePerfil.js', 'usePerfil', { apiUrl: x => x, fetch })
+    r.render(); await tick()
+    assert.match(r.render().erro, esperado); assert.doesNotMatch(r.render().erro, /SEGREDO/)
+    assert.equal(r.render().erroStatus, null); r.unmount()
+  }
+})
+
+test('401 antigo não sobrescreve perfil de nova sessão; ausência de token não chama a API', async () => {
+  let token = 'a', calls = 0
+  const pendentes = []
+  const r = runtime('hooks/usePerfil.js', 'usePerfil', { apiUrl: x => x, sessionStorage: { getItem: () => token },
+    fetch: () => { calls++; return new Promise(resolve => pendentes.push(resolve)) } })
+  r.render(); token = 'b'; r.render()
+  pendentes[1]({ ok: true, json: async () => identity }); await tick()
+  pendentes[0]({ ok: false, status: 401 }); await tick()
+  assert.equal(r.render().perfil, identity); assert.equal(r.render().erroStatus, null)
+  token = null; r.render(); await tick()
+  assert.equal(calls, 2); assert.equal(r.render().erroStatus, 401)
+  r.unmount()
+})
+
 function eventBus() {
   const listeners = new Set()
   return { addEventListener: (_, fn) => listeners.add(fn), removeEventListener: (_, fn) => listeners.delete(fn),

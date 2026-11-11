@@ -489,7 +489,7 @@ setOportunidades(oportunidadesFormatadas)
         </div>
       </div>}
       {pagina==='fornecedor-catalogo' && <PortfolioFornecedor />}
-      {pagina==='fornecedor-perfil' && <PerfilFornecedor propostas={propostas} />}
+      {pagina==='fornecedor-perfil' && <PerfilFornecedor propostas={propostas} aoSair={aoSair} />}
     </main>
   </div>
 }

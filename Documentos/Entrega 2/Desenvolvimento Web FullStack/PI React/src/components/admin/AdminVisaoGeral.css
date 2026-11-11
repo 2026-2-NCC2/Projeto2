@@ -1,0 +1,34 @@
+.admVisaoGeral .admResumoApresentacao { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px 24px; margin-bottom: 24px; }
+.admVisaoGeral .admResumoApresentacao > div { flex: 1 1 280px; min-width: 0; }
+.admVisaoGeral .admResumoApresentacao p { margin: 0; max-width: 620px; color: var(--texto-secundario); }
+.admVisaoGeral .admResumoApresentacao > button { flex-shrink: 0; }
+.admVisaoGeral .admResumoGrade { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.admVisaoGeral .admResumoCartao,
+.admVisaoGeral .admResumoAcompanhamento { min-width: 0; padding: 24px; background: var(--superficie-cartao); border: 1px solid var(--borda-superficie); border-radius: var(--raio-cartao); overflow-wrap: anywhere; }
+.admVisaoGeral .admResumoCartao { display: flex; flex-direction: column; align-items: flex-start; }
+.admVisaoGeral .admResumoTitulo { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; width: 100%; min-height: 54px; color: var(--texto-principal); }
+.admVisaoGeral .admResumoTitulo > svg { flex-shrink: 0; color: var(--marca-coral-escuro); }
+.admVisaoGeral .admResumoConsultar { margin-top: auto; }
+.admVisaoGeral .admResumoCartao > .admMensagem,
+.admVisaoGeral .admResumoCartao > .admSkeleton { width: 100%; min-width: 0; }
+.admVisaoGeral .admResumoCartao > .admSkeleton > div { height: 28px; }
+.admVisaoGeral .admResumoCartao > .admSkeleton .admSkeletonCard { height: 48px; }
+.admVisaoGeral h2 { margin: 0; font-size: 1.125rem; line-height: 1.5; }
+.admVisaoGeral .admResumoValor { margin: 20px 0 8px; font-size: 2.5rem; line-height: 1.2; font-weight: 700; color: var(--marca-coral-escuro); font-variant-numeric: tabular-nums; }
+.admVisaoGeral p { line-height: 1.6; }
+.admVisaoGeral .admResumoCartao > p:not(.admResumoValor) { color: var(--texto-secundario); margin: 0 0 20px; }
+.admVisaoGeral .admResumoAcompanhamento { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; margin-top: 24px; }
+.admVisaoGeral .admResumoAcompanhamento > div { flex: 1 1 240px; min-width: 0; }
+.admVisaoGeral .admResumoAcompanhamento p { margin: 8px 0 0; color: var(--texto-secundario); }
+.admVisaoGeral .admResumoAtalhos { display: flex; flex-wrap: wrap; gap: 12px; }
+.admVisaoGeral .admResumoNota { margin: 16px 0 0; }
+.admVisaoGeral .admResumoAtalhos button { display: flex; align-items: center; gap: 10px; min-width: 0; white-space: normal; }
+@media (max-width: 1100px) {
+  .admVisaoGeral .admResumoGrade { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 540px) {
+  .admVisaoGeral .admResumoCartao, .admVisaoGeral .admResumoAcompanhamento { padding: 18px; }
+  .admVisaoGeral .admResumoAtalhos button { width: 100%; }
+  .admVisaoGeral .admResumoAtalhos { width: 100%; }
+  .admVisaoGeral .admResumoApresentacao > button { width: 100%; }
+}

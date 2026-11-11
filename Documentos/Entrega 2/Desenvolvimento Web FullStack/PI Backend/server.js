@@ -108,6 +108,9 @@ function limitarFrequencia(limite, janelaMs) {
 require('./painel-evento-admin-http.cjs').instalarPainelEventoAdmin(app,{
   autenticar,permitirPerfis,repositorios,responderErroServico,
 });
+require('./admin-eventos-http.cjs').instalarCriacaoAdmin(app, {
+  autenticar, permitirPerfis, repositorios, ativo: process.env.ADMIN_EVENTOS_CRIACAO_ATIVA === 'true',
+});
 require('./admin-consultas-http.cjs').instalarConsultasAdmin(app,{
   autenticar,permitirPerfis,repositorios,responderErroServico,
 });

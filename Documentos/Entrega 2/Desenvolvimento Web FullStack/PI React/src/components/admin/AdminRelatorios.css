@@ -1,0 +1,25 @@
+.admRelatorios > p { margin: 0 0 20px; line-height: 1.6; color: var(--texto-secundario); }
+.admRelatorios .admRelatorioSeletor { display: grid; gap: 8px; max-width: 440px; margin-bottom: 24px; font-weight: 600; }
+.admRelatorios .admRelatorioSeletor select { min-width: 0; width: 100%; min-height: 44px; padding: 12px; border: 1px solid var(--borda-controle); border-radius: var(--raio-controle); background: var(--superficie-cartao); color: var(--texto-principal); font: inherit; }
+.admRelatorios .admRelatorioTopo { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.admRelatorios h2 { margin: 0; font-size: 1.25rem; }
+.admRelatorios .admFiltros { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 24px; background: var(--superficie-cartao); }
+.admRelatorios .admRelatorioTotais, .admRelatorios .admRelatorioGrupos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-bottom: 20px; }
+.admRelatorios .admRelatorioTotais article, .admRelatorios .admRelatorioGrupo { min-width: 0; padding: 24px; border: 1px solid var(--borda-superficie); border-radius: var(--raio-cartao); background: var(--superficie-cartao); overflow-wrap: anywhere; }
+.admRelatorios .admRelatorioTotais article { display: grid; gap: 12px; }
+.admRelatorios .admRelatorioTotais strong { font-size: 2rem; color: var(--marca-coral-escuro); font-variant-numeric: tabular-nums; }
+.admRelatorios .admRelatorioGrupo h3 { margin: 0 0 16px; font-size: 1rem; }
+.admRelatorios .admRelatorioGrupo dl { margin: 0; }
+.admRelatorios .admRelatorioGrupo dl > div { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--borda-superficie); }
+.admRelatorios .admRelatorioGrupo dt { min-width: 0; }
+.admRelatorios .admRelatorioGrupo dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+.admRelatorios .admTabela th, .admRelatorios .admTabela td { padding: 16px; vertical-align: top; line-height: 1.6; overflow-wrap: anywhere; }
+.admRelatorios .admTabela table { table-layout: fixed; }
+.admRelatorios .admBadge { white-space: normal; }
+.admRelatorios :focus-visible { outline: 3px solid var(--foco-cor); outline-offset: 3px; }
+@media (max-width: 1000px) { .admRelatorios .admFiltros { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 540px) {
+  .admRelatorios .admFiltros, .admRelatorios .admRelatorioTotais, .admRelatorios .admRelatorioGrupos { grid-template-columns: minmax(0, 1fr); }
+  .admRelatorios .admFiltros, .admRelatorios .admRelatorioTotais article, .admRelatorios .admRelatorioGrupo { padding: 18px; }
+  .admRelatorios .admRelatorioTopo button { width: 100%; }
+}

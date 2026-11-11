@@ -1,6 +1,8 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { setImmediate } from 'node:timers'
+import { readFileSync } from 'node:fs'
+import postcss from 'postcss'
 import { carregarAdmin, hooksAdmin, nodes, text } from './helpers/adminRuntime.js'
 
 const tick = () => new Promise(resolve => setImmediate(resolve))
@@ -76,10 +78,80 @@ test('resposta de decisão incompleta não é apresentada como sucesso', async (
   assert.equal(r.consulta.dados.find(s => s.id === 2).status, 'pendente')
   assert.ok(nodes(r.render()).some(n => n.props.role === 'alert'))
 })
-test('histórico não apresenta decisões e lote continua desabilitado', () => {
+test('histórico não apresenta decisões e ações em lote não são oferecidas', () => {
   const r = solicitacoes(async () => {}); nodes(r.render()).find(n => n.type === 'filtro' && n.props.titulo === 'Estado').props.aoAlterar('aprovado')
   const v = r.render(); assert.match(text(v), /Decisão registrada/); assert.equal(nodes(v).some(n => n.type === 'button' && text(n) === 'Aprovar'), false)
-  assert.ok(nodes(v).find(n => n.type === 'button' && text(n) === 'Aprovar em lote').props.disabled)
+  assert.equal(nodes(v).some(n => n.type === 'button' && /em lote/.test(text(n))), false)
+})
+
+test('título único acessível, indicadores reais e campos de período descrevem validação', () => {
+  const r = solicitacoes(async () => {}), v = r.render()
+  const h1 = nodes(v).filter(n => n.type === 'h1')
+  assert.equal(h1.length, 1); assert.equal(h1[0].props.className, 'admSrOnly')
+  const metricas = nodes(v).find(n => n.props.className === 'admMetricas')
+  assert.deepEqual(nodes(metricas).filter(n => n.type === 'strong').map(text), ['3', '1', '2'])
+  const datas = nodes(v).filter(n => n.type === 'input' && n.props.type === 'date')
+  datas[0].props.onChange({ target: { value: '2026-10-05' } })
+  datas[1].props.onChange({ target: { value: '2026-10-01' } })
+  const invalido = r.render()
+  for (const campo of nodes(invalido).filter(n => n.type === 'input')) {
+    assert.equal(campo.props['aria-invalid'], true)
+    assert.equal(campo.props['aria-describedby'], 'adm-periodo-erro')
+  }
+  assert.ok(nodes(invalido).some(n => n.props.id === 'adm-periodo-erro' && n.props.role === 'alert'))
+  nodes(invalido).find(n => n.type === 'button' && text(n) === 'Limpar filtros').props.onClick()
+  assert.equal(nodes(r.render()).find(n => n.type === 'filtro' && n.props.titulo === 'Estado').props.valor, 'pendente')
+  assert.ok(nodes(r.render()).filter(n => n.type === 'input').every(n => n.props.value === ''))
+})
+
+test('vazio do banco difere de filtro sem resultados e erro oferece nova consulta', () => {
+  const r = solicitacoes(async () => {})
+  nodes(r.render()).find(n => n.type === 'filtro' && n.props.titulo === 'Tipo de acesso').props.aoAlterar('inexistente')
+  assert.match(text(r.render()), /Nenhuma solicitação neste filtro/)
+  r.consulta.dados = []
+  assert.match(text(r.render()), /Nenhuma solicitação cadastrada/)
+  r.consulta.erro = Object.assign(Error('Acesso recusado'), { status: 403 })
+  const erro = nodes(r.render()).find(n => n.type === 'erro')
+  assert.equal(erro.props.erro.status, 403)
+  assert.equal(nodes(r.render()).some(n => n.type === 'table'), false)
+  erro.props.aoAtualizar(); assert.equal(r.consulta.atualizacoes, 1)
+})
+
+test('recusa confirmada atualiza status, contagens e histórico sem repetir decisão', async () => {
+  let calls = 0
+  const r = solicitacoes(async () => { calls++; return { mensagem: 'Solicitação rejeitada com sucesso!' } })
+  const acao = nodes(r.render()).find(n => n.type === 'button' && text(n) === 'Recusar')
+  assert.match(acao.props['aria-label'], /solicitação #2 de Ana/)
+  await acao.props.onClick(); await acao.props.onClick()
+  assert.equal(calls, 1)
+  assert.equal(r.consulta.dados.find(s => s.id === 2).status, 'rejeitado')
+  const v = r.render(), metricas = nodes(v).find(n => n.props.className === 'admMetricas')
+  assert.deepEqual(nodes(metricas).filter(n => n.type === 'strong').map(text), ['2', '1', '1'])
+  assert.match(text(v), /rejeitada com sucesso/)
+  nodes(v).find(n => n.type === 'filtro' && n.props.titulo === 'Estado').props.aoAlterar('rejeitado')
+  assert.match(text(r.render()), /Ana/)
+  assert.equal(nodes(r.render()).some(n => n.type === 'button' && text(n) === 'Recusar'), false)
+})
+
+const cssSolicitacoes = postcss.parse(readFileSync(new URL('../src/components/admin/AdminSolicitacoes.css', import.meta.url), 'utf8'))
+function estiloSolicitacoes(seletor, largura) {
+  const resultado = {}
+  cssSolicitacoes.walkRules(r => {
+    if (!r.selectors.includes(seletor)) return
+    for (let p = r.parent; p; p = p.parent) if (p.type === 'atrule' && largura > Number(p.params.match(/max-width:\s*(\d+)/)?.[1] ?? Infinity)) return
+    r.walkDecls(d => { resultado[d.prop] = d.value })
+  })
+  return resultado
+}
+for (const largura of [1920, 1366, 768, 390, 360]) test('filtros e indicadores de solicitações em ' + largura + 'px', () => {
+  assert.equal(estiloSolicitacoes('.admSolicitacoes .admFiltros', largura)['grid-template-columns'], largura <= 540 ? 'minmax(0, 1fr)' : largura <= 1100 ? 'repeat(2, minmax(0, 1fr))' : 'repeat(3, minmax(0, 1fr))')
+  assert.equal(estiloSolicitacoes('.admSolicitacoes .admMetricas article', largura).background, 'var(--superficie-cartao)')
+  assert.equal(estiloSolicitacoes('.admSolicitacoes .admTextoLongo', largura)['min-width'], '0')
+  if (largura <= 540) assert.equal(estiloSolicitacoes('.admSolicitacoes .admSolicitacoesApresentacao > button', largura).width, '100%')
+})
+test('acabamento de solicitações não afeta outras telas nem mascara overflow', () => {
+  cssSolicitacoes.walkRules(r => r.selectors.forEach(s => assert.ok(s.startsWith('.admSolicitacoes '))))
+  assert.doesNotMatch(cssSolicitacoes.toString(), /overflow-x:\s*hidden|!important/)
 })
 test('loading/erro não exibem indicadores simulados e lista vazia é explícita', () => {
   const r = solicitacoes(async () => {}); r.consulta.carregando = true; assert.ok(nodes(r.render()).some(n => n.type === 'skeleton')); assert.equal(nodes(r.render()).some(n => n.props.className === 'admMetricas'), false)
@@ -94,12 +166,14 @@ test('hook consulta uma vez e cancela resposta após desmontagem', async () => {
   assert.equal(render().carregando, true); render(); assert.equal(calls, 1); h.close(); assert.ok(signal.aborted); done([{ id: 1 }]); await tick(); assert.equal(render().carregando, true)
 })
 test('portal delega páginas e preserva navegação cotação-evento-painel', () => {
-  const h = hooksAdmin({ AdminCatalogo: 'catalogo', AdminSolicitacoes: 'solicitacoes', PerfilPessoal: 'perfil', NavegacaoRecolhivel: 'nav', Icone: 'svg', IdentidadeConta: 'identidade' })
+  const h = hooksAdmin({ AdminVisaoGeral: 'inicio', AdminCatalogo: 'catalogo', AdminSolicitacoes: 'solicitacoes', PerfilPessoal: 'perfil', NavegacaoRecolhivel: 'nav', Icone: 'svg', IdentidadeConta: 'identidade' })
   const api = carregarAdmin('components/admin/AdminPortal.jsx', ['AdminPortal', 'AdminMenu'], h.env), render = () => h.render(api.AdminPortal, { aoSair() {} })
+  assert.ok(nodes(render()).some(n => n.type === 'inicio'))
+  nodes(render()).find(n => n.type === 'inicio').props.aoNavegar('contas')
   assert.ok(nodes(render()).some(n => n.type === 'solicitacoes'))
   nodes(render()).find(n => n.type === api.AdminMenu).props.setSecao('propostas')
   nodes(render()).find(n => n.type === 'catalogo').props.aoAbrirCotacao(21)
   const cotacao = nodes(render()).find(n => n.type === 'catalogo'); assert.equal(cotacao.props.tipo, 'cotacoes'); assert.equal(cotacao.props.cotacaoInicial, 21)
   cotacao.props.aoAbrirPainel(13); assert.ok(nodes(render()).some(n => typeof n.type === 'function' && n.type.name === 'PaginaPainelAdmin'))
-  assert.equal(nodes(api.AdminMenu({ secao: 'contas', setSecao() {}, aoSair() {} })).filter(n => n.props.disabled).length, 2)
+  assert.equal(nodes(api.AdminMenu({ secao: 'contas', setSecao() {}, aoSair() {} })).filter(n => n.props.disabled).length, 1)
 })

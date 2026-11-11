@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { useConsultaAdmin } from '../../hooks/useConsultaAdmin.js'
 import { criarDecisorAcesso, filtrarSolicitacoes, nomesPerfis } from '../../services/admin.js'
 import { BadgeAdmin, SkeletonAdmin, ErroAdmin, FiltroAdmin } from './AdminUI.jsx'
+import './AdminSolicitacoes.css'
 
 const filtrosIniciais = { estado: 'pendente', tipo: '', inicio: '', fim: '', ordem: 'recentes' }
 export function AdminSolicitacoes({ aoSair }) {
@@ -39,18 +40,17 @@ export function AdminSolicitacoes({ aoSair }) {
     }
   }
   const pendentes = consulta.dados.filter(s => s.status === 'pendente')
-  return <section className="admPagina" aria-labelledby="adm-solicitacoes-titulo">
-    <header className="admPaginaTopo">
+  return <section className="admPagina admSolicitacoes" aria-labelledby="adm-solicitacoes-titulo">
+    <h1 className="admSrOnly" id="adm-solicitacoes-titulo">Solicitações de acesso</h1>
+    <div className="admSolicitacoesApresentacao">
       <div>
-        <p className="admSobretitulo">ADMINISTRAÇÃO · ACESSO</p>
-        <h1 id="adm-solicitacoes-titulo">Solicitações de acesso</h1>
         <p>Analise os pedidos pendentes e consulte o histórico de decisões.</p>
       </div>
       <button
         className="admAcao"
         disabled={consulta.carregando || processando.size > 0}
         onClick={atualizar}>Atualizar lista</button>
-    </header>
+    </div>
     {consulta.carregando ? <SkeletonAdmin rotulo="Carregando solicitações e indicadores" /> : consulta.erro ? <ErroAdmin erro={consulta.erro} aoAtualizar={atualizar} aoSair={aoSair} /> : <>
       <div className="admMetricas">
         {[['Pendentes', pendentes.length], ['Organizadores pendentes', pendentes.filter(s => s.perfil_solicitado === 'organizador').length], ['Fornecedores pendentes', pendentes.filter(s => s.perfil_solicitado === 'fornecedor').length]].map(([nome, valor]) => <article key={nome}>
@@ -62,7 +62,7 @@ export function AdminSolicitacoes({ aoSair }) {
           </strong>
         </article>)}
       </div>
-      <div className="admFiltros">
+      <div className="admFiltros" role="group" aria-label="Filtros do histórico de solicitações">
         <FiltroAdmin
           titulo="Estado"
           valor={filtros.estado}
@@ -75,17 +75,19 @@ export function AdminSolicitacoes({ aoSair }) {
           aoAlterar={v => filtrar('tipo', v)}
           todos="Todos os tipos"
           opcoes={[{ valor: 'organizador', nome: 'Organizador' }, { valor: 'fornecedor', nome: 'Fornecedor' }]} />
-        <label>Solicitada a partir de<input
+        <label>Data inicial<input
             type="date"
             value={filtros.inicio}
             onChange={e => filtrar('inicio', e.target.value)}
-            aria-invalid={Boolean(intervaloInvalido)} />
+            aria-invalid={Boolean(intervaloInvalido)}
+            aria-describedby={intervaloInvalido ? 'adm-periodo-erro' : 'adm-periodo-nota'} />
         </label>
-        <label>Solicitada até<input
+        <label>Data final<input
             type="date"
             value={filtros.fim}
             onChange={e => filtrar('fim', e.target.value)}
-            aria-invalid={Boolean(intervaloInvalido)} />
+            aria-invalid={Boolean(intervaloInvalido)}
+            aria-describedby={intervaloInvalido ? 'adm-periodo-erro' : 'adm-periodo-nota'} />
         </label>
         <label>Ordenar por<select value={filtros.ordem} onChange={e => filtrar('ordem', e.target.value)}>
             <option value="recentes">Mais recentes</option>
@@ -95,8 +97,8 @@ export function AdminSolicitacoes({ aoSair }) {
         </label>
         <button className="admAcao admAcao--secundaria" onClick={() => setFiltros(filtrosIniciais)}>Limpar filtros</button>
       </div>
-      <p className="admNota">O período considera a data da solicitação no horário de São Paulo. A data e o responsável pela decisão não estão disponíveis nos dados atuais.</p>
-      {intervaloInvalido && <p className="admMensagem admMensagem--alerta" role="alert">A data inicial deve ser anterior ou igual à data final.</p>}
+      <p className="admNota" id="adm-periodo-nota">O período considera a data da solicitação no horário de São Paulo. A data e o responsável pela decisão não estão disponíveis nos dados atuais.</p>
+      {intervaloInvalido && <p id="adm-periodo-erro" className="admMensagem admMensagem--alerta" role="alert">A data inicial deve ser anterior ou igual à data final.</p>}
       {mensagem && <div
         className={`admMensagem admMensagem--${mensagem.tom}`}
         role={mensagem.tom === 'sucesso' ? 'status' : 'alert'}>
@@ -107,8 +109,8 @@ export function AdminSolicitacoes({ aoSair }) {
       </div>}
       <p className="admContagem" role="status">Exibindo {lista.length} de {consulta.dados.length} solicitações</p>
       {!lista.length ? <div className="admVazio">
-        <h2>Nenhuma solicitação neste filtro</h2>
-        <p>Selecione outro estado, tipo ou período para consultar o histórico.</p>
+        <h2>{consulta.dados.length ? 'Nenhuma solicitação neste filtro' : 'Nenhuma solicitação cadastrada'}</h2>
+        <p>{consulta.dados.length ? 'Selecione outro estado, tipo ou período para consultar o histórico.' : 'Os pedidos de acesso aparecerão aqui quando forem enviados.'}</p>
       </div> : <div className="admTabela" role="region" aria-label="Solicitações de acesso" tabIndex={0}>
         <table>
           <thead>
@@ -148,12 +150,14 @@ export function AdminSolicitacoes({ aoSair }) {
                 {item.status === 'pendente' ? <div className="admAcoes">
                   <button
                     className="admAcao admAcao--sucesso"
+                    aria-label={`Aprovar solicitação #${item.id} de ${item.nome}`}
                     disabled={processando.has(item.id) || incertas.has(item.id)}
                     onClick={() => tomarDecisao(item, 'aprovado')}>
                     {processando.has(item.id) ? 'Processando…' : 'Aprovar'}
                   </button>
                   <button
                     className="admAcao admAcao--erro"
+                    aria-label={`Recusar solicitação #${item.id} de ${item.nome}`}
                     disabled={processando.has(item.id) || incertas.has(item.id)}
                     onClick={() => tomarDecisao(item, 'rejeitado')}>Recusar</button>
                   {incertas.has(item.id) && <small>Atualize a lista antes de decidir novamente.</small>}
@@ -164,10 +168,5 @@ export function AdminSolicitacoes({ aoSair }) {
         </table>
       </div>}
     </>}
-    <div className="admLote">
-      <span>Ações em lote indisponíveis. Analise cada solicitação individualmente.</span>
-      <button disabled title="Funcionalidade em desenvolvimento">Aprovar em lote</button>
-      <button disabled title="Funcionalidade em desenvolvimento">Reprovar em lote</button>
-    </div>
   </section>
 }
