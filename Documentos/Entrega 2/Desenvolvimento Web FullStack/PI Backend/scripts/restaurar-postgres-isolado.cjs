@@ -76,4 +76,12 @@ async function executar(dir, ensaio = false, oito = false) {
     save(); console.log(JSON.stringify({ containerRemoved: !!m.restore?.removed, backupChecksumsPreserved: true }));
   }
 }
-if (require.main === module) executar(process.argv[2], process.argv[3] === "--ensaio-retorno", process.argv[3] === "--rollback-oito-dominios").catch(() => { console.log('{"status":"RESTAURACAO_PREPARACAO_RECUSADA","detailsHidden":true}'); process.exitCode = 1; });
+if (require.main === module) {
+  const offline = process.argv.includes('--offline-v2');
+  const conflito = offline && process.argv.some(x => ['--ensaio-retorno', '--rollback-oito-dominios', '--historico'].includes(x));
+  const operacao = conflito ? Promise.reject(Error('Modos incompatíveis.')) : offline
+    ? require('./backup-postgres-offline.cjs').restaurar(process.argv[2], { autorizado: process.argv.includes('--restore-autorizado') })
+    : process.argv.includes('--historico') ? executar(process.argv[2], process.argv.includes('--ensaio-retorno'), process.argv.includes('--rollback-oito-dominios'))
+      : Promise.reject(Error('Modo explícito necessário.'));
+  operacao.then(r => { if (r) console.log(JSON.stringify(r)); }).catch(() => { console.log('{"status":"RESTAURACAO_PREPARACAO_RECUSADA","detailsHidden":true}'); process.exitCode = 1; });
+}

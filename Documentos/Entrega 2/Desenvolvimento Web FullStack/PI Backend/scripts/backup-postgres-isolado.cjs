@@ -62,5 +62,12 @@ async function executar(dir) {
     if (fs.existsSync(pass)) fs.unlinkSync(pass);
   }
 }
-if (require.main === module) executar(process.argv[2]).catch(() => { console.log('{"status":"BACKUP_PREPARACAO_RECUSADA","detailsHidden":true}'); process.exitCode = 1; });
+if (require.main === module) {
+  // A versão histórica permanece explícita; o caminho novo exige autorização de execução.
+  const nova = process.argv.includes('--v2');
+  const operacao = nova ? require('./backup-postgres-offline.cjs').backup(process.argv[2], {
+    autorizado: process.argv.includes('--backup-autorizado'), escritasPausadas: process.argv.includes('--escritas-pausadas'),
+  }) : process.argv.includes('--historico') ? executar(process.argv[2]) : Promise.reject(Error('Modo explícito necessário.'));
+  operacao.then(r => { if (r) console.log(JSON.stringify(r)); }).catch(() => { console.log('{"status":"BACKUP_PREPARACAO_RECUSADA","detailsHidden":true}'); process.exitCode = 1; });
+}
 module.exports = { pgpass, rowsHash, canonical };

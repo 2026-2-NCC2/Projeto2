@@ -30,3 +30,11 @@
   .admUsuarios .admUsuarioResumo { align-items: flex-start; gap: 14px; }
   .admUsuarios .admUsuarioResumo .admAvatar { width: 48px; height: 48px; }
 }
+.admUsuarios .admGestaoPerfis { display: grid; gap: 14px; overflow-wrap: anywhere; }
+.admUsuarios .admGestaoPerfis form { display: grid; gap: 14px; }
+.admUsuarios .admGestaoPerfis label { display: grid; gap: 7px; font-weight: 600; }
+.admUsuarios .admGestaoPerfis select, .admUsuarios .admGestaoPerfis textarea { width: 100%; box-sizing: border-box; min-height: 44px; padding: 10px; border: 1px solid #d9dce3; border-radius: 8px; font: inherit; }
+.admUsuarios .admGestaoPerfis textarea { min-height: 100px; resize: vertical; }
+.admUsuarios .admGestaoPerfis .admConfirmacaoPerfil { display: flex; align-items: flex-start; gap: 10px; font-weight: 400; }
+.admUsuarios .admConfirmacaoPerfil input { width: 22px; height: 22px; flex-shrink: 0; }
+.admUsuarios .admGestaoPerfis :focus-visible { outline: 3px solid #c64437; outline-offset: 3px; }

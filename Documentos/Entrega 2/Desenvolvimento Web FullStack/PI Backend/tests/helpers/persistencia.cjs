@@ -22,6 +22,7 @@ function criar(db, { agora, modulos = {} } = {}) {
   } };
 }
 function dependenciaPura(nome) {
+  if (nome === './admin-perfis-http.cjs') return require('../../admin-perfis-http.cjs');
   if (nome === './admin-eventos-http.cjs') return require('../../admin-eventos-http.cjs');
   // Lista fechada de módulos inertes. Nenhum prefixo dinâmico, driver,
   // preflight, inicializador de imagens ou configuração privada é permitido.

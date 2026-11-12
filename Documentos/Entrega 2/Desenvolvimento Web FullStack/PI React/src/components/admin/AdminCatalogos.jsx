@@ -8,6 +8,7 @@ import { BadgeAdmin, EstadoAdmin, SkeletonAdmin, ErroAdmin, ModalAdmin, FiltroAd
 import './AdminEventos.css'
 import './AdminUsuarios.css'
 import './AdminComercial.css'
+import { AdminGestaoPerfis } from './AdminGestaoPerfis.jsx'
 
 const paginas = {
   eventos: { titulo: 'Eventos', descricao: 'Consulte estados, ocupação e planejamento dos eventos.', rota: '/admin/eventos', colunas: ['Evento', 'Local', 'Estado', 'Organizador', 'Ações'] },
@@ -98,6 +99,10 @@ export function AdminCatalogo({ tipo, aoAbrirPainel, aoAbrirCotacao, aoFecharCot
   const fecharCotacaoRef = useRef(aoFecharCotacao)
   useEffect(() => { fecharCotacaoRef.current = aoFecharCotacao }, [aoFecharCotacao])
   const fecharModal = useCallback(() => { setSelecionado(null); fecharCotacaoRef.current?.() }, [])
+  const [gerenciar, setGerenciar] = useState(null)
+  const recarregarGestaoRef = useRef(consulta.recarregar)
+  useEffect(() => { recarregarGestaoRef.current = consulta.recarregar }, [consulta.recarregar])
+  const fecharGestao = useCallback(() => { setGerenciar(null); recarregarGestaoRef.current() }, [])
   const filtrar = (campo, valor) => setFiltros(f => ({ ...f, [campo]: valor }))
   const lista = filtrarCatalogo(tipo, consulta.dados, filtros)
   const estados = tipo === 'eventos' ? ['Ativo', 'Em planejamento', 'Cancelado', 'Encerrado'].map(nome => ({ valor: nome, nome })) : opcoes(consulta.dados, 'status')
@@ -241,6 +246,7 @@ export function AdminCatalogo({ tipo, aoAbrirPainel, aoAbrirCotacao, aoFecharCot
                 <div className="admAcoes">
                   <button className="admAcao" aria-label={tipo === 'eventos' ? `Visualizar evento ${item.nome}` : tipo === 'usuarios' ? `Visualizar usuário ${item.nome}, ID ${item.id}` : `Visualizar ${tipo === 'cotacoes' ? 'cotação' : 'proposta'} #${item.id}`} onClick={e => visualizar(e, item)}>Visualizar</button>
                   {tipo === 'eventos' && <button className="admAcao admAcao--secundaria" aria-label={`Abrir painel do evento ${item.nome}`} onClick={() => aoAbrirPainel(item.id)}>Abrir painel</button>}
+                  {tipo === 'usuarios' && <button className="admAcao admAcao--secundaria" aria-label={`Gerenciar perfis de ${item.nome}, ID ${item.id}`} onClick={e => { e.currentTarget.focus(); setGerenciar(item) }}>Gerenciar perfis</button>}
                 </div>
               </td>
             </tr>)}
@@ -248,6 +254,7 @@ export function AdminCatalogo({ tipo, aoAbrirPainel, aoAbrirCotacao, aoFecharCot
         </table>
       </div>}
     </>}
+    {gerenciar && <AdminGestaoPerfis key={gerenciar.id} usuario={gerenciar} aoFechar={fecharGestao} aoSalvar={consulta.recarregar} aoSair={aoSair} />}
     {selecionado && <ModalAdmin
       titulo={tipo === 'eventos' ? 'Detalhes do evento' : tipo === 'usuarios' ? 'Detalhes do usuário' : tipo === 'cotacoes' ? 'Detalhes da cotação' : 'Detalhes da proposta'}
       aoFechar={fecharModal}>
@@ -282,7 +289,7 @@ export function AdminCatalogo({ tipo, aoAbrirPainel, aoAbrirCotacao, aoFecharCot
             </dd>
           </div>
         </dl>
-        <p className="admNota">Consulta de dados cadastrais. Alterações de usuários não estão disponíveis nesta seção.</p>
+        <p className="admNota">O perfil de acesso pode ser consultado na ação Gerenciar perfis. Dados cadastrais não são alterados nesse fluxo.</p>
       </div> : tipo === 'cotacoes' ? <DetalhesCotacaoAdmin
         key={selecionado.id}
         id={selecionado.id}

@@ -550,12 +550,13 @@ test("MySQL principal e recusado; isolado preserva rotas sem iniciar HTTP na imp
     'get /cotacoes', 'post /cotacoes', 'get /fornecedor/cotacoes', 'get /fornecedor/propostas', 'post /fornecedor/propostas',
     'get /organizador/propostas', 'patch /organizador/propostas/:id/status',
     'get /usuarios', 'get /admin/eventos', 'get /admin/eventos/capacidades', 'post /admin/eventos', 'get /admin/eventos/:id/painel', 'get /admin/cotacoes', 'get /admin/cotacoes/:id', 'get /admin/propostas',
+    'get /admin/usuarios/perfis/capacidades', 'patch /admin/usuarios/:id/perfil',
     'post /solicitacoes-acesso', 'get /solicitacoes-acesso', 'patch /solicitacoes-acesso/:id',
     'get /portfolio', 'post /portfolio', 'patch /portfolio/:id', 'delete /portfolio/:id',
     'get /fornecedores', 'get /fornecedores/:id/portfolio',
   ];
-  assert.equal(esperadas.length, 49);
-  assert.equal(isolado.estado.rotas.length, 49);
+  assert.equal(esperadas.length, 51);
+  assert.equal(isolado.estado.rotas.length, 51);
   assert.deepEqual(isolado.estado.rotas.map(([metodo, rota]) => `${metodo} ${rota}`).sort(), esperadas.sort());
   assert.equal(isolado.app.locals.imagensDisponiveis(), false);
   assert.ok(isolado.estado.rotas.some(([metodo, rota]) => metodo === "put" && rota === "/eventos/:id/custos"));

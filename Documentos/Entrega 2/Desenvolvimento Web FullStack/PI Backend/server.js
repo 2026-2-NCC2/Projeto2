@@ -111,6 +111,9 @@ require('./painel-evento-admin-http.cjs').instalarPainelEventoAdmin(app,{
 require('./admin-eventos-http.cjs').instalarCriacaoAdmin(app, {
   autenticar, permitirPerfis, repositorios, ativo: process.env.ADMIN_EVENTOS_CRIACAO_ATIVA === 'true',
 });
+require('./admin-perfis-http.cjs').instalarGestaoPerfis(app, {
+  autenticar, permitirPerfis, repositorios, ativo: process.env.ADMIN_PERFIS_GESTAO_ATIVA === 'true',
+});
 require('./admin-consultas-http.cjs').instalarConsultasAdmin(app,{
   autenticar,permitirPerfis,repositorios,responderErroServico,
 });
