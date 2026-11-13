@@ -20,7 +20,7 @@ function estilo(selectors, width) {
   return values
 }
 
-for (const width of [1920, 1366, 768, 390, 360]) {
+for (const width of [1920, 1366, 768, 390, 360, 320, 375]) {
   test(`cards, formularios e acoes em ${width}px`, () => {
     assert.equal(estilo(['.evento'], width)['flex-wrap'], 'wrap')
     assert.equal(estilo(['.eventoInfo'], width)['min-width'], '0')

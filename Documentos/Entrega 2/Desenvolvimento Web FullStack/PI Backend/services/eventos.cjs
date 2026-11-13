@@ -6,7 +6,7 @@ function inicioFuturo(data,horario,agora=new Date()){
   const partes=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).format(agora);
   return `${dia} ${horario.length===5?horario+':00':horario}`>partes;
 }
-function validarEvento(dados){
+function validarEvento(dados,{criacao=false,agora=new Date()}={}){
   if(!dados||typeof dados!=='object'||Array.isArray(dados))throw falha(400,'Informe os dados do evento.');
   const texto=(nome,limite,padrao,opcional=false)=>{
     const v=dados[nome]===undefined?padrao:dados[nome];
@@ -22,7 +22,24 @@ function validarEvento(dados){
   if(dados.capacidade_maxima!==undefined && dados.capacidade_maxima!==null &&
     (!Number.isSafeInteger(dados.capacidade_maxima)||dados.capacidade_maxima<1||dados.capacidade_maxima>2147483647))
     throw falha(400,'Capacidade máxima deve ser um inteiro entre 1 e 2147483647.');
+  if(criacao&&!inicioFuturo(data,horario,agora))throw Object.assign(falha(400,'Escolha data e horário de início futuros no fuso de Brasília.'),{inicioPassado:true});
   return {...(dados.capacidade_maxima!==undefined?{capacidade_maxima:dados.capacidade_maxima}:{}),nome:texto('nome',100),data,horario,local:texto('local',200),categoria:texto('categoria',100,'Corporativo'),publico:dados.publico,descricao:texto('descricao',10000,'',true)};
+}
+// Somente um replay já identificado pode chegar à RPC após o início. A RPC
+// compara o conteúdo e revalida o ator; esta leitura nunca confirma o salvamento.
+async function reconciliarCriacaoConfirmada(cliente,{tabela,identificador,filtros,chave},confirmar){
+  if(typeof chave!=='string'||!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(chave))return null;
+  const controle=new AbortController(),timer=setTimeout(()=>controle.abort(),10000);
+  try{
+    let consulta=cliente.schema('public').from(tabela).select(identificador);
+    for(const [campo,valor] of Object.entries(filtros))consulta=consulta.eq(campo,valor);
+    const {data,error}=await consulta.maybeSingle().retry(false).abortSignal(controle.signal);
+    if(error)throw falha(503,'Não foi possível reconciliar a tentativa anterior. Consulte Eventos antes de repetir.',true);
+    if(data===null)return null;
+    if(!Number.isSafeInteger(data?.[identificador])||data[identificador]<=0)throw falha(503,'Confirmação da tentativa anterior incompleta.',true);
+    return await confirmar();
+  }catch(e){if(e instanceof ErroServico)throw e;throw falha(503,'Não foi possível reconciliar a tentativa anterior. Consulte Eventos antes de repetir.',true);}
+  finally{clearTimeout(timer);controle.abort();}
 }
 function erroRpc(erro){
   const mensagens={LT409:'Evento lotado. Não há vagas disponíveis.',DU409:'Você já está inscrito neste evento.',
@@ -44,4 +61,4 @@ async function consultarRpc(cliente,nome,args){
     throw falha(503,'Resultado não confirmado. Consulte o evento antes de repetir.',true);
   }finally{clearTimeout(timer);controle.abort();}
 }
-module.exports={ESTADOS,validarEvento,inicioFuturo,erroRpc,consultarRpc};
+module.exports={ESTADOS,validarEvento,inicioFuturo,erroRpc,consultarRpc,reconciliarCriacaoConfirmada};

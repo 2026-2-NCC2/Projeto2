@@ -1,16 +1,17 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import { createElement, Fragment, useId, useMemo, useState } from 'react'
+import { createElement, Fragment, useId, useMemo, useState, useRef, useEffect } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import postcss from 'postcss'
 import { carregarAdmin, hooksAdmin, nodes, text } from './helpers/adminRuntime.js'
 import { primitivasFixture, jsxPrimitivas } from './helpers/primitivasFixture.js'
+import { agendaBrasilia, validarFormularioEvento } from '../src/utils/validarEvento.js'
 
 const eventoBase = { id: 71, nome: 'Evento de teste', status: 'Em planejamento', data: '2026-12-10', horario: '10:30', local: 'Local sintético', publico: 100, categoria: 'Workshop', descricao: 'Descrição sintética', capacidade_maxima: null }
 function pagina(nome, props = {}) {
   const chamadas = []
-  const h = hooksAdmin({ ...primitivasFixture, jsx: jsxPrimitivas, useMemo: f => f(), Icone: 'svg', CapaEvento: 'capa', MidiaEvento: 'midia', VagasEvento: 'vagas' })
+  const h = hooksAdmin({ ...primitivasFixture, agendaBrasilia, validarFormularioEvento, jsx: jsxPrimitivas, useMemo: f => f(), Icone: 'svg', CapaEvento: 'capa', MidiaEvento: 'midia', VagasEvento: 'vagas' })
   const view = carregarAdmin(`pages/organizador/${nome}.jsx`, [nome], h.env)[nome]
   const p = { evento: { ...eventoBase }, eventos: [{ ...eventoBase }], capacidades: { criar: true, publicar: true, cancelar: true, encerrar: true }, podeSalvar: true, controleCapacidade: true,
     setPagina: v => chamadas.push(['pagina', v]), aoSelecionarEvento: v => chamadas.push(['selecionar', v]),
@@ -79,11 +80,11 @@ test('grupos do formulário têm títulos, labels e dica de capacidade associado
   p.close()
 })
 
-test('atributos de validação e transformação dos campos permanecem iguais', () => {
+test('atributos e limites preservados; data auxilia escolha futura e validação é própria', () => {
   const p = pagina('CriarEvento'), v = p.render()
   const contratos = [
     ['criarevento-campo-1', undefined, undefined, undefined, 100, true],
-    ['criarevento-campo-2', 'date', '1000-01-01', '9999-12-31', undefined, true],
+    ['criarevento-campo-2', 'date', agendaBrasilia().data, '9999-12-31', undefined, true],
     ['criarevento-campo-3', 'time', undefined, undefined, undefined, true],
     ['criarevento-campo-4', undefined, undefined, undefined, 200, true],
     ['criarevento-campo-5', 'number', '1', '2147483647', undefined, true],
@@ -137,12 +138,12 @@ test('envio continua aguardando callback original e retorna pelo guard existente
   assert.deepEqual(p.chamadas, [])
   botao(p.render(), 'Voltar sem salvar').props.onClick()
   assert.deepEqual(p.chamadas, [['pagina', 'eventos']])
-  assert.equal(nodes(p.render()).find(n => n.type === 'form').props.noValidate, undefined)
+  assert.equal(nodes(p.render()).find(n => n.type === 'form').props.noValidate, true)
   p.close()
 })
 
 test('HTML real do formulário mantém um h1, campos nativos, botões com nomes e regiões de consulta', () => {
-  const env = { jsx: createElement, Fragment, useId, useMemo, useState }
+  const env = { jsx: createElement, Fragment, useId, useMemo, useState, useRef, useEffect, agendaBrasilia, validarFormularioEvento }
   const ui = carregarAdmin('components/ui/Primitivas.jsx', ['Botao', 'Campo', 'Alerta', 'Badge'], env)
   const { CriarEvento } = carregarAdmin('pages/organizador/CriarEvento.jsx', ['CriarEvento'], { ...env, ...ui, MidiaEvento: () => null, VagasEvento: () => null })
   const html = renderToStaticMarkup(createElement(CriarEvento, { evento: eventoBase, podeSalvar: true, controleCapacidade: true }))
@@ -168,7 +169,7 @@ function estilo(seletor, largura) {
   })
   return resultado
 }
-for (const largura of [360, 390, 768, 1024, 1440, 320, 720]) test(`gerenciamento: regras responsivas em ${largura}px`, () => {
+for (const largura of [360, 390, 768, 1024, 1440, 320, 720, 375]) test(`gerenciamento: regras responsivas em ${largura}px`, () => {
   assert.equal(estilo('.orgEventoFormulario .duasColunas', largura)['grid-template-columns'], largura <= 700 ? 'minmax(0, 1fr)' : 'repeat(2, minmax(0, 1fr))')
   assert.equal(estilo('.orgDashboard .orgGerenciamento .orgEventoNumeros', largura)['grid-template-columns'], largura <= 600 ? 'minmax(0, 1fr)' : 'repeat(3, minmax(0, 1fr))')
   assert.equal(estilo('.orgDashboard .orgGerenciamento .orgEventoAcoes .ttBotao', largura)['min-height'], '44px')
@@ -185,5 +186,5 @@ test('estilos usam tokens, não cortam foco e não alcançam painéis O2, sideba
   assert.equal(estilo('.orgDashboard .orgGerenciamento .listaEventos', 360).overflow, 'visible')
   assert.equal(estilo('.orgDashboard .orgGerenciamento .orgEventoNumeros > div', 360)['overflow-wrap'], 'anywhere')
   const fonte = readFileSync(new URL('../src/pages/organizador/CriarEvento.jsx', import.meta.url), 'utf8')
-  assert.doesNotMatch(fonte, /fetch\(|useEffect|sessionStorage|localStorage|history\.|useNavegacao|services\//)
+  assert.doesNotMatch(fonte, /fetch\(|sessionStorage|localStorage|history\.|useNavegacao|services\//)
 })

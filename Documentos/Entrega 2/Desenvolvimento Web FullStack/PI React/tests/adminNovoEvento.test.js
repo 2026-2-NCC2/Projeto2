@@ -6,6 +6,7 @@ import postcss from 'postcss'
 import { carregarAdmin, hooksAdmin, nodes, text } from './helpers/adminRuntime.js'
 import { primitivasFixture } from './helpers/primitivasFixture.js'
 import { lerDestinoNavegacao, urlDestinoNavegacao } from '../src/hooks/useNavegacao.js'
+import { agendaBrasilia, validarFormularioEvento } from '../src/utils/validarEvento.js'
 const tick = () => new Promise(r => setImmediate(r))
 const storage = () => {
   const valores = new Map([['token', 'token-sintetico']])
@@ -139,8 +140,9 @@ test('indisponível, organizadores ausentes, falha e reload pendente não permit
   assert.deepEqual(f.destinos, []); f.close()
 })
 test('formulário reutilizado em contexto admin não oferece custos, publicação ou imagens', () => {
-  const { CriarEvento } = carregarAdmin('pages/organizador/CriarEvento.jsx', ['CriarEvento'], { ...primitivasFixture, VagasEvento: 'vagas', MidiaEvento: 'midia' })
-  const v = CriarEvento({ administrativo: true, evento: dados, podeSalvar: true, setPagina() {}, setEvento() {} })
+  const h = hooksAdmin({ ...primitivasFixture, agendaBrasilia, validarFormularioEvento, VagasEvento: 'vagas', MidiaEvento: 'midia' })
+  const { CriarEvento } = carregarAdmin('pages/organizador/CriarEvento.jsx', ['CriarEvento'], h.env)
+  const v = h.render(CriarEvento, { administrativo: true, evento: dados, podeSalvar: true, setPagina() {}, setEvento() {} })
   assert.equal(nodes(v).some(n => n.type === 'midia'), false)
   assert.doesNotMatch(text(v), /Custos & Cotações|Ticket e Viabilidade|Imagens do evento/)
   assert.match(text(v), /Criar evento em planejamento/)

@@ -42,6 +42,14 @@ test('handler real conserva defaults, trim, status, dono autenticado e resposta 
   assert.equal(res.code,201);assert.deepEqual(res.body,{mensagem:'Evento cadastrado com sucesso!',evento:{id:13,nome:'Evento ficticio',data:input.data,horario:input.horario,local:'Local',categoria:'Corporativo',publico:20,descricao:'',status:'Em planejamento',usuario_id:7}});
   assert.equal(m.calls.find(c=>c[0]==='insert')[1].usuario_id,7);
 });
+test('handler recusa intenção passada e permite apenas confirmação de replay pelo repositório',async()=>{
+  let escritas=0,leituras=0;const chave=require('node:crypto').randomUUID();
+  const repo={criar(){escritas++;throw Error('Não deve criar');},async reconciliarCriacao(usuario,recebida,dados){leituras++;assert.equal(usuario,7);assert.equal(recebida,chave);assert.equal(dados.data,'2000-01-01');return null;}};
+  const req={body:{...body(),data:'2000-01-01'},usuario:{id:7},headers:{'idempotency-key':chave}};
+  const res=response();await handler(repo)(req,res);assert.equal(res.code,400);assert.equal(escritas,0);assert.equal(leituras,1);
+  repo.reconciliarCriacao=async()=>({id:13,usuario_id:7,versao:1});const replay=response();await handler(repo)(req,replay);
+  assert.equal(replay.code,201);assert.equal(replay.body.evento.id,13);assert.equal(escritas,0);
+});
 test('handler real rejeita campos invalidos antes do INSERT e mantem HTTP 400',async()=>{
   for(const changes of [{nome:''},{nome:null},{data:'abc'},{horario:'24:00'},{local:' '},{publico:0},{publico:'20'},{publico:1.5},{categoria:null},{descricao:7}]){const m=mock({data:{id:13}}),res=response();await handler(criar(m.client))({body:{...body(),...changes},usuario:{id:7}},res);assert.equal(res.code,400);assert.deepEqual(res.body,{erro:'Informe nome, data, horário, local e público válidos.'});assert.equal(m.calls.length,0);}
 });

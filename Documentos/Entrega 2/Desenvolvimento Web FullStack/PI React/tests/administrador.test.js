@@ -143,7 +143,7 @@ function estiloSolicitacoes(seletor, largura) {
   })
   return resultado
 }
-for (const largura of [1920, 1366, 768, 390, 360]) test('filtros e indicadores de solicitações em ' + largura + 'px', () => {
+for (const largura of [1920, 1366, 768, 390, 360, 320, 375]) test('filtros e indicadores de solicitações em ' + largura + 'px', () => {
   assert.equal(estiloSolicitacoes('.admSolicitacoes .admFiltros', largura)['grid-template-columns'], largura <= 540 ? 'minmax(0, 1fr)' : largura <= 1100 ? 'repeat(2, minmax(0, 1fr))' : 'repeat(3, minmax(0, 1fr))')
   assert.equal(estiloSolicitacoes('.admSolicitacoes .admMetricas article', largura).background, 'var(--superficie-cartao)')
   assert.equal(estiloSolicitacoes('.admSolicitacoes .admTextoLongo', largura)['min-width'], '0')

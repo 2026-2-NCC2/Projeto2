@@ -121,7 +121,7 @@ function estilo(seletor, largura) {
   })
   return resultado
 }
-for (const largura of [360, 390, 768, 1024, 1440, 320]) test(`estrutura fornecedor: reflow em ${largura}px`, () => {
+for (const largura of [360, 390, 768, 1024, 1440, 320, 375]) test(`estrutura fornecedor: reflow em ${largura}px`, () => {
   assert.equal(estilo('.fornEstrutura', largura)['grid-template-columns'], largura <= 1000 ? 'minmax(0, 1fr)' : '264px minmax(0, 1fr)')
   assert.equal(estilo('.fornEstrutura .fornNavegacao .alternarNavegacao', largura).display, largura <= 1000 ? 'flex' : 'none')
   assert.equal(estilo(".fornEstrutura .fornNavegacao .painelNavegacao[data-aberto='false']", largura).display, largura <= 1000 ? 'none' : 'flex')

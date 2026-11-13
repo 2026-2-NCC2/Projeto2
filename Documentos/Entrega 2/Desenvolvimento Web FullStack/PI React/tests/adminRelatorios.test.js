@@ -218,7 +218,7 @@ function estilo(s, width) {
     r.walkDecls(d => { v[d.prop] = d.value })
   }); return v
 }
-for (const width of [1920, 1366, 768, 390, 360]) test('Relatórios responsivos em ' + width + 'px', () => {
+for (const width of [1920, 1366, 768, 390, 360, 320, 375]) test('Relatórios responsivos em ' + width + 'px', () => {
   assert.equal(estilo('.admRelatorios .admFiltros', width)['grid-template-columns'], width <= 540 ? 'minmax(0, 1fr)' : width <= 1000 ? 'repeat(2, minmax(0, 1fr))' : 'repeat(3, minmax(0, 1fr))')
   assert.equal(estilo('.admRelatorios .admRelatorioTotais', width)['grid-template-columns'], width <= 540 ? 'minmax(0, 1fr)' : 'repeat(2, minmax(0, 1fr))')
   assert.equal(estilo('.admRelatorios .admRelatorioSeletor select', width)['min-height'], '44px')

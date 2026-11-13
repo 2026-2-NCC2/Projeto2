@@ -92,7 +92,7 @@ function estilo(seletor, largura) {
   })
   return resultado
 }
-for (const largura of [1920, 1366, 768, 390, 360]) test('dashboard responsivo em ' + largura + 'px', () => {
+for (const largura of [1920, 1366, 768, 390, 360, 320, 375]) test('dashboard responsivo em ' + largura + 'px', () => {
   assert.equal(estilo('.admVisaoGeral .admResumoGrade', largura)['grid-template-columns'], largura <= 1100 ? 'minmax(0, 1fr)' : 'repeat(3, minmax(0, 1fr))')
   assert.equal(estilo('.admVisaoGeral .admResumoCartao', largura)['min-width'], '0')
   assert.equal(estilo('.admVisaoGeral .admResumoAtalhos', largura)['flex-wrap'], 'wrap')

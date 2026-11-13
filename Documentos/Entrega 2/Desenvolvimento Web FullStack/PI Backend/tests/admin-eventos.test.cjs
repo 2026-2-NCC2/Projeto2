@@ -35,6 +35,10 @@ test('endpoint administrativo exige autenticação e perfil admin, inclusive qua
   assert.equal((await bloqueado.request({ metodo: 'GET' })).body.criar, false);
   assert.equal(bloqueado.calls.length, 0);
 });
+test('criação administrativa rejeita início passado antes de chamar a escrita', async () => {
+  const a=ambiente(); const r=await a.request({body:{...dados(),data:'2000-01-01'}});
+  assert.equal(r.statusCode,400);assert.match(r.body.erro,/futuros.*Brasília/);assert.equal(a.calls.length,0);
+});
 test('ator vem da sessão, dono do cadastro validado; autor/status/proprietário adulterados são recusados', async () => {
   const a = ambiente(), chave = randomUUID(), r = await a.request({ chave });
   assert.equal(r.statusCode, 201); assert.deepEqual(r.body.evento, { id: 13, usuario_id: 7 });

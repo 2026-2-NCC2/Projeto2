@@ -116,7 +116,7 @@ test('acesso futuro é texto não interativo e não oferece controles sem ação
 
 test('integração preserva entrada de transparência e cadastro/Termos não são publicados', () => {
   assert.doesNotMatch(ler('main.jsx'), /LandingPage/)
-  assert.match(ler('main.jsx'), /<EntradaAplicacao><App \/><\/EntradaAplicacao>/)
+  assert.match(ler('main.jsx'), /<EntradaAplicacao><RouterProvider router={router} \/><\/EntradaAplicacao>/)
   assert.doesNotMatch(ler('App.jsx'), /LandingPage/)
   assert.match(ler('App.jsx'), /<EntradaPublica iniciarNoLogin=\{Boolean\(autenticacao.erro\)\}/)
   const child = createElement('div', null, 'Aplicação atual')
@@ -164,7 +164,7 @@ function estilo(seletor, largura) {
   return resultado
 }
 
-for (const largura of [360, 390, 768, 1024, 1440, 720]) test(`landing: regras responsivas em ${largura}px${largura === 720 ? ' (refluxo equivalente a 1440px/200%)' : ''}`, () => {
+for (const largura of [360, 390, 768, 1024, 1440, 720, 320, 375]) test(`landing: regras responsivas em ${largura}px${largura === 720 ? ' (refluxo equivalente a 1440px/200%)' : ''}`, () => {
   assert.equal(estilo('.lpPagina', largura)['min-width'], '0')
   assert.equal(estilo('.lpPagina', largura)['overflow-wrap'], 'anywhere')
   assert.equal(estilo('.lpPagina .lpHero', largura)['grid-template-columns'], largura <= 800 ? 'minmax(0, 1fr)' : 'minmax(0, 1.1fr) minmax(0, 1fr)')

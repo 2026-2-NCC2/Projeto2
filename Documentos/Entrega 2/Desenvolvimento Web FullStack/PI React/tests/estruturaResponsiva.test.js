@@ -85,7 +85,7 @@ function estilo(selectors, width) {
   })
   return values
 }
-for (const width of [1920, 1366, 768, 390, 360]) test(`estrutura compartilhada em ${width}px`, () => {
+for (const width of [1920, 1366, 768, 390, 360, 320, 375]) test(`estrutura compartilhada em ${width}px`, () => {
   const mobile = width <= 850
   assert.equal(estilo(['.alternarNavegacao'], width).display, mobile ? 'flex' : 'none')
   assert.equal(estilo(['.painelNavegacao', ".painelNavegacao[data-aberto='false']"], width).display, mobile ? 'none' : 'flex')

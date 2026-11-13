@@ -69,8 +69,8 @@ test('eventos distingue carregamento, erro, ausência e filtro; oculta dados ant
 
 function app(listarEventos) {
   return runtime('App.jsx', 'App', {
-    useAutenticacao: () => ({ sessao: { perfil: 'organizador' } }), paginaAutorizada: p => p,
-    useNavegacao() {}, lerDestinoNavegacao: () => null, useHistoricoNavegacao: () => ({ estado: null, mudar() {} }), useSessao: () => ({ aoSair() {} }),
+    useAutenticacao: () => ({ sessao: { perfil: 'organizador' } }), paginaAutorizada: p => p, paginasPorPerfil: { organizador: ['eventos', 'criar', 'custos', 'cotacao', 'ticket', 'perfil'] },
+    useNavegacao() {}, usePaginaRoteada: () => ({ paginaSolicitada: 'eventos', definirPagina() {} }), rotasPublicas: [], useHistoricoNavegacao: () => ({ estado: null, mudar() {} }), useSessao: () => ({ aoSair() {} }),
     useRascunhosCustos: () => ({ rascunhos: {}, formularioCustosPendenteRef: { current: false } }),
     useCustosPersistidos: () => ({}), usePublicacaoCotacao: () => ({}),
     Layout: 'Layout', Eventos: 'Eventos', listarEventos,

@@ -91,7 +91,7 @@ function estilo(seletor, largura) {
   })
   return valores
 }
-for (const largura of [1920, 1366, 1000, 768, 390, 360]) test('regras estruturais administrativas: ' + largura + 'px', () => {
+for (const largura of [1920, 1366, 1000, 768, 390, 360, 320, 375]) test('regras estruturais administrativas: ' + largura + 'px', () => {
   const compacto = largura <= 1000
   assert.equal(estilo('.adminApp.adminLayout', largura)['grid-template-columns'], compacto ? 'minmax(0, 1fr)' : '264px minmax(0, 1fr)')
   assert.equal(estilo('.adminLayout .adminSidebar', largura).position, compacto ? 'static' : 'sticky')
@@ -128,7 +128,7 @@ test('sidebar tem o mesmo acabamento em todas as seções, conservando rolagem e
   assert.equal(estilo('.adminLayout .adminMenu button', 1366)['min-height'], '48px')
 })
 
-for (const largura of [1920, 1366, 768, 390, 360]) test('títulos administrativos não duplicam visualmente e continuam acessíveis em ' + largura + 'px', () => {
+for (const largura of [1920, 1366, 768, 390, 360, 320, 375]) test('títulos administrativos não duplicam visualmente e continuam acessíveis em ' + largura + 'px', () => {
   for (const seletor of ['.adminLayout .peaCabecalho h1', '.adminLayout .perfilCabecalho h1']) {
     const estiloTitulo = estilo(seletor, largura)
     assert.equal(estiloTitulo.position, 'absolute')

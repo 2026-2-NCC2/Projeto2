@@ -21,6 +21,11 @@ function criarRepositorioAdminEventos(cliente) {
       // A resposta pública não expõe o diário ou o payload de idempotência.
       return { id: data.id, usuario_id: data.usuario_id };
     },
+    async reconciliarCriacao(adminId,organizadorId,dados,chave){
+      return require('../../services/eventos.cjs').reconciliarCriacaoConfirmada(cliente,{
+        tabela:'eventos_criacao_admin',identificador:'evento_id',filtros:{admin_id:adminId,chave},chave,
+      },()=>this.criar(adminId,organizadorId,dados,chave));
+    },
   };
 }
 module.exports = { criarRepositorioAdminEventos };

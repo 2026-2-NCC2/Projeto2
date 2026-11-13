@@ -130,7 +130,7 @@ function estilo(seletor, largura) {
   return valor
 }
 
-for (const largura of [360, 390, 768, 1024, 1440, 720]) test('estrutura do organizador: regras responsivas em ' + largura + 'px', () => {
+for (const largura of [360, 390, 768, 1024, 1440, 720, 320, 375]) test('estrutura do organizador: regras responsivas em ' + largura + 'px', () => {
   const recolhido = largura <= 1000
   assert.equal(estilo('.orgLayout', largura)['grid-template-columns'], recolhido ? 'minmax(0, 1fr)' : '264px minmax(0, 1fr)')
   assert.equal(estilo('.orgLayout .orgNavegacao .alternarNavegacao', largura).display, recolhido ? 'flex' : 'none')

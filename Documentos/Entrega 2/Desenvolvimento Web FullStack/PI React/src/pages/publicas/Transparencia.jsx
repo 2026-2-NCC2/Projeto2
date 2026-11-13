@@ -5,6 +5,15 @@ import { documentosTransparencia, documentoDaRota } from './documentosTransparen
 import { tecnologiasNecessarias } from './inventarioPrivacidade.js'
 import './Transparencia.css'
 
+function focarSecao(evento, id) {
+  evento.preventDefault()
+  const secao = document.getElementById(id)
+  if (!secao) return
+  secao.scrollIntoView?.({ block: 'start' })
+  if (!secao.hasAttribute('tabindex')) secao.setAttribute('tabindex', '-1')
+  secao.focus({ preventScroll: true })
+}
+
 export function LinksTransparencia() {
   return <nav className="transparenciaLinks" aria-label="Privacidade e transparência">
     <a href="/privacidade">Política de Privacidade</a>
@@ -20,7 +29,7 @@ export function PaginaTransparencia({ documento }) {
   if (!conteudo) return null
   const minuta = documento !== 'termos' || conteudo.estado !== 'aprovado' || !conteudo.aprovacao
   return <div className="transparenciaPagina">
-    <a className="transparenciaPular" href="#transparencia-conteudo">Ir para o conteúdo</a>
+    <a className="transparenciaPular" href="#transparencia-conteudo" onClick={e => focarSecao(e, 'transparencia-conteudo')}>Ir para o conteúdo</a>
     <header className="transparenciaCabecalho">
       <a href="/" aria-label="TrocaTicket — página inicial"><Marca compacto /></a>
       <a href="/">Voltar à página inicial</a>
@@ -37,7 +46,7 @@ export function PaginaTransparencia({ documento }) {
       </Alerta>}
       <nav className="transparenciaSumario" aria-label="Nesta página">
         <h2>Nesta página</h2>
-        <ul>{conteudo.secoes.map(s => <li key={s.id}><a href={`#${s.id}`}>{s.titulo}</a></li>)}</ul>
+        <ul>{conteudo.secoes.map(s => <li key={s.id}><a href={`#${s.id}`} onClick={e => focarSecao(e, s.id)}>{s.titulo}</a></li>)}</ul>
       </nav>
       <article aria-label={`Conteúdo ${minuta ? 'da minuta' : 'do documento'}: ${conteudo.titulo}`}>
         {conteudo.secoes.map(s => <section key={s.id} id={s.id} aria-labelledby={`${s.id}-titulo`}>
@@ -60,7 +69,7 @@ export function PaginaTransparencia({ documento }) {
 
 export function PaginaPreferenciasPrivacidade() {
   return <div className="transparenciaPagina">
-    <a className="transparenciaPular" href="#preferencias-conteudo">Ir para o conteúdo</a>
+    <a className="transparenciaPular" href="#preferencias-conteudo" onClick={e => focarSecao(e, 'preferencias-conteudo')}>Ir para o conteúdo</a>
     <header className="transparenciaCabecalho">
       <a href="/" aria-label="TrocaTicket — página inicial"><Marca compacto /></a>
       <a href="/">Voltar à página inicial</a>

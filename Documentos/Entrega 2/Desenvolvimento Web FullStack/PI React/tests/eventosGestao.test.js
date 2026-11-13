@@ -4,13 +4,14 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
 import { transformSync } from 'rolldown/utils'
+import { agendaBrasilia, validarFormularioEvento } from '../src/utils/validarEvento.js'
 const jsx = jsxPrimitivas
 const nodes=v=>v&&typeof v==='object'?[v,...(v.children||[]).flatMap(nodes)]:[]
 const text=v=>v&&typeof v==='object'?(v.children||[]).map(text).join(' '):String(v??'')
 function carregar(file,nome){
   const fonte=readFileSync(new URL('../src/'+file,import.meta.url),'utf8').replace(/^import .*\r?\n/gm,'').replace('export function ','function ')
   return vm.runInNewContext(transformSync(file,fonte,{jsx:{runtime:'classic',pragma:'jsx'}}).code+'\n'+nome,{
-    ...primitivasFixture, jsx,VagasEvento:'vagas',Icone:'svg',MidiaEvento:'midia',CapaEvento:'capa',useState:v=>[v,()=>{}],useMemo:fn=>fn(),
+    ...primitivasFixture, jsx,agendaBrasilia,validarFormularioEvento,VagasEvento:'vagas',Icone:'svg',MidiaEvento:'midia',CapaEvento:'capa',useState:v=>[v,()=>{}],useRef:v=>({current:v}),useEffect(){},useMemo:fn=>fn(),
   })
 }
 test('listagem apresenta os quatro estados e substitui exclusão por cancelamento/encerramento',()=>{

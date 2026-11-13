@@ -198,6 +198,12 @@ function criarRepositorioEventos(
       }
       return criado.id;
     },
+    async reconciliarCriacao(usuarioId,chave,dados){
+      if(!gestaoSegura||!(await capacidades()).controleVersao)return null;
+      return require('../../services/eventos.cjs').reconciliarCriacaoConfirmada(cliente,{
+        tabela:'eventos',identificador:'id',filtros:{usuario_id:usuarioId,criacao_chave:chave},chave,
+      },()=>gerir('criar',null,usuarioId,dados,null,chave));
+    },
 
     async atualizar(id, usuarioId, { nome, data, horario, local, categoria, publico, descricao, capacidade_maxima }, versao) {
       if(gestaoSegura){await gerir('editar',id,usuarioId,validarEvento({nome,data,horario,local,categoria,publico,descricao,capacidade_maxima}),versao);return 1;}

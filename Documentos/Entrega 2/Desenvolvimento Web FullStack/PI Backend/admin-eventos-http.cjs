@@ -26,7 +26,14 @@ function instalarCriacaoAdmin(app, { autenticar, permitirPerfis, repositorios, a
       if (!Number.isSafeInteger(body.organizador_id) || body.organizador_id <= 0 || !uuidV4.test(req.headers['idempotency-key'] || '')) {
         throw falha(400, 'Informe organizador e chave de idempotência válidos.');
       }
-      const dados = validarEvento(body);
+      let dados;
+      try { dados = validarEvento(body, { criacao: true }); }
+      catch (erro) {
+        if (!erro.inicioPassado || typeof repositorios.adminEventos.reconciliarCriacao !== 'function') throw erro;
+        const confirmado = await repositorios.adminEventos.reconciliarCriacao(adminId, body.organizador_id, validarEvento(body), req.headers['idempotency-key']);
+        if (!confirmado) throw erro;
+        return res.status(201).json({ evento: confirmado });
+      }
       const capacidades = await repositorios.adminEventos.capacidades();
       if (dados.capacidade_maxima !== undefined && !capacidades.controleCapacidade) throw falha(503, 'Controle de capacidade indisponível.');
       const dono = await repositorios.usuarios.buscarParaAutenticacao(body.organizador_id);

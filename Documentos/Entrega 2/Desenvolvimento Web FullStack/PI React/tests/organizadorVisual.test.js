@@ -5,11 +5,12 @@ import { carregarAdmin, hooksAdmin, nodes, text } from './helpers/adminRuntime.j
 import { primitivasFixture, jsxPrimitivas } from './helpers/primitivasFixture.js'
 import { criarRascunhoCustos, rascunhoCustosTemAlteracoes } from '../src/utils/rascunhosCustos.js'
 import { formatarMoeda } from '../src/utils/formatarMoeda.js'
+import { agendaBrasilia, validarFormularioEvento } from '../src/utils/validarEvento.js'
 
 function pagina(nome, props, extras = {}) {
   const h = hooksAdmin({ ...primitivasFixture, jsx: jsxPrimitivas, Icone: 'svg', VagasEvento: 'vagas',
     CapaEvento: 'capa', MidiaEvento: 'midia', ConsultaPortfolios: 'portfolio', useMemo: fn => fn(),
-    formatarMoeda, rascunhoCustosTemAlteracoes, console: { error() {} }, ...extras })
+    formatarMoeda, agendaBrasilia, validarFormularioEvento, rascunhoCustosTemAlteracoes, console: { error() {} }, ...extras })
   const fn = carregarAdmin(`pages/organizador/${nome}.jsx`, [nome], h.env)[nome]
   return { props, render: () => h.render(fn, props), close: () => h.close() }
 }

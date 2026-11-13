@@ -177,7 +177,7 @@ function estilo(seletor, largura) {
   })
   return valores
 }
-for (const largura of [360, 390, 768, 1024, 1440, 320, 720]) test(`dashboard: regras de reflow em ${largura}px`, () => {
+for (const largura of [360, 390, 768, 1024, 1440, 320, 720, 375]) test(`dashboard: regras de reflow em ${largura}px`, () => {
   assert.equal(estilo('.orgDashboard .orgIndicadores', largura)['grid-template-columns'], largura <= 380 ? 'minmax(0, 1fr)' : largura <= 1200 ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, minmax(0, 1fr))')
   assert.equal(estilo('.orgDashboard .orgPaineis', largura)['grid-template-columns'], largura <= 1200 ? 'minmax(0, 1fr)' : 'repeat(2, minmax(0, 1fr))')
   assert.equal(estilo('.orgDashboard .orgIndicador', largura)['min-width'], '0')

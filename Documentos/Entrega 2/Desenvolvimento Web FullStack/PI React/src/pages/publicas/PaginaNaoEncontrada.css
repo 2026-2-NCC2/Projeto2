@@ -1,0 +1,6 @@
+.ttPaginaStatus { box-sizing: border-box; min-height: 100dvh; width: 100%; padding: clamp(24px, 8vw, 80px); display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 20px; background: var(--superficie-pagina); color: var(--texto-principal); overflow-wrap: anywhere; }
+.ttPaginaStatus h1, .ttPaginaStatus p { margin: 0; max-width: 60ch; }
+.ttPaginaStatus .ttPaginaStatusCodigo { color: var(--marca-coral-escuro); font-size: 2rem; font-weight: 700; }
+.ttPaginaStatus nav { display: flex; flex-wrap: wrap; gap: 16px; }
+.ttPaginaStatus a { display: inline-flex; align-items: center; min-height: 44px; box-sizing: border-box; padding: 12px 18px; border: 1px solid var(--borda-controle); border-radius: var(--raio-controle); color: var(--marca-coral-escuro); background: var(--superficie-cartao); }
+.ttPaginaStatus a:focus-visible, .ttPaginaStatus h1:focus { outline: 3px solid var(--foco-cor); outline-offset: 4px; }

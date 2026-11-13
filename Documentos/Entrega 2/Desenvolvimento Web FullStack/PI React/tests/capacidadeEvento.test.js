@@ -4,12 +4,13 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
 import { transformSync } from 'rolldown/utils'
+import { agendaBrasilia, validarFormularioEvento } from '../src/utils/validarEvento.js'
 const jsx = jsxPrimitivas
 const nodes=v=>v&&typeof v==='object'?[v,...(v.children||[]).flatMap(nodes)]:[]
 const text=v=>v&&typeof v==='object'?(v.children||[]).map(text).join(' '):String(v??'')
 function carregar(file,nome){
  const s=readFileSync(new URL('../src/'+file,import.meta.url),'utf8').replace(/^import .*\r?\n/gm,'').replace('export function ','function ')
- return vm.runInNewContext(transformSync(file,s,{jsx:{runtime:'classic',pragma:'jsx'}}).code+'\n'+nome,{...primitivasFixture,jsx,React:{Fragment:'fragment'},VagasEvento:'vagas',MidiaEvento:'midia'})
+ return vm.runInNewContext(transformSync(file,s,{jsx:{runtime:'classic',pragma:'jsx'}}).code+'\n'+nome,{...primitivasFixture,jsx,agendaBrasilia,validarFormularioEvento,useState:v=>[v,()=>{}],useRef:v=>({current:v}),useEffect(){},React:{Fragment:'fragment'},VagasEvento:'vagas',MidiaEvento:'midia'})
 }
 test('disponibilidade distingue saldo zero, vagas e ausência de limite',()=>{
  const View=carregar('components/eventos/VagasEvento.jsx','VagasEvento')

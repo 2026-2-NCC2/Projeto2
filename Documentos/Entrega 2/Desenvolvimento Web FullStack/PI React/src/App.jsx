@@ -1,8 +1,11 @@
+import { PaginaNaoEncontrada } from './pages/publicas/PaginaNaoEncontrada.jsx'
+import { PaginaTransparencia, PaginaPreferenciasPrivacidade } from './pages/publicas/Transparencia.jsx'
+import { rotasPublicas } from './router/contratos.js'
 import { PerfilPessoal } from './components/perfil/PerfilPessoal.jsx'
 import { useSessao } from './hooks/useSessao.js'
 import { useAutenticacao } from './hooks/useAutenticacao.js'
 import { paginaAutorizada, paginasPorPerfil } from './services/autenticacao.js'
-import { useNavegacao, useHistoricoNavegacao, lerDestinoNavegacao } from './hooks/useNavegacao.js'
+import { useNavegacao, useHistoricoNavegacao, usePaginaRoteada } from './hooks/useNavegacao.js'
 import { PortalParticipante } from './pages/participante/PortalParticipante.jsx'
 import { PortalFornecedor } from './pages/fornecedor/PortalFornecedor.jsx'
 import { SolicitarAcesso } from './pages/auth/SolicitarAcesso.jsx'
@@ -26,7 +29,7 @@ import { useCustosPersistidos } from './hooks/useCustosPersistidos.js'
 import { usePublicacaoCotacao } from './hooks/usePublicacaoCotacao.js'
 import './App.css'
 import './SessaoSkeleton.css'
-import { AdminPortal } from './components/admin/AdminPortal'
+import { AdminPortal } from './components/admin/AdminPortal.jsx'
 import { ProvedorImagensEvento } from './components/eventos/ProvedorImagensEvento.jsx'
 
 
@@ -49,20 +52,11 @@ function PerfilFornecedor({ propostas = [], aoSair }) {
 }
 
 function App() {
-  const [paginaSolicitada, definirPagina] = useState(() => {
-  const destino = lerDestinoNavegacao()
-  if (destino) return destino.pagina
-  const token = sessionStorage.getItem('token')
-  const paginaSalva = sessionStorage.getItem('paginaAtual')
-
-  return token && paginaSalva ? paginaSalva : 'login'
-})
+  const { paginaSolicitada, definirPagina, localizacao } = usePaginaRoteada()
   const autenticacao = useAutenticacao(paginaSolicitada)
-  const pagina = paginaAutorizada(
-    autenticacao.sessao && ['login', 'cadastro'].includes(paginaSolicitada) && !['login', 'cadastro'].includes(lerDestinoNavegacao()?.pagina)
-      ? paginasPorPerfil[autenticacao.sessao.perfil][0] : paginaSolicitada,
-    autenticacao.sessao?.perfil,
-  )
+  const publica = ['nao-encontrada', ...rotasPublicas].includes(paginaSolicitada)
+  const pagina = publica ? paginaSolicitada : paginaAutorizada(paginaSolicitada, autenticacao.sessao?.perfil)
+  const acessoNegado = !publica && autenticacao.sessao && !['login', 'cadastro', ...paginasPorPerfil[autenticacao.sessao.perfil]].includes(paginaSolicitada)
   const [eventos, setEventos] = useState([])
   const [carregandoEventos, setCarregandoEventos] = useState(true)
   const [erroEventos, setErroEventos] = useState('')
@@ -242,7 +236,7 @@ function App() {
     )
   }
 
-  function setPagina(destino) {
+  function setPagina(destino, restauracao = false) {
     const proximaPagina = typeof destino === 'function'
       ? destino(paginaAtualRef.current)
       : destino
@@ -296,7 +290,7 @@ function App() {
 
     if (abandonarFormulario) setFormularioCustosPendente(false)
     paginaAtualRef.current = proximaPagina
-    definirPagina(proximaPagina)
+    if (!restauracao) definirPagina(proximaPagina, selecaoEventoRef.current.chave)
     return true
   }
 
@@ -516,11 +510,10 @@ alert(
     ativo: !autenticacao.verificando, chaveSessao: autenticacao.sessao?.token || '',
     contextoEvento: chaveEvento, iniciarNoLogin: Boolean(autenticacao.erro),
     aoRestaurar(destino, contexto, signal) {
-      const permitidas = ['login', 'cadastro', ...(autenticacao.sessao ? paginasPorPerfil[autenticacao.sessao.perfil] : [])]
-      if (!permitidas.includes(destino)) {
-        const seguro = autenticacao.sessao ? paginasPorPerfil[autenticacao.sessao.perfil][0] : 'login'
-        return setPagina(seguro) ? seguro : false
-      }
+      const restaurarPagina = p => setPagina(p, true)
+      const permitidas = ['login', 'cadastro', 'nao-encontrada', ...rotasPublicas, ...(autenticacao.sessao ? paginasPorPerfil[autenticacao.sessao.perfil] : [])]
+      // Uma rota protegida sem acesso permanece na URL e apresenta login/403.
+      if (!permitidas.includes(destino)) return restaurarPagina(destino) ? destino : false
       if (['criar', 'custos', 'cotacao', 'ticket'].includes(destino) && contexto !== chaveEvento && /^evento:[1-9]\d*$/.test(contexto)) {
         const token = autenticacao.sessao?.token, id = Number(contexto.slice(7))
         return (async () => {
@@ -528,25 +521,31 @@ alert(
             const resposta = await consultarEvento(id, token)
             const dados = resposta.ok ? await resposta.json() : null
             if (signal.aborted || sessionStorage.getItem('token') !== token) return false
-            if (!dados || Number(dados.id) !== id) return setPagina('eventos') ? 'eventos' : false
+            if (!dados || Number(dados.id) !== id) return restaurarPagina('eventos') ? 'eventos' : false
             aoSelecionarEvento(dados)
-            return setPagina(destino) ? destino : false
+            return restaurarPagina(destino) ? destino : false
           } catch {
             if (signal.aborted || sessionStorage.getItem('token') !== token) return false
-            return setPagina('eventos') ? 'eventos' : false
+            return restaurarPagina('eventos') ? 'eventos' : false
           }
         })()
       }
       if (['criar', 'custos', 'cotacao', 'ticket'].includes(destino) && contexto === 'novo:0' && chaveEvento.startsWith('evento:')) {
         aoCriarNovoEvento()
-        return setPagina(destino) ? destino : false
+        return restaurarPagina(destino) ? destino : false
       }
-      if (destino === pagina) return destino
-      return setPagina(destino) ? destino : false
+      if (destino === pagina && contexto === chaveEvento) return destino
+      return restaurarPagina(destino) ? destino : false
     },
   })
   const comImagens=conteudo=><ProvedorImagensEvento key={autenticacao.sessao?.token||''} token={autenticacao.sessao?.token}>{conteudo}</ProvedorImagensEvento>
   if (autenticacao.verificando || navegacaoHistorica.restaurando) return <Skeleton tipo="card" linhas={5} rotulo="Validando sessão..." className="sessaoSkeleton" />
+  const portalAutorizado = autenticacao.sessao ? '/' + paginasPorPerfil[autenticacao.sessao.perfil][0] : '/inicio'
+  const caminhoDesconhecido = typeof window !== 'undefined' && !['/', '/index.html'].includes(window.location.pathname)
+  if (pagina === 'nao-encontrada' || caminhoDesconhecido) return <PaginaNaoEncontrada key={localizacao?.key} destino={portalAutorizado} reiniciarDocumento={caminhoDesconhecido} />
+  if (acessoNegado) return <PaginaNaoEncontrada destino={portalAutorizado} acessoNegado />
+  if (pagina === 'preferencias-privacidade') return <PaginaPreferenciasPrivacidade />
+  if (rotasPublicas.includes(pagina)) return <PaginaTransparencia documento={pagina} />
   if (pagina === 'admin') {
     return comImagens(<AdminPortal aoSair={aoSair} navegacao={navegacaoHistorica} />)
   }
@@ -604,6 +603,7 @@ alert(
       )}
       {pagina === 'criar' && (
         <CriarEvento
+          key={chaveEvento}
           controleCapacidade={capacidades.controleCapacidade===true}
           evento={eventoEmEdicao}
           setEvento={setEventoEmEdicao}
@@ -618,11 +618,7 @@ aoAvancarParaCustos={async () => {
   try {
     const token = sessionStorage.getItem('token')
 
-    if (!token) {
-      alert('Sua sessão expirou. Faça login novamente.')
-      setPagina('login')
-      return
-    }
+    if (!token) throw Object.assign(new Error('Sua sessão expirou. Entre novamente.'), { status: 401 })
 
     const eventoExistente = Boolean(eventoEmEdicao.id)
 
@@ -634,28 +630,25 @@ aoAvancarParaCustos={async () => {
     if (selecaoEventoRef.current.versao !== versaoAoSalvar) return
 
     if (!resposta.ok) {
-      alert(dados.erro || 'Erro ao salvar evento.')
-      return
+      throw Object.assign(new Error(dados.erro || 'Não foi possível salvar o evento. Revise os dados e tente novamente.'), { status: resposta.status })
     }
 
     if (!eventoExistente) {
       const idCriado = dados.evento?.id ?? dados.id
 
       if (!idCriado) {
-        alert('Evento salvo, mas a API não retornou o ID.')
-        return
+        throw new Error('Salvamento enviado, mas a confirmação não contém o ID. Consulte Meus Eventos antes de repetir.')
       }
 
       if (!vincularRascunhoAoEvento(idCriado, versaoAoSalvar)) {
-        alert('Evento salvo, mas a API não retornou um ID válido para associar o rascunho de custos.')
-        return
+        throw new Error('Salvamento enviado, mas não foi possível associar os custos. Consulte Meus Eventos antes de repetir.')
       }
     }
 
     if (paginaAtualRef.current === paginaAoSalvar) setPagina('custos')
   } catch (erro) {
-    console.error('Erro ao salvar evento:', erro)
-    alert(erro.message || 'Resultado não confirmado. Consulte Meus Eventos antes de repetir.')
+    if (erro instanceof TypeError || erro instanceof SyntaxError) throw new Error('Não foi possível confirmar o salvamento. Verifique a conexão e consulte Meus Eventos antes de repetir.', { cause: erro })
+    throw erro
   }
 }}
 

@@ -355,7 +355,7 @@ function estiloParticipante(seletor, largura) {
   })
   return out
 }
-for (const largura of [360, 390, 768, 1024, 1440]) test(`grade de descoberta e inscrições adapta regras em ${largura}px`, () => {
+for (const largura of [360, 390, 768, 1024, 1440, 320, 375]) test(`grade de descoberta e inscrições adapta regras em ${largura}px`, () => {
   const esperado = largura <= 700 ? 'minmax(0, 1fr)' : largura <= 1100 ? 'repeat(2, minmax(0, 1fr))' : 'repeat(3, minmax(0, 1fr))'
   for (const grade of ['.ppGradeEventos', '.ppGradeInscricoes']) {
     assert.equal(estiloParticipante(`.participantePagina ${grade}`, largura)['grid-template-columns'], esperado)
@@ -494,7 +494,7 @@ test('capas existentes preservam fallback, carregamento, erro, alt e falha de im
   h.close()
 })
 
-for (const largura of [360, 390, 768, 1024, 1440, 720]) test(`cards e skeletons compartilham proporções e refluxo em ${largura}px`, () => {
+for (const largura of [360, 390, 768, 1024, 1440, 720, 320, 375]) test(`cards e skeletons compartilham proporções e refluxo em ${largura}px`, () => {
   const colunas = estiloParticipante('.participantePagina .ppGradeEventos', largura)['grid-template-columns']
   assert.equal(estiloParticipante('.participantePagina .ppEsqueletos', largura)['grid-template-columns'], colunas)
   assert.equal(estiloParticipante('.participantePagina .ppSkeletonEvento .ttSkeletonCapa', largura)['aspect-ratio'], '16 / 10')
@@ -630,7 +630,7 @@ test('inscrições com nomes e locais extensos mantêm todas as informações', 
   assert.equal(text(nodes(card).find(n => n.type === 'h3')), nome); assert.ok(text(card).includes(local)); p.close()
 })
 
-for (const largura of [360, 390, 768, 1024, 1440, 720]) test(`detalhes e ingressos refluem sem cortes nas regras de ${largura}px`, () => {
+for (const largura of [360, 390, 768, 1024, 1440, 720, 320, 375]) test(`detalhes e ingressos refluem sem cortes nas regras de ${largura}px`, () => {
   assert.equal(estiloParticipante('.participantePagina .ppDetalhesGrade', largura)['grid-template-columns'], largura <= 900 ? 'minmax(0, 1fr)' : 'minmax(0, 1fr) minmax(260px, .65fr)')
   assert.equal(estiloParticipante('.participantePagina .ppDetalhesDados', largura)['grid-template-columns'], largura <= 700 ? 'minmax(0, 1fr)' : 'repeat(2, minmax(0, 1fr))')
   assert.equal(estiloParticipante('.participantePagina .ppDetalhes', largura)['min-width'], '0')
@@ -715,13 +715,13 @@ test('menu que deixa de ter acionador visível não rouba foco no desktop', () =
   assert.equal(m.focado(), 0); m.close(); p.close()
 })
 
-for (const largura of [360, 390, 768, 1024, 1440, 720]) test(`estrutura/menu em ${largura}px${largura === 720 ? ' (refluxo equivalente a 1440px/200%)' : ''}`, () => {
+for (const largura of [360, 390, 768, 1024, 1440, 720, 320, 375]) test(`estrutura/menu em ${largura}px${largura === 720 ? ' (refluxo equivalente a 1440px/200%)' : ''}`, () => {
   const mobile = largura <= 900
   assert.equal(estiloParticipante('.participantePagina .ppNavegacao .alternarNavegacao', largura).display, mobile ? 'flex' : 'none')
   // display:none retira todos os controles descendentes da ordem de Tab.
   assert.equal(estiloParticipante(".participantePagina .ppNavegacao .painelNavegacao[data-aberto='false']", largura).display, mobile ? 'none' : 'flex')
   assert.equal(estiloParticipante('.participantePagina .ppNavegacao .painelNavegacao', largura).display, 'flex')
-  assert.equal(estiloParticipante('.participantePagina .ppCabecalhoInterno', largura)['grid-template-columns'], mobile ? 'minmax(0, 1fr) auto' : 'auto minmax(0, 1fr)')
+  assert.equal(estiloParticipante('.participantePagina .ppCabecalhoInterno', largura)['grid-template-columns'], largura <= 340 ? 'minmax(0, 1fr)' : mobile ? 'minmax(0, 1fr) auto' : 'auto minmax(0, 1fr)')
   assert.equal(estiloParticipante('.participantePagina .ppMenu .ttBotao', largura)['min-height'], '44px')
   assert.equal(estiloParticipante('.participantePagina .ppConteudo', largura)['min-width'], '0')
   assert.equal(estiloParticipante('.participantePagina .ppCabecalhoInterno', largura)['max-width'], '1328px')
@@ -772,7 +772,7 @@ test('acabamento de perfil/privacidade é isolado, sem esconder conteúdo ou alt
   assert.equal(estiloParticipante('.participantePagina .ppPerfil .ttCampoControle:focus-visible', 390)['outline-offset'], '3px')
 })
 
-for (const largura of [360, 390, 768, 1024, 1440, 720]) test(`perfil/privacidade: regras de refluxo em ${largura}px${largura === 720 ? ' (1440px/200%)' : ''}`, () => {
+for (const largura of [360, 390, 768, 1024, 1440, 720, 320, 375]) test(`perfil/privacidade: regras de refluxo em ${largura}px${largura === 720 ? ' (1440px/200%)' : ''}`, () => {
   assert.equal(estiloParticipante('.participantePagina .ppPerfil', largura)['min-width'], '0')
   assert.equal(estiloParticipante('.participantePagina .ppPerfil', largura)['overflow-wrap'], 'anywhere')
   assert.equal(estiloParticipante('.participantePagina .ppPerfil .perfilCampos .ttCampo', largura).margin, '0')

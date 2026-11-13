@@ -42,7 +42,7 @@ test('entrada pública não amplia a lista de caminhos nem modifica o filho exis
   assert.equal(documentoDaRota(null), null)
   assert.equal(api.PaginaTransparencia({ documento: '__proto__' }), null)
   const main = ler('main.jsx')
-  assert.match(main, /<EntradaAplicacao><App \/><\/EntradaAplicacao>/)
+  assert.match(main, /<EntradaAplicacao><RouterProvider router={router} \/><\/EntradaAplicacao>/)
 })
 
 test('links nativos, sumários e destino do atalho de teclado apontam para conteúdo existente', () => {

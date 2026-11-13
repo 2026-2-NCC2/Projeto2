@@ -806,7 +806,15 @@ app.post("/eventos", autenticar, permitirPerfis("organizador"),async (req, res) 
       });
     }
 
-    const normalizado=validarEvento({capacidade_maxima:req.body?.capacidade_maxima,nome,data,horario,local,categoria:categoria||'Corporativo',publico,descricao:descricao||''});
+    const entrada={capacidade_maxima:req.body?.capacidade_maxima,nome,data,horario,local,categoria:categoria||'Corporativo',publico,descricao:descricao||''};
+    let normalizado;
+    try{normalizado=validarEvento(entrada,{criacao:true});}
+    catch(erro){
+      if(!erro.inicioPassado||typeof eventosRepository.reconciliarCriacao!=='function')throw erro;
+      const confirmado=await eventosRepository.reconciliarCriacao(req.usuario.id,req.headers?.['idempotency-key'],validarEvento(entrada));
+      if(!confirmado)throw erro;
+      return res.status(201).json({mensagem:'Evento cadastrado com sucesso!',evento:confirmado});
+    }
     if(req.body?.capacidade_maxima!==undefined&&providerBanco!=='supabase')throw require('./services/suporte-transacoes.cjs').falha(503,'Controle de capacidade exige PostgreSQL preparado.');
     const nomeFinal = normalizado.nome;
     const localFinal = normalizado.local;

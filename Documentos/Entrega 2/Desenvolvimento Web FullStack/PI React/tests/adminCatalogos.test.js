@@ -131,7 +131,7 @@ function estiloEvento(seletor, largura) {
   })
   return valores
 }
-for (const largura of [1920, 1366, 768, 390, 360]) test('estrutura de Eventos em ' + largura + 'px', () => {
+for (const largura of [1920, 1366, 768, 390, 360, 320, 375]) test('estrutura de Eventos em ' + largura + 'px', () => {
   assert.equal(estiloEvento('.admEventos .admFiltros', largura)['grid-template-columns'], largura <= 540 ? 'minmax(0, 1fr)' : largura <= 900 ? 'repeat(2, minmax(0, 1fr))' : 'minmax(0, 2fr) minmax(0, 1fr) auto')
   assert.equal(estiloEvento('.admEventos .admTabela table', largura)['min-width'], '780px')
   assert.equal(estiloEvento('.admEventos .admEventoNome > strong', largura)['overflow-wrap'], 'anywhere')
@@ -219,7 +219,7 @@ function estiloUsuario(seletor, largura) {
   })
   return valores
 }
-for (const largura of [1920, 1366, 768, 390, 360]) test('Usuários: tabela, filtros e detalhes em ' + largura + 'px', () => {
+for (const largura of [1920, 1366, 768, 390, 360, 320, 375]) test('Usuários: tabela, filtros e detalhes em ' + largura + 'px', () => {
   assert.equal(estiloUsuario('.admUsuarios .admFiltros', largura)['grid-template-columns'], largura <= 540 ? 'minmax(0, 1fr)' : largura <= 900 ? 'repeat(2, minmax(0, 1fr))' : 'minmax(0, 2fr) minmax(0, 1fr) auto')
   assert.equal(estiloUsuario('.admUsuarios .admTabela table', largura)['min-width'], '760px')
   assert.equal(estiloUsuario('.admUsuarios .admTabela td', largura)['overflow-wrap'], 'anywhere')
@@ -304,7 +304,7 @@ function estiloComercial(seletor, largura) {
   })
   return valores
 }
-for (const largura of [1920, 1366, 768, 390, 360]) test('Cotações e Propostas: estrutura em ' + largura + 'px', () => {
+for (const largura of [1920, 1366, 768, 390, 360, 320, 375]) test('Cotações e Propostas: estrutura em ' + largura + 'px', () => {
   for (const seletor of ['.admComercial .admFiltros', '.admComercial.admPropostas .admFiltros']) {
     const esperado = largura <= 540 ? 'minmax(0, 1fr)' : largura <= 1100 ? 'repeat(2, minmax(0, 1fr))' : seletor.includes('.admPropostas') ? 'repeat(3, minmax(0, 1fr)) auto' : 'repeat(2, minmax(0, 1fr)) auto'
     assert.equal(estiloComercial(seletor, largura)['grid-template-columns'], esperado)
