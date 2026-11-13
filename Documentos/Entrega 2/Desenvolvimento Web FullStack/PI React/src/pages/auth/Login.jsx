@@ -11,6 +11,7 @@ export function Login({ setPagina, aoAutenticarSessao, erroSessao }) {
   const [perfil, setPerfil] = useState('')
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
+  const [mostrarSenha, setMostrarSenha] = useState(false)
   const [entrando, setEntrando] = useState(false)
   const [feedback, setFeedback] = useState(() => lerAvisoCadastro() ? { tipo: 'sucesso', mensagem: lerAvisoCadastro() } : null)
   const envio = useRef(false)
@@ -55,41 +56,56 @@ const aoAutenticar = async (eventoDisparado) => {
 }
 
   return (
-    <div className="paginaLogin autenticacaoPagina">
+    <div className="paginaLogin autenticacaoPagina loginPagina">
       <div className="cabecalhoLogin">
         <div className="logo">
           <Marca />
         </div>
         <span className="acessoSeguro"><Icone nome="acesso" tamanho={16} /> Acesso à conta</span>
       </div>
-      <main className="caixaLogin">
-        {erroSessao && <Alerta variante="erro">{erroSessao}</Alerta>}
-        {feedback && <Alerta variante={feedback.tipo} tabIndex={-1} ref={mensagemRef}>{feedback.mensagem}</Alerta>}
-        <div className="escolhaPerfil"><button type="button" aria-pressed={perfil === 'organizador'} className={perfil === 'organizador' ? 'selecionado' : ''} onClick={() => setPerfil('organizador')}>Organizador</button><button type="button" aria-pressed={perfil === 'fornecedor'} className={perfil === 'fornecedor' ? 'selecionado' : ''} onClick={() => setPerfil('fornecedor')}>Fornecedor</button></div>
+      <div className="loginEstrutura">
+      <main className="caixaLogin" aria-labelledby="login-titulo">
+        <p className="loginSobretitulo">BEM-VINDO AO TROCATICKET</p>
+        <h1 id="login-titulo">Acessar sua conta</h1>
+        <p className="loginIntroducao">{perfil === 'fornecedor' ? 'Encontre oportunidades e envie propostas para eventos.' : perfil === 'participante' ? 'Explore eventos e acompanhe suas inscrições.' : perfil === 'admin' ? 'Consulte as informações disponíveis para a administração.' : 'Seus eventos, suas conexões e seu planejamento em um só lugar.'}</p>
+        {erroSessao && <Alerta id="login-sessao" variante="erro" titulo="Confira sua sessão">{erroSessao}</Alerta>}
+        {feedback && <Alerta id="login-feedback" variante={feedback.tipo} titulo={feedback.tipo === 'erro' ? 'Não foi possível entrar' : undefined} tabIndex={-1} ref={mensagemRef}>{feedback.mensagem}</Alerta>}
+        <div className="loginPerfis" role="group" aria-label="Apresentação dos portais" aria-describedby="login-perfis-ajuda">
+        <div className="escolhaPerfil">
+          <button type="button" disabled={entrando} aria-pressed={perfil === 'participante'}
+            className={perfil === 'participante' ? 'selecionado' : ''} onClick={() => setPerfil('participante')}>Participante</button>
+          <button type="button" disabled={entrando} aria-pressed={perfil === 'organizador'}
+            className={perfil === 'organizador' ? 'selecionado' : ''} onClick={() => setPerfil('organizador')}>Organizador</button>
+          <button type="button" disabled={entrando} aria-pressed={perfil === 'fornecedor'}
+            className={perfil === 'fornecedor' ? 'selecionado' : ''} onClick={() => setPerfil('fornecedor')}>Fornecedor</button>
+        </div>
         <button
           type="button"
+          disabled={entrando}
           className={`acessoAdmin ${perfil === 'admin' ? 'selecionado' : ''}`}
           aria-pressed={perfil === 'admin'}
           onClick={() => setPerfil('admin')}
         >
           Acesso administrativo
         </button>
-        <h1>Acessar sua conta</h1>
-        <p>{perfil === 'fornecedor' ? 'Encontre oportunidades e envie propostas para eventos.' : 'Acesse seu painel de gestão e cotações de eventos corporativos.'}</p>
-        <form onSubmit={aoAutenticar} aria-busy={entrando}>
+        </div>
+        <p className="loginAjuda" id="login-perfis-ajuda">A seleção apresenta cada portal. Seu acesso é definido pela conta autenticada.</p>
+        <form onSubmit={aoAutenticar} aria-busy={entrando} aria-describedby={[erroSessao && 'login-sessao', feedback && 'login-feedback'].filter(Boolean).join(' ') || undefined}>
           <Campo id="login-email" label="E-mail" type="email" autoComplete="username"
+            autoCapitalize="none" spellCheck={false}
             value={email} onChange={e => setEmail(e.target.value)} placeholder="seuemail@empresa.com" obrigatorio ocupado={entrando} />
-          <Campo id="login-senha" label="Senha" type="password" autoComplete="current-password"
+          <Campo id="login-senha" label="Senha" type={mostrarSenha ? 'text' : 'password'} autoComplete="current-password"
             value={senha} onChange={e => setSenha(e.target.value)} placeholder="••••••••" obrigatorio ocupado={entrando} />
-          <div className="rotuloSenha">
-            <button type="button" disabled title="Funcionalidade indisponível">Esqueci minha senha</button>
-          </div>
-          <label className="lembrar">
-            <input type="checkbox" disabled /> Lembrar deste dispositivo
-          </label>
+          <Botao className="loginMostrarSenha" variante="discreto" disabled={entrando} aria-controls="login-senha" aria-pressed={mostrarSenha} onClick={() => setMostrarSenha(atual => !atual)}>{mostrarSenha ? 'Ocultar senha' : 'Mostrar senha'}</Botao>
           <Botao type="submit" ocupado={entrando}>{entrando ? 'Entrando...' : 'Entrar'}</Botao>
         </form>
-        <div className="divisor">ou continue com</div>
+        <details className="loginIndisponiveis">
+        <summary>Recursos ainda indisponíveis</summary>
+        <p className="loginAjuda">Estas opções não estão habilitadas nesta versão.</p>
+        <div className="rotuloSenha">
+          <button type="button" disabled title="Funcionalidade indisponível">Esqueci minha senha</button>
+        </div>
+        <label className="lembrar"><input type="checkbox" disabled /> Lembrar deste dispositivo</label>
         <button
           type="button"
           className="botaoGoogle"
@@ -98,6 +114,7 @@ const aoAutenticar = async (eventoDisparado) => {
         >
           Google Workspace / SSO
         </button>
+        </details>
         <p className="cadastro">Ainda não tem uma conta?{' '}
           <Botao variante="discreto" disabled={entrando} onClick={() => setPagina('cadastro')}>Criar conta</Botao>
         </p>
@@ -107,6 +124,15 @@ const aoAutenticar = async (eventoDisparado) => {
           <a href="/contato-privacidade">Contato de Privacidade</a>
         </nav>
       </main>
+      <aside className="loginApresentacao" aria-labelledby="login-apresentacao-titulo">
+        <span className="loginSimbolo" aria-hidden="true"><Icone nome="ticket" tamanho={64} /></span>
+        <p className="loginSobretitulo">CONEXÕES PARA EVENTOS</p>
+        <h2 id="login-apresentacao-titulo">Seu próximo encontro começa com uma conexão.</h2>
+        <p>Continue no espaço da sua conta para explorar, planejar ou acompanhar oportunidades.</p>
+        <ul><li><Icone nome="eventos" /> Eventos e inscrições</li><li><Icone nome="custos" /> Custos e simulação de ticket</li><li><Icone nome="documento" /> Cotações e propostas comerciais</li></ul>
+        <p className="loginAjuda">Cada perfil acessa somente as informações e ações autorizadas para sua conta.</p>
+      </aside>
+      </div>
     </div>
   )
 }

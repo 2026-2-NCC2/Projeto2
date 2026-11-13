@@ -5,6 +5,7 @@
 .orgPaginaSecundaria .cartaoFormulario h2, .orgPaginaSecundaria .cartaoTicket h2 { font-size: 1.0625rem; line-height: 1.5; }
 .orgPaginaSecundaria .cartaoFormulario h2 > .icone { vertical-align: middle; }
 .orgPaginaSecundaria .ttCampoControle { font-size: 1rem; }
+.orgPaginaSecundaria .cartaoFormulario, .orgPaginaSecundaria .cartaoTicket { padding: clamp(18px, 3vw, 28px); border-radius: var(--raio-cartao); box-shadow: var(--sombra-cartao); }
 .orgPaginaSecundaria .ttBotao { min-height: 44px; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 .orgPaginaSecundaria .ttBotao--secundario:enabled { color: var(--link-cor); }
 .orgPaginaSecundaria .ttBotao--secundario:hover:enabled { background: var(--marca-coral-suave); }

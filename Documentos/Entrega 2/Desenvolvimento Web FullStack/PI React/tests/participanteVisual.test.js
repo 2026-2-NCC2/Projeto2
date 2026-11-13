@@ -146,6 +146,26 @@ test('nenhum evento disponivel e nenhum resultado dos filtros sao estados distin
   assert.doesNotMatch(text(p.render()), /Nenhum evento disponível/)
 })
 
+test('participante recupera a busca vazia e explora eventos a partir de ingressos sem novas consultas', async () => {
+  const p = participante(); p.render(); await tick()
+  try {
+    const total = p.chamadas.length
+    let view = p.navegar('Explorar eventos')
+    const busca = nodes(view).find(n => n.props.id === 'participante-busca')
+    let focos = 0
+    busca.props.ref.current = { focus() { focos++ } }
+    busca.props.onChange({ target: { value: 'sem-correspondencia' } })
+    botao(p.render(), 'Limpar busca').props.onClick()
+    assert.equal(focos, 1)
+    assert.doesNotMatch(text(p.render()), /Nenhum resultado encontrado/)
+    view = p.navegar('Meus ingressos')
+    botao(view, 'Explorar eventos disponíveis').props.onClick()
+    assert.match(text(p.render()), /Evento sintético/)
+    assert.equal(p.chamadas.length, total)
+    assert.equal(p.confirmacoes.length, 0)
+  } finally { p.close() }
+})
+
 test('filtro continua pesquisando nome, categoria e local sem requisicoes adicionais', async () => {
   const p = participante(); p.render(); await tick(); p.navegar('Explorar eventos')
   const total = p.chamadas.length

@@ -82,6 +82,9 @@ export function useHistoricoNavegacao(pagina, { ativo, chaveSessao, contextoEven
     const alvo = urlDestinoNavegacao({ pagina, dados: validado, contextoEvento: destino?.contextoEvento }).slice(1)
     if (alvo !== localizacao.pathname + localizacao.search) navegar(alvo, { replace: substituir })
   }
-  const precisaContexto = destino?.pagina === pagina && ['criar', 'custos', 'cotacao', 'ticket'].includes(pagina) && destino.contextoEvento !== contextoEvento
+  // A URL sem evento representa qualquer rascunho local novo:N. O contador
+  // distingue rascunhos na memória, mas não faz parte do contrato da URL.
+  const mesmoRascunho = destino?.contextoEvento === 'novo:0' && /^novo:\d+$/.test(contextoEvento)
+  const precisaContexto = destino?.pagina === pagina && ['criar', 'custos', 'cotacao', 'ticket'].includes(pagina) && !mesmoRascunho && destino.contextoEvento !== contextoEvento
   return { estado: dados, mudar, restaurando: ativo && (pronto === null || pendente || precisaContexto) }
 }

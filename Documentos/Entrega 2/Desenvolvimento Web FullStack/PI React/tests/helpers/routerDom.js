@@ -21,18 +21,18 @@ registerHooks({ load(url, context, next) {
   return next(url, context)
 } })
 
-export async function montarRouter({ url = '/#/inicio', dados = {}, fetch: buscar, routes } = {}) {
+export async function montarRouter({ url = '/#/inicio', dados = {}, fetch: buscar, routes, strictMode = false } = {}) {
   const dom = new JSDOM('<!doctype html><title>TrocaTicket</title><div id="root"></div>', { url: 'http://localhost' + url, pretendToBeVisual: true })
   const anteriores = new Map()
   for (const [nome, valor] of Object.entries({ window: dom.window, document: dom.window.document, navigator: dom.window.navigator,
-    sessionStorage: dom.window.sessionStorage, HTMLElement: dom.window.HTMLElement, IS_REACT_ACT_ENVIRONMENT: true,
+    sessionStorage: dom.window.sessionStorage, HTMLElement: dom.window.HTMLElement, CustomEvent: dom.window.CustomEvent, IS_REACT_ACT_ENVIRONMENT: true,
     fetch: buscar || (async () => { throw Error('Requisição não prevista; acesso externo bloqueado no teste.') }),
   })) { anteriores.set(nome, Object.getOwnPropertyDescriptor(globalThis, nome)); Object.defineProperty(globalThis, nome, { configurable: true, writable: true, value: valor }) }
   for (const [k, v] of Object.entries(dados)) sessionStorage.setItem(k, v)
   window.confirm = () => true
   window.alert = () => {}
   globalThis.alert = window.alert
-  const { createElement } = await import('react')
+  const { createElement, StrictMode } = await import('react')
   const { createRoot } = await import('react-dom/client')
   const { createHashRouter } = await import('react-router')
   const { RouterProvider } = await import('react-router/dom')
@@ -40,7 +40,8 @@ export async function montarRouter({ url = '/#/inicio', dados = {}, fetch: busca
   const { EntradaAplicacao } = await import('../../src/pages/publicas/Transparencia.jsx')
   const router = createHashRouter(routes || rotasAplicacao, { window: dom.window })
   const root = createRoot(document.getElementById('root'))
-  await act(async () => { root.render(createElement(EntradaAplicacao, null, createElement(RouterProvider, { router }))); await new Promise(r => setTimeout(r, 0)) })
+  const entrada = createElement(EntradaAplicacao, null, createElement(RouterProvider, { router }))
+  await act(async () => { root.render(strictMode ? createElement(StrictMode, null, entrada) : entrada); await new Promise(r => setTimeout(r, 0)) })
   const settle = async () => { await act(async () => { await new Promise(r => setTimeout(r, 20)) }) }
   await settle()
   return { router, window: dom.window, document: dom.window.document, settle,

@@ -1,26 +1,15 @@
 import { PaginaNaoEncontrada } from './pages/publicas/PaginaNaoEncontrada.jsx'
 import { PaginaTransparencia, PaginaPreferenciasPrivacidade } from './pages/publicas/Transparencia.jsx'
 import { rotasPublicas } from './router/contratos.js'
-import { PerfilPessoal } from './components/perfil/PerfilPessoal.jsx'
+import { PerfilPessoal, PortalParticipante, PortalFornecedor, SolicitarAcesso, Cadastro, Cotacao, Ticket, Custos, PerfilOrganizador, CriarEvento, Eventos, Layout, AdminPortal } from './carregamento/portais.jsx'
 import { useSessao } from './hooks/useSessao.js'
 import { useAutenticacao } from './hooks/useAutenticacao.js'
 import { paginaAutorizada, paginasPorPerfil } from './services/autenticacao.js'
 import { useNavegacao, useHistoricoNavegacao, usePaginaRoteada } from './hooks/useNavegacao.js'
-import { PortalParticipante } from './pages/participante/PortalParticipante.jsx'
-import { PortalFornecedor } from './pages/fornecedor/PortalFornecedor.jsx'
-import { SolicitarAcesso } from './pages/auth/SolicitarAcesso.jsx'
 import { Login } from './pages/auth/Login.jsx'
 import { EntradaPublica } from './pages/publicas/EntradaPublica.jsx'
 import { Skeleton } from './components/ui/Primitivas.jsx'
-import { Cadastro } from './pages/auth/Cadastro.jsx'
-import { Cotacao } from './pages/organizador/Cotacao.jsx'
-import { Ticket } from './pages/organizador/Ticket.jsx'
 import { listarEventos, publicarEvento, salvarEvento, consultarEvento, capacidadesEventos, mudarEstadoEvento } from './services/eventos.js'
-import { Custos } from './pages/organizador/Custos.jsx'
-import { PerfilOrganizador } from './pages/organizador/Perfil.jsx'
-import { CriarEvento } from './pages/organizador/CriarEvento.jsx'
-import { Eventos } from './pages/organizador/Eventos.jsx'
-import { Layout } from './components/layout/Layout.jsx'
 import { useState, useEffect, useRef } from 'react'
 import { formatarMoeda } from './utils/formatarMoeda.js'
 import { useRascunhosCustos } from './hooks/useRascunhosCustos.js'
@@ -29,7 +18,6 @@ import { useCustosPersistidos } from './hooks/useCustosPersistidos.js'
 import { usePublicacaoCotacao } from './hooks/usePublicacaoCotacao.js'
 import './App.css'
 import './SessaoSkeleton.css'
-import { AdminPortal } from './components/admin/AdminPortal.jsx'
 import { ProvedorImagensEvento } from './components/eventos/ProvedorImagensEvento.jsx'
 
 
@@ -569,6 +557,7 @@ alert(
   return comImagens(
     <Layout
       pagina={pagina}
+      evento={eventoEmEdicao}
       setPagina={setPagina}
       aoCriarNovoEvento={aoCriarNovoEvento}
       aoSair={aoSair}

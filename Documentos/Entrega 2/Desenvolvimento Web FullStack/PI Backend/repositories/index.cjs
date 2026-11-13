@@ -31,6 +31,9 @@ function prepararRepositorios() {
   };
   // Usa o cliente já selecionado; não cria conexão extra nem recorre ao MySQL.
   if (provider === 'supabase') {
+    if (process.env.CONTRATACOES_ATIVAS === 'true') {
+      repositorios.contratacoes = require('./supabase/contratacoes.cjs').criarRepositorioContratacoes(conexao);
+    }
     if (process.env.ADMIN_PERFIS_GESTAO_ATIVA === 'true') {
       repositorios.adminPerfis = require('./supabase/admin-perfis.cjs').criarRepositorioAdminPerfis(conexao);
     }

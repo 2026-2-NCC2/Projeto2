@@ -94,6 +94,33 @@ test('nenhuma proposta e filtro sem correspondencias mantem mensagens distintas'
   assert.equal(linhas(p.render()).length, 0)
 })
 
+test('fornecedor recupera busca e filtros e identifica a cotação da ação sem enviar proposta', async () => {
+  const p = fornecedor({ propostas: [proposta] }); p.render(); await tick()
+  try {
+    const total = p.chamadas.length
+    let focos = 0
+    nodes(p.render()).find(n => n.props.id === 'fornecedor-busca').props.ref.current = { focus() { focos++ } }
+    p.alterar('fornecedor-busca', 'sem-correspondencia')
+    botao(p.render(), 'Limpar busca').props.onClick()
+    assert.equal(focos, 1)
+    const enviar = nodes(p.render()).find(n => n.props['aria-label']?.startsWith('Elaborar proposta para'))
+    assert.match(enviar.props['aria-label'], /Evento sintético, cotação #8/)
+    p.ir('fornecedor-enviadas')
+    botao(p.render(), 'Todas').props.ref.current = { focus() { focos++ } }
+    botao(p.render(), 'Aprovada').props.onClick()
+    botao(p.render(), 'Mostrar todas as propostas').props.onClick()
+    assert.equal(linhas(p.render()).length, 1)
+    assert.equal(focos, 2)
+    assert.equal(p.chamadas.length, total)
+  } finally { p.close() }
+  const vazio = fornecedor({ pagina: 'fornecedor-enviadas' }); vazio.render(); await tick()
+  try {
+    botao(vazio.render(), 'Explorar oportunidades').props.onClick()
+    assert.deepEqual(vazio.destinos, ['fornecedor-mural'])
+    assert.equal(vazio.chamadas.some(([, opcoes]) => opcoes?.method === 'POST'), false)
+  } finally { vazio.close() }
+})
+
 test('falhas de consulta permanecem visiveis e nao aparecem como ausencia de dados', async () => {
   const p = fornecedor({ fetch: async () => ({ ok: false, json: async () => ({ erro: 'Consulta indisponível' }) }) })
   p.render(); await tick()
@@ -183,7 +210,7 @@ test('contratos continuam bloqueados, paginas antigas e componentes compartilhad
   assert.equal(text(atual).trim(), 'Propostas enviadas')
   const bloqueado = nodes(p.render()).find(n => n.type === 'button' && text(n).includes('Contratos ativos'))
   assert.equal(bloqueado.props.disabled, true); assert.equal(bloqueado.props.onClick, undefined)
-  assert.match(text(p.ir('fornecedor-contratos')), /Funcionalidade indisponível/)
+  assert.match(text(p.ir('fornecedor-contratos')), /Contratos ativos indisponíveis/)
   assert.ok(nodes(p.ir('fornecedor-catalogo')).some(n => n.type === 'portfolio'))
   assert.ok(nodes(p.ir('fornecedor-perfil')).some(n => n.type === 'perfil'))
   botao(p.render(), 'Sair').props.onClick(); assert.equal(p.saidas(), 1)

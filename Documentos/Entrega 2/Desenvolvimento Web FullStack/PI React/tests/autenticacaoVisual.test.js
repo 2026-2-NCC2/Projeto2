@@ -43,6 +43,48 @@ test('login preserva selecao visual de perfil sem transforma-la em permissao', (
   assert.match(text(p.render()), /Encontre oportunidades/)
 })
 
+test('mostrar e ocultar senha preserva o valor e não consulta nem autentica', () => {
+  let consultas = 0
+  const p = pagina('Login', () => { consultas++; throw Error('Consulta inesperada') })
+  p.alterar('login-senha', 'senha-sintetica')
+  const controle = () => nodes(p.render()).find(n => n.type === 'Campo' && n.props.id === 'login-senha')
+  const alternar = label => nodes(p.render()).find(n => n.type === 'Botao' && text(n) === label)
+  assert.equal(controle().props.type, 'password')
+  const mostrar = alternar('Mostrar senha')
+  assert.equal(mostrar.props['aria-controls'], 'login-senha')
+  assert.equal(mostrar.props['aria-pressed'], false)
+  mostrar.props.onClick()
+  assert.equal(controle().props.type, 'text')
+  assert.equal(controle().props.value, 'senha-sintetica')
+  assert.equal(alternar('Ocultar senha').props['aria-pressed'], true)
+  alternar('Ocultar senha').props.onClick()
+  assert.equal(controle().props.type, 'password')
+  assert.equal(consultas, 0)
+  assert.deepEqual(p.sessao, [])
+})
+
+test('perfil participante e recursos indisponíveis são apresentados sem mudar a autorização', () => {
+  const p = pagina('Login', () => { throw Error('Consulta inesperada') })
+  nodes(p.render()).find(n => n.type === 'button' && text(n) === 'Participante').props.onClick()
+  const view = p.render()
+  assert.match(text(view), /acompanhe suas inscrições/)
+  assert.match(text(view), /acesso é definido pela conta autenticada/)
+  assert.ok(nodes(view).some(n => n.type === 'details' && text(n).includes('Recursos ainda indisponíveis')))
+  assert.equal(nodes(view).filter(n => n.type === 'h1').length, 1)
+  assert.deepEqual(p.sessao, [])
+})
+
+test('erro de login é associado ao formulário, com título específico e campos preservados', async () => {
+  const p = pagina('Login', async () => resposta(false, { erro: 'Credenciais inválidas' }))
+  p.alterar('login-email', 'p@example.invalid')
+  await p.enviar()
+  const view = p.render()
+  const alerta = nodes(view).find(n => n.props.id === 'login-feedback')
+  assert.equal(alerta.props.titulo, 'Não foi possível entrar')
+  assert.equal(nodes(view).find(n => n.type === 'form').props['aria-describedby'], 'login-feedback')
+  assert.equal(nodes(view).find(n => n.props.id === 'login-email').props.value, 'p@example.invalid')
+})
+
 test('erro conhecido de login fica persistente e preserva campos', async () => {
   const p = pagina('Login', async () => resposta(false, { erro: 'Credenciais inválidas' }))
   p.alterar('login-email', 'p@example.invalid'); await p.enviar()

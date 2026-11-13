@@ -29,6 +29,23 @@ function fixture(tipo, dados) {
   const api = carregarAdmin('components/admin/AdminCatalogos.jsx', ['AdminCatalogo', 'DetalhesCotacaoAdmin'], h.env)
   return { consulta, api, destinos, render: () => h.render(api.AdminCatalogo, { tipo, aoAbrirPainel: id => destinos.push(['evento', id]), aoAbrirCotacao: id => destinos.push(['cotacao', id]) }) }
 }
+
+test('catálogos oferecem região de busca e recuperação local dos filtros sem consultar novamente', () => {
+  for (const tipo of ['eventos', 'usuarios', 'cotacoes', 'propostas']) {
+    const r = fixture(tipo, [{ id: 1, nome: 'Sintético', email: 'p@example.invalid', status: 'Ativo', perfil: 'organizador' }])
+    const regiao = nodes(r.render()).find(n => n.props.role === 'search')
+    assert.ok(regiao.props['aria-label'].startsWith('Filtrar '))
+    let focos = 0
+    regiao.props.ref.current = { querySelector: () => ({ focus() { focos++ } }) }
+    const filtro = nodes(r.render()).find(n => n.type === 'filtro')
+    filtro.props.aoAlterar('sem-correspondencia')
+    assert.match(text(r.render()), /Nenhum resultado para estes filtros/)
+    nodes(r.render()).find(n => n.type === 'button' && text(n) === 'Limpar filtros e mostrar registros').props.onClick()
+    assert.match(text(r.render()), /Exibindo\s+1\s+de\s+1\s+registros/)
+    assert.equal(focos, 1)
+    assert.equal(r.consulta.recargas || 0, 0)
+  }
+})
 test('eventos têm quatro filtros, resumo de capacidade e link para painel', () => {
   const r = fixture('eventos', [{ id: 13, nome: 'Sintético', status: 'Cancelado', capacidade_maxima: null, inscritos_confirmados: 5, vagas_restantes: null }])
   assert.deepEqual(Array.from(nodes(r.render()).find(n => n.type === 'filtro').props.opcoes, o => o.valor), ['Ativo', 'Em planejamento', 'Cancelado', 'Encerrado'])

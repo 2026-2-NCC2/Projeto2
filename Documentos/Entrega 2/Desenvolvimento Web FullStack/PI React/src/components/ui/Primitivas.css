@@ -1,6 +1,6 @@
 /* Isolado por prefixo: nao altera componentes ou paginas existentes. */
 .ttSrOnly { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.ttBotao { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; max-width: 100%; padding: 10px 16px; border: 1px solid transparent; border-radius: var(--raio-controle); font: inherit; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; cursor: pointer; }
+.ttBotao { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; max-width: 100%; padding: 10px 16px; border: 1px solid transparent; border-radius: var(--raio-controle); font: inherit; font-weight: 600; line-height: 1.5; text-align: center; white-space: normal; overflow-wrap: anywhere; cursor: pointer; }
 .ttBotao--primario { background: var(--acao-primaria-fundo); color: var(--acao-primaria-texto); }
 .ttBotao--secundario { background: var(--superficie-cartao); color: var(--link-cor); border-color: var(--borda-controle); }
 .ttBotao--discreto { background: transparent; color: var(--link-cor); }
@@ -26,11 +26,12 @@ textarea.ttCampoControle { resize: vertical; }
 .ttTom--erro { --tt-tom-texto: var(--estado-erro-texto); --tt-tom-fundo: var(--estado-erro-fundo); }
 .ttTom--informacao { --tt-tom-texto: var(--estado-info-texto); --tt-tom-fundo: var(--estado-info-fundo); }
 .ttTom--neutro { --tt-tom-texto: var(--texto-secundario); --tt-tom-fundo: var(--superficie-neutra); }
-.ttBadge { display: inline-flex; align-items: center; max-width: 100%; padding: 4px 10px; border-radius: 999px; color: var(--tt-tom-texto); background: var(--tt-tom-fundo); font-size: .875rem; font-weight: 600; overflow-wrap: anywhere; }
-.ttAlerta { padding: 16px; border: 1px solid var(--tt-tom-texto); border-radius: var(--raio-controle); color: var(--tt-tom-texto); background: var(--tt-tom-fundo); overflow-wrap: anywhere; }
+.ttBadge { display: inline-flex; align-items: center; max-width: 100%; padding: 4px 10px; border-radius: 999px; color: var(--tt-tom-texto); background: var(--tt-tom-fundo); font-size: .875rem; font-weight: 600; line-height: 1.5; white-space: normal; overflow-wrap: anywhere; }
+.ttAlerta { padding: 16px; border: 1px solid var(--tt-tom-texto); border-radius: var(--raio-controle); color: var(--tt-tom-texto); background: var(--tt-tom-fundo); line-height: 1.6; overflow-wrap: anywhere; }
+.ttAlerta > .ttBotao { margin-top: 12px; }
 .ttAlertaTitulo, .ttVazioTitulo { margin: 0 0 8px; font-weight: 700; }
 .ttAlerta > :last-child, .ttVazio > :last-child { margin-bottom: 0; }
-.ttVazio { padding: 24px; border: 1px dashed var(--borda-controle); border-radius: var(--raio-cartao); color: var(--texto-secundario); background: var(--superficie-cartao); overflow-wrap: anywhere; }
+.ttVazio { padding: 24px; border: 1px dashed var(--borda-controle); border-radius: var(--raio-cartao); color: var(--texto-secundario); background: var(--superficie-cartao); line-height: 1.6; overflow-wrap: anywhere; }
 .ttVazioTitulo { color: var(--texto-principal); }
 .ttVazioAcao { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .ttSkeleton { min-width: 0; }

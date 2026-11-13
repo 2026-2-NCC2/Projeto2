@@ -13,6 +13,8 @@ import { formatarMoeda } from '../../utils/formatarMoeda.js'
 
 export function PortalFornecedor({pagina,setPagina,aoSair,PerfilFornecedor,navegacao}) {
  const [busca,setBusca]=useState('')
+ const buscaRef = useRef(null)
+ const todasRef = useRef(null)
  const [oportunidades, setOportunidades] = useState([])
   const [carregandoOportunidades, setCarregandoOportunidades] = useState(true)
   const [erroOportunidades, setErroOportunidades] = useState('')
@@ -143,7 +145,7 @@ setOportunidades(oportunidadesFormatadas)
  }
  const [filtro,setFiltro]=useState('Todas')
  const navegar=(destino)=>setPagina('fornecedor-'+destino)
- const titulo={mural:'Mural de oportunidades',cotacoes:'Propostas enviadas',proposta:'Elaborar proposta comercial',enviadas:'Propostas enviadas',contratos:'Contratos ativos',catalogo:'Portfólio profissional',desempenho:'Desempenho',perfil:'Perfil do fornecedor'}[pagina.replace('fornecedor-','')] || 'Portal do Fornecedor'
+ const titulo={mural:'Mural de oportunidades',cotacoes:'Propostas enviadas',proposta:'Elaborar proposta comercial',enviadas:'Propostas enviadas',contratos:'Contratos ativos',catalogo:'Portfólio profissional',desempenho:'Desempenho',perfil:'Meu perfil'}[pagina.replace('fornecedor-','')] || 'Portal do Fornecedor'
  const enviar = async (e) => {
   e.preventDefault()
 
@@ -203,7 +205,7 @@ setOportunidades(oportunidadesFormatadas)
     .toLowerCase()
     .includes(busca.toLowerCase())
 )
- const menu=[['mural','Mural de oportunidades'],['enviadas','Propostas enviadas'],['contratos','Contratos ativos',true],['catalogo','Portfólio profissional'],['desempenho','Desempenho'],['perfil','Perfil fornecedor']]
+ const menu=[['mural','Mural de oportunidades'],['enviadas','Propostas enviadas'],['contratos','Contratos ativos',true],['catalogo','Portfólio profissional'],['desempenho','Desempenho']]
  const conteudoRef = useRef(null)
  return <div className="portalFornecedor fornecedorPagina fornEstrutura">
     <a
@@ -233,8 +235,13 @@ setOportunidades(oportunidadesFormatadas)
               {indisponivel && <small> (indisponível)</small>}
             </Botao>)}
           </nav>
+          <div className="fornMenuRodape">
+          <Botao variante="discreto" aria-current={pagina === 'fornecedor-perfil' ? 'page' : undefined}
+            className={pagina === 'fornecedor-perfil' ? 'ativo' : ''} onClick={() => navegar('perfil')}>
+            <Icone nome="perfil" /> Meu perfil</Botao>
           <Botao variante="discreto" className="fornSair" onClick={aoSair}>
             <Icone nome="sair" /> Sair</Botao>
+          </div>
         </div>
       </NavegacaoRecolhivel>
     </aside>
@@ -259,9 +266,7 @@ setOportunidades(oportunidadesFormatadas)
       </div>
       <div className="fornTitulo">
         <div>
-          <h1>
-            {titulo}
-          </h1>
+          {pagina === 'fornecedor-perfil' ? <p className="fornPerfilContexto">Conta do fornecedor</p> : <h1>{titulo}</h1>}
           <p>Gestão comercial e oportunidades para fornecedores de eventos.</p>
         </div>
         <span className="fornSelo">Conta de fornecedor</span>
@@ -310,6 +315,7 @@ setOportunidades(oportunidadesFormatadas)
         </div>
         <Campo
           id="fornecedor-busca"
+          ref={buscaRef}
           label="Buscar oportunidades"
           aria-label="Buscar oportunidades"
           placeholder="Buscar eventos, serviços ou cidades..."
@@ -330,7 +336,8 @@ setOportunidades(oportunidadesFormatadas)
   abertas.length === 0 && (
     <EstadoVazio
             tipo={oportunidades.length === 0 ? 'sem-dados' : 'sem-resultados'}
-            titulo={oportunidades.length === 0 ? 'Nenhuma cotação disponível no momento.' : 'Nenhum resultado encontrado pelos filtros.'} />
+            titulo={oportunidades.length === 0 ? 'Nenhuma cotação disponível no momento.' : 'Nenhum resultado encontrado pelos filtros.'}
+            acao={oportunidades.length > 0 && <Botao variante="secundario" onClick={() => { setBusca(''); buscaRef.current?.focus() }}>Limpar busca</Botao>} />
   )}
           {abertas.map(o=><article className="fornCartao" key={o.id}>
             <CapaEvento eventoId={o.eventoId}/>
@@ -352,6 +359,7 @@ setOportunidades(oportunidadesFormatadas)
             <MidiaEvento eventoId={o.eventoId} />
             <Botao
               className="principal"
+              aria-label={`Elaborar proposta para ${o.nome}, cotação #${o.id}`}
               onClick={()=>{setSelecionada(o);setValor('');setCondicoes('');setDetalhes('');navegar('proposta')}}>Elaborar proposta →</Botao>
           </article>)}
         </div>
@@ -424,6 +432,7 @@ setOportunidades(oportunidadesFormatadas)
         <div className="fornFiltros">
           {['Todas','Em avaliação','Aprovada','Recusada'].map(f=><Botao
             key={f}
+            ref={f === 'Todas' ? todasRef : undefined}
             variante="secundario"
             aria-pressed={filtro===f}
             className={filtro===f?'selecionado':''}
@@ -436,7 +445,10 @@ setOportunidades(oportunidadesFormatadas)
           {!carregandoPropostas && !erroPropostas && propostas.filter(p=>filtro==='Todas'||p.status===filtro).length===0 &&
     <EstadoVazio
             tipo={propostas.length===0 ? 'sem-dados' : 'sem-resultados'}
-            titulo={propostas.length===0 ? 'Nenhuma proposta enviada.' : 'Nenhum resultado encontrado pelos filtros.'} />}
+            titulo={propostas.length===0 ? 'Nenhuma proposta enviada.' : 'Nenhum resultado encontrado pelos filtros.'}
+            acao={propostas.length === 0
+              ? <Botao onClick={() => navegar('mural')}>Explorar oportunidades</Botao>
+              : <Botao variante="secundario" onClick={() => { setFiltro('Todas'); todasRef.current?.focus() }}>Mostrar todas as propostas</Botao>} />}
           <div className="fornTabela" role="region" aria-label="Histórico de propostas" tabIndex={0}>
             <div role="table" aria-label="Histórico de propostas enviadas">
               <div className="fornTabelaCab" role="row">
@@ -466,7 +478,11 @@ setOportunidades(oportunidadesFormatadas)
         </div>
       </>}
       {pagina==='fornecedor-contratos' && <div className="fornCartao">
-        <EstadoVazio tipo="indisponivel" titulo="Funcionalidade indisponível." />
+        <EstadoVazio tipo="indisponivel" titulo="Contratos ativos indisponíveis."
+          acao={<Botao variante="secundario" onClick={() => navegar('enviadas')}>Consultar propostas enviadas</Botao>}>
+          <p>O sistema acompanha propostas comerciais, mas ainda não registra a formalização ou a vigência de contratos.</p>
+          <p>Uma proposta aprovada não comprova contrato formalizado, assinatura ou pagamento.</p>
+        </EstadoVazio>
       </div>}
       {pagina==='fornecedor-desempenho' && <div className="fornIndicadores">
         <div>

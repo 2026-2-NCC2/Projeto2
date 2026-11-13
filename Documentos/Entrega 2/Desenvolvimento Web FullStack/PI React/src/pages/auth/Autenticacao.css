@@ -16,3 +16,45 @@
 .autenticacaoPagina .cadastroAceite input { width: 22px; height: 22px; flex: 0 0 22px; margin-top: 3px; accent-color: var(--link-cor); }
 .autenticacaoPagina .cadastroAceite p { font-size: .875rem; line-height: 1.7; }
 .autenticacaoPagina .cadastroAceite a { color: var(--link-cor); text-decoration: underline; }
+
+/* Entrada redesenhada; o cadastro e os portais mantêm seus contêineres. */
+.autenticacaoPagina.loginPagina { min-width: 0; background: radial-gradient(ellipse at 15% 35%, var(--marca-coral-suave), var(--superficie-pagina) 65%); color: var(--texto-principal); overflow-wrap: anywhere; }
+.loginPagina .cabecalhoLogin { height: auto; min-height: 88px; align-items: center; padding: 24px 32px; border-bottom: 1px solid var(--borda-superficie); background: var(--superficie-cartao); }
+.loginPagina .loginEstrutura { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 500px); grid-template-areas: 'apresentacao formulario'; gap: 64px; align-items: center; max-width: 1200px; width: 100%; margin-inline: auto; padding: 48px 32px 64px; }
+.loginPagina .loginEstrutura .caixaLogin { grid-area: formulario; width: 100%; max-width: none; min-width: 0; margin: 0; padding: 32px; border: 1px solid var(--borda-superficie); border-radius: 24px; background: var(--superficie-cartao); box-shadow: var(--sombra-cartao); }
+.loginPagina .loginSobretitulo { margin: 0 0 12px; font-size: .6875rem; font-weight: 750; letter-spacing: .1em; color: var(--marca-coral-escuro); }
+.loginPagina .caixaLogin h1 { margin: 0 0 12px; font-size: clamp(1.75rem, 3vw, 2.25rem); line-height: 1.2; letter-spacing: -.03em; text-align: left; }
+.loginPagina .caixaLogin > p { text-align: left; }
+.loginPagina .loginIntroducao { margin: 0 0 24px; font-size: .9375rem; line-height: 1.6; color: var(--texto-secundario); }
+.loginPagina .loginPerfis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.loginPagina .loginPerfis .escolhaPerfil { display: contents; }
+.loginPagina .loginPerfis button { min-width: 0; min-height: 44px; margin: 0; padding: 10px; border: 1px solid var(--borda-controle); border-radius: var(--raio-controle); background: var(--superficie-cartao); color: var(--texto-secundario); font: inherit; font-size: .8125rem; font-weight: 600; white-space: normal; overflow-wrap: anywhere; }
+.loginPagina .loginPerfis button[aria-pressed='true'] { background: var(--marca-coral-suave); color: var(--link-cor); border-color: var(--marca-coral-escuro); }
+.loginPagina .loginPerfis button:disabled { background: var(--desabilitado-fundo); color: var(--desabilitado-texto); cursor: not-allowed; }
+.loginPagina .loginAjuda { font-size: .8125rem; color: var(--texto-secundario); line-height: 1.6; }
+.loginPagina .caixaLogin form { margin-top: 24px; gap: 16px; }
+.loginPagina .caixaLogin form > .loginMostrarSenha { width: auto; justify-self: start; margin-top: -8px; padding-inline: 0; font-size: .875rem; }
+.loginPagina .caixaLogin .ttAlerta { text-align: left; }
+.loginPagina .loginIndisponiveis { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--borda-superficie); }
+.loginPagina .loginIndisponiveis summary { min-height: 44px; padding-block: 10px; color: var(--texto-secundario); font-size: .8125rem; cursor: pointer; }
+.loginPagina .loginIndisponiveis .botaoGoogle { width: 100%; margin-top: 12px; }
+.loginPagina .loginApresentacao { grid-area: apresentacao; min-width: 0; }
+.loginPagina .loginApresentacao h2 { font-size: clamp(1.75rem, 3.5vw, 3rem); line-height: 1.15; letter-spacing: -.035em; margin: 16px 0 24px; max-width: 18ch; }
+.loginPagina .loginApresentacao > p { max-width: 50ch; line-height: 1.7; }
+.loginPagina .loginSimbolo { display: inline-grid; place-items: center; width: 104px; height: 104px; border: 1px solid var(--borda-superficie); border-radius: 28px; margin-bottom: 32px; background: var(--superficie-cartao); color: var(--marca-coral-escuro); }
+.loginPagina .loginApresentacao ul { display: grid; gap: 16px; margin: 28px 0; padding: 0; list-style: none; }
+.loginPagina .loginApresentacao li { display: flex; align-items: center; gap: 12px; font-size: .9375rem; }
+.loginPagina .loginApresentacao .icone { flex-shrink: 0; color: var(--marca-coral-escuro); }
+.loginPagina .transparenciaLinks { justify-content: flex-start; gap: 8px 16px; margin-top: 20px; text-align: left; }
+.loginPagina .transparenciaLinks a { min-height: 44px; display: inline-flex; align-items: center; font-size: .8125rem; }
+.loginPagina button:focus-visible, .loginPagina summary:focus-visible, .loginPagina a:focus-visible { outline: 3px solid var(--foco-cor); outline-offset: 3px; }
+@media (max-width: 900px) {
+  .loginPagina .loginEstrutura { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'formulario' 'apresentacao'; max-width: 600px; gap: 40px; }
+  .loginPagina .loginApresentacao h2 { max-width: none; }
+  .loginPagina .loginSimbolo { display: none; }
+}
+@media (max-width: 600px) {
+  .loginPagina .cabecalhoLogin { padding: 20px 18px; }
+  .loginPagina .loginEstrutura { padding: 24px 18px 40px; }
+  .loginPagina .loginEstrutura .caixaLogin { padding: 24px 18px; border-radius: var(--raio-cartao); }
+}

@@ -48,7 +48,7 @@ export function Ticket({
       <div className="gradeTicket">
         <div className="cartaoTicket">
           <span className="tag">TICKET SUGERIDO POR PARTICIPANTE</span>
-          <div className="preco">
+          <div className="preco" aria-live="polite" aria-atomic="true">
             R$ <strong>{ticketSugerido.toFixed(2).replace('.', ',')}</strong>
           </div>
           <p>
@@ -84,9 +84,12 @@ export function Ticket({
             min="0"
             max="100"
             value={margemPercentual}
+            aria-describedby="ticket-acrescimo-ajuda"
+            aria-valuetext={`${margemPercentual}% de acréscimo sobre os custos`}
             onChange={(eventoDisparado) => setMargemPercentual(Number(eventoDisparado.target.value))}
             style={{ width: '100%', accentColor: 'var(--marca-coral)' }}
           />
+          <p id="ticket-acrescimo-ajuda">O acréscimo é aplicado ao custo total e dividido pelo público previsto. Use as setas do teclado para ajustar o percentual.</p>
           <h3 style={{ marginTop: '25px', fontSize: '15px' }}>Composição dos custos</h3>
           <div style={{ marginTop: '15px' }}>
             {custos.map((custo) => (

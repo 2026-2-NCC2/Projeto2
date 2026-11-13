@@ -1,0 +1,18 @@
+.ctPagina { min-width: 0; margin-block: 24px; overflow-wrap: anywhere; }
+.ctIndicadores { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 16px; }
+.ctIndicadores > div, .ctCartao { min-width: 0; padding: 20px; border: 1px solid var(--borda-superficie); border-radius: var(--raio-cartao); background: var(--superficie-cartao); margin-block: 12px; }
+.ctIndicadores dt { color: var(--texto-secundario); }
+.ctIndicadores dd { margin: 8px 0 0; font-size: 1.75rem; font-weight: 700; }
+.ctFiltros { display: flex; flex-wrap: wrap; align-items: end; gap: 16px; margin-block: 24px; }
+.ctFiltros > .ttCampo { flex: 1 1 220px; margin: 0; }
+.ctTabela { max-width: 100%; overflow: auto; border: 1px solid var(--borda-superficie); border-radius: var(--raio-cartao); }
+.ctTabela table { width: 100%; min-width: 760px; border-collapse: collapse; background: var(--superficie-cartao); }
+.ctTabela th, .ctTabela td { padding: 16px; border-bottom: 1px solid var(--borda-superficie); text-align: left; vertical-align: top; max-width: 300px; overflow-wrap: anywhere; }
+.ctTabela td .ttBotao { margin: 4px; }
+.ctTabela p { white-space: pre-wrap; }
+.ctOverlay { position: fixed; inset: 0; z-index: 2200; display: grid; place-items: center; padding: 16px; background: color-mix(in srgb,var(--texto-principal) 65%,transparent); }
+.ctDialogo { width: min(100%,680px); max-height: 90dvh; overflow: auto; padding: 24px; border-radius: var(--raio-cartao); background: var(--superficie-cartao); box-shadow: var(--sombra-modal); overflow-wrap: anywhere; }
+.ctDialogo p { white-space: pre-wrap; }
+.ctAcoes { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+.ctPagina :focus-visible, .ctDialogo :focus-visible { outline: 3px solid var(--foco-cor); outline-offset: 3px; }
+@media (max-width: 540px) { .ctIndicadores { grid-template-columns: minmax(0,1fr); } .ctAcoes .ttBotao { flex: 1 1 100%; } }

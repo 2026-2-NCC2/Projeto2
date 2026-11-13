@@ -26,6 +26,7 @@ export function PortalParticipante({ setPagina, aoSair, navegacao }) {
     else setAbaLocal(valor)
   }
   const tituloRef = useRef(null)
+  const buscaRef = useRef(null)
   const secaoAnteriorRef = useRef(abaParticipante)
   useEffect(() => {
     // A montagem inicial e atualizacoes de dados nao devem roubar o foco.
@@ -258,7 +259,8 @@ const aoInscreverEvento = async (evento) => {
         !erroEventos &&
         eventosFiltrados.length === 0 && (
           <EstadoVazio tipo={eventosDisponiveis.length === 0 ? 'sem-dados' : 'sem-resultados'}
-            titulo={eventosDisponiveis.length === 0 ? 'Nenhum evento disponível.' : 'Nenhum resultado encontrado pelos filtros.'} />
+            titulo={eventosDisponiveis.length === 0 ? 'Nenhum evento disponível.' : 'Nenhum resultado encontrado pelos filtros.'}
+            acao={eventosDisponiveis.length > 0 && <Botao variante="secundario" onClick={() => { setBusca(''); buscaRef.current?.focus() }}>Limpar busca</Botao>} />
         )}
 
       {!carregandoEventos &&
@@ -457,7 +459,7 @@ const aoInscreverEvento = async (evento) => {
 
               <div className="ppBuscaBarra" role="search" aria-label="Busca local de eventos">
                 <span className="ppBuscaIcone" aria-hidden="true"><Icone nome="busca" tamanho={22} /></span>
-                <Campo id="participante-busca" label="Buscar eventos"
+                <Campo id="participante-busca" label="Buscar eventos" ref={buscaRef}
                   aria-label="Buscar eventos"
                   aria-describedby="participante-busca-dica"
                   placeholder="Buscar por nome, categoria ou local..."
@@ -553,12 +555,13 @@ const aoInscreverEvento = async (evento) => {
           
           {abaParticipante === 'ingressos' && (
   <section className="ppInscricoes" aria-labelledby="participante-ingressos-titulo">
-    <h2 id="participante-ingressos-titulo">Meus ingressos</h2>
+    <h2 className="ttSrOnly" id="participante-ingressos-titulo">Meus ingressos</h2>
     <p>Confira os eventos em que você está inscrito.</p>
 
     {avisoInscricoes}
     {!carregandoIngressos && !erroIngressos && (meusIngressos.length === 0 ? (
-      <EstadoVazio tipo="sem-dados" titulo="Você ainda não possui inscrições em eventos." />
+      <EstadoVazio tipo="sem-dados" titulo="Você ainda não possui inscrições em eventos."
+        acao={<Botao onClick={() => setAbaParticipante('eventos')}>Explorar eventos disponíveis</Botao>} />
     ) : (
       <div className="ppGradeInscricoes">{meusIngressos.map((ingresso) => (
         <article

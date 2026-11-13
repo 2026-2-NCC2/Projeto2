@@ -38,14 +38,14 @@ for (const [secao, titulo, ativo] of [
   ['cotacoes', 'Propostas enviadas', 'Propostas enviadas'],
   ['catalogo', 'Portfólio profissional', 'Portfólio profissional'],
   ['desempenho', 'Desempenho', 'Desempenho'],
-  ['perfil', 'Perfil do fornecedor', 'Perfil fornecedor'],
+  ['perfil', 'Meu perfil', 'Meu perfil'],
   ['contratos', 'Contratos ativos', 'Contratos ativos'],
   ['proposta', 'Elaborar proposta comercial', null],
 ]) test('cabeçalho e seção ativa preservam destino existente: ' + secao, () => {
   const html = render('fornecedor-' + secao)
   assert.ok(html.includes('id="fornecedor-titulo-secao">' + titulo + '</p>'))
   assert.equal((html.match(/aria-current="page"/g) || []).length, ativo ? 1 : 0)
-  if (ativo) assert.match(html, new RegExp(`aria-current="page"[^]*?</svg>${ativo}`))
+  if (ativo) assert.match(html, new RegExp(`aria-current="page"[^]*?</svg>\\s*${ativo}`))
   assert.match(html, /<button(?=[^>]*disabled="")(?=[^>]*title="Funcionalidade indisponível")[^>]*>/)
 })
 
@@ -77,8 +77,9 @@ test('navegação mantém callbacks exatos, destinos legados e bloqueio de contr
   const b = label => nodes(menu).find(n => n.type === 'button' && text(n).trim() === label)
   b('Propostas enviadas').props.onClick()
   b('Portfólio profissional').props.onClick()
+  b('Meu perfil').props.onClick()
   b('Sair').props.onClick()
-  assert.deepEqual(p.chamadas, ['fornecedor-enviadas', 'fornecedor-catalogo', 'sair'])
+  assert.deepEqual(p.chamadas, ['fornecedor-enviadas', 'fornecedor-catalogo', 'fornecedor-perfil', 'sair'])
   const contratos = nodes(menu).find(n => n.props.title === 'Funcionalidade indisponível')
   assert.equal(contratos.props.disabled, true); assert.equal(contratos.props.onClick, undefined)
   assert.equal(text(nodes(p.render()).find(n => n.props['aria-current'] === 'page')).trim(), 'Mural de oportunidades')

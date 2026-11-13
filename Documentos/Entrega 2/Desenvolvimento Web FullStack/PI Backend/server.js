@@ -69,6 +69,9 @@ app.use('/perfil/imagens', (req,res,next) => {
   });
 });
 app.use(express.json());
+require('./contratacoes-http.cjs').instalarContratacoes(app, {
+  autenticar, repositorios, ativo: process.env.CONTRATACOES_ATIVAS === 'true',
+});
 
 // Janelas por IP, independentes por rota e locais a este processo.
 // Nao confiar em X-Forwarded-For sem uma topologia de proxy validada.

@@ -35,7 +35,9 @@
 .participantePagina .fornHero p { max-width: 620px; font-size: 1rem; margin: 0; }
 .participantePagina .fornHero .ppSobretitulo { font-size: .75rem; font-weight: 700; letter-spacing: .12em; color: var(--link-cor); }
 .participantePagina .fornIndicadores { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-block: 28px; }
-.participantePagina .fornIndicadores > div { border-radius: 18px; }
+.participantePagina .fornIndicadores > div { border-radius: var(--raio-cartao); box-shadow: var(--sombra-cartao); }
+.participantePagina .fornIndicadores small { font-size: .875rem; line-height: 1.5; }
+.participantePagina .fornIndicadores strong { font-variant-numeric: tabular-nums; }
 .participantePagina .ppBuscaBarra { display: flex; align-items: center; gap: 18px; padding: 20px 24px; background: var(--superficie-cartao); border: 1px solid var(--borda-superficie); border-radius: 20px; box-shadow: var(--sombra-cartao); margin-block: 28px; min-width: 0; }
 .participantePagina .ppBuscaBarra:focus-within { border-color: var(--foco-cor); }
 .participantePagina .ppBuscaBarra .ttCampo { flex: 1 1 400px; margin: 0; min-width: 0; }

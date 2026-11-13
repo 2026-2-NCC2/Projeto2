@@ -95,6 +95,7 @@ export function AdminCatalogo({ tipo, aoAbrirPainel, aoAbrirCotacao, aoFecharCot
   const config = paginas[tipo]
   const consulta = useConsultaAdmin(config.rota)
   const [filtros, setFiltros] = useState(filtrosVazios)
+  const filtrosRef = useRef(null)
   const [selecionado, setSelecionado] = useState(cotacaoInicial ? { id: cotacaoInicial } : null)
   const fecharCotacaoRef = useRef(aoFecharCotacao)
   useEffect(() => { fecharCotacaoRef.current = aoFecharCotacao }, [aoFecharCotacao])
@@ -119,7 +120,7 @@ export function AdminCatalogo({ tipo, aoAbrirPainel, aoAbrirCotacao, aoFecharCot
       </div>
       <button className="admAcao" onClick={consulta.recarregar} disabled={consulta.carregando}>Atualizar lista</button>
     </header>
-    <div className="admFiltros">
+    <div className="admFiltros" ref={filtrosRef} role="search" aria-label={`Filtrar ${config.titulo.toLowerCase()}`}>
       {(tipo === 'eventos' || tipo === 'usuarios') && <label>Pesquisar {tipo === 'eventos' ? 'por nome' : 'por nome ou e-mail'}
         <input
           type="search"
@@ -162,6 +163,10 @@ export function AdminCatalogo({ tipo, aoAbrirPainel, aoAbrirCotacao, aoFecharCot
         <p>
           {consulta.dados.length ? 'Ajuste a busca ou limpe os filtros para consultar outros registros.' : 'Os dados serão apresentados quando estiverem disponíveis.'}
         </p>
+        {consulta.dados.length > 0 && <button type="button" className="admAcao admAcao--secundaria" onClick={() => {
+          setFiltros(filtrosVazios)
+          filtrosRef.current?.querySelector('input, select')?.focus()
+        }}>Limpar filtros e mostrar registros</button>}
       </div> :
         <div
         className="admTabela"

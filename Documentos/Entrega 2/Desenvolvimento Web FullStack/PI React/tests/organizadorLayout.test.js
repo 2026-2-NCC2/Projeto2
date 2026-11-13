@@ -16,6 +16,21 @@ const { Layout } = carregarAdmin('components/layout/Layout.jsx', ['Layout'], { .
 const render = pagina => renderToStaticMarkup(createElement(Layout, { pagina, setPagina() {}, aoCriarNovoEvento() {}, aoSair() {} },
   createElement('section', null, createElement('h1', null, 'Conteúdo preservado'))))
 
+test('etapas identificam o evento selecionado ou o rascunho sem acrescentar títulos ou ações', () => {
+  const evento = { id: 7, nome: 'Evento sintético selecionado', status: 'Em planejamento' }
+  for (const pagina of ['criar', 'custos', 'ticket', 'cotacao']) {
+    const html = renderToStaticMarkup(createElement(Layout, { pagina, evento }, createElement('h1', null, 'Etapa atual')))
+    assert.match(html, /aria-label="Evento em contexto"/)
+    assert.match(html, /Evento sintético selecionado/)
+    assert.match(html, /Evento #7/)
+    assert.equal((html.match(/<h1\b/g) || []).length, 1)
+  }
+  const novo = renderToStaticMarkup(createElement(Layout, { pagina: 'criar', evento: { nome: '' } }))
+  assert.match(novo, /Novo evento sem nome/)
+  assert.match(novo, /rascunho local/)
+  assert.doesNotMatch(renderToStaticMarkup(createElement(Layout, { pagina: 'perfil', evento })), /Evento em contexto|Evento #7/)
+})
+
 test('organizador tem sidebar, marca, cabeçalho, identidade e um único conteúdo sem inventar funções', () => {
   const html = render('eventos')
   assert.match(html, /class="orgLayout"/)

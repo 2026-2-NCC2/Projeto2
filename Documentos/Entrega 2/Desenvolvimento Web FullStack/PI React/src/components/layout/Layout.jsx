@@ -5,7 +5,7 @@ import { IdentidadeConta } from './IdentidadeConta.jsx'
 import { useRef } from 'react'
 import './OrganizadorLayout.css'
 
-export function Layout({ children: filhos, pagina, setPagina, aoCriarNovoEvento, aoSair }) {
+export function Layout({ children: filhos, pagina, evento, setPagina, aoCriarNovoEvento, aoSair }) {
   const conteudoRef = useRef(null)
   const titulos = { eventos: 'Meus eventos', criar: 'Criar evento', custos: 'Custos',
     cotacao: 'Cotações e concorrência', ticket: 'Propostas e ticket', perfil: 'Meu perfil' }
@@ -30,7 +30,15 @@ export function Layout({ children: filhos, pagina, setPagina, aoCriarNovoEvento,
         <div className="orgContexto"><p className="orgSobretitulo">Portal do organizador</p><p className="orgTitulo" id="org-titulo-secao">{titulos[pagina] || 'Organizador'}</p></div>
         <div className="orgConta"><IdentidadeConta /></div>
       </header>
-      <main className="orgConteudo" id="org-conteudo" ref={conteudoRef} tabIndex={-1} aria-labelledby="org-titulo-secao">{filhos}</main>
+      <main className="orgConteudo" id="org-conteudo" ref={conteudoRef} tabIndex={-1} aria-labelledby="org-titulo-secao">
+        {evento && ['criar', 'custos', 'ticket', 'cotacao'].includes(pagina) && (
+          <aside className="orgEventoContexto" aria-label="Evento em contexto">
+            <div><p>Evento selecionado</p><strong>{evento.nome || 'Novo evento sem nome'}</strong></div>
+            <p>{evento.id ? `Evento #${evento.id}` : 'Novo evento · rascunho local'}{evento.status && <> · {evento.status}</>}</p>
+          </aside>
+        )}
+        {filhos}
+      </main>
     </div>
   )
 }

@@ -15,13 +15,17 @@
 .lpPagina .lpAcessoFuturo span { display: block; font-size: .75rem; }
 .lpPagina .lpAcessar { min-height: 44px; max-width: 100%; white-space: normal; }
 .lpPagina .lpAcessar:focus-visible { outline: 3px solid var(--foco-cor); outline-offset: 3px; }
-.lpPagina .lpHero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: center; gap: 56px; padding-block: 80px 96px; }
+.lpPagina .lpHero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: center; gap: 56px; padding-block: 72px 88px; background: radial-gradient(ellipse at 90% 40%, var(--marca-coral-suave), transparent 65%); }
 .lpPagina .lpHeroTexto { min-width: 0; }
 .lpPagina .lpSobretitulo { font-size: .75rem; font-weight: 750; letter-spacing: .1em; line-height: 1.7; color: var(--marca-coral-escuro); margin: 0 0 20px; }
-.lpPagina h1 { margin: 0; font-size: clamp(2.25rem, 4.3vw, 3.75rem); line-height: 1.12; letter-spacing: -.045em; font-weight: 750; color: var(--texto-principal); }
+.lpPagina h1 { margin: 0; font-size: clamp(2.5rem, 4.8vw, 4.5rem); line-height: 1.08; letter-spacing: -.045em; font-weight: 750; color: var(--texto-principal); }
 .lpPagina h1 span { color: var(--marca-coral-escuro); }
 .lpPagina .lpIntroducao { max-width: 550px; font-size: 1.125rem; color: var(--texto-secundario); margin: 28px 0; }
 .lpPagina .lpHeroAcoes { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+.lpPagina .lpHeroAcessar { min-height: 48px; padding: 12px 24px; border-color: var(--marca-coral-escuro); font-size: .9375rem; }
+.lpPagina .lpHeroRecursos { display: flex; flex-wrap: wrap; gap: 12px 20px; padding: 0; margin: 28px 0 0; list-style: none; }
+.lpPagina .lpHeroRecursos li { display: flex; align-items: center; gap: 8px; font-size: .8125rem; color: var(--texto-secundario); }
+.lpPagina .lpHeroRecursos .icone { flex-shrink: 0; color: var(--link-cor); }
 .lpPagina .lpLinkDestaque, .lpPagina .lpLinkSecundario { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 12px 20px; border: 1px solid var(--borda-controle); border-radius: var(--raio-controle); font-size: .9375rem; font-weight: 650; text-decoration: none; }
 .lpPagina .lpLinkDestaque { background: var(--acao-primaria-fundo); color: var(--acao-primaria-texto); border-color: var(--marca-coral-escuro); }
 .lpPagina .lpLinkDestaque:hover { background: var(--acao-hover-fundo); color: var(--acao-hover-texto); }
@@ -30,10 +34,12 @@
 .lpPagina .lpNota { font-size: .8125rem; color: var(--texto-secundario); line-height: 1.7; margin-block: 16px 0; }
 .lpPagina .lpComposicao { position: relative; min-width: 0; padding: 40px 20px 40px 36px; isolation: isolate; }
 .lpPagina .lpOrbita { position: absolute; inset: 5% 0; z-index: -1; border: 1px solid var(--marca-coral); border-radius: 50%; }
-.lpPagina .lpPoster { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 28px; padding: 36px; border: 1px solid var(--borda-superficie); border-radius: 28px; background: var(--marca-coral-suave); box-shadow: var(--sombra-cartao); }
+.lpPagina .lpPoster { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 28px; padding: 36px; border: 1px solid var(--marca-coral); border-radius: 28px; background: linear-gradient(145deg, var(--superficie-cartao), var(--marca-coral-suave)); box-shadow: var(--sombra-cartao); }
 .lpPagina .lpPosterRotulo { color: var(--marca-coral-escuro); font-size: .6875rem; letter-spacing: .12em; font-weight: 700; }
 .lpPagina .lpPoster > .icone { color: var(--marca-coral-escuro); }
 .lpPagina .lpPoster > strong { font-size: clamp(2rem, 4vw, 3.5rem); line-height: 1.1; letter-spacing: -.04em; }
+.lpPagina .lpEtapasVisuais { display: flex; flex-wrap: wrap; gap: 8px; }
+.lpPagina .lpEtapasVisuais span { padding: 6px 12px; border: 1px solid var(--borda-superficie); border-radius: 999px; font-size: .75rem; color: var(--texto-principal); background: var(--superficie-cartao); }
 .lpPagina .lpPosterRodape { width: 100%; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding-top: 20px; border-top: 1px solid var(--borda-superficie); font-size: .8125rem; font-weight: 650; }
 .lpPagina .lpPosterRodape > span { color: var(--texto-secundario); font-weight: 400; }
 .lpPagina .lpSelo { position: relative; display: flex; align-items: center; gap: 12px; width: fit-content; max-width: 100%; margin: -30px 0 0 -20px; padding: 16px 24px; border: 1px solid var(--borda-superficie); border-radius: 16px; background: var(--superficie-cartao); box-shadow: var(--sombra-cartao); font-size: .875rem; line-height: 1.5; }
@@ -44,7 +50,7 @@
 .lpPagina .lpTituloSecao > p:last-child { margin: 0; color: var(--texto-secundario); }
 .lpPagina .lpComo { background: var(--superficie-cartao); border-block: 1px solid var(--borda-superficie); }
 .lpPagina .lpPerfis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
-.lpPagina .lpCard { min-width: 0; padding: 32px; border: 1px solid var(--borda-superficie); border-radius: 20px; background: var(--superficie-cartao); box-shadow: var(--sombra-cartao); }
+.lpPagina .lpCard { min-width: 0; padding: 32px; border: 1px solid var(--borda-superficie); border-top: 3px solid var(--marca-coral); border-radius: 20px; background: var(--superficie-cartao); box-shadow: var(--sombra-cartao); }
 .lpPagina .lpIcone { display: inline-grid; place-items: center; width: 56px; height: 56px; flex-shrink: 0; border-radius: 16px; background: var(--marca-coral-suave); color: var(--marca-coral-escuro); }
 .lpPagina h3 { font-size: 1.25rem; line-height: 1.4; margin: 24px 0 12px; }
 .lpPagina .lpCard > p { color: var(--texto-secundario); font-size: .9375rem; margin: 0; }

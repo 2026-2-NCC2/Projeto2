@@ -34,20 +34,27 @@ export function LandingPage({ aoAcessar }) {
       <section className="lpHero lpLimite" id="lp-inicio" tabIndex={-1} aria-labelledby="lp-titulo">
         <div className="lpHeroTexto">
           <p className="lpSobretitulo">TROCATICKET · CONEXÕES PARA EVENTOS</p>
-          <h1 id="lp-titulo">Eventos aproximam.<br /><span>A organização conecta.</span></h1>
-          <p className="lpIntroducao">Um espaço para explorar eventos, organizar informações e conectar participantes, organizadores e fornecedores.</p>
+          <h1 id="lp-titulo">Boas conexões.<br /><span>Grandes encontros.</span></h1>
+          <p className="lpIntroducao">Explore eventos, dê forma ao seu planejamento e encontre oportunidades. Participantes, organizadores e fornecedores conectados em um só lugar.</p>
           <div className="lpHeroAcoes">
-            <a className="lpLinkDestaque" href="#lp-como-funciona">Conheça os três perfis <Icone nome="adicionar" tamanho={18} /></a>
-            <a className="lpLinkSecundario" href="#lp-projeto">Sobre o TrocaTicket</a>
+            {aoAcessar ? <Botao className="lpHeroAcessar" onClick={aoAcessar}>Entrar no TrocaTicket <Icone nome="sair" tamanho={18} /></Botao> :
+              <a className="lpLinkDestaque" href="#lp-como-funciona">Conheça os três perfis <Icone nome="adicionar" tamanho={18} /></a>}
+            <a className="lpLinkSecundario" href="#lp-como-funciona">Descubra como funciona</a>
           </div>
+          <ul className="lpHeroRecursos" aria-label="Recursos da plataforma">
+            <li><Icone nome="eventos" tamanho={18} /> Eventos e inscrições</li>
+            <li><Icone nome="custos" tamanho={18} /> Planejamento de custos</li>
+            <li><Icone nome="documento" tamanho={18} /> Cotações e propostas</li>
+          </ul>
           <p className="lpNota">O cadastro permanece bloqueado enquanto os Termos de Uso estão em minuta.</p>
         </div>
         <div className="lpComposicao" aria-hidden="true">
           <div className="lpOrbita" />
           <div className="lpPoster">
-            <span className="lpPosterRotulo">IDEIAS QUE REÚNEM PESSOAS</span>
+            <span className="lpPosterRotulo">DO PLANEJAMENTO AO ENCONTRO</span>
             <Icone nome="ticket" tamanho={88} />
-            <strong>Encontros.<br />Ideias.<br />Conexões.</strong>
+            <strong>Mais clareza.<br />Mais conexões.</strong>
+            <div className="lpEtapasVisuais"><span>Explore eventos</span><span>Organize ideias</span><span>Conecte serviços</span></div>
             <span className="lpPosterRodape">TrocaTicket <span>Feito para organizar</span></span>
           </div>
           <div className="lpSelo"><Icone nome="eventos" tamanho={24} /><span>Do planejamento<br /><strong>ao encontro.</strong></span></div>

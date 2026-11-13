@@ -55,6 +55,44 @@ test('Landing → login → cadastro usa histórico real; Voltar/Avançar restau
   } finally { await r.close() }
 })
 
+test('CTA do hero abre o login pelo Router, mantém foco e volta à apresentação sem consultas', async () => {
+  let consultas = 0
+  const r = await montarRouter({ fetch: async () => { consultas++; throw Error('Não deve consultar') } })
+  try {
+    await r.clicar(r.document.querySelector('.lpHeroAcessar'))
+    assert.equal(r.window.location.hash, '#/entrar')
+    assert.equal(r.document.activeElement.id, 'login-email')
+    assert.equal(r.document.querySelectorAll('h1').length, 1)
+    await r.back()
+    assert.equal(r.window.location.hash, '#/inicio')
+    assert.ok(r.document.querySelector('.lpHeroAcessar'))
+    assert.equal(consultas, 0)
+  } finally { await r.close() }
+})
+
+test('erro de login foca o alerta real e permite mostrar senha sem repetir o POST', async () => {
+  const chamadas = []
+  const r = await montarRouter({ url: '/#/entrar', fetch: async (input, options) => {
+    chamadas.push([input, options])
+    return { ok: false, status: 401, json: async () => ({ erro: 'Credenciais inválidas' }) }
+  } })
+  try {
+    await act(async () => { r.document.querySelector('form').dispatchEvent(new r.window.Event('submit', { bubbles: true, cancelable: true })) })
+    await r.settle()
+    const alerta = r.document.getElementById('login-feedback')
+    assert.equal(r.document.activeElement, alerta)
+    assert.match(alerta.textContent, /Não foi possível entrar.*Credenciais inválidas/)
+    assert.equal(r.document.querySelector('form').getAttribute('aria-describedby'), 'login-feedback')
+    await r.clicar(botao(r, 'Mostrar senha'))
+    assert.equal(r.document.getElementById('login-senha').type, 'text')
+    await r.clicar(botao(r, 'Ocultar senha'))
+    assert.equal(r.document.getElementById('login-senha').type, 'password')
+    assert.equal(chamadas.length, 1)
+    assert.equal(r.window.location.hash, '#/entrar')
+    assert.equal(r.window.sessionStorage.getItem('token'), null)
+  } finally { await r.close() }
+})
+
 for (const [perfil, urls] of [
   ['participante', ['/participante?secao=perfil', '/participante?secao=ingressos', '/participante?secao=eventos']],
   ['admin', ['/admin?secao=usuarios', '/admin?secao=propostas', '/admin?secao=relatorios', '/admin?secao=cotacoes', '/admin?secao=eventos', '/admin?secao=painel', '/admin?secao=novo-evento']],

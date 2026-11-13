@@ -8,6 +8,11 @@
 .fornecedorPagina .fornMenu nav .ttBotao.ativo:enabled, .fornecedorPagina .fornFiltros .ttBotao.selecionado:enabled { background: var(--marca-coral-suave); color: var(--link-cor); border-color: var(--link-cor); }
 .fornecedorPagina .fornLista > .ttSkeleton, .fornecedorPagina .fornLista > .ttAlerta, .fornecedorPagina .fornLista > .ttVazio { grid-column: 1 / -1; }
 .fornecedorPagina .fornIndicadores .ttSkeleton { min-height: 38px; }
+.fornecedorPagina .fornIndicadores > div, .fornecedorPagina .fornCartao { border-radius: var(--raio-cartao); box-shadow: var(--sombra-cartao); }
+.fornecedorPagina .fornIndicadores small { font-size: .875rem; line-height: 1.5; }
+.fornecedorPagina .fornIndicadores strong { font-variant-numeric: tabular-nums; }
+.fornecedorPagina .fornCartao p { font-size: .875rem; line-height: 1.6; }
+.fornecedorPagina .fornTabelaCab, .fornecedorPagina .fornTabelaLinha { font-size: .875rem; line-height: 1.6; }
 .fornecedorPagina .fornTabela { overflow-x: auto; }
 .fornecedorPagina .fornTabela:focus-visible { outline: 3px solid var(--foco-cor); outline-offset: 3px; }
 .fornecedorPagina .fornTabelaLinha .ttBadge { justify-self: start; }

@@ -58,6 +58,22 @@ test('ticket soma valores reais, lista todos os custos e permite ajustar o acré
   assert.match(text(view), /13,00/)
   assert.match(text(view), /não será salvo/)
 })
+
+test('ticket explica a base do acréscimo e anuncia o valor recalculado de forma acessível', () => {
+  const render = ticket(10, [{ id: 1, valor: 100 }])
+  let view = render()
+  const controle = nodes(view).find(n => n.props.id === 'ticket-margem')
+  const ajuda = nodes(view).find(n => n.props.id === controle.props['aria-describedby'])
+  assert.match(text(ajuda), /custo total.*público previsto/)
+  assert.match(controle.props['aria-valuetext'], /0% de acréscimo/)
+  controle.props.onChange({ target: { value: '25' } })
+  view = render()
+  assert.match(nodes(view).find(n => n.props.id === 'ticket-margem').props['aria-valuetext'], /25%/)
+  const resultado = nodes(view).find(n => n.props.className === 'preco')
+  assert.equal(resultado.props['aria-live'], 'polite')
+  assert.equal(resultado.props['aria-atomic'], 'true')
+  assert.match(text(resultado), /12,50/)
+})
 test('salvamento aguarda resposta e não navega por conta própria', async () => {
   let resolver, calls = 0
   const render = ticket(10, [{ id: 1, valor: 100 }], () => { calls++; return new Promise(resolve => { resolver = resolve }) })

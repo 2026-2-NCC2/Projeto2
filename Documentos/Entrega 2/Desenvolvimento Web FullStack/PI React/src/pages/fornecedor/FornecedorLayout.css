@@ -16,7 +16,12 @@
 .fornEstrutura .fornSidebar .fornMenu nav button:hover:enabled { background: var(--marca-coral-suave); color: var(--link-cor); }
 .fornEstrutura .fornSidebar .fornMenu > .novo { justify-content: center; background: var(--acao-primaria-fundo); color: var(--acao-primaria-texto); border-color: var(--marca-coral-escuro); }
 .fornEstrutura .fornSidebar .fornMenu > .novo:hover:enabled { background: var(--acao-hover-fundo); color: var(--acao-hover-texto); }
-.fornEstrutura .fornSidebar .fornSair { margin-top: auto; border-top: 1px solid var(--borda-superficie); border-radius: 0; color: var(--estado-erro-texto); }
+.fornEstrutura .fornSidebar .fornMenuRodape { display: flex; flex-direction: column; gap: 6px; margin-top: auto; padding-top: 16px; border-top: 1px solid var(--borda-superficie); }
+.fornEstrutura .fornSidebar .fornMenuRodape button { justify-content: flex-start; background: transparent; color: var(--texto-secundario); }
+.fornEstrutura .fornSidebar .fornMenuRodape button[aria-current='page']:enabled { background: var(--marca-coral-suave); color: var(--marca-coral-escuro); font-weight: 700; }
+.fornEstrutura .fornSidebar .fornMenuRodape button:hover:enabled { background: var(--marca-coral-suave); color: var(--link-cor); }
+.fornEstrutura .fornSidebar .fornSair { margin-top: 0; color: var(--estado-erro-texto); }
+.fornEstrutura .fornPerfilContexto { margin: 0; font-size: 1rem; color: var(--texto-secundario); }
 .fornEstrutura .fornTopo { grid-column: 2; grid-row: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 260px); align-items: center; gap: 24px; min-height: 104px; padding: 24px 32px; background: var(--superficie-cartao); box-shadow: none; }
 .fornEstrutura .fornContexto, .fornEstrutura .fornEmpresa { min-width: 0; overflow-wrap: anywhere; }
 .fornEstrutura .fornContexto > p { margin: 0 0 6px; color: var(--texto-secundario); font-size: .75rem; }
