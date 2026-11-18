@@ -1,0 +1,67 @@
+/* F12: a paleta e os ajustes não escapam do portal do Fornecedor. */
+.fornEstrutura {
+  --forn-petroleo: #193B4D;
+  --forn-petroleo-suave: #EDF3F5;
+  --forn-espaco-cartao: clamp(18px, 2.5vw, 28px);
+  --foco-cor: var(--forn-petroleo);
+}
+.fornEstrutura #fornecedor-titulo-secao,
+.fornEstrutura .fornConteudo :is(h1, h2, h3) { color: var(--forn-petroleo); }
+.fornEstrutura .fornTopo { border-top: 3px solid var(--forn-petroleo); }
+.fornEstrutura .fornTrilha { margin-bottom: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.fornEstrutura .fornTitulo { align-items: flex-start; gap: 16px 24px; }
+.fornEstrutura .fornTitulo h1 { margin: 0 0 10px; font-size: clamp(1.5rem, 2.4vw, 2rem); line-height: 1.3; }
+.fornEstrutura .fornTitulo p { margin-block: 0; max-width: 65ch; line-height: 1.7; }
+.fornEstrutura .fornSelo { max-width: 100%; white-space: normal; overflow-wrap: anywhere; background: var(--forn-petroleo-suave); color: var(--forn-petroleo); line-height: 1.5; }
+.fornEstrutura .fornHero { padding: var(--forn-espaco-cartao); border-inline-start: 3px solid var(--forn-petroleo); background: var(--forn-petroleo-suave); }
+.fornEstrutura .fornHero h2 { font-size: clamp(1.125rem, 2vw, 1.5rem); line-height: 1.4; }
+.fornEstrutura .fornHero p { margin-block: 10px 0; max-width: 65ch; line-height: 1.7; }
+.fornEstrutura .fornIndicadores { align-items: stretch; }
+.fornEstrutura .fornIndicadores > div { min-width: 0; padding: var(--forn-espaco-cartao); gap: 12px; }
+.fornEstrutura .fornIndicadores small { min-height: 2.5em; font-size: .8125rem; line-height: 1.5; }
+.fornEstrutura .fornIndicadores strong { color: var(--forn-petroleo); font-size: clamp(1.5rem, 2.5vw, 2rem); line-height: 1.3; }
+.fornEstrutura .fornIndicadores span { margin-top: auto; line-height: 1.6; }
+.fornEstrutura .fornCartao { min-width: 0; padding: var(--forn-espaco-cartao); }
+.fornEstrutura .fornLista { align-items: stretch; }
+.fornEstrutura .fornLista > .fornCartao { display: flex; flex-direction: column; margin-bottom: 0; }
+.fornEstrutura .fornLista .fornCartao > .ttBotao { width: 100%; min-height: 44px; margin-top: auto; }
+.fornEstrutura .fornLista .fornCartao > h3 { margin-block: 18px 8px; line-height: 1.5; overflow-wrap: anywhere; }
+.fornEstrutura .fornCartao p { overflow-wrap: anywhere; }
+.fornEstrutura .fornLinha { align-items: flex-start; gap: 12px; }
+.fornEstrutura .fornLinha .fornPrazo { padding: 6px 10px; border-radius: var(--raio-controle); background: var(--forn-petroleo-suave); color: var(--forn-petroleo); font-size: .8125rem; line-height: 1.5; }
+.fornEstrutura .fornPrazo time { font-weight: 700; font-variant-numeric: tabular-nums; }
+.fornEstrutura .fornFiltros { gap: 10px; align-items: stretch; }
+.fornEstrutura .fornFiltros .ttBotao { min-height: 44px; }
+.fornEstrutura .fornTabela { max-width: 100%; border: 1px solid var(--borda-superficie); border-radius: var(--raio-controle); }
+.fornEstrutura .fornTabelaCab { background: var(--forn-petroleo-suave); color: var(--forn-petroleo); }
+.fornEstrutura .fornTabelaLinha { align-items: start; padding-block: 18px; }
+.fornEstrutura .fornTabelaLinha > * { min-width: 0; overflow-wrap: anywhere; }
+.fornEstrutura .fornTabelaLinha .fornValorProposto { color: var(--forn-petroleo); font-variant-numeric: tabular-nums; }
+.fornEstrutura .fornForm h2 { margin-top: 0; line-height: 1.5; }
+.fornEstrutura .fornForm .ttCampo { margin-block: 24px; }
+.fornEstrutura .fornForm .ttCampo > label { margin: 0; line-height: 1.5; }
+.fornEstrutura .fornForm .fornCheck { align-items: flex-start; gap: 12px; padding: 14px; min-height: 44px; border-radius: var(--raio-controle); background: var(--forn-petroleo-suave); font-size: .875rem; line-height: 1.7; }
+.fornEstrutura .fornCheck input { flex-shrink: 0; margin-top: 4px; accent-color: var(--marca-coral-escuro); }
+.fornEstrutura .fornForm .acoes { padding-top: 20px; border-top: 1px solid var(--borda-superficie); gap: 12px; }
+.fornEstrutura .ttAlerta { line-height: 1.7; }
+.fornEstrutura .ttAlerta .ttBotao { margin-top: 12px; }
+.fornEstrutura .ttVazio { padding: var(--forn-espaco-cartao); background: var(--forn-petroleo-suave); }
+.fornEstrutura .ttVazioTitulo { color: var(--forn-petroleo); }
+.fornEstrutura :is(.perfilCartao, .portfolioItem) { min-width: 0; padding: var(--forn-espaco-cartao); border-color: var(--borda-superficie); }
+.fornEstrutura .perfilCartao :is(h2, h3), .fornEstrutura .portfolioItem h3 { line-height: 1.5; overflow-wrap: anywhere; }
+.fornEstrutura .perfilCapaVisual { background: var(--forn-petroleo); }
+.fornEstrutura .portfolioItem { display: flex; flex-direction: column; gap: 12px; }
+.fornEstrutura .portfolioItem :is(h3, p) { margin: 0; }
+.fornEstrutura .portfolioItem .ttBadge { align-self: flex-start; }
+.fornEstrutura .portfolioItem .perfilAcoes { margin-top: auto; }
+.fornEstrutura :is(.perfilAcoes, .portfolioPaginacao) { gap: 12px; flex-wrap: wrap; }
+.fornEstrutura .fornSidebar .fornMenu button:disabled { opacity: 1; background: var(--desabilitado-fundo); color: var(--desabilitado-texto); cursor: not-allowed; }
+@media (max-width: 1200px) {
+  .fornEstrutura .fornIndicadores { grid-template-columns: minmax(0, 1fr); }
+  .fornEstrutura .fornLista { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  .fornEstrutura .fornFiltros .ttBotao { flex: 1 1 120px; }
+  .fornEstrutura .fornForm .acoes .ttBotao { flex: 1 1 100%; }
+  .fornEstrutura .portfolioItem .perfilAcoes .ttBotao { flex: 1 1 100%; }
+}

@@ -40,7 +40,7 @@ test('hierarquia possui um h1, quatro seções nomeadas e títulos de cards subo
   const html = render()
   assert.equal((html.match(/<h1\b/g) || []).length, 1)
   assert.equal((html.match(/<h2\b/g) || []).length, 3)
-  assert.equal((html.match(/<h3\b/g) || []).length, 7)
+  assert.equal((html.match(/<h3\b/g) || []).length, 8)
   assert.equal((html.match(/<section\b/g) || []).length, 4)
   for (const [, titulo] of html.matchAll(/<section[^>]*aria-labelledby="([^"]+)"/g)) assert.ok(html.includes(`id="${titulo}"`))
 })
@@ -59,9 +59,10 @@ test('âncoras e atalho de conteúdo têm destinos únicos focáveis sem ordem a
   assert.doesNotMatch(html, /tabindex="[0-9]+"/)
 })
 
-test('os três perfis descrevem apenas fluxos implementados e inscrições condicionais', () => {
+test('os quatro perfis descrevem fluxos reais, inscrições condicionais e administração restrita', () => {
   const html = render()
-  for (const perfil of ['Participante', 'Organizador', 'Fornecedor']) assert.ok(html.includes(`<h3>${perfil}</h3>`))
+  for (const perfil of ['Participante', 'Organizador', 'Fornecedor', 'Administrador']) assert.ok(html.includes(`<h3>${perfil}</h3>`))
+  assert.match(html, /Acesso restrito às contas autorizadas para administração/)
   for (const texto of ['quando disponível', 'próprias inscrições', 'planeje custos', 'cotações disponíveis', 'itens solicitados', 'propostas enviadas']) assert.ok(html.includes(texto), texto)
   assert.doesNotMatch(html, /checkout|pagamentos|QR Code|ingressos digitais|inteligência artificial|depoimentos|mil usuários|gratuito|patrocínio/i)
 })
@@ -136,6 +137,7 @@ test('landing não introduz tecnologia externa, rastreamento, armazenamento ou r
 test('estilos são isolados, usam tokens existentes e não animam nem ocultam overflow da página', () => {
   const tokens = new Set()
   postcss.parse(ler('index.css')).walkDecls(d => { if (d.prop.startsWith('--')) tokens.add(d.prop) })
+  postcss.parse(ler('pages/publicas/IdentidadePublica.css')).walkDecls(d => { if (d.prop.startsWith('--')) tokens.add(d.prop) })
   css.walkRules(r => r.selectors.forEach(s => assert.ok(s.startsWith('.lpPagina'), s)))
   css.walkDecls(d => {
     assert.doesNotMatch(d.value, /#[\da-f]{3,8}\b|!important/i)
@@ -168,7 +170,7 @@ for (const largura of [360, 390, 768, 1024, 1440, 720, 320, 375]) test(`landing:
   assert.equal(estilo('.lpPagina', largura)['min-width'], '0')
   assert.equal(estilo('.lpPagina', largura)['overflow-wrap'], 'anywhere')
   assert.equal(estilo('.lpPagina .lpHero', largura)['grid-template-columns'], largura <= 800 ? 'minmax(0, 1fr)' : 'minmax(0, 1.1fr) minmax(0, 1fr)')
-  assert.equal(estilo('.lpPagina .lpPerfis', largura)['grid-template-columns'], largura <= 800 ? 'minmax(0, 1fr)' : 'repeat(3, minmax(0, 1fr))')
+  assert.equal(estilo('.lpPagina .lpPerfis', largura)['grid-template-columns'], largura <= 800 ? 'minmax(0, 1fr)' : largura <= 1000 ? 'repeat(2, minmax(0, 1fr))' : 'repeat(4, minmax(0, 1fr))')
   assert.equal(estilo('.lpPagina .lpBeneficiosGrade', largura)['grid-template-columns'], largura <= 800 ? 'minmax(0, 1fr)' : 'repeat(2, minmax(0, 1fr))')
   assert.equal(estilo('.lpPagina .lpNavegacao', largura)['flex-wrap'], 'wrap')
   assert.equal(estilo('.lpPagina .lpNavegacao a', largura)['min-height'], '44px')

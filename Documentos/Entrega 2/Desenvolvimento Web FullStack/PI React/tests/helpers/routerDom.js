@@ -67,6 +67,7 @@ export function apiSintetica(perfil, { expirada = false, calls = [] } = {}) {
     if (path === '/perfil') return resposta(200, { id: 7, nome: 'Pessoa sintética', email: 'pessoa@example.invalid', perfil })
     if (Object.values(acessos).includes(path) && path !== acessos[perfil]) return resposta(403, {})
     if (path === '/eventos/capacidades') return resposta(200, { criar: false, editar: false, publicar: false })
+    if (path === '/contratacoes/capacidades') return resposta(200, { disponivel: false })
     if (path === '/admin/eventos/capacidades') return resposta(200, { criar: false })
     if (path === '/admin/usuarios/perfis/capacidades') return resposta(200, { alterar: false, modelo: 'unico' })
     if (path === '/eventos/7') return resposta(200, { id: 7, nome: 'Evento sintético', data: '2030-12-10', horario: '10:00:00', local: 'Local', publico: 20, status: 'Em planejamento', usuario_id: 7, versao: 1 })

@@ -8,7 +8,7 @@ import { formatarMoeda } from '../src/utils/formatarMoeda.js'
 import { agendaBrasilia, validarFormularioEvento } from '../src/utils/validarEvento.js'
 
 function pagina(nome, props, extras = {}) {
-  const h = hooksAdmin({ ...primitivasFixture, jsx: jsxPrimitivas, Icone: 'svg', VagasEvento: 'vagas',
+  const h = hooksAdmin({ ...primitivasFixture, AbortController, sessionStorage: { getItem: () => 'sintetico' }, Contratacoes: 'contratacoes', jsx: jsxPrimitivas, Icone: 'svg', VagasEvento: 'vagas',
     CapaEvento: 'capa', MidiaEvento: 'midia', ConsultaPortfolios: 'portfolio', useMemo: fn => fn(),
     formatarMoeda, agendaBrasilia, validarFormularioEvento, rascunhoCustosTemAlteracoes, console: { error() {} }, ...extras })
   const fn = carregarAdmin(`pages/organizador/${nome}.jsx`, [nome], h.env)[nome]

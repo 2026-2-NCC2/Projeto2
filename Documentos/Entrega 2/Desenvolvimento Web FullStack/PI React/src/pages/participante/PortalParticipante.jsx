@@ -1,6 +1,7 @@
 import { Marca } from '../../components/ui/Marca.jsx'
 import { Skeleton, Botao, Campo, Badge, Alerta, EstadoVazio } from '../../components/ui/Primitivas.jsx'
 import './Participante.css'
+import './ParticipanteVisual.css'
 import { VagasEvento } from '../../components/eventos/VagasEvento.jsx'
 import { PerfilPessoal } from '../../components/perfil/PerfilPessoal.jsx'
 import { Icone } from '../../components/ui/Icone.jsx'

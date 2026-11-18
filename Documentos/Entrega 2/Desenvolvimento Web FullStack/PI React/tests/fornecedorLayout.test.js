@@ -7,7 +7,7 @@ import postcss from 'postcss'
 import { carregarAdmin, hooksAdmin, nodes, text } from './helpers/adminRuntime.js'
 import { primitivasFixture, jsxPrimitivas } from './helpers/primitivasFixture.js'
 
-const env = { jsx: createElement, Fragment, useId, useMemo, useState, useRef, useEffect }
+const env = { jsx: createElement, Fragment, useId, useMemo, useState, useRef, useEffect, sessionStorage: { getItem: () => 'sintetico' }, useCapacidadeContratacoes: () => false, Contratacoes: () => null }
 const ui = carregarAdmin('components/ui/Primitivas.jsx', ['Skeleton', 'Botao', 'Campo', 'Badge', 'Alerta', 'EstadoVazio'], env)
 const { Marca } = carregarAdmin('components/ui/Marca.jsx', ['Marca'], env)
 const { Icone } = carregarAdmin('components/ui/Icone.jsx', ['Icone'], env)
@@ -51,7 +51,7 @@ for (const [secao, titulo, ativo] of [
 
 function portal() {
   const chamadas = [], consultas = []
-  const h = hooksAdmin({ ...primitivasFixture, jsx: jsxPrimitivas, Icone: 'svg', IdentidadeConta: 'identidade', NavegacaoRecolhivel: 'recolhivel',
+  const h = hooksAdmin({ ...primitivasFixture, useCapacidadeContratacoes: () => false, Contratacoes: 'contratacoes', jsx: jsxPrimitivas, Icone: 'svg', IdentidadeConta: 'identidade', NavegacaoRecolhivel: 'recolhivel',
     AbortController, sessionStorage: { getItem: () => 'token-sintético' }, apiUrl: p => p,
     fetch: url => { consultas.push(url); return new Promise(() => {}) },
   })

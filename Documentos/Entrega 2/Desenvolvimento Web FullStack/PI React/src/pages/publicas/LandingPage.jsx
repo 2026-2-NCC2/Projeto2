@@ -3,6 +3,7 @@ import { Icone } from '../../components/ui/Icone.jsx'
 import { Botao } from '../../components/ui/Primitivas.jsx'
 import { LinksTransparencia } from './Transparencia.jsx'
 import './LandingPage.css'
+import './IdentidadePublica.css'
 
 const perfis = [
   { nome: 'Participante', icone: 'ticket', resumo: 'Encontre seu próximo encontro.',
@@ -11,6 +12,8 @@ const perfis = [
     texto: 'Organize os dados dos eventos, planeje custos e acompanhe cotações e propostas em um portal dedicado.' },
   { nome: 'Fornecedor', icone: 'documento', resumo: 'Conecte serviços a eventos.',
     texto: 'Consulte as cotações disponíveis, veja os itens solicitados e acompanhe as propostas enviadas pelo seu perfil.' },
+  { nome: 'Administrador', icone: 'acesso', resumo: 'Acompanhe a plataforma.',
+    texto: 'Consulte cadastros, analise solicitações de acesso e acompanhe os relatórios disponíveis. Acesso restrito às contas autorizadas para administração.' },
 ]
 
 // O acesso é fornecido pela entrada; não cria URLs ou mecanismos de autenticação.
@@ -38,7 +41,7 @@ export function LandingPage({ aoAcessar }) {
           <p className="lpIntroducao">Explore eventos, dê forma ao seu planejamento e encontre oportunidades. Participantes, organizadores e fornecedores conectados em um só lugar.</p>
           <div className="lpHeroAcoes">
             {aoAcessar ? <Botao className="lpHeroAcessar" onClick={aoAcessar}>Entrar no TrocaTicket <Icone nome="sair" tamanho={18} /></Botao> :
-              <a className="lpLinkDestaque" href="#lp-como-funciona">Conheça os três perfis <Icone nome="adicionar" tamanho={18} /></a>}
+              <a className="lpLinkDestaque" href="#lp-como-funciona">Conheça os quatro perfis <Icone nome="adicionar" tamanho={18} /></a>}
             <a className="lpLinkSecundario" href="#lp-como-funciona">Descubra como funciona</a>
           </div>
           <ul className="lpHeroRecursos" aria-label="Recursos da plataforma">
@@ -63,7 +66,7 @@ export function LandingPage({ aoAcessar }) {
 
       <section className="lpSecao lpComo" id="lp-como-funciona" tabIndex={-1} aria-labelledby="lp-como-titulo">
         <div className="lpLimite">
-          <div className="lpTituloSecao"><p className="lpSobretitulo">COMO FUNCIONA</p><h2 id="lp-como-titulo">Três perfis. Um mesmo encontro.</h2>
+          <div className="lpTituloSecao"><p className="lpSobretitulo">COMO FUNCIONA</p><h2 id="lp-como-titulo">Quatro perfis. Um mesmo encontro.</h2>
             <p>Cada perfil tem seu espaço, com informações e ações próprias.</p></div>
           <div className="lpPerfis">{perfis.map(perfil => <article className="lpCard" key={perfil.nome}>
             <span className="lpIcone"><Icone nome={perfil.icone} tamanho={28} /></span>

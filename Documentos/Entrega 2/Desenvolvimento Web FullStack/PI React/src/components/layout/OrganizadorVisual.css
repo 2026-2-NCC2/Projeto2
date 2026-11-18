@@ -1,0 +1,69 @@
+/* F11: tokens e acabamento exclusivos do portal do Organizador. */
+.orgLayout {
+  --org-petroleo: #193B4D;
+  --org-petroleo-suave: #EDF3F5;
+  --org-espaco-cartao: clamp(18px, 2.5vw, 28px);
+  --foco-cor: var(--org-petroleo);
+}
+
+.orgLayout .orgTitulo,
+.orgLayout .orgConteudo .organizadorPagina :is(h1, h2, h3),
+.orgLayout .orgEventoContexto strong { color: var(--org-petroleo); }
+.orgLayout .orgCabecalho { border-top: 3px solid var(--org-petroleo); }
+.orgLayout .orgEventoContexto { background: var(--org-petroleo-suave); border-inline-start-color: var(--org-petroleo); }
+.orgLayout .orgConteudo > * { min-width: 0; }
+
+/* Mesma leitura numérica e altura útil nos cards, inclusive durante a consulta. */
+.orgLayout .orgDashboard .orgIndicador { display: flex; flex-direction: column; padding: var(--org-espaco-cartao); }
+.orgLayout .orgDashboard .orgIndicador dt { align-items: flex-start; min-height: 2.5em; }
+.orgLayout .orgDashboard .orgIndicador dd { display: flex; flex-direction: column; flex: 1; }
+.orgLayout .orgDashboard .orgIndicador dd strong { color: var(--org-petroleo); font-size: clamp(2rem, 3vw, 2.5rem); }
+.orgLayout .orgDashboard .orgIndicador dd span { margin-top: auto; padding-top: 12px; }
+.orgLayout .orgDashboard .orgIndicador dt .icone,
+.orgLayout .orgDashboard .orgPainelCabecalho > .icone,
+.orgLayout .orgDashboard .orgDistribuicao dd { color: var(--org-petroleo); }
+.orgLayout .orgDashboard .orgIndicadorDestaque { background: var(--org-petroleo); border-color: var(--org-petroleo); }
+.orgLayout .orgDashboard .orgIndicadorDestaque :is(dt, dd strong, dd span) { color: var(--superficie-cartao); }
+.orgLayout .orgDashboard .orgIndicadorDestaque dt .icone { color: var(--marca-coral); }
+.orgLayout .orgDashboard .orgIndicadorSkeleton { min-height: 196px; }
+.orgLayout .orgDashboard .orgPainelSkeleton { min-height: 300px; }
+.orgLayout .orgDashboard :is(.orgPainel, .orgGerenciamento) { padding: var(--org-espaco-cartao); }
+.orgLayout .orgDashboard .orgPainelCabecalho { align-items: flex-start; }
+.orgLayout .orgDashboard .orgPainelCabecalho > .icone { margin-top: 3px; }
+.orgLayout .organizadorPagina .ttVazio { margin-block: 20px 0; padding: var(--org-espaco-cartao); background: var(--org-petroleo-suave); }
+.orgLayout .organizadorPagina .ttVazioTitulo { color: var(--org-petroleo); }
+
+.orgLayout .orgDashboard .orgGerenciamento .filtros { gap: 10px; align-items: stretch; }
+.orgLayout .orgDashboard .orgGerenciamento .filtros > * { max-width: 100%; }
+.orgLayout .orgDashboard .orgGerenciamento .orgEventoNumeros { background: var(--org-petroleo-suave); }
+.orgLayout .orgDashboard .orgGerenciamento .orgEventoNumeros dd { color: var(--org-petroleo); }
+.orgLayout .orgDashboard .orgGerenciamento .orgEventoAcoes { align-items: stretch; }
+.orgLayout .orgDashboard .orgGerenciamento .orgEvento .eventoInfo h3 { color: var(--org-petroleo); }
+.orgLayout .orgEventoFormulario .orgFormularioGrupo h2 { display: flex; align-items: center; gap: 10px; }
+.orgLayout .orgEventoFormulario .orgFormularioGrupo h2::before { content: ''; flex: 0 0 4px; align-self: stretch; border-radius: 2px; background: var(--org-petroleo); }
+.orgLayout .orgEventoFormulario .orgFormularioGrupo .ttCampoErro { margin-top: 0; }
+.orgLayout .organizadorPagina :is(.ttCampoErro, .ttCampoDica) { max-width: 70ch; }
+
+.orgLayout .orgPaginaSecundaria :is(.cartaoFormulario, .cartaoTicket) { padding: var(--org-espaco-cartao); }
+.orgLayout .orgPaginaSecundaria .gradeCotacao { align-items: start; }
+.orgLayout .orgPaginaSecundaria :is(.total, .preco) { color: var(--org-petroleo); font-variant-numeric: tabular-nums; }
+.orgLayout .orgPaginaSecundaria .total { gap: 12px; flex-wrap: wrap; align-items: baseline; }
+.orgLayout .orgPaginaSecundaria .total strong { color: var(--org-petroleo); }
+.orgLayout .orgPaginaSecundaria .itemResumo b { color: var(--org-petroleo); font-variant-numeric: tabular-nums; }
+.orgLayout .orgPaginaSecundaria .ttAlerta .ttBotao { margin-top: 12px; }
+.orgLayout .orgPaginaSecundaria .ttAlerta p + p { margin-top: 10px; }
+.orgLayout .orgPropostasRecebidas { margin-top: 24px; }
+.orgLayout .orgPaginaSecundaria .orgProposta { margin-top: 20px; background: var(--superficie-cartao); border: 1px solid var(--borda-superficie); box-shadow: none; }
+.orgLayout .orgPropostaCabecalho { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 12px 24px; margin-bottom: 16px; }
+.orgLayout .orgPropostaCabecalho h3 { flex: 1 1 200px; min-width: 0; margin: 0; line-height: 1.5; overflow-wrap: anywhere; }
+.orgLayout .orgPropostaValor { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; padding: 14px 16px; border-radius: var(--raio-controle); background: var(--org-petroleo-suave); color: var(--org-petroleo); }
+.orgLayout .orgPropostaValor span { font-size: clamp(1.25rem, 2vw, 1.5rem); font-weight: 700; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.orgLayout .orgProposta > p { overflow-wrap: anywhere; white-space: pre-wrap; }
+.orgLayout .orgProposta .acoesProposta { gap: 12px; padding-top: 16px; border-top: 1px solid var(--borda-superficie); }
+
+@media (max-width: 600px) {
+  .orgLayout .orgDashboard .orgGerenciamento .filtros input { flex-basis: 100%; }
+  .orgLayout .orgDashboard .orgGerenciamento .filtros .ttBotao { flex: 1 1 120px; }
+  .orgLayout .orgProposta .acoesProposta .ttBotao { flex: 1 1 100%; min-height: 44px; }
+  .orgLayout .orgPaginaSecundaria .preco strong { font-size: clamp(2rem, 10vw, 3.625rem); }
+}

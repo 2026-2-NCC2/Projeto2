@@ -1,5 +1,11 @@
 # TrocaTicket — guia de demonstração presencial (F5)
 
+> Atualização E1 (17/11/2026): resultados atuais, pendências de distribuição e
+> checklist de entrega estão em [ENTREGA_FINAL_E1.md](ENTREGA_FINAL_E1.md).
+> Este guia conserva o registro histórico F5. Manter A7, A10 **e F8** desativados;
+> localhost principal não isola o Supabase. Para inspeção sem acesso remoto,
+> seguir [VALIDACAO_MANUAL_F10.md](VALIDACAO_MANUAL_F10.md), respeitando seus pré-requisitos.
+
 Preparação verificada em 12/11/2026. Apresentadores: Lucas, Carlos Eduardo
 (Cadu) e Guilherme. Este guia não executa comandos nem cria dados.
 

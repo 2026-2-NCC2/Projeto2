@@ -23,7 +23,8 @@ function criarRepositorioContratacoes(cliente) {
     async listar(u, evento) {
       const data = await rpc('listar_contratacoes_v1', { ...ator(u), p_evento: evento });
       if (!Array.isArray(data) || data.some(c => !Number.isSafeInteger(c.id) ||
-        (u.perfil === 'fornecedor' && c.fornecedor_id !== u.id) || (u.perfil === 'organizador' && c.organizador_id !== u.id) ||
+        (u.perfil === 'fornecedor' && c.fornecedor_id !== u.id) ||
+        (u.perfil === 'organizador' && (c.organizador_id !== u.id || c.evento_organizador_id !== u.id)) ||
         (evento !== null && c.evento_id !== evento))) throw falha(503, 'Lista de contratações inválida.');
       return data;
     },

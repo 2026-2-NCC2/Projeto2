@@ -4,13 +4,13 @@
 .transparenciaPagina .transparenciaCabecalho { height: auto; min-height: 80px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; padding: 20px max(24px, calc((100% - 1040px) / 2)); background: var(--superficie-cartao); border-bottom: 1px solid var(--borda-superficie); }
 .transparenciaCabecalho > a:first-child { text-decoration: none; }
 .transparenciaPagina main { width: min(100% - 40px, 960px); margin: 36px auto; padding: clamp(20px, 4vw, 48px); background: var(--superficie-cartao); border: 1px solid var(--borda-superficie); border-radius: var(--raio-cartao); box-shadow: var(--sombra-cartao); min-width: 0; overflow-wrap: anywhere; }
-.transparenciaPagina h1 { margin: 12px 0 20px; font-size: clamp(1.8rem, 5vw, 2.6rem); line-height: 1.2; }
-.transparenciaPagina h2 { font-size: 1.2rem; line-height: 1.4; }
+.transparenciaPagina h1 { color: var(--publico-petroleo); margin: 12px 0 20px; font-size: clamp(1.8rem, 5vw, 2.6rem); line-height: 1.2; }
+.transparenciaPagina h2 { color: var(--publico-petroleo); font-size: 1.2rem; line-height: 1.4; }
 .transparenciaPagina p, .transparenciaPagina li { line-height: 1.8; }
 .transparenciaPagina .transparenciaSobretitulo { color: var(--link-cor); font-size: .75rem; font-weight: 700; letter-spacing: .08em; }
 .transparenciaPagina .transparenciaIntroducao { color: var(--texto-secundario); margin-bottom: 28px; }
 .transparenciaPagina section { margin-top: 32px; scroll-margin-top: 24px; }
-.transparenciaPagina .transparenciaSumario { margin-block: 28px; padding: 20px; background: var(--superficie-pagina); border-radius: var(--raio-controle); }
+.transparenciaPagina .transparenciaSumario { margin-block: 28px; padding: 20px; background: var(--publico-petroleo-suave); border-radius: var(--raio-controle); }
 .transparenciaSumario h2 { margin-top: 0; }
 .transparenciaSumario ul { padding-left: 22px; margin-bottom: 0; }
 .transparenciaSumario a { display: inline-block; padding-block: 7px; }

@@ -4,6 +4,7 @@ import { contatoPrivacidade } from '../../config/privacidade.js'
 import { documentosTransparencia, documentoDaRota } from './documentosTransparencia.js'
 import { tecnologiasNecessarias } from './inventarioPrivacidade.js'
 import './Transparencia.css'
+import './IdentidadePublica.css'
 
 function focarSecao(evento, id) {
   evento.preventDefault()

@@ -1,0 +1,56 @@
+/* F13: tokens e acabamento exclusivos do Participante. */
+.participantePagina {
+  --pp-petroleo: #193B4D;
+  --pp-petroleo-suave: #EDF3F5;
+  --pp-espaco-cartao: clamp(18px, 2.5vw, 28px);
+  --foco-cor: var(--pp-petroleo);
+}
+.participantePagina .ppConteudo :is(h1, h2, h3),
+.participantePagina .ppCabecalhoPagina .ppTitulo { color: var(--pp-petroleo); }
+.participantePagina .ppCabecalho { border-top: 3px solid var(--pp-petroleo); }
+.participantePagina .ppCabecalhoPagina { align-items: flex-start; }
+.participantePagina .ppCabecalhoPagina p { max-width: 65ch; line-height: 1.7; }
+.participantePagina .ppContaAcoes > * { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+.participantePagina .fornHero { background: var(--pp-petroleo-suave); border-inline-start: 3px solid var(--pp-petroleo); }
+.participantePagina .fornHero h2 { color: var(--pp-petroleo); }
+.participantePagina .fornIndicadores > div { min-width: 0; padding: var(--pp-espaco-cartao); gap: 12px; }
+.participantePagina .fornIndicadores strong { color: var(--pp-petroleo); font-size: clamp(1.75rem, 3vw, 2.25rem); line-height: 1.3; }
+.participantePagina .fornIndicadores small { min-height: 2.5em; line-height: 1.5; }
+.participantePagina .fornIndicadores span { margin-top: auto; line-height: 1.6; }
+.participantePagina .ppBuscaBarra { align-items: center; }
+.participantePagina .ppBuscaIcone { color: var(--pp-petroleo); flex-shrink: 0; }
+.participantePagina .ppEventoCapa > .eventoIdentidade { background: var(--pp-petroleo-suave); color: var(--pp-petroleo); }
+.participantePagina .ppEventoConteudo { padding: var(--pp-espaco-cartao); }
+.participantePagina .ppEventoConteudo h3 { color: var(--pp-petroleo); font-size: clamp(1.125rem, 2vw, 1.35rem); line-height: 1.4; }
+.participantePagina .ppEventoMetadados { gap: 4px 20px; }
+.participantePagina .ppEventoMetadados strong { color: var(--pp-petroleo); }
+.participantePagina .ppEventoLocal { margin-top: 12px; }
+.participantePagina .ppEventoDisponibilidade { padding: 14px; border: 1px solid var(--borda-superficie); border-radius: var(--raio-controle); background: var(--pp-petroleo-suave); color: var(--pp-petroleo); }
+.participantePagina .ppEventoDisponibilidade p { margin: 0; }
+.participantePagina .ppEventoAcoes { gap: 12px; padding-top: 20px; }
+.participantePagina .ppEventoAcoes > .ttBotao { padding-block: 12px; }
+.participantePagina .ppDetalhes { padding: var(--pp-espaco-cartao); }
+.participantePagina .ppDetalhesDados > div { background: var(--pp-petroleo-suave); }
+.participantePagina .ppDetalhesDados dd { color: var(--pp-petroleo); font-weight: 600; }
+.participantePagina .ppDetalhesInscricao { background: var(--pp-petroleo-suave); border-top: 3px solid var(--pp-petroleo); padding: var(--pp-espaco-cartao); }
+.participantePagina .ppDetalhesInscricao > p[role='status'] { color: var(--pp-petroleo); line-height: 1.7; }
+.participantePagina .ppIngresso { padding: var(--pp-espaco-cartao); gap: 20px; }
+.participantePagina .ppIngressoNumero { color: var(--pp-petroleo); font-weight: 600; }
+.participantePagina .ppIngressoDados { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding: 16px; border-radius: var(--raio-controle); background: var(--pp-petroleo-suave); }
+.participantePagina .ppIngressoDados > div:last-child { grid-column: 1 / -1; }
+.participantePagina .ppIngressoDados dd { color: var(--pp-petroleo); }
+.participantePagina .ppIngressoEstados p { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
+.participantePagina .ppConteudo .ttVazio { padding: var(--pp-espaco-cartao); background: var(--pp-petroleo-suave); }
+.participantePagina .ppConteudo .ttVazioTitulo { color: var(--pp-petroleo); }
+.participantePagina .ppConteudo .ttAlerta .ttBotao { margin-top: 12px; }
+.participantePagina .ppPerfil .perfilCapaVisual { background: var(--pp-petroleo); }
+.participantePagina .ppPerfil .perfilCartao { padding: var(--pp-espaco-cartao); }
+.participantePagina .ppPerfil .perfilCartao :is(h2, h3) { color: var(--pp-petroleo); }
+.participantePagina .ppPerfil .privacidadeContaCartao { border: 1px solid var(--borda-superficie); }
+.participantePagina .ppPerfil .privacidadeContaDados dd { margin-inline: 0; }
+@media (max-width: 700px) {
+  .participantePagina .ppBuscaBarra { padding: 18px; }
+  .participantePagina .ppIngressoDados { grid-template-columns: minmax(0, 1fr); }
+  .participantePagina .ppEventoAcoes > .ttBotao { flex-basis: 100%; }
+  .participantePagina .ppDetalhesTopo .ttBotao { text-align: start; }
+}

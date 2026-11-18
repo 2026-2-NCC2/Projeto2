@@ -35,7 +35,7 @@ CREATE TABLE public.contratacoes (
   motivo_encerramento text,
   CHECK(formalizado_por=organizador_id AND organizador_id<>fornecedor_id),
   CHECK((estado='ativo' AND encerrado_em IS NULL AND motivo_encerramento IS NULL) OR
-    (estado<>'ativo' AND encerrado_em IS NOT NULL AND length(btrim(motivo_encerramento)) BETWEEN 3 AND 1000))
+    (estado<>'ativo' AND encerrado_em IS NOT NULL AND motivo_encerramento IS NOT NULL AND length(btrim(motivo_encerramento)) BETWEEN 3 AND 1000))
 );
 CREATE INDEX contratacoes_fornecedor ON public.contratacoes(fornecedor_id,id);
 CREATE INDEX contratacoes_evento ON public.contratacoes(evento_id,id);
@@ -49,6 +49,31 @@ CREATE TABLE public.contratacoes_auditoria (
   motivo text,
   criada_em timestamptz NOT NULL DEFAULT now()
 );
+CREATE INDEX contratacoes_auditoria_contrato ON public.contratacoes_auditoria(contratacao_id,id);
+CREATE INDEX contratacoes_auditoria_autor ON public.contratacoes_auditoria(autor_id,id);
+
+-- Defesa contra alteração acidental inclusive por executores com UPDATE amplo.
+-- Não transfere autoria/propriedade e não define exclusão/retenção automática.
+CREATE FUNCTION public.proteger_historico_contratacoes_v1() RETURNS trigger
+LANGUAGE plpgsql SECURITY INVOKER SET search_path=pg_catalog AS $$
+BEGIN
+  IF TG_OP='DELETE' OR TG_TABLE_NAME='contratacoes_auditoria' THEN
+    RAISE EXCEPTION USING ERRCODE='CT409',MESSAGE='Histórico comercial preservado';
+  END IF;
+  IF ROW(NEW.id,NEW.proposta_id,NEW.cotacao_id,NEW.evento_id,NEW.organizador_id,NEW.fornecedor_id,NEW.formalizado_por,
+         NEW.valor_acordado,NEW.moeda,NEW.servico,NEW.condicoes_pagamento,NEW.formalizado_em)
+     IS DISTINCT FROM
+     ROW(OLD.id,OLD.proposta_id,OLD.cotacao_id,OLD.evento_id,OLD.organizador_id,OLD.fornecedor_id,OLD.formalizado_por,
+         OLD.valor_acordado,OLD.moeda,OLD.servico,OLD.condicoes_pagamento,OLD.formalizado_em) THEN
+    RAISE EXCEPTION USING ERRCODE='CT409',MESSAGE='Identidade e snapshot comercial imutáveis';
+  END IF;
+  RETURN NEW;
+END $$;
+REVOKE ALL ON FUNCTION public.proteger_historico_contratacoes_v1() FROM PUBLIC,anon,authenticated,service_role;
+CREATE TRIGGER contratacoes_historico_imutavel BEFORE UPDATE OR DELETE ON public.contratacoes
+FOR EACH ROW EXECUTE FUNCTION public.proteger_historico_contratacoes_v1();
+CREATE TRIGGER contratacoes_auditoria_imutavel BEFORE UPDATE OR DELETE ON public.contratacoes_auditoria
+FOR EACH ROW EXECUTE FUNCTION public.proteger_historico_contratacoes_v1();
 ALTER TABLE public.contratacoes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.contratacoes FORCE ROW LEVEL SECURITY;
 ALTER TABLE public.contratacoes_auditoria ENABLE ROW LEVEL SECURITY;
@@ -68,13 +93,17 @@ LANGUAGE sql SECURITY INVOKER SET search_path=pg_catalog AS $$ SELECT 1 $$;
 CREATE FUNCTION public.formalizar_contratacao_v1(p_ator integer,p_proposta integer) RETURNS jsonb
 LANGUAGE plpgsql SECURITY INVOKER SET search_path=pg_catalog AS $$
 DECLARE p public.propostas%ROWTYPE; q public.cotacoes%ROWTYPE; e public.eventos%ROWTYPE;
-  c public.contratacoes%ROWTYPE;
+  c public.contratacoes%ROWTYPE; fornecedor_inicial integer; cotacao_inicial integer; evento_inicial integer;
 BEGIN
   IF current_user<>'service_role' THEN RAISE EXCEPTION USING ERRCODE='CT403',MESSAGE='Acesso recusado'; END IF;
   IF p_ator IS NULL OR p_ator<=0 OR p_proposta IS NULL OR p_proposta<=0 THEN RAISE EXCEPTION USING ERRCODE='CT400',MESSAGE='Argumentos inválidos'; END IF;
   PERFORM pg_advisory_xact_lock(84712001);
   SELECT * INTO p FROM public.propostas WHERE id=p_proposta;
   IF NOT FOUND THEN RAISE EXCEPTION USING ERRCODE='CT404',MESSAGE='Proposta ausente'; END IF;
+  fornecedor_inicial:=p.fornecedor_id; cotacao_inicial:=p.cotacao_id;
+  SELECT * INTO q FROM public.cotacoes WHERE id=cotacao_inicial;
+  IF NOT FOUND THEN RAISE EXCEPTION USING ERRCODE='CT409',MESSAGE='Cotação ausente'; END IF;
+  evento_inicial:=q.evento_id;
   PERFORM id FROM public.usuarios WHERE id IN (p_ator,p.fornecedor_id) ORDER BY id FOR UPDATE;
   IF NOT EXISTS(SELECT 1 FROM public.usuarios WHERE id=p_ator AND perfil::text='organizador') OR
      NOT EXISTS(SELECT 1 FROM public.usuarios WHERE id=p.fornecedor_id AND perfil::text='fornecedor') THEN
@@ -84,15 +113,20 @@ BEGIN
   IF EXISTS(SELECT 1 FROM public.contas_teste_imagens WHERE usuario_id IN(p_ator,p.fornecedor_id) AND estado::text<>'ativa') THEN
     RAISE EXCEPTION USING ERRCODE='CT403',MESSAGE='Conta indisponível';
   END IF;
+  SELECT * INTO e FROM public.eventos WHERE id=evento_inicial FOR UPDATE;
+  IF NOT FOUND THEN RAISE EXCEPTION USING ERRCODE='CT409',MESSAGE='Evento ausente'; END IF;
+  SELECT * INTO q FROM public.cotacoes WHERE id=cotacao_inicial FOR UPDATE;
+  IF NOT FOUND OR q.evento_id IS DISTINCT FROM evento_inicial THEN RAISE EXCEPTION USING ERRCODE='CT409',MESSAGE='Vínculo mudou'; END IF;
   SELECT * INTO p FROM public.propostas WHERE id=p_proposta FOR UPDATE;
-  IF NOT EXISTS(SELECT 1 FROM public.usuarios WHERE id=p.fornecedor_id AND perfil::text='fornecedor') THEN
-    RAISE EXCEPTION USING ERRCODE='CT409',MESSAGE='Fornecedor mudou'; END IF;
-  SELECT * INTO q FROM public.cotacoes WHERE id=p.cotacao_id FOR UPDATE;
-  SELECT * INTO e FROM public.eventos WHERE id=q.evento_id FOR UPDATE;
+  IF NOT FOUND OR p.fornecedor_id IS DISTINCT FROM fornecedor_inicial OR p.cotacao_id IS DISTINCT FROM cotacao_inicial THEN
+    RAISE EXCEPTION USING ERRCODE='CT409',MESSAGE='Vínculo mudou'; END IF;
   IF e.usuario_id IS DISTINCT FROM p_ator THEN RAISE EXCEPTION USING ERRCODE='CT403',MESSAGE='Evento de outro Organizador'; END IF;
   SELECT * INTO c FROM public.contratacoes WHERE proposta_id=p_proposta;
-  IF FOUND THEN RETURN to_jsonb(c); END IF; -- replay natural: nunca cria duplicata
-  IF p.status::text<>'Aprovada' OR e.status::text IN ('Cancelado','Encerrado') OR p.fornecedor_id=p_ator THEN
+  IF FOUND THEN
+    IF c.organizador_id<>p_ator OR c.fornecedor_id<>p.fornecedor_id OR c.evento_id<>e.id OR c.cotacao_id<>q.id THEN RAISE EXCEPTION USING ERRCODE='CT409',MESSAGE='Histórico incompatível'; END IF;
+    RETURN to_jsonb(c);
+  END IF; -- replay natural: nunca cria duplicata
+  IF p.status::text IS DISTINCT FROM 'Aprovada' OR e.status::text IN ('Cancelado','Encerrado') OR p.fornecedor_id=p_ator THEN
     RAISE EXCEPTION USING ERRCODE='CT409',MESSAGE='Proposta/evento não permite formalização';
   END IF;
   INSERT INTO public.contratacoes(proposta_id,cotacao_id,evento_id,organizador_id,fornecedor_id,formalizado_por,valor_acordado,servico,condicoes_pagamento)
@@ -103,7 +137,7 @@ END $$;
 
 CREATE FUNCTION public.alterar_contratacao_v1(p_ator integer,p_contrato integer,p_estado text,p_motivo text,p_versao integer) RETURNS jsonb
 LANGUAGE plpgsql SECURITY INVOKER SET search_path=pg_catalog AS $$
-DECLARE c public.contratacoes%ROWTYPE;
+DECLARE c public.contratacoes%ROWTYPE; evento_inicial integer;
 BEGIN
   IF current_user<>'service_role' THEN RAISE EXCEPTION USING ERRCODE='CT403',MESSAGE='Acesso recusado'; END IF;
   IF p_ator IS NULL OR p_ator<=0 OR p_contrato IS NULL OR p_contrato<=0 OR p_versao IS NULL OR p_versao<1 OR
@@ -114,9 +148,13 @@ BEGIN
   IF NOT EXISTS(SELECT 1 FROM public.usuarios WHERE id=p_ator AND perfil::text='organizador') OR
     EXISTS(SELECT 1 FROM public.contas_teste_imagens WHERE usuario_id=p_ator AND estado::text<>'ativa') THEN
     RAISE EXCEPTION USING ERRCODE='CT403',MESSAGE='Ator inválido'; END IF;
-  SELECT * INTO c FROM public.contratacoes WHERE id=p_contrato FOR UPDATE;
+  SELECT * INTO c FROM public.contratacoes WHERE id=p_contrato;
   IF NOT FOUND THEN RAISE EXCEPTION USING ERRCODE='CT404',MESSAGE='Contratação ausente'; END IF;
-  IF c.organizador_id<>p_ator OR NOT EXISTS(SELECT 1 FROM public.eventos WHERE id=c.evento_id AND usuario_id=p_ator) THEN
+  evento_inicial:=c.evento_id;
+  PERFORM id FROM public.eventos WHERE id=evento_inicial AND usuario_id=p_ator FOR UPDATE;
+  IF NOT FOUND THEN RAISE EXCEPTION USING ERRCODE='CT403',MESSAGE='Propriedade inválida'; END IF;
+  SELECT * INTO c FROM public.contratacoes WHERE id=p_contrato FOR UPDATE;
+  IF c.organizador_id<>p_ator OR c.evento_id<>evento_inicial THEN
     RAISE EXCEPTION USING ERRCODE='CT403',MESSAGE='Propriedade inválida'; END IF;
   IF c.estado<>'ativo' OR c.versao<>p_versao THEN RAISE EXCEPTION USING ERRCODE='CT409',MESSAGE='Estado/versão mudou'; END IF;
   UPDATE public.contratacoes SET estado=p_estado,versao=versao+1,motivo_encerramento=btrim(p_motivo),encerrado_em=now(),atualizado_em=now() WHERE id=c.id RETURNING * INTO c;
@@ -127,6 +165,10 @@ END $$;
 CREATE FUNCTION public.listar_contratacoes_v1(p_ator integer,p_perfil text,p_evento integer DEFAULT NULL) RETURNS jsonb
 LANGUAGE plpgsql SECURITY INVOKER SET search_path=pg_catalog AS $$
 BEGIN
+  IF current_user<>'service_role' THEN RAISE EXCEPTION USING ERRCODE='CT403',MESSAGE='Acesso recusado'; END IF;
+  -- Compartilha lock com outras leituras e aguarda alterações/encerramento do ator.
+  -- O ciclo existente de contas também bloqueia usuarios antes de mudar seu estado.
+  PERFORM id FROM public.usuarios WHERE id=p_ator FOR SHARE;
   IF current_user<>'service_role' OR p_perfil IS NULL OR p_perfil NOT IN('organizador','fornecedor','admin') OR
     NOT EXISTS(SELECT 1 FROM public.usuarios WHERE id=p_ator AND perfil::text=p_perfil) OR
     EXISTS(SELECT 1 FROM public.contas_teste_imagens WHERE usuario_id=p_ator AND estado::text<>'ativa') THEN
@@ -134,7 +176,8 @@ BEGIN
   IF p_evento IS NOT NULL AND p_perfil='organizador' AND NOT EXISTS(SELECT 1 FROM public.eventos WHERE id=p_evento AND usuario_id=p_ator) THEN
     RAISE EXCEPTION USING ERRCODE='CT403',MESSAGE='Evento não autorizado'; END IF;
   RETURN (SELECT coalesce(jsonb_agg(linha ORDER BY (linha->>'id')::integer DESC),'[]'::jsonb) FROM (
-    SELECT to_jsonb(c)||jsonb_build_object('evento_nome',e.nome,'fornecedor_nome',u.nome) AS linha
+    SELECT to_jsonb(c)||jsonb_build_object('evento_nome',e.nome,'fornecedor_nome',u.nome,
+      'evento_organizador_id',CASE WHEN p_perfil='organizador' THEN e.usuario_id ELSE NULL END) AS linha
     FROM public.contratacoes c JOIN public.eventos e ON e.id=c.evento_id JOIN public.usuarios u ON u.id=c.fornecedor_id
     WHERE (p_evento IS NULL OR c.evento_id=p_evento) AND
       (p_perfil='admin' OR (p_perfil='fornecedor' AND c.fornecedor_id=p_ator) OR
@@ -145,10 +188,30 @@ END $$;
 REVOKE ALL ON FUNCTION public.contratacoes_capacidades_v1(), public.formalizar_contratacao_v1(integer,integer), public.alterar_contratacao_v1(integer,integer,text,text,integer), public.listar_contratacoes_v1(integer,text,integer) FROM PUBLIC,anon,authenticated,service_role;
 GRANT EXECUTE ON FUNCTION public.contratacoes_capacidades_v1(), public.formalizar_contratacao_v1(integer,integer), public.alterar_contratacao_v1(integer,integer,text,text,integer), public.listar_contratacoes_v1(integer,text,integer) TO service_role;
 -- Defaults herdados inesperados (inclusive outros papéis) impedem instalação.
-DO $$ DECLARE objeto regclass; BEGIN
+DO $$ DECLARE objeto regclass; funcao regprocedure; papel text; BEGIN
   FOREACH objeto IN ARRAY ARRAY['public.contratacoes'::regclass,'public.contratacoes_auditoria'::regclass,'public.contratacoes_id_seq'::regclass,'public.contratacoes_auditoria_id_seq'::regclass] LOOP
-    IF EXISTS(SELECT 1 FROM pg_class c CROSS JOIN LATERAL aclexplode(c.relacl) a WHERE c.oid=objeto AND a.grantee NOT IN(c.relowner,(SELECT oid FROM pg_roles WHERE rolname='service_role'))) THEN
+    IF EXISTS(SELECT 1 FROM pg_class c CROSS JOIN LATERAL aclexplode(c.relacl) a WHERE c.oid=objeto AND
+      (a.grantee NOT IN(c.relowner,(SELECT oid FROM pg_roles WHERE rolname='service_role')) OR (a.grantee<>c.relowner AND a.is_grantable))) THEN
       RAISE EXCEPTION 'Privilégios herdados não revisados'; END IF;
+  END LOOP;
+  FOREACH funcao IN ARRAY ARRAY['public.proteger_historico_contratacoes_v1()'::regprocedure,'public.contratacoes_capacidades_v1()'::regprocedure,'public.formalizar_contratacao_v1(integer,integer)'::regprocedure,'public.alterar_contratacao_v1(integer,integer,text,text,integer)'::regprocedure,'public.listar_contratacoes_v1(integer,text,integer)'::regprocedure] LOOP
+    IF EXISTS(SELECT 1 FROM pg_proc p CROSS JOIN LATERAL aclexplode(p.proacl) a WHERE p.oid=funcao AND
+      (a.grantee NOT IN(p.proowner,(SELECT oid FROM pg_roles WHERE rolname='service_role')) OR (a.grantee<>p.proowner AND a.is_grantable))) THEN
+      RAISE EXCEPTION 'Privilégios de função não revisados'; END IF;
+  END LOOP;
+  -- ACL declarada não detecta herança de outro papel. Recusar exposição efetiva.
+  FOREACH papel IN ARRAY ARRAY['anon','authenticated'] LOOP
+    IF has_table_privilege(papel,'public.contratacoes','SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER') OR
+       has_table_privilege(papel,'public.contratacoes_auditoria','SELECT,INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER') OR
+       has_sequence_privilege(papel,'public.contratacoes_id_seq','USAGE,SELECT,UPDATE') OR
+       has_sequence_privilege(papel,'public.contratacoes_auditoria_id_seq','USAGE,SELECT,UPDATE') OR
+       has_function_privilege(papel,'public.contratacoes_capacidades_v1()','EXECUTE') OR
+       has_function_privilege(papel,'public.proteger_historico_contratacoes_v1()','EXECUTE') OR
+       has_function_privilege(papel,'public.formalizar_contratacao_v1(integer,integer)','EXECUTE') OR
+       has_function_privilege(papel,'public.alterar_contratacao_v1(integer,integer,text,text,integer)','EXECUTE') OR
+       has_function_privilege(papel,'public.listar_contratacoes_v1(integer,text,integer)','EXECUTE') THEN
+      RAISE EXCEPTION 'Privilégios efetivos públicos não revisados';
+    END IF;
   END LOOP;
 END $$;
 COMMIT;

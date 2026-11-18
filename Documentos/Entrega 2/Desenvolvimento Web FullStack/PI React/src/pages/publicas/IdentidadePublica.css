@@ -1,0 +1,6 @@
+/* Tokens compartilhados somente pelas superfícies públicas; não envolvem os portais. */
+.lpPagina, .loginPagina, .ttPaginaStatus, .transparenciaPagina, .entradaPublica {
+  --publico-petroleo: #193B4D;
+  --publico-petroleo-suave: #EDF3F5;
+  --foco-cor: var(--publico-petroleo);
+}

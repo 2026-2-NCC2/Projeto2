@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Alerta, Botao, Campo } from '../../components/ui/Primitivas.jsx'
 import { lerAvisoCadastro, limparAvisoCadastro } from './avisoCadastro.js'
 import './Autenticacao.css'
+import '../publicas/IdentidadePublica.css'
 import { apiUrl } from '../../services/api.js'
 
 export function Login({ setPagina, aoAutenticarSessao, erroSessao }) {

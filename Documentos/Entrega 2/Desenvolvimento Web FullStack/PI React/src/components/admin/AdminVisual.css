@@ -1,0 +1,60 @@
+/* F14: paleta e acabamento restritos à estrutura administrativa. */
+.adminLayout {
+  --admin-petroleo: #193B4D;
+  --admin-petroleo-suave: #EDF3F5;
+  --admin-espaco-cartao: clamp(18px, 2.5vw, 28px);
+  --foco-cor: var(--admin-petroleo);
+}
+.adminLayout .adminTituloSecao,
+.adminLayout.adminApp .adminConteudo :is(h1, h2, h3, h4) { color: var(--admin-petroleo); }
+.adminLayout .adminTopo { border-top: 3px solid var(--admin-petroleo); }
+.adminLayout .adminTopo .adminUsuario { border: 1px solid var(--borda-superficie); }
+.adminLayout .adminUsuario .identidadeConta strong { color: var(--admin-petroleo); }
+.adminLayout .adminConteudo > * { min-width: 0; }
+.adminLayout .admPaginaTopo { align-items: flex-start; gap: 16px 24px; }
+.adminLayout .admVisaoGeral .admResumoCartao { padding: var(--admin-espaco-cartao); gap: 12px; }
+.adminLayout .admVisaoGeral .admResumoTitulo { min-height: 3.5em; align-items: flex-start; }
+.adminLayout .admVisaoGeral .admResumoTitulo > svg { color: var(--admin-petroleo); }
+.adminLayout .admVisaoGeral .admResumoValor { color: var(--admin-petroleo); margin-block: 8px 0; font-size: clamp(2rem, 3vw, 2.5rem); }
+.adminLayout .admVisaoGeral .admResumoCartao > p:not(.admResumoValor) { margin-bottom: 8px; }
+.adminLayout .admVisaoGeral .admResumoConsultar { width: 100%; min-height: 44px; }
+.adminLayout .admVisaoGeral .admResumoAcompanhamento { padding: var(--admin-espaco-cartao); background: var(--admin-petroleo-suave); border-inline-start: 3px solid var(--admin-petroleo); }
+.adminLayout .admVisaoGeral .admResumoCartao > .admSkeleton { margin-block: 8px; }
+.adminLayout .admSolicitacoes .admMetricas article { padding: var(--admin-espaco-cartao); }
+.adminLayout .admSolicitacoes .admMetricas strong { color: var(--admin-petroleo); font-variant-numeric: tabular-nums; }
+.adminLayout .admFiltros { gap: 16px; border-color: var(--borda-superficie); }
+.adminLayout .admFiltros label { line-height: 1.5; }
+.adminLayout .admFiltros :is(input, select) { max-width: 100%; }
+.adminLayout .admTabela { max-width: 100%; min-width: 0; }
+.adminLayout .admTabela th { background: var(--admin-petroleo-suave); color: var(--admin-petroleo); line-height: 1.6; }
+.adminLayout .admTabela td { line-height: 1.7; }
+.adminLayout .admTabela .admValor { color: var(--admin-petroleo); }
+.adminLayout .admTabela .admAcoes { gap: 10px; }
+.adminLayout .admBadge { max-width: 100%; white-space: normal; overflow-wrap: anywhere; line-height: 1.5; }
+.adminLayout .admMensagem { line-height: 1.7; }
+.adminLayout .admMensagem button { margin-top: 8px; }
+.adminLayout .admVazio { padding: var(--admin-espaco-cartao); background: var(--admin-petroleo-suave); }
+.adminLayout .admModal { padding: var(--admin-espaco-cartao); }
+.adminLayout .admModal > header { align-items: flex-start; gap: 12px 20px; }
+.adminLayout .admModal .admDados > div { min-width: 0; background: var(--admin-petroleo-suave); border-radius: var(--raio-controle); padding: 16px; }
+.adminLayout .admModal .admDados dd { overflow-wrap: anywhere; }
+.adminLayout .admModal .admPropostaValor { color: var(--admin-petroleo); overflow-wrap: anywhere; }
+.adminLayout .admUsuarios .admUsuarioResumo .admAvatar { background: var(--admin-petroleo-suave); color: var(--admin-petroleo); }
+.adminLayout .admRelatorios .admRelatorioSeletor { max-width: 100%; width: min(100%, 440px); line-height: 1.5; color: var(--admin-petroleo); }
+.adminLayout .admRelatorios .admRelatorioTotais article,
+.adminLayout .admRelatorios .admRelatorioGrupo { padding: var(--admin-espaco-cartao); }
+.adminLayout .admRelatorios .admRelatorioTotais strong { color: var(--admin-petroleo); font-size: clamp(1.75rem, 3vw, 2rem); }
+.adminLayout .admRelatorios .admRelatorioGrupo dd { color: var(--admin-petroleo); }
+.adminLayout .admRelatorios .admRelatorioGrupo dl > div { align-items: baseline; }
+.adminLayout .admRelatorios .admRelatorioGrupo dt { overflow-wrap: anywhere; }
+.adminLayout .peaHero { border-inline-start: 3px solid var(--admin-petroleo); }
+.adminLayout .peaTabela th { color: var(--admin-petroleo); background: var(--admin-petroleo-suave); }
+.adminLayout .peaMetricas article:not(.peaAlerta) { background: var(--admin-petroleo-suave); border-color: var(--borda-superficie); }
+.adminLayout .peaMetricas article:not(.peaAlerta) strong { color: var(--admin-petroleo); font-variant-numeric: tabular-nums; }
+.adminLayout .perfilCapaVisual { background: var(--admin-petroleo); }
+.adminLayout .perfilCartao { padding: var(--admin-espaco-cartao); }
+@media (max-width: 540px) {
+  .adminLayout .admModal > header > button { width: 100%; }
+  .adminLayout .admModal .admAcoes > button { flex: 1 1 100%; }
+  .adminLayout .admRelatorios .admRelatorioGrupo dl > div { flex-wrap: wrap; gap: 8px 16px; }
+}

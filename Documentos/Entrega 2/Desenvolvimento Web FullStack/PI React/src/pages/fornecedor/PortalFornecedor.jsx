@@ -2,6 +2,7 @@ import { Marca } from '../../components/ui/Marca.jsx'
 import { Skeleton, Botao, Campo, Badge, Alerta, EstadoVazio } from '../../components/ui/Primitivas.jsx'
 import './Fornecedor.css'
 import './FornecedorLayout.css'
+import './FornecedorVisual.css'
 import { NavegacaoRecolhivel } from '../../components/layout/NavegacaoRecolhivel.jsx'
 import { Icone } from '../../components/ui/Icone.jsx'
 import { IdentidadeConta } from '../../components/layout/IdentidadeConta.jsx'
@@ -10,25 +11,31 @@ import { PortfolioFornecedor } from '../../components/portfolio/Portfolio.jsx'
 import { useState, useEffect, useRef } from 'react'
 import { apiUrl } from '../../services/api.js'
 import { formatarMoeda } from '../../utils/formatarMoeda.js'
+import { Contratacoes } from '../../components/contratacoes/Contratacoes.jsx'
+import { useCapacidadeContratacoes } from '../../hooks/useContratacoes.js'
 
 export function PortalFornecedor({pagina,setPagina,aoSair,PerfilFornecedor,navegacao}) {
+ const contratacoesAtivas = useCapacidadeContratacoes()
+ const token = sessionStorage.getItem('token')
  const [busca,setBusca]=useState('')
  const buscaRef = useRef(null)
  const todasRef = useRef(null)
  const [oportunidades, setOportunidades] = useState([])
   const [carregandoOportunidades, setCarregandoOportunidades] = useState(true)
   const [erroOportunidades, setErroOportunidades] = useState('')
+  const [tentativaOportunidades, setTentativaOportunidades] = useState(0)
   useEffect(() => {
+  let ativo = true
+  const controller = new AbortController()
   const buscarOportunidades = async () => {
     try {
       setCarregandoOportunidades(true)
       setErroOportunidades('')
 
-      const token = sessionStorage.getItem('token')
-
       const resposta = await fetch(
         apiUrl('/fornecedor/cotacoes'),
         {
+          signal: controller.signal,
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -41,7 +48,8 @@ export function PortalFornecedor({pagina,setPagina,aoSair,PerfilFornecedor,naveg
         throw new Error(dados.erro || 'Erro ao buscar cotações.')
       }
 
-      const lista = Array.isArray(dados) ? dados : []
+      if (!Array.isArray(dados)) throw new Error('Resposta de cotações incompleta. Tente consultar novamente.')
+      const lista = dados
 
      const oportunidadesFormatadas = lista.map((cotacao) => ({
        id: cotacao.id,
@@ -50,27 +58,27 @@ export function PortalFornecedor({pagina,setPagina,aoSair,PerfilFornecedor,naveg
        categoria: cotacao.itens
           .map((item) => item.categoria)
          .join(', '),
-        organizador: 'Organizador do evento',
        local: cotacao.evento_local,
-       publico: 'Não informado',
         prazo: cotacao.prazo.slice(0, 10),
        descricao: cotacao.observacoes || 'Sem observações.',
         itens: cotacao.itens,
         status: cotacao.status
     }))
 
-setOportunidades(oportunidadesFormatadas)
+      if (ativo && sessionStorage.getItem('token') === token) setOportunidades(oportunidadesFormatadas)
 
     } catch (erro) {
+      if (!ativo || controller.signal.aborted || sessionStorage.getItem('token') !== token) return
       console.error('Erro ao buscar oportunidades:', erro)
-      setErroOportunidades(erro.message)
+      if (ativo && sessionStorage.getItem('token') === token) setErroOportunidades(erro.message)
     } finally {
-      setCarregandoOportunidades(false)
+      if (ativo && sessionStorage.getItem('token') === token) setCarregandoOportunidades(false)
     }
   }
 
   buscarOportunidades()
-}, [])
+  return () => { ativo = false; controller.abort() }
+}, [tentativaOportunidades, token])
  const [selecionadaLocal, setSelecionadaLocal] = useState(null)
  const selecionada = navegacao ? oportunidades.find(item => item.id === navegacao.estado.cotacaoId) || null : selecionadaLocal
  function setSelecionada(item) {
@@ -205,7 +213,7 @@ setOportunidades(oportunidadesFormatadas)
     .toLowerCase()
     .includes(busca.toLowerCase())
 )
- const menu=[['mural','Mural de oportunidades'],['enviadas','Propostas enviadas'],['contratos','Contratos ativos',true],['catalogo','Portfólio profissional'],['desempenho','Desempenho']]
+ const menu=[['mural','Mural de oportunidades'],['enviadas','Propostas enviadas'],['contratos','Contratos ativos',!contratacoesAtivas],['catalogo','Portfólio profissional'],['desempenho','Desempenho']]
  const conteudoRef = useRef(null)
  return <div className="portalFornecedor fornecedorPagina fornEstrutura">
     <a
@@ -285,14 +293,14 @@ setOportunidades(oportunidadesFormatadas)
         <div className="fornHero">
           <div>
             {carregandoOportunidades ? <Skeleton tipo="texto" linhas={1} rotulo="Consultando oportunidades" /> : <h2>
-              {erroOportunidades ? '—' : oportunidades.length} EVENTOS AGUARDANDO SUA PROPOSTA</h2>}
+              {erroOportunidades ? '—' : oportunidades.length} COTAÇÕES DISPONÍVEIS</h2>}
             <p>Encontre demandas compatíveis com seus serviços e envie sua oferta comercial.</p>
           </div>
           <span className="fornSelo">Oportunidades disponíveis</span>
         </div>
         <div className="fornIndicadores">
           <div>
-            <small>OPORTUNIDADES COMPATÍVEIS</small>
+            <small>COTAÇÕES DISPONÍVEIS</small>
             {carregandoOportunidades ? <Skeleton tipo="texto" linhas={1} rotulo="Consultando quantidade de oportunidades" /> : <strong>
               {erroOportunidades ? '—' : oportunidades.length}
             </strong>}
@@ -328,7 +336,8 @@ setOportunidades(oportunidadesFormatadas)
 )}
           {erroOportunidades && (
   <Alerta variante="erro" titulo="Erro de consulta de cotações">
-            {erroOportunidades}
+            <p>{erroOportunidades}</p>
+            <Botao variante="secundario" disabled={carregandoOportunidades} onClick={() => setTentativaOportunidades(n => n + 1)}>Tentar consultar cotações novamente</Botao>
           </Alerta>
 )}
           {!carregandoOportunidades &&
@@ -339,20 +348,19 @@ setOportunidades(oportunidadesFormatadas)
             titulo={oportunidades.length === 0 ? 'Nenhuma cotação disponível no momento.' : 'Nenhum resultado encontrado pelos filtros.'}
             acao={oportunidades.length > 0 && <Botao variante="secundario" onClick={() => { setBusca(''); buscaRef.current?.focus() }}>Limpar busca</Botao>} />
   )}
-          {abertas.map(o=><article className="fornCartao" key={o.id}>
+          {!carregandoOportunidades && !erroOportunidades && abertas.map(o=><article className="fornCartao" key={o.id} aria-labelledby={`forn-cotacao-${o.id}`}>
             <CapaEvento eventoId={o.eventoId}/>
             <div className="fornLinha">
               <Badge variante="informacao">#{o.id} · {o.categoria}
               </Badge>
-              <small>Prazo: {o.prazo.split('-').reverse().join('/')}
+              <small className="fornPrazo">Prazo: <time dateTime={o.prazo}>{o.prazo.split('-').reverse().join('/')}</time>
               </small>
             </div>
-            <h3>
+            <h3 id={`forn-cotacao-${o.id}`}>
               {o.nome}
             </h3>
-            <p>Organizador: {o.organizador}
-            </p>
-            <p>Local: {o.local} · {o.publico} participantes</p>
+            <p>Local: {o.local}</p>
+            <p>Organizador e público não informados nesta consulta.</p>
             <p>
               {o.descricao}
             </p>
@@ -371,10 +379,10 @@ setOportunidades(oportunidadesFormatadas)
             {selecionada.nome}
           </h2>
           <p>
-            {selecionada.categoria} · {selecionada.organizador} · {selecionada.publico} participantes</p>
+            {selecionada.categoria} · Cotação #{selecionada.id}</p>
         </div>
-        <form className="fornCartao fornForm" onSubmit={enviar}>
-          <h2>Parâmetros financeiros e condições</h2>
+        <form className="fornCartao fornForm" onSubmit={enviar} aria-labelledby="forn-proposta-formulario">
+          <h2 id="forn-proposta-formulario">Parâmetros financeiros e condições</h2>
           <Campo
             id="fornecedor-proposta-1"
             label="Valor global da proposta (R$)"
@@ -429,7 +437,7 @@ setOportunidades(oportunidadesFormatadas)
             </strong>}
           </div>
         </div>
-        <div className="fornFiltros">
+        <div className="fornFiltros" role="group" aria-label="Filtrar propostas por situação">
           {['Todas','Em avaliação','Aprovada','Recusada'].map(f=><Botao
             key={f}
             ref={f === 'Todas' ? todasRef : undefined}
@@ -464,7 +472,7 @@ setOportunidades(oportunidadesFormatadas)
                 <span role="cell">
                   {p.categoria}
                 </span>
-                <strong role="cell">
+                <strong role="cell" className="fornValorProposto">
                   {formatarMoeda(p.valor)}
                 </strong>
                 <Badge
@@ -478,11 +486,7 @@ setOportunidades(oportunidadesFormatadas)
         </div>
       </>}
       {pagina==='fornecedor-contratos' && <div className="fornCartao">
-        <EstadoVazio tipo="indisponivel" titulo="Contratos ativos indisponíveis."
-          acao={<Botao variante="secundario" onClick={() => navegar('enviadas')}>Consultar propostas enviadas</Botao>}>
-          <p>O sistema acompanha propostas comerciais, mas ainda não registra a formalização ou a vigência de contratos.</p>
-          <p>Uma proposta aprovada não comprova contrato formalizado, assinatura ou pagamento.</p>
-        </EstadoVazio>
+        <Contratacoes aoSair={aoSair} aoConsultarPropostas={() => navegar('enviadas')} />
       </div>}
       {pagina==='fornecedor-desempenho' && <div className="fornIndicadores">
         <div>

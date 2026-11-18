@@ -15,7 +15,7 @@ const proposta = { id: 10, evento_nome: 'Proposta sintética', valor: '12.34', s
 function fornecedor({ cotacoes = [cotacao], propostas = [], fetch, pagina = 'fornecedor-mural', navegacao } = {}) {
   const chamadas = [], destinos = [], avisos = []
   let saidas = 0
-  const h = hooksAdmin({ ...primitivasFixture, jsx: jsxPrimitivas, Icone: 'svg', IdentidadeConta: 'identidade', NavegacaoRecolhivel: 'navegacao-recolhivel',
+  const h = hooksAdmin({ ...primitivasFixture, useCapacidadeContratacoes: () => false, Contratacoes: 'contratacoes', jsx: jsxPrimitivas, Icone: 'svg', IdentidadeConta: 'identidade', NavegacaoRecolhivel: 'navegacao-recolhivel',
     CapaEvento: 'capa', MidiaEvento: 'midia', PortfolioFornecedor: 'portfolio', formatarMoeda, AbortController,
     apiUrl: p => p, sessionStorage: { getItem: () => 'token-sintetico' }, console: { error() {} }, alert: m => avisos.push(m),
     fetch: async (url, opcoes) => { chamadas.push([url, opcoes]); return fetch ? fetch(url, opcoes) : ok(url.endsWith('/cotacoes') ? cotacoes : propostas) },
@@ -210,7 +210,7 @@ test('contratos continuam bloqueados, paginas antigas e componentes compartilhad
   assert.equal(text(atual).trim(), 'Propostas enviadas')
   const bloqueado = nodes(p.render()).find(n => n.type === 'button' && text(n).includes('Contratos ativos'))
   assert.equal(bloqueado.props.disabled, true); assert.equal(bloqueado.props.onClick, undefined)
-  assert.match(text(p.ir('fornecedor-contratos')), /Contratos ativos indisponíveis/)
+  assert.ok(nodes(p.ir('fornecedor-contratos')).some(n => n.type === 'contratacoes'))
   assert.ok(nodes(p.ir('fornecedor-catalogo')).some(n => n.type === 'portfolio'))
   assert.ok(nodes(p.ir('fornecedor-perfil')).some(n => n.type === 'perfil'))
   botao(p.render(), 'Sair').props.onClick(); assert.equal(p.saidas(), 1)

@@ -6,6 +6,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { ConsultaPortfolios } from '../../components/portfolio/Portfolio.jsx'
 import { apiUrl } from '../../services/api.js'
 import { formatarMoeda } from '../../utils/formatarMoeda.js'
+import { Contratacoes } from '../../components/contratacoes/Contratacoes.jsx'
 
 export function Cotacao({
   evento,
@@ -20,17 +21,20 @@ export function Cotacao({
   const propostasRecebidas = evento?.id ? propostasRecebidasSalvas : []
   const carregandoPropostas = Boolean(evento?.id) && buscandoPropostas
   const [erroPropostas, setErroPropostas] = useState('')
+  const [tentativaPropostas, setTentativaPropostas] = useState(0)
+  const token = sessionStorage.getItem('token')
   useEffect(() => {
+  let ativo = true
+  const controller = new AbortController()
   const buscarPropostasRecebidas = async () => {
     try {
       setCarregandoPropostas(true)
       setErroPropostas('')
 
-      const token = sessionStorage.getItem('token')
-
       const resposta = await fetch(
         apiUrl('/organizador/propostas'),
         {
+          signal: controller.signal,
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -43,25 +47,28 @@ export function Cotacao({
         throw new Error(dados.erro || 'Erro ao buscar propostas.')
       }
 
+      if (!Array.isArray(dados)) throw new Error('Resposta de propostas incompleta. Tente consultar novamente.')
       const propostasDoEvento = dados.filter(
         (proposta) => Number(proposta.evento_id) === Number(evento.id)
       )
 
-      setPropostasRecebidas(propostasDoEvento)
+      if (ativo && sessionStorage.getItem('token') === token) setPropostasRecebidas(propostasDoEvento)
 
     } catch (erro) {
+      if (!ativo || controller.signal.aborted || sessionStorage.getItem('token') !== token) return
       console.error('Erro ao buscar propostas recebidas:', erro)
-      setErroPropostas(erro.message)
+      if (ativo && sessionStorage.getItem('token') === token) setErroPropostas(erro.message)
 
     } finally {
-      setCarregandoPropostas(false)
+      if (ativo && sessionStorage.getItem('token') === token) setCarregandoPropostas(false)
     }
   }
 
   if (evento?.id) {
     buscarPropostasRecebidas()
   }
-}, [evento?.id])
+  return () => { ativo = false; controller.abort() }
+}, [evento?.id, token, tentativaPropostas])
   const [avaliandoPropostaId, setAvaliandoPropostaId] = useState(null)
   const [feedbackAvaliacao, setFeedbackAvaliacao] = useState(null)
   const avaliarProposta = async (propostaId, novoStatus) => {
@@ -203,12 +210,12 @@ const aoPublicarCotacao = async () => {
           )}
         </div>
       </div>
-            <section className="cartaoFormulario" style={{ marginTop: '24px' }}>
-        <h2><Icone nome="documento" /> Propostas recebidas</h2>
+      <section className="cartaoFormulario orgPropostasRecebidas" aria-labelledby="org-propostas-titulo">
+        <h2 id="org-propostas-titulo"><Icone nome="documento" /> Propostas recebidas</h2>
         <p>Propostas enviadas pelos fornecedores para este evento.</p>
         {feedbackAvaliacao && <Alerta variante={feedbackAvaliacao.tipo}>
           <p>{feedbackAvaliacao.mensagem}</p>
-          {feedbackAvaliacao.tipo === 'erro' && <p>Não foi possível confirmar o resultado. Consulte as propostas antes de repetir a operação.</p>}
+          {feedbackAvaliacao.tipo === 'erro' && <><p>Não foi possível confirmar o resultado. Consulte as propostas antes de repetir a operação.</p><Botao variante="secundario" disabled={carregandoPropostas} onClick={() => setTentativaPropostas(n => n + 1)}>Consultar propostas novamente</Botao></>}
         </Alerta>}
 
         {carregandoPropostas && (
@@ -216,7 +223,7 @@ const aoPublicarCotacao = async () => {
         )}
 
         {erroPropostas && (
-          <Alerta variante="erro">{erroPropostas}</Alerta>
+          <Alerta variante="erro"><p>{erroPropostas}</p><Botao variante="secundario" disabled={carregandoPropostas} onClick={() => setTentativaPropostas(n => n + 1)}>Tentar consultar propostas novamente</Botao></Alerta>
         )}
 
         {!carregandoPropostas &&
@@ -230,18 +237,22 @@ const aoPublicarCotacao = async () => {
           propostasRecebidas.map((proposta) => (
             <div
               key={proposta.id}
-              className="cartaoFormulario"
-              style={{ marginTop: '16px' }}
+              className="cartaoFormulario orgProposta"
+              role="group"
+              aria-labelledby={`org-proposta-${proposta.id}`}
             >
-              <h3>{proposta.fornecedor_nome}</h3>
+              <div className="orgPropostaCabecalho">
+                <h3 id={`org-proposta-${proposta.id}`}>{proposta.fornecedor_nome}</h3>
+                <Badge variante={proposta.status === 'Aprovada' ? 'sucesso' : proposta.status === 'Recusada' ? 'erro' : 'alerta'}>{proposta.status}</Badge>
+              </div>
               {proposta.fornecedor_id && <ConsultaPortfolios fornecedorId={Number(proposta.fornecedor_id)} />}
 
               <p>
                 <strong>Evento:</strong> {proposta.evento_nome}
               </p>
 
-              <p>
-                <strong>Valor:</strong> {formatarMoeda(Number(proposta.valor))}
+              <p className="orgPropostaValor">
+                <strong>Valor proposto:</strong> <span>{formatarMoeda(Number(proposta.valor))}</span>
               </p>
 
               <p>
@@ -254,9 +265,6 @@ const aoPublicarCotacao = async () => {
                 {proposta.detalhes_tecnicos}
               </p>
 
-              <p>
-                <strong>Status:</strong> <Badge variante={proposta.status === 'Aprovada' ? 'sucesso' : proposta.status === 'Recusada' ? 'erro' : 'alerta'}>{proposta.status}</Badge>
-              </p>
               {proposta.status === 'Em avaliação' && (
               <div className="acoes acoesProposta">
               <Botao
@@ -284,6 +292,7 @@ const aoPublicarCotacao = async () => {
             </div>
           ))}
       </section>
+      {evento?.id && <Contratacoes key={evento.id} eventoId={evento.id} propostas={propostasRecebidas} organizador />}
     </div>
   )
 }

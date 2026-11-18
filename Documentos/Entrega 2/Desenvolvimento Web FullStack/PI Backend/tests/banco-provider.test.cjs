@@ -208,6 +208,7 @@ function iniciarSimulado({ env = {}, modo = "principal", dotenv = {} } = {}) {
       if (nome === "./db") return carregar("db.js");
       if (nome === "./repositories/index.cjs") return carregar("repositories/index.cjs");
       if (nome === "./eventos-imagens-http.cjs") return carregar("eventos-imagens-http.cjs");
+      if (nome === "./contratacoes-http.cjs") return require('../contratacoes-http.cjs');
       if (arquivo === "eventos-imagens-http.cjs" && ["./imagens/politica.cjs", "./eventos-imagens.cjs"].includes(nome)) return require("../" + nome.slice(2));
       if (nome.startsWith("./services/")) return require("../" + nome.slice(2));
       assert.ok(Object.hasOwn(dependencias, nome), "Importacao proibida: " + nome);
@@ -276,7 +277,7 @@ test("isolado usa so adaptador validado, sem dotenv, pool principal ou importaca
   assert.equal(a.estado.dotenv, 0);
   assert.deepEqual(a.estado.pools, []);
   assert.deepEqual(a.estado.escutas, []);
-  assert.equal(a.estado.rotas.length, 51);
+  assert.equal(a.estado.rotas.length, 55);
   assert.equal(new Set(a.estado.rotas).size, a.estado.rotas.length);
   for (const rota of ['get /admin/eventos/:id/painel', 'get /admin/cotacoes/:id',
     'get /termos/vigente', 'get /minha-privacidade/dados', 'get /minha-privacidade/exportacao']) {

@@ -143,6 +143,8 @@ function ambiente(perfil = "organizador", passos = [], { termosSinteticos = fals
 
 // null = qualquer perfil autenticado; publico = sem autenticacao.
 const contratos = [
+  ["get /contratacoes/capacidades", null], ["get /contratacoes", null],
+  ["post /contratacoes", "organizador"], ["patch /contratacoes/:id", "organizador"],
   ["get /", "publico"], ["post /usuarios", "publico"], ["post /login", "publico"],
   ["get /eventos", null], ["get /eventos/:id", null], ["get /perfil", null], ["patch /perfil", null],
   ["get /perfil/profissional", null], ["patch /perfil/profissional", null],
@@ -170,8 +172,8 @@ const contratos = [
   ["get /fornecedores", null], ["get /fornecedores/:id/portfolio", null],
 ];
 
-test("inventario fixa exatamente os 51 pares metodo/caminho registrados no app", () => {
-  assert.equal(contratos.length, 51);
+test("inventario fixa exatamente os 55 pares metodo/caminho registrados no app", () => {
+  assert.equal(contratos.length, 55);
   assert.deepEqual([...ambiente().rotas.keys()].sort(), contratos.map(([rota]) => rota).sort());
 });
 
@@ -206,7 +208,10 @@ for (const [rota, perfil] of contratos.filter(([, p]) => p !== "publico")) {
       const body = { perfil_solicitado: "fornecedor", justificativa: "Solicito acesso" };
       const r = await a.requisitar(rota, body);
       assert.equal(r.statusCode, 403);
-      assert.deepEqual(r.body, { erro: rota === "post /solicitacoes-acesso"
+      const contratacao = rota.includes('/contratacoes');
+      assert.deepEqual(r.body, contratacao ? { erro: outro === 'participante' ? 'Acesso não autorizado.' : rota.startsWith('post ')
+        ? 'Somente o Organizador pode formalizar contratações.'
+        : 'Somente o Organizador responsável pode alterar a contratação.', resultado_incerto: false } : { erro: rota === "post /solicitacoes-acesso"
         ? "Somente participantes podem solicitar acesso." : "Você não tem permissão para realizar esta ação." });
       assert.equal(a.chamadas.length, 1); assert.deepEqual(a.transacao, []); a.verificar();
     }

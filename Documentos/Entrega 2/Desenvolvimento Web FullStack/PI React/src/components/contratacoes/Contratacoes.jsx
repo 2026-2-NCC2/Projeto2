@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useContratacoes } from '../../hooks/useContratacoes.js'
 import { formalizarContratacao, alterarContratacao } from '../../services/contratacoes.js'
 import { Botao, Campo, Badge, Alerta, Skeleton, EstadoVazio } from '../ui/Primitivas.jsx'
@@ -8,7 +8,7 @@ import './Contratacoes.css'
 
 const rotulos = { ativo: 'Ativo', concluido: 'Concluído', cancelado: 'Cancelado' }
 const tom = { ativo: 'sucesso', concluido: 'neutro', cancelado: 'erro' }
-export function Contratacoes({ eventoId, propostas = [], organizador = false, aoSair }) {
+export function Contratacoes({ eventoId, propostas = [], organizador = false, aoSair, aoConsultarPropostas }) {
   const consulta = useContratacoes(eventoId)
   const [busca, buscar] = useState(''), [estado, filtrar] = useState('ativo')
   const [acao, selecionar] = useState(null), [mensagem, informar] = useState('')
@@ -18,7 +18,10 @@ export function Contratacoes({ eventoId, propostas = [], organizador = false, ao
   if (consulta.erro) return <Alerta variante="erro" titulo={consulta.erro.status === 403 ? 'Acesso negado' : 'Contratações não consultadas'}>
     <p>{consulta.erro.message}</p><Botao onClick={consulta.erro.status === 401 && aoSair ? aoSair : consulta.recarregar}>{consulta.erro.status === 401 && aoSair ? 'Entrar novamente' : 'Tentar novamente'}</Botao>
   </Alerta>
-  if (!consulta.disponivel) return <EstadoVazio tipo="indisponivel" titulo="Contratos ativos indisponíveis."><p>O registro de contratações aguarda preparação e autorização do ambiente. Propostas aprovadas não são convertidas automaticamente em contratos.</p></EstadoVazio>
+  if (!consulta.disponivel) return <EstadoVazio tipo="indisponivel" titulo="Contratos ativos indisponíveis."
+    acao={aoConsultarPropostas && <Botao variante="secundario" onClick={aoConsultarPropostas}>Consultar propostas enviadas</Botao>}>
+    <p>O registro de contratações aguarda preparação e autorização do ambiente.</p>
+    <p>Uma proposta aprovada não comprova contrato formalizado, assinatura ou pagamento.</p></EstadoVazio>
   return <section className="ctPagina" aria-label="Contratações comerciais">
     <h2>Contratações do {organizador ? 'evento' : 'fornecedor'}</h2>
     <p>Registro comercial confirmado pelo Organizador. Não representa assinatura digital, pagamento ou documento juridicamente assinado.</p>
@@ -38,7 +41,7 @@ export function Contratacoes({ eventoId, propostas = [], organizador = false, ao
         <td><Botao variante="secundario" aria-label={`Detalhes da contratação #${c.id}`} onClick={() => selecionar({ tipo: 'detalhes', registro: c })}>Detalhes</Botao>
           {organizador && c.estado === 'ativo' && <><Botao variante="secundario" onClick={() => selecionar({ tipo: 'concluido', registro: c })}>Concluir #{c.id}</Botao><Botao variante="destrutivo" onClick={() => selecionar({ tipo: 'cancelado', registro: c })}>Cancelar #{c.id}</Botao></>}</td>
       </tr>)}</tbody></table></div>}
-    {acao && <DialogoContratacao key={acao.tipo + acao.registro.id} acao={acao} aoFechar={() => selecionar(null)} aoSalvar={async motivo => {
+    {acao && <DialogoContratacao key={acao.tipo + acao.registro.id} acao={acao} aoFechar={reconsultar => { selecionar(null); if (reconsultar) consulta.recarregar() }} aoSalvar={async motivo => {
       if (acao.tipo === 'formalizar') await formalizarContratacao(acao.registro.id)
       else await alterarContratacao(acao.registro, acao.tipo, motivo)
       selecionar(null); informar('Operação confirmada. Atualizando a consulta.'); consulta.recarregar()
@@ -49,7 +52,10 @@ export function Contratacoes({ eventoId, propostas = [], organizador = false, ao
 function DialogoContratacao({ acao, aoFechar, aoSalvar }) {
   const [motivo, justificar] = useState(''), [erro, falhar] = useState(''), [ocupado, ocupar] = useState(false), [incerto, marcarIncerto] = useState(false)
   const envio = useRef(false)
-  const modal = useFocoModal(true, ocupado ? () => {} : aoFechar)
+  const fechamento = useRef({ ocupado, incerto, aoFechar })
+  useEffect(() => { fechamento.current = { ocupado, incerto, aoFechar } }, [ocupado, incerto, aoFechar])
+  const fechar = useCallback(() => { if (!fechamento.current.ocupado) fechamento.current.aoFechar(fechamento.current.incerto) }, [])
+  const modal = useFocoModal(true, fechar)
   const c = acao.registro, detalhes = acao.tipo === 'detalhes', criar = acao.tipo === 'formalizar'
   return <div className="ctOverlay"><section className="ctDialogo" role="dialog" aria-modal="true" aria-label={detalhes ? 'Detalhes da contratação' : criar ? 'Confirmar contratação' : 'Confirmar alteração da contratação'} ref={modal} tabIndex={-1}>
     <h2>{detalhes ? `Contratação #${c.id}` : criar ? `Formalizar proposta #${c.id}?` : `${rotulos[acao.tipo]}: contratação #${c.id}`}</h2>
@@ -58,7 +64,7 @@ function DialogoContratacao({ acao, aoFechar, aoSalvar }) {
     {!detalhes && <p>Confirmação explícita de registro comercial; não é assinatura digital nem pagamento.</p>}
     {!criar && !detalhes && <Campo label="Justificativa obrigatória" como="textarea" value={motivo} minLength={3} maxLength={1000} obrigatorio disabled={ocupado || incerto} onChange={e => justificar(e.target.value)} />}
     {erro && <Alerta variante="erro">{erro}</Alerta>}
-    <div className="ctAcoes"><Botao variante="secundario" disabled={ocupado} onClick={aoFechar}>{detalhes || incerto ? 'Fechar e consultar a lista' : 'Voltar sem confirmar'}</Botao>
+    <div className="ctAcoes"><Botao variante="secundario" disabled={ocupado} onClick={fechar}>{incerto ? 'Fechar e consultar a lista' : detalhes ? 'Fechar detalhes' : 'Voltar sem confirmar'}</Botao>
     {!detalhes && <Botao variante={acao.tipo === 'cancelado' ? 'destrutivo' : 'primario'} ocupado={ocupado} disabled={incerto} onClick={async () => {
       if (envio.current || incerto) return
       if (!criar && motivo.trim().length < 3) { falhar('Informe justificativa de 3 a 1000 caracteres.'); return }

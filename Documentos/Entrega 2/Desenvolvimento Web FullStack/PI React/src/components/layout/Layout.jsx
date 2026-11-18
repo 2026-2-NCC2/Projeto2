@@ -4,6 +4,7 @@ import { Marca } from '../ui/Marca.jsx'
 import { IdentidadeConta } from './IdentidadeConta.jsx'
 import { useRef } from 'react'
 import './OrganizadorLayout.css'
+import './OrganizadorVisual.css'
 
 export function Layout({ children: filhos, pagina, evento, setPagina, aoCriarNovoEvento, aoSair }) {
   const conteudoRef = useRef(null)

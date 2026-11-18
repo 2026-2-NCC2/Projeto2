@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { Link } from 'react-router'
 import { Marca } from '../../components/ui/Marca.jsx'
 import './PaginaNaoEncontrada.css'
+import './IdentidadePublica.css'
 
 export function PaginaNaoEncontrada({ destino = '/inicio', acessoNegado = false, reiniciarDocumento = false }) {
   const titulo = useRef(null)
