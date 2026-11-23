@@ -22,7 +22,7 @@ test('modo efetivo da API preserva destinos principal e isolado', async () => {
     const { apiUrl } = await import(`data:text/javascript;base64,${Buffer.from(codigo).toString('base64')}`)
     let chamadas = 0
     const cliente = criarPublicadorCotacao(apiUrl, { executarFetch: async destino => {
-      assert.equal(destino, env.MODE === 'isolado' ? '/api/cotacoes' : 'http://localhost:3001/cotacoes'); chamadas++; return resposta()
+      assert.equal(destino, env.MODE === 'development' ? 'http://localhost:3001/cotacoes' : '/api/cotacoes'); chamadas++; return resposta()
     } })
     const r = await cliente.publicar(contexto())
     assert.equal(cliente.disponivel, true)

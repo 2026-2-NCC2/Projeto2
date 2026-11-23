@@ -116,7 +116,7 @@ test('builds em memoria executam o apiUrl real nos modos principal e isolado', a
     assert.ok(chunk)
     const modulo = await import(`data:text/javascript;base64,${Buffer.from(chunk.code).toString('base64')}`)
     for (const caminho of ['/login', '/usuarios', '/eventos', '/cotacoes', '/admin/propostas']) {
-      assert.equal(modulo.apiUrl(caminho), `${isolado ? '/api' : 'http://localhost:3001'}${caminho}`)
+      assert.equal(modulo.apiUrl(caminho), `/api${caminho}`)
     }
   }
 })

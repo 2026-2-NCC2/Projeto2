@@ -29,9 +29,12 @@ test('apiUrl no modo isolado utiliza exclusivamente o prefixo /api', async () =>
   assert.equal(apiUrl('/login'), 'http://localhost:3001/login')
 })
 
-test('apiUrl preserva o backend principal tambem no build de producao', async () => {
+test('apiUrl em producao usa o proxy de mesma origem sem fallback local', async () => {
   const { apiUrl: producao } = await carregarApi({ MODE: 'production' })
-  assert.equal(producao('/eventos'), 'http://localhost:3001/eventos')
+  assert.equal(producao('/eventos'), '/api/eventos')
+  assert.equal(producao('/login'), '/api/login')
+  const { apiUrl: explicita } = await carregarApi({ MODE: 'production', TROCATICKET_API_MODO: 'principal' })
+  assert.equal(explicita('/login'), '/api/login')
 })
 
 test('apiUrl interrompe a importacao com configuracoes ausentes ou inconsistentes', async () => {
@@ -61,7 +64,7 @@ test('preserva caminhos, parametros e codificacao sem normalizacao silenciosa', 
     '/eventos/', '/eventos?pagina=2&ordem=id', '/categorias/%C3%A1udio',
     '/eventos?busca=som%20e%20luz', '/eventos?origem=https%3A%2F%2Fexemplo.com',
   ]
-  for (const modo of ['principal', 'isolado']) {
+  for (const modo of ['principal', 'isolado', 'producao']) {
     const construir = criarConstrutorUrlApi(modo)
     const base = modo === 'principal' ? 'http://localhost:3001' : '/api'
     for (const caminho of caminhos) assert.equal(construir(caminho), base + caminho)
@@ -83,7 +86,7 @@ const casosInvalidos = [
   '/eventos/%FF', '/eventos?pagina=%GG',
 ]
 
-for (const modo of ['principal', 'isolado']) {
+for (const modo of ['principal', 'isolado', 'producao']) {
   test(`rejeita tipos, destinos e caminhos invalidos no modo ${modo}`, () => {
     const construir = criarConstrutorUrlApi(modo)
     for (const caminho of casosInvalidos) {
@@ -114,10 +117,10 @@ test('as referencias dos componentes usam apiUrl com destinos preservados', asyn
   assert.doesNotMatch(admin, /(?:localhost|127\.0\.0\.1):3001/u)
 })
 
-test('respostas simuladas funcionam nos dois modos sem requisicoes reais', async () => {
-  for (const modo of ['principal', 'isolado']) {
+test('respostas simuladas funcionam nos tres modos sem requisicoes reais', async () => {
+  for (const modo of ['principal', 'isolado', 'producao']) {
     const { apiUrl: construir } = await carregarApi(modo === 'isolado'
-      ? { MODE: 'isolado', TROCATICKET_API_MODO: 'isolado' } : { MODE: 'development' })
+      ? { MODE: 'isolado', TROCATICKET_API_MODO: 'isolado' } : { MODE: modo === 'producao' ? 'production' : 'development' })
     const opcoes = {
       method: 'POST', headers: { Authorization: 'Bearer token-simulado' },
       body: JSON.stringify({ exemplo: true }),
@@ -130,9 +133,29 @@ test('respostas simuladas funcionam nos dois modos sem requisicoes reais', async
     const resposta = await fetchSimulado(construir('/login'), opcoes)
     assert.deepEqual(await resposta.json(), { resultado: 'simulado' })
     assert.equal(chamadas.length, 1)
-    assert.equal(chamadas[0].url, modo === 'isolado' ? '/api/login' : 'http://localhost:3001/login')
+    assert.equal(chamadas[0].url, modo === 'principal' ? 'http://localhost:3001/login' : '/api/login')
     assert.equal(chamadas[0].options, opcoes)
   }
+})
+
+test('falha de API em producao permanece no proxy sem repetir em localhost', async () => {
+  const { apiUrl: construir } = await carregarApi({ MODE: 'production', VITE_API_URL: 'http://192.168.1.8:3001', VITE_API_BASE_URL: 'https://destino-nao-autorizado.invalid' })
+  const destinos = []
+  const simular = async caminho => { destinos.push(construir(caminho)); throw Error('Proxy indisponível') }
+  await assert.rejects(() => simular('/login'), /Proxy indisponível/)
+  assert.deepEqual(destinos, ['/api/login'])
+})
+
+test('Vercel preserva paginas publicas e nao instala rewrite externo desconhecido ou fallback da API para HTML', () => {
+  const config = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'))
+  assert.equal(config.framework, 'vite')
+  assert.equal(config.installCommand, 'npm ci')
+  assert.equal(config.buildCommand, 'npm run build')
+  assert.equal(config.outputDirectory, 'dist')
+  assert.deepEqual(config.rewrites, ['/privacidade', '/termos', '/contato-privacidade', '/preferencias-privacidade']
+    .map(source => ({ source, destination: '/index.html' })))
+  assert.equal(config.env, undefined)
+  assert.equal(config.redirects, undefined)
 })
 
 test('falha simulada no modo isolado nao tenta acessar o backend principal', async () => {

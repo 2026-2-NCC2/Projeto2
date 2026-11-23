@@ -14,6 +14,7 @@ async function carregar(ambiente) {
 
 for (const [modo, env, base] of [
   ['principal', { MODE: 'development' }, 'http://localhost:3001'],
+  ['producao', { MODE: 'production' }, '/api'],
   ['isolado', { MODE: 'isolado', TROCATICKET_API_MODO: 'isolado' }, '/api'],
 ]) {
   test(`${modo}: preserva URLs, metodos, JWT, payloads e Response sem ler JSON`, async () => {

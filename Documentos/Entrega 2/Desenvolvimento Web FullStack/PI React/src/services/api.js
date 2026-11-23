@@ -1,11 +1,12 @@
 const BASES_API = Object.freeze({
   principal: 'http://localhost:3001',
   isolado: '/api',
+  producao: '/api',
 })
 
 // A escolha do modo e explicita: uma configuracao invalida nunca usa o principal.
 export function criarConstrutorUrlApi(modo = 'principal') {
-  if (modo !== 'principal' && modo !== 'isolado') {
+  if (!['principal', 'isolado', 'producao'].includes(modo)) {
     throw new TypeError('Modo de API invalido.')
   }
 
@@ -42,8 +43,10 @@ function selecionarModoApi(ambiente) {
 
   const { MODE: modoVite, TROCATICKET_API_MODO: modoApi } = ambiente
   if (modoVite === 'isolado' && modoApi === 'isolado') return 'isolado'
-  if ((modoVite === 'development' || modoVite === 'production') &&
-      (modoApi === undefined || modoApi === 'principal')) return 'principal'
+  if (modoApi === undefined || modoApi === 'principal') {
+    if (modoVite === 'development') return 'principal'
+    if (modoVite === 'production') return 'producao'
+  }
 
   throw new TypeError('Configuracao de execucao da API invalida ou inconsistente.')
 }
