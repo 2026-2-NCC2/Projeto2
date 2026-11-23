@@ -2,6 +2,8 @@
 // Não migra, não cria contas/buckets e não altera credenciais. Toda ativação
 // repete o preflight de leitura no projeto de produção explicitamente validado.
 async function prepararImagens({env,supervisor}){
+  // Defesa adicional: nenhum preflight, pool ou timer e criado na demonstracao.
+  if (env.TROCATICKET_DEMONSTRACAO === 'true') throw new Error('IMAGENS_INDISPONIVEIS_DEMONSTRACAO');
   const preflight=require('../scripts/preflight-imagens-producao.cjs');
   const evidencia=await preflight.executar(env,{exigirDiarioVazio:false,validarContasTeste:true});
   if(!evidencia.aprovado)throw Object.assign(Error('Imagens recusadas pelo preflight.'),{code:'IMAGENS_PREFLIGHT',etapa:evidencia.bloqueio});

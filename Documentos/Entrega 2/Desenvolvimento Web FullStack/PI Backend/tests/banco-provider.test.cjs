@@ -174,6 +174,7 @@ function iniciarSimulado({ env = {}, modo = "principal", dotenv = {} } = {}) {
   estado.middlewares = [];
   for (const metodo of ["get", "post", "put", "patch", "delete"]) app[metodo] = rota => estado.rotas.push(`${metodo} ${rota}`);
   const dependencias = {
+    "./config/hospedagem.cjs": require("../config/hospedagem.cjs"),
     express: Object.assign(() => app, { json: () => () => {}, Router: require("express").Router }), bcryptjs: {}, jsonwebtoken: {}, cors: () => () => {},
     "./config/banco.cjs": require("../config/banco.cjs"),
     "./config/encerramento-gracioso.cjs": require("../config/encerramento-gracioso.cjs"),

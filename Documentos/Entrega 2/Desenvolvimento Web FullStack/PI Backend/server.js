@@ -13,6 +13,8 @@ if (!homologacao && process.env.TROCATICKET_HOMOLOGACAO !== undefined) {
   require("./homologacao.cjs").confirmarEntrada(); // Recusar flag vinda do .env sem inicializador.
 }
 
+const hospedagem = require("./config/hospedagem.cjs").configurarHospedagem(process.env);
+
 // Manter a trava de startup antes de criar qualquer cliente/pool.
 const { validarInicializacaoBanco } = require("./config/banco.cjs");
 if (!homologacao) require("./config/startup-controlado.cjs").validarEntrada(process.env, modoExecucao());
@@ -45,7 +47,7 @@ app.use(encerramentoGracioso.middleware);
 if (supervisor) supervisor.instalar(app);
 
 app.use(cors({
-  origin: "http://localhost:5173"
+  origin: hospedagem.origemCors
 }));
 
 // Antes do parser JSON: o router de imagens recebe apenas o corpo binário.
@@ -55,11 +57,14 @@ const receberImagem = require('./imagens/http-binario.cjs').criarRecebedorImagen
 require('./eventos-imagens-http.cjs').instalarImagensEvento(app,{
   autenticar,receber:receberImagem,obterIntegracao:()=>runtimeImagens?.eventos,
 });
-app.locals.prepararImagens = () => preparandoImagens ||= (async () => {
-  runtimeImagens = await require('./imagens/inicializacao.cjs').prepararImagens({env:process.env,supervisor});
-  routerImagens = require('./imagens/http.cjs').criarRouterImagens({autenticar,servico:runtimeImagens.integracao.servico,receber:receberImagem});
-  return runtimeImagens;
-})();
+app.locals.prepararImagens = () => {
+  if (hospedagem.demonstracao) return Promise.reject(new Error("IMAGENS_INDISPONIVEIS_DEMONSTRACAO"));
+  return preparandoImagens ||= (async () => {
+    runtimeImagens = await require('./imagens/inicializacao.cjs').prepararImagens({env:process.env,supervisor});
+    routerImagens = require('./imagens/http.cjs').criarRouterImagens({autenticar,servico:runtimeImagens.integracao.servico,receber:receberImagem});
+    return runtimeImagens;
+  })();
+};
 app.locals.imagensDisponiveis = () => Boolean(routerImagens);
 app.use('/perfil/imagens', (req,res,next) => {
   if(routerImagens)return routerImagens(req,res,next);
@@ -1173,8 +1178,10 @@ if (require.main === module && modoExecucao() === "principal") {
       if(!/^evidencias\/imagens-descartaveis-[0-9a-f-]{36}\.json$/.test(ativacao.evidencia||''))throw Error('IMAGENS_EVIDENCIA_INVALIDA');
       const evidencia=require('./'+ativacao.evidencia);
       if(evidencia.aprovado!==true||evidencia.projeto!==ativacao.projeto)throw Error('IMAGENS_TESTES_PENDENTES');
-      const runtime=await app.locals.prepararImagens();await runtime.iniciarLimpeza();
-      console.log('Fotos e capas ativadas com guardas e limpeza em quarentena.');
+      if (!hospedagem.demonstracao) {
+        const runtime=await app.locals.prepararImagens();await runtime.iniciarLimpeza();
+        console.log('Fotos e capas ativadas com guardas e limpeza em quarentena.');
+      }
     }
     const servidor=app.listen(PORT,()=>console.log(`Servidor rodando na porta ${PORT}`));
     const fechar=()=>{void encerramentoGracioso.encerrar(servidor).then(

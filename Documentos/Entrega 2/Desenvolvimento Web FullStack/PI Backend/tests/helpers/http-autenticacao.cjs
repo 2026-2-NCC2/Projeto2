@@ -33,7 +33,8 @@ async function iniciar(t, provider, op = {}) {
   state.falha = null; state.authIdDivergente = false;
   const env = { JWT_SECRET: segredo, ...(provider === undefined ? {} : { DB_PROVIDER: provider }),
     SUPABASE_URL: "https://gnwybroqfvwosiqzsfla.supabase.co", SUPABASE_SECRET_KEY: secretKey,
-    ...(op.profissionalAtivo ? { PERFIL_PROFISSIONAL_ATIVO: "true" } : {}) };
+    ...(op.profissionalAtivo ? { PERFIL_PROFISSIONAL_ATIVO: "true" } : {}),
+    ...(op.demonstracao ? { NODE_ENV: "production", TROCATICKET_DEMONSTRACAO: "true", CORS_ORIGIN: "https://trocaticket-ebon.vercel.app" } : {}) };
   const evento = c => state.eventos.find(e => e.id === c.evento_id);
   const cotacao = p => state.cotacoes.find(c => c.id === p.cotacao_id);
   const perfilUsuario = u => Object.fromEntries(["id", "nome", "email", "perfil"].map(k => [k, u[k]]));
